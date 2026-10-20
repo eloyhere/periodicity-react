@@ -3,6 +3,8 @@ import {
     useState,
     type Dispatch,
     type FC,
+    type FormEvent,
+    type ChangeEvent,
     type ReactNode,
     type RefObject,
     type SetStateAction,
@@ -18,6 +20,9 @@ import {
     ConstraintLayout,
     DrawerLayout,
     Drag,
+    Form,
+    FormActions,
+    FormField,
     GridLayout,
     LinearLayout,
     LinearLayoutItem,
@@ -40,6 +45,7 @@ import { useToast } from "../../../component/toast/ToastContext";
 import type { ToastApi } from "../../../component/toast/ToastContext";
 import type {
     DrawerLayoutHandle,
+    FormFieldControlProps,
     ListItemState,
     ListOption,
     NavigationItem,
@@ -132,8 +138,19 @@ const dragCode: string = `<Drag onReorder={(from, to) => reorder(from, to)}>
     </div>
 </Drag>`;
 
-const virtualTableCode: string = `<Table
-    columns={tableColumns}
+const formCode: string = `<Form onSubmit={(event) => {
+    event.preventDefault();
+    save(new FormData(event.currentTarget));
+}}>
+    <FormField label="Email" name="email" hint="We never share it." required>
+        {(field) => <input {...field} type="email" autoComplete="email" />}
+    </FormField>
+    <FormActions align="end">
+        <Button type="submit">Subscribe</Button>
+    </FormActions>
+</Form>`;
+
+const virtualTableCode: string = `<Table    columns={tableColumns}
     rows={virtualTeamRows}
     rowKey={(row) => row.id}
     caption="Virtual team"
@@ -326,6 +343,8 @@ const LayoutPage: FC = () => {
     const [pagerPage, setPagerPage]: [number, Dispatch<SetStateAction<number>>] = useState<number>(0);
     const [switchOn, setSwitchOn]: [boolean, Dispatch<SetStateAction<boolean>>] =
         useState<boolean>(true);
+    const [formEmail, setFormEmail]: [string, Dispatch<SetStateAction<string>>] =
+        useState<string>("");
     const drawerApiRef: RefObject<DrawerLayoutHandle | null> =
         useRef<DrawerLayoutHandle | null>(null);
     const navigationApiRef: RefObject<NavigationViewHandle | null> =
@@ -947,6 +966,53 @@ const LayoutPage: FC = () => {
                     variant="bottom"
                     ariaLabel="Bottom navigation"
                 />
+            </Demo>
+
+            <Demo
+                title="Form"
+                description="A native form wrapper with automatic label, hint, error, and ARIA binding."
+                code={formCode}
+            >
+                <Form
+                    onSubmit={(event: FormEvent<HTMLFormElement>): void => {
+                        event.preventDefault();
+                        toast.show({
+                            title: "Form submitted",
+                            description: `Email: ${formEmail}`,
+                        });
+                    }}
+                >
+                    <FormField
+                        label="Email"
+                        name="email"
+                        hint="We never share your email."
+                        required
+                    >
+                        {(field: FormFieldControlProps): ReactNode => (
+                            <input
+                                {...field}
+                                type="email"
+                                autoComplete="email"
+                                value={formEmail}
+                                onChange={(event: ChangeEvent<HTMLInputElement>): void =>
+                                    setFormEmail(event.target.value)
+                                }
+                                style={{
+                                    minHeight: 40,
+                                    padding: "0 12px",
+                                    border: "1px solid var(--color-outline-variant)",
+                                    borderRadius: 8,
+                                    background: "var(--color-surface)",
+                                    color: "var(--color-on-surface)",
+                                    font: "inherit",
+                                }}
+                            />
+                        )}
+                    </FormField>
+                    <FormActions align="end">
+                        <Button type="submit">Subscribe</Button>
+                    </FormActions>
+                </Form>
             </Demo>
         </>
     );

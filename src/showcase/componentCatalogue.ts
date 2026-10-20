@@ -707,6 +707,24 @@ export const uiComponentSections: readonly ComponentSection[] = [
             demo: "Drag",
             description: "Single-slot drag sorter for the direct children of one container.",
         },
+        {
+            name: "Form",
+            family: "layout",
+            demo: "Form",
+            description: "Native form wrapper with browser validation, submission, and field context.",
+        },
+        {
+            name: "FormField",
+            family: "layout",
+            demo: "Form",
+            description: "Accessible label, hint, error, and ARIA binding for a native form control.",
+        },
+        {
+            name: "FormActions",
+            family: "layout",
+            demo: "Form",
+            description: "Flex action row for submit and cancel controls.",
+        },
     ]),
     createSection("data", "Data display", [
         {

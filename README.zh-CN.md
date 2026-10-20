@@ -2,7 +2,7 @@
 
 面向产品界面、管理后台和数据密集型应用的 Material 风格 React 组件库。
 
-`periodicity-react` 提供 120 个带 `Periodicity` 前缀的组件，覆盖表单、选择器、浮层、导航、集合视图、消息会话、文件工具，以及把它们连接起来的设计系统 Provider。API 以 TypeScript 为先、以 Flex 布局为基础，并尽量贴近浏览器原生行为：在合理的地方透传原生属性、事件、ARIA 和 `ref`。
+`periodicity-react` 提供 123 个带 `Periodicity` 前缀的组件，覆盖表单、选择器、浮层、导航、集合视图、消息会话、文件工具，以及把它们连接起来的设计系统 Provider。API 以 TypeScript 为先、以 Flex 布局为基础，并尽量贴近浏览器原生行为：在合理的地方透传原生属性、事件、ARIA 和 `ref`。
 
 - **npm：** [`periodicity-react`](https://www.npmjs.com/package/periodicity-react)
 - **版本：** `0.1.0`
@@ -13,6 +13,7 @@
 
 - [安装](#安装)
 - [快速开始](#快速开始)
+- [表单](#表单)
 - [组件命名](#组件命名)
 - [表单与选择器](#表单与选择器)
 - [集合与数据](#集合与数据)
@@ -67,6 +68,34 @@ export function SignIn() {
     );
 }
 ```
+
+## 表单
+
+`PeriodicityForm` 封装原生 `<form>`，保留浏览器原生校验、提交、重置、method、action 和 autocomplete 行为。
+
+```tsx
+import { PeriodicityButton, PeriodicityForm, PeriodicityFormActions, PeriodicityFormField } from "periodicity-react";
+
+<PeriodicityForm
+    action="/subscribe"
+    method="post"
+    onSubmit={(event) => {
+        event.preventDefault();
+        subscribe(new FormData(event.currentTarget));
+    }}
+>
+    <PeriodicityFormField label="邮箱" name="email" hint="我们不会分享你的邮箱。" required>
+        {(field) => <input {...field} type="email" autoComplete="email" />}
+    </PeriodicityFormField>
+
+    <PeriodicityFormActions align="end">
+        <PeriodicityButton type="submit">订阅</PeriodicityButton>
+    </PeriodicityFormActions>
+</PeriodicityForm>;
+```
+
+`PeriodicityFormField` 自动生成控件 id，并绑定 `label htmlFor`、`aria-describedby` 和 `aria-invalid`。
+`PeriodicityTextInput` 等 UI 输入组件已经内置同样的 label 关联，可以直接放进 `PeriodicityForm`。
 
 ## 组件命名
 

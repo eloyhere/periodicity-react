@@ -13,7 +13,7 @@ The first public npm release of `periodicity-react`.
 
 ### Highlights
 
-- 120 prefixed React components covering forms, pickers, collections, overlays, navigation, messaging, file tools,
+- 123 prefixed React components covering forms, pickers, collections, overlays, navigation, messaging, file tools,
   theming, internationalisation, and motion.
 - A publishable ES module build with TypeScript declarations and an extracted `styles.css`.
 - Native attribute, event, ARIA, data-attribute, and ref pass-through across the component surface.
@@ -24,6 +24,9 @@ The first public npm release of `periodicity-react`.
 
 - `Periodicity`-prefixed exports for every public component, including layouts and providers. The unprefixed names
   remain as compatibility aliases.
+- `PeriodicityForm`, `PeriodicityFormField`, and `PeriodicityFormActions`: a native `<form>` wrapper with native
+  validation/submission/reset behaviour, generated `label htmlFor` binding, `aria-describedby`, and `aria-invalid`
+  wiring for native controls.
 - Form controls: button, text input, text area, email, telephone, number, complete input, checkbox, radio group,
   range, switch, select, combobox, mention, and transfer.
 - Pickers: colour, time, date-time, number, cycle, and variant.

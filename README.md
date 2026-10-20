@@ -2,7 +2,7 @@
 
 A Material-inspired React component library for product interfaces, admin tools, and data-heavy applications.
 
-`periodicity-react` brings together 120 prefixed components: form controls, overlays, navigation, collections,
+`periodicity-react` brings together 123 prefixed components: form controls, overlays, navigation, collections,
 messaging, file tooling, and the design-system providers that connect them. The API is TypeScript-first, flex-first,
 and deliberately close to the browser: native attributes, events, ARIA, and refs pass through wherever they make
 sense.
@@ -16,6 +16,7 @@ sense.
 
 - [Install](#install)
 - [Quick start](#quick-start)
+- [Forms](#forms)
 - [Component names](#component-names)
 - [Forms and pickers](#forms-and-pickers)
 - [Collections and data](#collections-and-data)
@@ -71,6 +72,36 @@ export function SignIn() {
     );
 }
 ```
+
+## Forms
+
+`PeriodicityForm` wraps the native `<form>` element, so browser validation, submission, reset, method, action, and
+autocomplete behaviour stay intact.
+
+```tsx
+import { PeriodicityButton, PeriodicityForm, PeriodicityFormActions, PeriodicityFormField } from "periodicity-react";
+
+<PeriodicityForm
+    action="/subscribe"
+    method="post"
+    onSubmit={(event) => {
+        event.preventDefault();
+        subscribe(new FormData(event.currentTarget));
+    }}
+>
+    <PeriodicityFormField label="Email" name="email" hint="We never share it." required>
+        {(field) => <input {...field} type="email" autoComplete="email" />}
+    </PeriodicityFormField>
+
+    <PeriodicityFormActions align="end">
+        <PeriodicityButton type="submit">Subscribe</PeriodicityButton>
+    </PeriodicityFormActions>
+</PeriodicityForm>;
+```
+
+`PeriodicityFormField` generates the control id and binds `label htmlFor`, `aria-describedby`, and `aria-invalid`.
+UI inputs such as `PeriodicityTextInput` already provide the same label association internally, so they can be
+placed directly inside `PeriodicityForm`.
 
 ## Component names
 

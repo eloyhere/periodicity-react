@@ -12,7 +12,7 @@
 
 ### 亮点
 
-- 120 个带 `Periodicity` 前缀的 React 组件，覆盖表单、选择器、集合、浮层、导航、消息、文件工具、主题、国际化和动效。
+- 123 个带 `Periodicity` 前缀的 React 组件，覆盖表单、选择器、集合、浮层、导航、消息、文件工具、主题、国际化和动效。
 - 可发布的 ES Module、TypeScript 声明文件和独立 `styles.css`。
 - 全组件范围支持原生属性、事件、ARIA、`data-*` 和 `ref` 透传。
 - 支持受控/非受控状态，以及 disabled、read-only、loading、empty 等完整状态和语义化回调。
@@ -21,6 +21,7 @@
 ### 新增
 
 - 所有公共组件提供 `Periodicity` 前缀导出，包括布局和 Provider；不带前缀的名称保留为兼容别名。
+- `PeriodicityForm`、`PeriodicityFormField`、`PeriodicityFormActions`：封装原生 `<form>`，保留原生校验、提交和重置行为，并为原生控件自动生成 `label htmlFor`、`aria-describedby` 和 `aria-invalid` 关联。
 - 表单控件：Button、TextInput、TextArea、Email、Telephone、Number、CompleteInput、Checkbox、RadioGroup、Range、Switch、Select、Combobox、Mention、Transfer。
 - 选择器：Colour、Time、DateTime、Number、Cycle、Variant。
 - 集合：List、Tree、Table、Select、Combobox、Transfer 的普通版和虚拟化版本，支持 Adapter 数据源和固定行高虚拟化。
