@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type {
+    ButtonHTMLAttributes,
     CSSProperties,
     Dispatch,
     FC,
@@ -7,6 +8,8 @@ import type {
     MouseEventHandler,
     MutableRefObject,
     ReactNode,
+    Ref,
+    RefCallback,
     RefObject,
     SetStateAction,
 } from "react";
@@ -14,7 +17,9 @@ import { createSelectAdapter, type SelectAdapter, type SelectOption } from "../a
 import type { ListEntry } from "../../../../layout/list/adapter";
 import Dropdown, { DropdownItem } from "../../../dropdown/Dropdown";
 import cx from "../../../foundation/cx";
+import useControllableState from "../../../foundation/useControllableState";
 import useField, { type FieldState } from "../../../foundation/useField";
+import useMergedRef from "../../../foundation/useMergedRef";
 import Icon from "../../../icon/Icon";
 import Surface from "../../../surface/Surface";
 import useVirtualWindow, { type VirtualWindow } from "../../../foundation/useVirtualWindow";
@@ -41,14 +46,42 @@ export type SelectSize = "sm" | "md" | "lg";
 /**
  * Props for the virtual Select listbox.
  * Type: interface.
- * Fields: label, value, options, adapter, onChange, variant, size, hint, error,
- * placeholder, disabled, listHeight, itemHeight, className, id.
+ * Native button attributes are forwarded to the trigger; `className` and `style` apply to the field root.
+ * Fields: label, value, defaultValue, options, adapter, onChange, variant, size, hint, error,
+ * placeholder, disabled, readOnly, open, defaultOpen, onOpenChange, listHeight, itemHeight,
+ * className, id, ref, and native button attributes.
+ * @param label - Floating label and accessible name for the trigger.
+ * @param value - Controlled selected value.
+ * @param defaultValue - Initial selected value when uncontrolled.
+ * @param options - Choices rendered in the virtual listbox.
+ * @param adapter - Indexed choices used instead of `options`.
+ * @param onChange - Called with the selected option value.
+ * @param variant - Field variant: outline, fill, or standard.
+ * @param size - Control size.
+ * @param hint - Supporting text shown below the field.
+ * @param error - Validation message; replaces the hint and marks the field invalid.
+ * @param placeholder - Text shown while the listbox is open without a selection.
+ * @param disabled - Disables the trigger natively.
+ * @param readOnly - Keeps the value visible but suppresses opening and selection.
+ * @param open - Controlled listbox visibility.
+ * @param defaultOpen - Initial listbox visibility when uncontrolled.
+ * @param onOpenChange - Called when the listbox visibility changes.
+ * @param listHeight - Maximum height of the virtual viewport.
+ * @param itemHeight - Fixed row height used by the virtual window.
+ * @param className - Extra classes for the field root.
+ * @param id - Id for the trigger; generated when omitted.
+ * @param ref - Ref to the trigger button.
  * @example
  * <VirtualSelect label="Options" value={value} options={options} onChange={setValue} />
  */
-export interface VirtualSelectProps {
+export interface VirtualSelectProps
+    extends Omit<
+        ButtonHTMLAttributes<HTMLButtonElement>,
+        "value" | "defaultValue" | "onChange" | "type" | "className" | "children"
+    > {
     label: string;
-    value: string;
+    value?: string;
+    defaultValue?: string;
     options?: readonly SelectOption[];
     adapter?: SelectAdapter;
     onChange: (value: string) => void;
@@ -58,10 +91,15 @@ export interface VirtualSelectProps {
     error?: string;
     placeholder?: string;
     disabled?: boolean;
+    readOnly?: boolean;
+    open?: boolean;
+    defaultOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
     listHeight?: number;
     itemHeight?: number;
     className?: string;
     id?: string;
+    ref?: Ref<HTMLButtonElement>;
 }
 
 /**
@@ -74,6 +112,7 @@ export interface VirtualSelectProps {
 const VirtualSelect: FC<VirtualSelectProps> = ({
     label,
     value,
+    defaultValue = "",
     options = [],
     adapter,
     onChange,
@@ -83,16 +122,41 @@ const VirtualSelect: FC<VirtualSelectProps> = ({
     error,
     placeholder,
     disabled = false,
+    readOnly = false,
+    open: openProp,
+    defaultOpen = false,
+    onOpenChange,
     listHeight = 280,
     itemHeight = 40,
     className = "",
+    style,
     id,
+    onClick,
+    onKeyDown,
+    ref,
+    ...rest
 }: VirtualSelectProps) => {
     const virtual: boolean = true;
     const fieldState: FieldState = useField({ id, label, hint, error });
     const controlId: string = fieldState.controlId;
     const labelId: string = `${controlId}-label`;
     const listboxId: string = `${controlId}-listbox`;
+    const [selectedValue, setSelectedValue]: readonly [
+        string,
+        (next: string | ((previous: string) => string)) => void,
+    ] = useControllableState<string>({
+        value,
+        defaultValue,
+        onChange,
+    });
+    const [open, setOpen]: readonly [
+        boolean,
+        (next: boolean | ((previous: boolean) => boolean)) => void,
+    ] = useControllableState<boolean>({
+        value: openProp,
+        defaultValue: defaultOpen,
+        onChange: onOpenChange,
+    });
     const hasError: boolean = fieldState.invalid;
     const describedBy: string = hasError
         ? fieldState.errorId
@@ -106,12 +170,11 @@ const VirtualSelect: FC<VirtualSelectProps> = ({
         [adapter, options],
     );
 
-    const selectedIndex: number = source.indexOf(value);
+    const selectedIndex: number = source.indexOf(selectedValue);
     const selectedOption: SelectOption | void =
         selectedIndex >= 0 ? source.getItem(selectedIndex) : (void 0);
-    const displayText: string = selectedOption === (void 0) ? value : selectedOption.label;
-    const hasValue: boolean = selectedOption !== (void 0) || value.length > 0;
-    const [open, setOpen]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false);
+    const displayText: string = selectedOption === (void 0) ? selectedValue : selectedOption.label;
+    const hasValue: boolean = selectedOption !== (void 0) || selectedValue.length > 0;
     const [activeIndex, setActiveIndex]: [number, Dispatch<SetStateAction<number>>] =
         useState<number>(-1);
     const enabledIndices: number[] = Array.from(
@@ -148,6 +211,10 @@ const VirtualSelect: FC<VirtualSelectProps> = ({
     );
 
     const triggerRef: RefObject<HTMLButtonElement | null> = useRef<HTMLButtonElement | null>(null);
+    const mergedTriggerRef: RefCallback<HTMLButtonElement> = useMergedRef<HTMLButtonElement>(
+        triggerRef,
+        ref,
+    );
     const typeBufferRef: MutableRefObject<string> = useRef<string>("");
     const typeTimerRef: MutableRefObject<number | void> = useRef<number | void>((void 0));
 
@@ -193,7 +260,7 @@ const VirtualSelect: FC<VirtualSelectProps> = ({
      * @returns Nothing.
      */
     const openListbox: () => void = (): void => {
-        if (disabled) {
+        if (disabled || readOnly) {
             return;
         }
 
@@ -244,11 +311,11 @@ const VirtualSelect: FC<VirtualSelectProps> = ({
      * @returns Nothing.
      */
     const handleSelect: (option: SelectOption) => void = (option: SelectOption): void => {
-        if (option.disabled === true) {
+        if (disabled || readOnly || option.disabled === true) {
             return;
         }
 
-        onChange(option.value);
+        setSelectedValue(option.value);
         setOpen(false);
         typeBufferRef.current = "";
         triggerRef.current?.focus({ preventScroll: true });
@@ -256,11 +323,20 @@ const VirtualSelect: FC<VirtualSelectProps> = ({
 
     /**
      * Toggles the dropdown from the trigger button.
+     * @param event - Trigger click event.
      * @example
-     * handleTriggerClick();
+     * <button onClick={handleTriggerClick} />
      * @returns Nothing.
      */
-    const handleTriggerClick: MouseEventHandler<HTMLButtonElement> = (): void => {
+    const handleTriggerClick: MouseEventHandler<HTMLButtonElement> = (
+        event: Parameters<MouseEventHandler<HTMLButtonElement>>[0],
+    ): void => {
+        onClick?.(event);
+
+        if (disabled || readOnly || event.defaultPrevented) {
+            return;
+        }
+
         if (open) {
             closeListbox();
             return;
@@ -279,7 +355,9 @@ const VirtualSelect: FC<VirtualSelectProps> = ({
     const handleTriggerKeyDown: KeyboardEventHandler<HTMLButtonElement> = (
         event: Parameters<KeyboardEventHandler<HTMLButtonElement>>[0],
     ): void => {
-        if (disabled) {
+        onKeyDown?.(event);
+
+        if (event.defaultPrevented || disabled || readOnly) {
             return;
         }
 
@@ -481,12 +559,15 @@ const VirtualSelect: FC<VirtualSelectProps> = ({
                 hasValue && "select-field--filled",
                 hasError && "select-field--invalid",
                 disabled && "select-field--disabled",
+                readOnly && "select-field--readonly",
                 virtual && "select-field--virtual",
                 className,
             )}
+            style={style}
             data-open={open ? "true" : "false"}
             data-invalid={hasError ? "true" : "false"}
             data-disabled={disabled ? "true" : "false"}
+            data-readonly={readOnly ? "true" : "false"}
         >
             <Surface
                 className="select-field__surface"
@@ -495,7 +576,8 @@ const VirtualSelect: FC<VirtualSelectProps> = ({
                 ripple={{ layer: "foreground", trigger: ["hover", "click"] }}
             >
                 <button
-                    ref={triggerRef}
+                    {...rest}
+                    ref={mergedTriggerRef}
                     id={controlId}
                     type="button"
                     role="combobox"
@@ -505,6 +587,7 @@ const VirtualSelect: FC<VirtualSelectProps> = ({
                     aria-controls={listboxId}
                     aria-labelledby={labelId}
                     aria-invalid={hasError}
+                    aria-readonly={readOnly ? true : (void 0)}
                     aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
                     disabled={disabled}
                     onClick={handleTriggerClick}
@@ -581,7 +664,7 @@ const VirtualSelect: FC<VirtualSelectProps> = ({
                             <DropdownItem
                                 key={option.value}
                                 icon={option.icon}
-                                selected={option.value === value}
+                                selected={option.value === selectedValue}
                                 disabled={option.disabled === true}
                                 role="option"
                                 className={cx(

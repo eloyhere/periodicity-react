@@ -1,25 +1,27 @@
-import type { CSSProperties, FC, MouseEventHandler } from "react";
+import type { FC, HTMLAttributes, Ref } from "react";
 import cx from "../foundation/cx";
 import "./Backdrop.css";
 
 /**
  * Props for the overlay scrim.
  * Type: interface.
- * Fields: open, tone, blur, className, style, onClick.
+ * Fields: open, tone, blur, className, style, onClick, ref, plus native div attributes.
+ * The scrim is always hidden from assistive technology, so `aria-hidden` is not accepted.
  * @example
  * <Backdrop open onClick={close} />
  */
-export interface BackdropProps {
+export interface BackdropProps extends Omit<HTMLAttributes<HTMLDivElement>, "aria-hidden" | "children"> {
     open?: boolean;
     tone?: "neutral" | "accent";
     blur?: boolean;
-    className?: string;
-    style?: CSSProperties;
-    onClick?: MouseEventHandler<HTMLDivElement>;
+    /** Ref for the native backdrop element. */
+    ref?: Ref<HTMLDivElement>;
 }
+
 /**
  * Renders a full-screen scrim behind drawers and command palettes.
- * @param props - Open state, tone, blur, style, and click handler.
+ * Caller handlers and native attributes are forwarded to the underlying div.
+ * @param props - Open state, tone, blur, and native div attributes.
  * @example
  * <Portal><Backdrop open={open} /></Portal>
  * @returns A backdrop element.
@@ -29,15 +31,15 @@ const Backdrop: FC<BackdropProps> = ({
     tone = "neutral",
     blur = true,
     className = "",
-    style,
-    onClick,
+    ref,
+    ...rest
 }: BackdropProps) => (
     <div
+        {...rest}
+        ref={ref}
         aria-hidden="true"
         className={cx("backdrop", `backdrop--${tone}`, blur && "backdrop--blur", className)}
         data-open={open ? "true" : "false"}
-        style={style}
-        onClick={onClick}
     />
 );
 

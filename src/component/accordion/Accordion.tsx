@@ -4,9 +4,11 @@ import {
     useMemo,
     useRef,
     type FC,
+    type HTMLAttributes,
     type KeyboardEvent,
     type MutableRefObject,
     type ReactNode,
+    type Ref,
 } from "react";
 import { createListAdapter, type ListAdapter, type ListEntry } from "../../layout/list/adapter";
 import cx from "../foundation/cx";
@@ -38,25 +40,30 @@ export interface AccordionItem {
 /**
  * Props for the Accordion component.
  * Type: interface.
+ * Extends the native `div` attributes, so `id`, `style`, `title`, `aria-*`, `data-*`, `tabIndex`, and
+ * pointer, mouse, keyboard, and focus handlers are forwarded to the accordion surface.
  * Fields:
  * - `items`: Sections in display order.
  * - `value`: Controlled list of expanded values.
  * - `defaultValue`: Uncontrolled initial list of expanded values.
  * - `onValueChange`: Called with the next expanded value list.
  * - `multiple`: Whether several sections may be open at once.
+ * - `disabled`: Disables every section, including ripple feedback.
  * - `variant`: Visual treatment; defaults to `default`.
  * - `className`: Extra class names for the root element.
  * @example
  * <Accordion items={items} defaultValue={["setup"]} multiple />
  */
-export interface AccordionProps {
+export interface AccordionProps extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "className"> {
     items: AccordionItem[];
     value?: string[];
     defaultValue?: string[];
     onValueChange?: (values: string[]) => void;
     multiple?: boolean;
+    disabled?: boolean;
     variant?: "default" | "contained";
     className?: string;
+    ref?: Ref<HTMLDivElement>;
 }
 
 /**
@@ -109,7 +116,8 @@ const findEdgeEnabled: (items: readonly AccordionItem[], fromEnd: boolean) => nu
 
 /**
  * Renders collapsible sections with heading buttons, regions, and a rotating chevron.
- * @param props - Sections, expanded values, multi-open flag, variant, and change handler.
+ * @param props - Sections, expanded values, multi-open flag, disabled flag, variant, change handler,
+ * and native div attributes.
  * @example
  * <Accordion items={items} defaultValue={["setup"]} />
  * @returns The accordion root element.
@@ -120,8 +128,11 @@ const Accordion: FC<AccordionProps> = ({
     defaultValue,
     onValueChange,
     multiple = false,
+    disabled = false,
     variant = "default",
     className = "",
+    ref,
+    ...rest
 }: AccordionProps): ReactNode => {
     const baseId: string = useId();
     const adapter: ListAdapter<AccordionItem> = useMemo<ListAdapter<AccordionItem>>(
@@ -146,6 +157,10 @@ const Accordion: FC<AccordionProps> = ({
 
     const toggleSection: (sectionValue: string) => void = useCallback(
         (sectionValue: string): void => {
+            if (disabled) {
+                return;
+            }
+
             const isExpanded: boolean = expandedValues.has(sectionValue);
             let nextValues: string[];
 
@@ -159,7 +174,7 @@ const Accordion: FC<AccordionProps> = ({
 
             setCurrentValues(nextValues);
         },
-        [currentValues, expandedValues, multiple, setCurrentValues],
+        [currentValues, disabled, expandedValues, multiple, setCurrentValues],
     );
 
     const handleTriggerKeyDown: (event: KeyboardEvent<HTMLButtonElement>, index: number) => void = (
@@ -192,10 +207,16 @@ const Accordion: FC<AccordionProps> = ({
     };
 
     return (
-        <Surface className={cx("accordion", `accordion--${variant}`, className)} contentClassName="accordion__body">
+        <Surface
+            ref={ref}
+            className={cx("accordion", `accordion--${variant}`, className)}
+            contentClassName="accordion__body"
+            {...rest}
+        >
             {entries.map((entry: ListEntry<AccordionItem>): ReactNode => {
                 const item: AccordionItem = entry.item;
                 const isExpanded: boolean = expandedValues.has(item.value);
+                const isDisabled: boolean = disabled || item.disabled === true;
                 const triggerId: string = `${baseId}-trigger-${entry.index}`;
                 const panelId: string = `${baseId}-panel-${entry.index}`;
 
@@ -203,7 +224,7 @@ const Accordion: FC<AccordionProps> = ({
                     <div key={entry.key} className="accordion__item">
                         <Surface
                             className="accordion__surface"
-                            disabled={item.disabled}
+                            disabled={isDisabled}
                             ripple={{ layer: "foreground", trigger: ["hover", "click"] }}
                         >
                             <h3 className="accordion__heading">
@@ -216,7 +237,7 @@ const Accordion: FC<AccordionProps> = ({
                                     className="accordion__trigger"
                                     aria-expanded={isExpanded}
                                     aria-controls={panelId}
-                                    disabled={item.disabled}
+                                    disabled={isDisabled}
                                     onClick={(): void => {
                                         toggleSection(item.value);
                                     }}

@@ -1,4 +1,4 @@
-import type { CSSProperties, FC } from "react";
+import type { CSSProperties, FC, HTMLAttributes, Ref } from "react";
 import cx from "../foundation/cx";
 import "./Progress.css";
 
@@ -23,23 +23,29 @@ export type ProgressSize = "sm" | "md";
 /**
  * Props for the Progress component.
  * Type: interface.
- * Fields: value, max, label, showValue, tone, size, className.
+ * Extends the native `div` attributes, so `id`, `style`, `title`, `aria-*`, `data-*`, `tabIndex`, and
+ * pointer, mouse, keyboard, and focus handlers are forwarded to the progressbar element. A caller
+ * supplied `aria-label` takes precedence over the label-derived default.
+ * Fields: value, max, label, showValue, formatValue, tone, size, className.
  * @example
  * <Progress value={68} label="Cycle progress" showValue />
  */
-export interface ProgressProps {
+export interface ProgressProps extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "className"> {
     value?: number;
     max?: number;
     label?: string;
     showValue?: boolean;
+    formatValue?: (value: number, max: number) => string;
     tone?: ProgressTone;
     size?: ProgressSize;
     className?: string;
+    ref?: Ref<HTMLDivElement>;
 }
 
 /**
  * Renders a determinate or indeterminate linear progress bar.
- * @param props - Value, maximum, label, value visibility, tone, size, and class name.
+ * @param props - Value, maximum, label, value visibility, value formatter, tone, size, class name, and
+ * native div attributes.
  * @example
  * <Progress value={3} max={7} label="Rituals done" showValue tone="mint" />
  * @returns A progress bar element.
@@ -49,17 +55,24 @@ const Progress: FC<ProgressProps> = ({
     max = 100,
     label,
     showValue = false,
+    formatValue,
     tone = "accent",
     size = "md",
     className = "",
+    ref,
+    ...rest
 }: ProgressProps) => {
     const safeMax: number = max > 0 ? max : 100;
     const numericValue: number = typeof value === "number" ? value : 0;
     const boundedValue: number = Math.min(Math.max(numericValue, 0), safeMax);
     const isDeterminate: boolean = typeof value === "number" && Number.isFinite(value);
     const percent: number = isDeterminate ? (boundedValue / safeMax) * 100 : 0;
-    const percentLabel: string = `${Math.round(percent)}%`;
-    const valueText: string = isDeterminate ? percentLabel : "Loading";
+    const defaultText: string = `${Math.round(percent)}%`;
+    const valueText: string = isDeterminate
+        ? formatValue === (void 0)
+            ? defaultText
+            : formatValue(boundedValue, safeMax)
+        : "Loading";
     const hasLabel: boolean = label !== (void 0) && label.length > 0;
     const accessibleName: string = label !== (void 0) && label.length > 0 ? label : "Progress";
     const fillStyle: CSSProperties = { width: `${percent}%` };
@@ -67,6 +80,7 @@ const Progress: FC<ProgressProps> = ({
 
     return (
         <div
+            ref={ref}
             className={cx("progress", `progress--${size}`, `progress--${tone}`, className)}
             role="progressbar"
             aria-label={accessibleName}
@@ -74,12 +88,11 @@ const Progress: FC<ProgressProps> = ({
             aria-valuemax={safeMax}
             aria-valuenow={isDeterminate ? boundedValue : (void 0)}
             aria-valuetext={valueText}
+            {...rest}
         >
             {hasMeta ? (
                 <div className="progress__meta">
-                    {label !== (void 0) && label.length > 0 ? (
-                        <span className="progress__label">{label}</span>
-                    ) : null}
+                    {hasLabel ? <span className="progress__label">{label}</span> : null}
                     {showValue ? <span className="progress__value">{valueText}</span> : null}
                 </div>
             ) : null}

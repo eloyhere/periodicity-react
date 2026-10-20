@@ -1,6 +1,15 @@
 import { createContext, useContext, useMemo, type Context } from "react";
-import type { AnimationConfig, AnimationContextValue, ReducedMotionBehaviour } from "./types";
+import type { AnimationConfig, AnimationContextValue, AnimationOptions, ReducedMotionBehaviour } from "./types";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
+
+/**
+ * Default configuration change handler used outside a provider.
+ * @param config - Ignored configuration request.
+ * @example
+ * noopSetConfig({ duration: 320 });
+ * @returns Nothing.
+ */
+const noopSetConfig: (config: AnimationOptions) => void = (): void => {};
 
 /**
  * Default animation configuration used when no Animation provider is present.
@@ -35,13 +44,19 @@ export const isReducedMotion: (behaviour: ReducedMotionBehaviour, prefersReduced
  * Resolves a configuration plus the media preference into a context value.
  * @param config - Requested animation configuration.
  * @param prefersReducedMotion - Whether the operating system requests reduced motion.
+ * @param setConfig - Optional handler used by descendants to request configuration changes.
  * @example
  * const value: AnimationContextValue = resolveAnimation(DefaultAnimation, true);
  * @returns The resolved context value, with zeroed timings when motion is muted.
  */
-export const resolveAnimation: (config: AnimationConfig, prefersReducedMotion: boolean) => AnimationContextValue = (
+export const resolveAnimation: (
     config: AnimationConfig,
     prefersReducedMotion: boolean,
+    setConfig?: (config: AnimationOptions) => void,
+) => AnimationContextValue = (
+    config: AnimationConfig,
+    prefersReducedMotion: boolean,
+    setConfig?: (config: AnimationOptions) => void,
 ): AnimationContextValue => {
     const duration: number = Math.max(0, config.duration);
     const delay: number = Math.max(0, config.delay);
@@ -59,6 +74,7 @@ export const resolveAnimation: (config: AnimationConfig, prefersReducedMotion: b
         reduced,
         resolvedDuration: active ? duration : 0,
         resolvedDelay: active ? delay : 0,
+        setConfig: setConfig ?? noopSetConfig,
     };
 };
 

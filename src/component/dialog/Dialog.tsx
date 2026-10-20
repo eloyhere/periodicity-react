@@ -3,15 +3,21 @@ import {
     useEffect,
     useId,
     useRef,
+    type DialogHTMLAttributes,
     type FC,
     type MouseEventHandler,
     type PointerEventHandler,
     type ReactElement,
+    type ReactEventHandler,
     type ReactNode,
+    type Ref,
+    type RefCallback,
     type RefObject,
     type SyntheticEvent,
 } from "react";
 import cx from "../foundation/cx";
+import useControllableState from "../foundation/useControllableState";
+import useMergedRef from "../foundation/useMergedRef";
 import Icon from "../icon/Icon";
 import Surface from "../surface/Surface";
 import "./Dialog.css";
@@ -44,16 +50,34 @@ export type DialogHeadingLevel = 2 | 3 | 4;
 export type DialogRole = "dialog" | "alertdialog";
 
 /**
+ * Why the dialog asked to close.
+ * Type: type alias.
+ * Fields: none.
+ * @example
+ * const reason: DialogCloseReason = "escape";
+ */
+export type DialogCloseReason = "backdrop" | "close-button" | "escape" | "native";
+
+/**
  * Props for the modal dialog.
  * Type: interface.
- * Fields: open, onClose, title, eyebrow, description, children, footer, className, size,
- * headingLevel, closeLabel, closeOnBackdrop, role.
+ * Fields: open, defaultOpen, onOpenChange, onClose, title, eyebrow, description, children, footer,
+ * className, size, headingLevel, closeLabel, closeOnBackdrop, closeOnEscape, restoreFocus, role, ref.
+ * Native dialog attributes (id, style, aria-*, data-*, tabIndex, and pointer, mouse and keyboard
+ * events) are forwarded to the underlying `dialog` element.
  * @example
  * <Dialog open={open} onClose={close} title="New ritual">...</Dialog>
  */
-export interface DialogProps {
-    open: boolean;
-    onClose: () => void;
+export interface DialogProps
+    extends Omit<DialogHTMLAttributes<HTMLDialogElement>, "open" | "title" | "role" | "onClose"> {
+    /** Controlled open state; omit to let the dialog manage its own state. */
+    open?: boolean;
+    /** Initial open state when uncontrolled; defaults to `false`. */
+    defaultOpen?: boolean;
+    /** Called with the requested open state whenever the dialog asks to open or close. */
+    onOpenChange?: (open: boolean) => void;
+    /** Called with the reason whenever the dialog asks to close. */
+    onClose: (reason: DialogCloseReason) => void;
     title: string;
     eyebrow?: string;
     description?: ReactNode;
@@ -64,7 +88,13 @@ export interface DialogProps {
     headingLevel?: DialogHeadingLevel;
     closeLabel?: string;
     closeOnBackdrop?: boolean;
+    /** Whether Escape asks the dialog to close; defaults to `true`. */
+    closeOnEscape?: boolean;
+    /** Whether focus returns to the opener on close; defaults to `true`. */
+    restoreFocus?: boolean;
     role?: DialogRole;
+    /** Ref for the native dialog element. */
+    ref?: Ref<HTMLDialogElement>;
 }
 
 const FocusableSelector: string = [
@@ -126,16 +156,18 @@ const getInitialFocus: (
 /**
  * Returns focus to the element that opened the dialog.
  * @param previousActive - Ref holding the opener, cleared after restoring.
+ * @param restore - Whether focus should actually be restored.
  * @example
- * restoreFocus(previousActiveRef);
+ * restoreFocus(previousActiveRef, true);
  * @returns Nothing.
  */
-const restoreFocus: (previousActive: RefObject<HTMLElement | null>) => void = (
+const restoreFocus: (previousActive: RefObject<HTMLElement | null>, restore: boolean) => void = (
     previousActive: RefObject<HTMLElement | null>,
+    restore: boolean,
 ): void => {
     const opener: HTMLElement | null = previousActive.current;
 
-    if (opener !== null && opener.isConnected) {
+    if (restore && opener !== null && opener.isConnected) {
         opener.focus({ preventScroll: true });
     }
 
@@ -144,7 +176,9 @@ const restoreFocus: (previousActive: RefObject<HTMLElement | null>) => void = (
 
 /**
  * Renders a native modal dialog with managed focus, dismiss and scroll locking.
- * @param props - Open state, labels, heading level, dismissal rules, and content.
+ * The `open` state may be controlled or uncontrolled; `onClose` reports the reason
+ * (`backdrop`, `close-button`, `escape`, or `native`).
+ * @param props - Open state, labels, heading level, dismissal rules, native dialog attributes, and content.
  * @example
  * <Dialog open={open} onClose={() => setOpen(false)} title="New ritual">
  *     <TextInput label="Name" />
@@ -152,7 +186,9 @@ const restoreFocus: (previousActive: RefObject<HTMLElement | null>) => void = (
  * @returns A modal dialog element.
  */
 const Dialog: FC<DialogProps> = ({
-    open,
+    open: openProp,
+    defaultOpen = false,
+    onOpenChange,
     onClose,
     title,
     eyebrow,
@@ -164,7 +200,17 @@ const Dialog: FC<DialogProps> = ({
     headingLevel = 2,
     closeLabel = "Close dialog",
     closeOnBackdrop = true,
+    closeOnEscape = true,
+    restoreFocus: restoreFocusOnClose = true,
     role = "dialog",
+    ref,
+    onCancel,
+    onClick,
+    onPointerDown,
+    onPointerCancel,
+    "aria-labelledby": ariaLabelledBy,
+    "aria-describedby": ariaDescribedBy,
+    ...rest
 }: DialogProps): ReactElement => {
     const dialogRef: RefObject<HTMLDialogElement | null> = useRef<HTMLDialogElement>(null);
     const panelRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
@@ -177,6 +223,26 @@ const Dialog: FC<DialogProps> = ({
     const hasDescription: boolean = description !== (void 0) && description !== null;
     const hasBody: boolean = children !== null && children !== (void 0) && children !== false;
     const headingTag: "h2" | "h3" | "h4" = headingLevel === 3 ? "h3" : headingLevel === 4 ? "h4" : "h2";
+    const [open, setOpen]: readonly [
+        boolean,
+        (next: boolean | ((previous: boolean) => boolean)) => void,
+    ] = useControllableState<boolean>({
+        value: openProp,
+        defaultValue: defaultOpen,
+        onChange: onOpenChange,
+    });
+    const mergedRef: RefCallback<HTMLDialogElement> = useMergedRef<HTMLDialogElement>(dialogRef, ref);
+    const labelledBy: string = [titleId, ariaLabelledBy ?? ""]
+        .filter((value: string): boolean => value.length > 0)
+        .join(" ");
+    const describedBy: string = [hasDescription ? descriptionId : "", ariaDescribedBy ?? ""]
+        .filter((value: string): boolean => value.length > 0)
+        .join(" ");
+
+    const requestClose: (reason: DialogCloseReason) => void = (reason: DialogCloseReason): void => {
+        setOpen(false);
+        onClose(reason);
+    };
 
     useEffect((): (() => void) | void => {
         const dialog: HTMLDialogElement | null = dialogRef.current;
@@ -208,7 +274,7 @@ const Dialog: FC<DialogProps> = ({
                     dialog.close();
                 }
 
-                restoreFocus(previousActiveRef);
+                restoreFocus(previousActiveRef, restoreFocusOnClose);
             };
         }
 
@@ -217,8 +283,8 @@ const Dialog: FC<DialogProps> = ({
             dialog.close();
         }
 
-        restoreFocus(previousActiveRef);
-    }, [open]);
+        restoreFocus(previousActiveRef, restoreFocusOnClose);
+    }, [open, restoreFocusOnClose]);
 
     useEffect((): (() => void) | void => {
         if (!open) {
@@ -234,11 +300,16 @@ const Dialog: FC<DialogProps> = ({
         };
     }, [open]);
 
-    const handleCancel: (event: SyntheticEvent<HTMLDialogElement>) => void = (
+    const handleCancel: ReactEventHandler<HTMLDialogElement> = (
         event: SyntheticEvent<HTMLDialogElement>,
     ): void => {
         event.preventDefault();
-        onClose();
+
+        if (closeOnEscape) {
+            requestClose("escape");
+        }
+
+        onCancel?.(event);
     };
 
     const handleNativeClose: () => void = (): void => {
@@ -247,7 +318,7 @@ const Dialog: FC<DialogProps> = ({
             return;
         }
 
-        onClose();
+        requestClose("native");
     };
 
     const handlePointerDown: PointerEventHandler<HTMLDialogElement> = (
@@ -257,10 +328,14 @@ const Dialog: FC<DialogProps> = ({
         const target: EventTarget | null = event.target;
         pointerDownOutsideRef.current =
             panel === null || !(target instanceof Node) || !panel.contains(target);
+        onPointerDown?.(event);
     };
 
-    const handlePointerCancel: PointerEventHandler<HTMLDialogElement> = (): void => {
+    const handlePointerCancel: PointerEventHandler<HTMLDialogElement> = (
+        event: Parameters<PointerEventHandler<HTMLDialogElement>>[0],
+    ): void => {
         pointerDownOutsideRef.current = false;
+        onPointerCancel?.(event);
     };
 
     const handleClick: MouseEventHandler<HTMLDialogElement> = (
@@ -269,25 +344,26 @@ const Dialog: FC<DialogProps> = ({
         const startedOutside: boolean = pointerDownOutsideRef.current;
         pointerDownOutsideRef.current = false;
 
-        if (!closeOnBackdrop || !startedOutside || event.target !== event.currentTarget) {
-            return;
+        if (closeOnBackdrop && startedOutside && event.target === event.currentTarget) {
+            requestClose("backdrop");
         }
 
-        onClose();
+        onClick?.(event);
     };
 
     const handleCloseClick: () => void = (): void => {
-        onClose();
+        requestClose("close-button");
     };
 
     return (
         <dialog
-            ref={dialogRef}
+            {...rest}
+            ref={mergedRef}
             className={cx("dialog", `dialog--${size}`, className)}
             role={role}
             aria-modal="true"
-            aria-labelledby={titleId}
-            aria-describedby={hasDescription ? descriptionId : (void 0)}
+            aria-labelledby={labelledBy}
+            aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
             onCancel={handleCancel}
             onClose={handleNativeClose}
             onPointerDown={handlePointerDown}

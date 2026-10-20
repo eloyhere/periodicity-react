@@ -19,6 +19,11 @@
     line-height: 1.2;
 }
 
+.number-picker-field__required {
+    margin-left: 2px;
+    color: var(--color-error);
+}
+
 .number-picker {
     display: flex;
     flex-direction: column;
@@ -241,6 +246,12 @@
 .number-picker-field--disabled .number-picker__wheel,
 .number-picker-field--disabled .number-picker__item,
 .number-picker-field--disabled .number-picker__input {
+    cursor: default;
+}
+
+.number-picker-field--readonly .number-picker__wheel,
+.number-picker-field--readonly .number-picker__item,
+.number-picker-field--readonly .number-picker__input {
     cursor: default;
 }
 

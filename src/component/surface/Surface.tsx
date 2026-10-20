@@ -3,6 +3,7 @@ import {
     type CSSProperties,
     type Dispatch,
     type FC,
+    type HTMLAttributes,
     type KeyboardEventHandler,
     type MouseEventHandler,
     type PointerEventHandler,
@@ -92,6 +93,8 @@ interface RippleStyle extends CSSProperties {
 /**
  * Props for the three-layer Surface container.
  * Type: interface.
+ * Extends the native `div` attributes, so `id`, `style`, `title`, `aria-*`, `data-*`, `tabIndex`, and any
+ * mouse, pointer, keyboard, or focus handler are forwarded to the root element.
  * @param children - Content rendered in the component layer.
  * @param background - Decorative content painted below the component layer.
  * @param foreground - Decorative content painted above the component layer.
@@ -101,10 +104,17 @@ interface RippleStyle extends CSSProperties {
  * @param shape - Corner shape.
  * @param stateLayer - Whether to render the hover/press state layer.
  * @param disabled - Disables the ripple and state layer.
+ * @param ariaLabel - Convenience alias for `aria-label`; an explicit `aria-label` wins.
+ * @param onPointerDown - Composed with the internal ripple listener and called afterwards.
+ * @param onPointerEnter - Composed with the internal hover ripple listener and called afterwards.
+ * @param onKeyDown - Composed with the internal keyboard ripple listener and called afterwards.
+ * @param onContextMenu - Composed with the internal context ripple listener and called afterwards.
  * @example
- * <Surface ripple={{ layer: "foreground", trigger: "click" }}>Save</Surface>
+ * <Surface ripple={{ layer: "foreground", trigger: "click" }} data-testid="panel">
+ *     Save
+ * </Surface>
  */
-export interface SurfaceProps {
+export interface SurfaceProps extends Omit<HTMLAttributes<HTMLDivElement>, "role"> {
     children: ReactNode;
     className?: string;
     contentClassName?: string;
@@ -147,7 +157,7 @@ const ClaimedRippleEvents: WeakSet<Event> = new WeakSet<Event>();
 /**
  * Renders background → component → foreground layers, with state layer and ripple support.
  * Type: function component.
- * @param props - Layer content, tone, elevation, shape, ripple options, and handlers.
+ * @param props - Layer content, tone, elevation, shape, ripple options, native attributes, and handlers.
  * @example
  * <Surface ripple={{ trigger: "hover" }}>Hover me</Surface>
  * @returns A layered Surface element.
@@ -174,6 +184,7 @@ const Surface: FC<SurfaceProps> = ({
     onKeyDown,
     onClick,
     onContextMenu,
+    ...rest
 }: SurfaceProps) => {
     const [ripples, setRipples]: [RippleState[], Dispatch<SetStateAction<RippleState[]>>] =
         useState<RippleState[]>([]);
@@ -341,6 +352,7 @@ const Surface: FC<SurfaceProps> = ({
             onKeyDown={handleKeyDown}
             onClick={onClick}
             onContextMenu={handleContextMenu}
+            {...rest}
         >
             <div className="surface__background" aria-hidden="true">
                 {background}

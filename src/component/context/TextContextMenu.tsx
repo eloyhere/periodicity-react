@@ -107,7 +107,7 @@ const TextContextMenu: FC = () => {
                 return;
             }
 
-            if (event.target.closest('[role="menu"]') !== null) {
+            if (event.target.closest('[role="menu"], .context-menu__zone') !== null) {
                 return;
             }
 
@@ -130,7 +130,7 @@ const TextContextMenu: FC = () => {
                 return;
             }
 
-            if (event.target.closest('[role="menu"]') !== null) {
+            if (event.target.closest('[role="menu"], .context-menu__zone') !== null) {
                 return;
             }
 

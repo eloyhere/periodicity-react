@@ -1,6 +1,14 @@
-import { useMemo, useState, type Dispatch, type FC, type ReactNode, type SetStateAction } from "react";
+import {
+    useMemo,
+    type FC,
+    type HTMLAttributes,
+    type MouseEvent as ReactMouseEvent,
+    type ReactNode,
+    type Ref,
+} from "react";
 import { createListAdapter, type ListAdapter } from "../../layout/list/adapter";
 import cx from "../foundation/cx";
+import useControllableState from "../foundation/useControllableState";
 import Icon, { type IconName } from "../icon/Icon";
 import Surface from "../surface/Surface";
 import Text from "../text/Text";
@@ -12,7 +20,7 @@ import "./Breadcrumbs.css";
  * Fields:
  * - `label`: Visible crumb text.
  * - `href`: Optional link target; a button is rendered when omitted.
- * - `onClick`: Optional activation handler.
+ * - `onClick`: Optional activation handler, composed with the trail-level `onItemClick`.
  * - `icon`: Optional leading icon.
  * @example
  * const item: BreadcrumbItem = { label: "Library", href: "/library" };
@@ -20,26 +28,39 @@ import "./Breadcrumbs.css";
 export interface BreadcrumbItem {
     label: string;
     href?: string;
-    onClick?: () => void;
+    onClick?: (event: ReactMouseEvent<HTMLElement>) => void;
     icon?: IconName;
 }
 
 /**
  * Props for the Breadcrumbs component.
  * Type: interface.
+ * Extends the native `nav` attributes, so `id`, `style`, `title`, `aria-*`, `data-*`, `tabIndex`, and
+ * pointer, mouse, keyboard, and focus handlers are forwarded to the navigation landmark.
  * Fields:
  * - `items`: Crumbs from the root to the current page.
  * - `separator`: Decorative separator between crumbs.
  * - `maxItems`: Maximum visible crumbs before collapsing; omitted means never collapse.
+ * - `expanded`: Controlled expansion of the collapsed trail.
+ * - `defaultExpanded`: Uncontrolled initial expansion; defaults to `false`.
+ * - `onExpandedChange`: Called with the next expansion state.
+ * - `onItemClick`: Called with the activated crumb and its source index.
+ * - `ellipsisLabel`: Accessible label for the expander button; defaults to `Show all breadcrumbs`.
  * - `className`: Extra class names for the navigation element.
  * @example
- * <Breadcrumbs items={items} maxItems={4} />
+ * <Breadcrumbs items={items} maxItems={4} onItemClick={track} />
  */
-export interface BreadcrumbsProps {
+export interface BreadcrumbsProps extends Omit<HTMLAttributes<HTMLElement>, "children" | "className"> {
     items: BreadcrumbItem[];
     separator?: ReactNode;
     maxItems?: number;
+    expanded?: boolean;
+    defaultExpanded?: boolean;
+    onExpandedChange?: (expanded: boolean) => void;
+    onItemClick?: (item: BreadcrumbItem, index: number) => void;
+    ellipsisLabel?: string;
     className?: string;
+    ref?: Ref<HTMLElement>;
 }
 
 /**
@@ -55,7 +76,7 @@ type BreadcrumbSlot = { readonly kind: "item"; readonly index: number } | { read
 
 /**
  * Renders a breadcrumb trail with an expandable ellipsis for long paths.
- * @param props - Crumbs, separator, collapse limit, and class name.
+ * @param props - Crumbs, separator, collapse limit, expansion state, callbacks, and class name.
  * @example
  * <Breadcrumbs items={items} maxItems={4} />
  * @returns A labelled navigation landmark containing an ordered list.
@@ -64,15 +85,28 @@ const Breadcrumbs: FC<BreadcrumbsProps> = ({
     items,
     separator,
     maxItems,
+    expanded,
+    defaultExpanded = false,
+    onExpandedChange,
+    onItemClick,
+    ellipsisLabel = "Show all breadcrumbs",
     className = "",
+    ref,
+    ...rest
 }: BreadcrumbsProps): ReactNode => {
     const adapter: ListAdapter<BreadcrumbItem> = useMemo<ListAdapter<BreadcrumbItem>>(
         () => createListAdapter<BreadcrumbItem>(items),
         [items],
     );
-    const [expanded, setExpanded]: readonly [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false);
+    const [isExpanded, setExpanded]: readonly [boolean, (next: boolean) => void] =
+        useControllableState<boolean>({
+            value: expanded,
+            defaultValue: defaultExpanded,
+            onChange: onExpandedChange,
+        });
     const resolvedMaxItems: number = maxItems ?? items.length;
-    const isCollapsible: boolean = maxItems !== (void 0) && resolvedMaxItems >= 3 && items.length > resolvedMaxItems;
+    const isCollapsible: boolean =
+        maxItems !== (void 0) && resolvedMaxItems >= 3 && items.length > resolvedMaxItems;
     const slots: readonly BreadcrumbSlot[] = useMemo<readonly BreadcrumbSlot[]>(() => {
         const allSlots: BreadcrumbSlot[] = [];
 
@@ -80,7 +114,7 @@ const Breadcrumbs: FC<BreadcrumbsProps> = ({
             allSlots.push({ kind: "item", index });
         }
 
-        if (!isCollapsible || expanded) {
+        if (!isCollapsible || isExpanded) {
             return allSlots;
         }
 
@@ -93,7 +127,7 @@ const Breadcrumbs: FC<BreadcrumbsProps> = ({
         }
 
         return collapsedSlots;
-    }, [expanded, isCollapsible, items.length, resolvedMaxItems]);
+    }, [isCollapsible, isExpanded, items.length, resolvedMaxItems]);
     const separatorNode: ReactNode =
         separator === (void 0) ? (
             <Icon className="breadcrumbs__separator-icon" name="ChevronRight" size={14} />
@@ -101,8 +135,17 @@ const Breadcrumbs: FC<BreadcrumbsProps> = ({
             separator
         );
 
+    const activateItem: (item: BreadcrumbItem, index: number, event: ReactMouseEvent<HTMLElement>) => void = (
+        item: BreadcrumbItem,
+        index: number,
+        event: ReactMouseEvent<HTMLElement>,
+    ): void => {
+        item.onClick?.(event);
+        onItemClick?.(item, index);
+    };
+
     return (
-        <nav className={cx("breadcrumbs", className)} aria-label="Breadcrumb">
+        <nav ref={ref} className={cx("breadcrumbs", className)} aria-label="Breadcrumb" {...rest}>
             <ol className="breadcrumbs__list">
                 {slots.map((slot: BreadcrumbSlot, slotIndex: number): ReactNode => {
                     const isLast: boolean = slotIndex === slots.length - 1;
@@ -117,7 +160,8 @@ const Breadcrumbs: FC<BreadcrumbsProps> = ({
                                     <button
                                         type="button"
                                         className="breadcrumbs__ellipsis"
-                                        aria-label="Show all breadcrumbs"
+                                        aria-label={ellipsisLabel}
+                                        aria-expanded={isExpanded}
                                         onClick={(): void => {
                                             setExpanded(true);
                                         }}
@@ -165,8 +209,8 @@ const Breadcrumbs: FC<BreadcrumbsProps> = ({
                                 <a
                                     className="breadcrumbs__link"
                                     href={item.href}
-                                    onClick={(): void => {
-                                        item.onClick?.();
+                                    onClick={(event: ReactMouseEvent<HTMLAnchorElement>): void => {
+                                        activateItem(item, slot.index, event);
                                     }}
                                 >
                                     {iconNode}
@@ -174,7 +218,7 @@ const Breadcrumbs: FC<BreadcrumbsProps> = ({
                                 </a>
                             </Surface>
                         );
-                    } else if (item.onClick) {
+                    } else if (item.onClick !== (void 0) || onItemClick !== (void 0)) {
                         crumb = (
                             <Surface
                                 className="breadcrumbs__surface"
@@ -183,8 +227,8 @@ const Breadcrumbs: FC<BreadcrumbsProps> = ({
                                 <button
                                     type="button"
                                     className="breadcrumbs__link"
-                                    onClick={(): void => {
-                                        item.onClick?.();
+                                    onClick={(event: ReactMouseEvent<HTMLButtonElement>): void => {
+                                        activateItem(item, slot.index, event);
                                     }}
                                 >
                                     {iconNode}

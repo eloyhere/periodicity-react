@@ -1,4 +1,11 @@
-import { Children, type CSSProperties, type FC, type ReactNode } from "react";
+import {
+    Children,
+    type CSSProperties,
+    type FC,
+    type HTMLAttributes,
+    type ReactNode,
+    type Ref,
+} from "react";
 import cx from "../../component/foundation/cx";
 import "./GridLayout.css";
 
@@ -14,22 +21,24 @@ export type GridGap = "none" | "xs" | "sm" | "md" | "lg" | "xl";
 /**
  * Props for the flex-based responsive grid.
  * Type: interface.
- * Fields: children, columns, gap, responsive, className, ariaLabel.
+ * Fields: children, columns, gap, responsive, ariaLabel, ref, and native `div` attributes.
+ * Native `id`, `className`, `style`, `title`, `tabIndex`, `role`, `aria-*`, `data-*`, pointer,
+ * mouse, keyboard, and focus handlers are forwarded to the grid container.
  * @example
- * <GridLayout columns={3} gap="md">...</GridLayout>
+ * <GridLayout columns={3} gap="md" aria-label="Gallery">...</GridLayout>
  */
-export interface GridLayoutProps {
+export interface GridLayoutProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
     children: ReactNode;
     columns?: number;
     gap?: GridGap;
     responsive?: boolean;
-    className?: string;
     ariaLabel?: string;
+    ref?: Ref<HTMLDivElement>;
 }
 
 /**
  * Flex grid with an explicit column count; never uses CSS Grid.
- * @param props - Column count, gap, and children.
+ * @param props - Column count, gap, children, and native attributes.
  * @example
  * <GridLayout columns={2} gap="lg"><Card /><Card /></GridLayout>
  * @returns A responsive grid layout.
@@ -40,24 +49,30 @@ const GridLayout: FC<GridLayoutProps> = ({
     gap = "md",
     responsive = true,
     className = "",
+    style,
     ariaLabel,
+    ref,
+    ...rest
 }: GridLayoutProps) => {
     const safeColumns: number = Math.max(1, Math.floor(columns));
-    const style: CSSProperties = {
+    const gridStyle: CSSProperties = {
         "--grid-columns": safeColumns,
     } as CSSProperties;
+    const label: string | undefined = rest["aria-label"] ?? ariaLabel;
 
     return (
         <div
+            {...rest}
+            ref={ref}
             className={cx(
                 "grid-layout",
                 `grid-layout--gap-${gap}`,
                 responsive && "grid-layout--responsive",
                 className,
             )}
-            style={style}
+            style={{ ...gridStyle, ...style }}
+            aria-label={label}
             data-columns={safeColumns}
-            aria-label={ariaLabel}
         >
             {Children.toArray(children).map((child: ReactNode, index: number): ReactNode => (
                 <div className="grid-layout__cell" key={index}>

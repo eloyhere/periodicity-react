@@ -37,9 +37,27 @@ export interface TaskOptions {
 }
 
 /**
+ * Immutable snapshot of scheduler timing configuration.
+ * Type: interface.
+ * Fields: frameBudget, idleTimeout, lowFallbackDelay.
+ * @example
+ * const config: TaskConfiguration = task.configuration();
+ */
+export interface TaskConfiguration {
+    /** Milliseconds of high- and medium-priority work allowed in one animation frame. */
+    readonly frameBudget: number;
+
+    /** Milliseconds after which requestIdleCallback should force a low-priority callback. */
+    readonly idleTimeout: number;
+
+    /** Milliseconds before the setTimeout fallback runs a low-priority task. */
+    readonly lowFallbackDelay: number;
+}
+
+/**
  * Options accepted by {@link Task.schedule}.
  * Type: interface.
- * Fields: priority, signal, label.
+ * Fields: priority, signal, label, timeout.
  * @example
  * const options: TaskScheduleOptions = { priority: "high", label: "hydrate" };
  */
@@ -52,15 +70,31 @@ export interface TaskScheduleOptions {
 
     /** Human-readable label used in diagnostics and disposal errors. */
     readonly label?: string;
+
+    /**
+     * Milliseconds after which the task is cancelled with {@link TaskTimeoutError}.
+     * Omit for no timeout; negative values are clamped to zero and non-finite values disable the timeout.
+     */
+    readonly timeout?: number;
 }
+
+/**
+ * Lifecycle state of one scheduled task.
+ * Type: type alias.
+ * Fields: "queued", "running", "settled", "cancelled".
+ * @example
+ * const status: TaskStatus = pending.status;
+ */
+export type TaskStatus = "queued" | "running" | "settled" | "cancelled";
 
 /**
  * Cancellation handle attached to every promise returned by {@link Task.schedule}.
  * Type: interface.
- * Fields: id, priority, label, cancel.
+ * Fields: id, priority, label, status, settled, cancel.
  * @example
  * const handle: TaskHandle = task.schedule((): void => {});
  * handle.cancel();
+ * // handle.status is now "cancelled" and handle.settled is true.
  */
 export interface TaskHandle {
     /** Monotonically increasing identifier, unique for the lifetime of the scheduler. */
@@ -72,14 +106,26 @@ export interface TaskHandle {
     /** Diagnostic label, or null when none was supplied. */
     readonly label: string | null;
 
-    /** Cancels the task; safe to call more than once. */
-    cancel(): void;
+    /** Current lifecycle state, read live from the scheduler. */
+    readonly status: TaskStatus;
+
+    /** Whether the task has settled, including after cancellation or disposal. */
+    readonly settled: boolean;
+
+    /**
+     * Cancels the task; safe to call more than once.
+     * @param reason - Optional rejection reason; defaults to a {@link TaskCancelledError}.
+     * @example
+     * pending.cancel(new Error("Superseded."));
+     * @returns Nothing.
+     */
+    cancel(reason?: unknown): void;
 }
 
 /**
  * Promise returned by {@link Task.schedule}, augmented with its cancellation handle.
  * Type: type alias.
- * Fields: id, priority, label, cancel.
+ * Fields: id, priority, label, status, settled, cancel.
  * @example
  * const pending: TaskPromise<string> = task.schedule((): string => "ready");
  * pending.cancel();
@@ -108,6 +154,85 @@ export interface TaskPending {
 
     /** Queued tasks plus running tasks. */
     readonly total: number;
+}
+
+/**
+ * Lifecycle notifications published by the scheduler.
+ * Type: type alias.
+ * Fields: "scheduled", "started", "resolved", "rejected", "cancelled", "disposed".
+ * @example
+ * const type: TaskEventType = "resolved";
+ */
+export type TaskEventType = "scheduled" | "started" | "resolved" | "rejected" | "cancelled" | "disposed";
+
+/**
+ * Notification emitted when a task changes lifecycle state.
+ * Type: interface.
+ * Fields: type, id, priority, label, timestamp, reason.
+ * @example
+ * task.subscribe((event: TaskEvent): void => {
+ *     lastEvent = event;
+ * });
+ */
+export interface TaskEvent {
+    /** Kind of lifecycle change. */
+    readonly type: TaskEventType;
+
+    /** Identifier of the task that changed. */
+    readonly id: number;
+
+    /** Priority queue the task was submitted to. */
+    readonly priority: TaskPriority;
+
+    /** Diagnostic label, or null when none was supplied. */
+    readonly label: string | null;
+
+    /** Milliseconds on the scheduler clock when the event was published. */
+    readonly timestamp: number;
+
+    /** Rejection reason for rejected, cancelled, and disposed tasks; otherwise absent. */
+    readonly reason?: unknown;
+}
+
+/**
+ * Observer called for every lifecycle notification.
+ * Type: type alias.
+ * Fields: none.
+ * @example
+ * const listener: TaskSubscriber = (event: TaskEvent): void => {
+ *     lastType = event.type;
+ * };
+ */
+export type TaskSubscriber = (event: TaskEvent) => void;
+
+/**
+ * Cumulative scheduler counters since the last {@link Task.resetMetrics}.
+ * Type: interface.
+ * Fields: scheduled, started, resolved, rejected, cancelled, disposed, peakRunning.
+ * @example
+ * const metrics: TaskMetrics = task.metrics();
+ */
+export interface TaskMetrics {
+    /** Tasks accepted by schedule, including work cancelled before it ran. */
+    readonly scheduled: number;
+
+    /** Tasks whose run function was invoked. */
+    readonly started: number;
+
+    /** Tasks that resolved successfully. */
+    readonly resolved: number;
+
+    /** Tasks that threw, rejected, or returned a rejected promise. */
+    readonly rejected: number;
+
+    /** Tasks cancelled explicitly, aborted, or timed out. */
+    readonly cancelled: number;
+
+    /** Tasks rejected because the scheduler was disposed. */
+    readonly disposed: number;
+
+    /** Highest number of tasks observed running at the same time. */
+    readonly peakRunning: number;
 }
 
 /**
@@ -157,16 +282,42 @@ export class TaskDisposedError extends Error {
 }
 
 /**
- * Internal lifecycle state of a scheduled task.
- * Type: type alias.
- * Fields: "queued", "running", "settled".
+ * Rejection reason used when a task exceeds its configured timeout.
+ * Type: class.
+ * @example
+ * try {
+ *     await pending;
+ * } catch (error: unknown) {
+ *     if (error instanceof TaskTimeoutError) {
+ *         // The task did not settle within its timeout.
+ *     }
+ * }
  */
-type TaskState = "queued" | "running" | "settled";
+export class TaskTimeoutError extends Error {
+    /**
+     * Creates a timeout error, optionally naming the task.
+     * @param label - Diagnostic label of the timed-out task.
+     * @example
+     * throw new TaskTimeoutError("hydrate");
+     * @returns A new TaskTimeoutError.
+     */
+    public constructor(label?: string | null) {
+        super(label === (void 0) || label === null ? "Task timed out." : `Task timed out: ${label}`);
+        this.name = "TaskTimeoutError";
+    }
+}
+
+/**
+ * Final lifecycle outcome recorded when a task settles.
+ * Type: type alias.
+ * Fields: "resolved", "rejected", "cancelled", "disposed".
+ */
+type TaskOutcome = Extract<TaskEventType, "resolved" | "rejected" | "cancelled" | "disposed">;
 
 /**
  * Internal record for one scheduled task.
  * Type: interface.
- * Fields: id, priority, label, run, resolve, reject, signal, abort, state.
+ * Fields: id, priority, label, run, resolve, reject, signal, abort, timer, status.
  */
 interface ScheduledTask {
     readonly id: number;
@@ -177,7 +328,8 @@ interface ScheduledTask {
     readonly reject: (reason: unknown) => void;
     signal: AbortSignal | null;
     abort: (() => void) | null;
-    state: TaskState;
+    timer: number | null;
+    status: TaskStatus;
 }
 
 /**
@@ -444,6 +596,9 @@ const requestIdle: (
  * Only one instance can exist. The constructor is private and also rejects a missing module token
  * at runtime; use {@link Task.instance}, {@link Task.shared}, or the exported `task` singleton.
  *
+ * Lifecycle notifications are available through {@link Task.subscribe}, cumulative counters through
+ * {@link Task.metrics}, and current occupancy through {@link Task.pending}.
+ *
  * @example
  * const value: string = await Task.instance.schedule((): string => "ready", { priority: "high" });
  * Task.configure({ frameBudget: 4 });
@@ -456,6 +611,7 @@ export class Task {
     private readonly medium: Queue<ScheduledTask>;
     private readonly low: Queue<ScheduledTask>;
     private readonly active: Map<number, ScheduledTask>;
+    private readonly listeners: Set<TaskSubscriber>;
     private frameRequest: (() => void) | null;
     private idleRequest: (() => void) | null;
     private frameRunning: boolean;
@@ -467,6 +623,13 @@ export class Task {
     private frameBudget: number;
     private idleTimeout: number;
     private lowFallbackDelay: number;
+    private scheduledCount: number;
+    private startedCount: number;
+    private resolvedCount: number;
+    private rejectedCount: number;
+    private cancelledCount: number;
+    private disposedCount: number;
+    private peakRunning: number;
 
     /**
      * Creates the scheduler after verifying the module-private singleton token.
@@ -485,6 +648,7 @@ export class Task {
         this.medium = new Queue<ScheduledTask>();
         this.low = new Queue<ScheduledTask>();
         this.active = new Map<number, ScheduledTask>();
+        this.listeners = new Set<TaskSubscriber>();
         this.frameRequest = null;
         this.idleRequest = null;
         this.frameRunning = false;
@@ -496,6 +660,13 @@ export class Task {
         this.frameBudget = DefaultFrameBudget;
         this.idleTimeout = DefaultIdleTimeout;
         this.lowFallbackDelay = DefaultLowFallbackDelay;
+        this.scheduledCount = 0;
+        this.startedCount = 0;
+        this.resolvedCount = 0;
+        this.rejectedCount = 0;
+        this.cancelledCount = 0;
+        this.disposedCount = 0;
+        this.peakRunning = 0;
     }
 
     /**
@@ -535,6 +706,78 @@ export class Task {
     }
 
     /**
+     * Reads the current timing configuration of the global scheduler.
+     * @example
+     * const config: TaskConfiguration = Task.configuration();
+     * @returns A snapshot of the global configuration.
+     */
+    public static configuration(): TaskConfiguration {
+        return Task.instance.configuration();
+    }
+
+    /**
+     * Restores the global scheduler to its default timing configuration.
+     * @example
+     * Task.resetConfiguration();
+     * @returns Nothing.
+     */
+    public static resetConfiguration(): void {
+        Task.instance.resetConfiguration();
+    }
+
+    /**
+     * Cancels every outstanding task on the global scheduler.
+     * @param priority - Optional queue to cancel; omit to cancel every queue.
+     * @example
+     * const cancelled: number = Task.cancelAll();
+     * @returns Number of tasks cancelled.
+     */
+    public static cancelAll(priority?: TaskPriority): number {
+        return Task.instance.cancelAll(priority);
+    }
+
+    /**
+     * Subscribes to lifecycle events from the global scheduler.
+     * @param listener - Observer called for every event.
+     * @example
+     * const unsubscribe: () => void = Task.subscribe(handleTaskEvent);
+     * @returns A function that removes the subscription.
+     */
+    public static subscribe(listener: TaskSubscriber): () => void {
+        return Task.instance.subscribe(listener);
+    }
+
+    /**
+     * Reads cumulative global scheduler counters.
+     * @example
+     * const metrics: TaskMetrics = Task.metrics();
+     * @returns A snapshot of the global metrics.
+     */
+    public static metrics(): TaskMetrics {
+        return Task.instance.metrics();
+    }
+
+    /**
+     * Resets cumulative global scheduler counters.
+     * @example
+     * Task.resetMetrics();
+     * @returns Nothing.
+     */
+    public static resetMetrics(): void {
+        Task.instance.resetMetrics();
+    }
+
+    /**
+     * Checks whether the global scheduler has no queued or running work.
+     * @example
+     * const idle: boolean = Task.isIdle();
+     * @returns True when no tasks are outstanding.
+     */
+    public static isIdle(): boolean {
+        return Task.instance.isIdle();
+    }
+
+    /**
      * Updates timing options on this scheduler.
      * Changes apply to subsequent frame and idle requests; a callback already in flight keeps
      * the budget it started with.
@@ -558,16 +801,42 @@ export class Task {
     }
 
     /**
+     * Reads this scheduler's timing configuration.
+     * @example
+     * const config: TaskConfiguration = task.configuration();
+     * @returns A snapshot of the current configuration.
+     */
+    public configuration(): TaskConfiguration {
+        return {
+            frameBudget: this.frameBudget,
+            idleTimeout: this.idleTimeout,
+            lowFallbackDelay: this.lowFallbackDelay,
+        };
+    }
+
+    /**
+     * Restores this scheduler to its default timing configuration.
+     * @example
+     * task.resetConfiguration();
+     * @returns Nothing.
+     */
+    public resetConfiguration(): void {
+        this.frameBudget = DefaultFrameBudget;
+        this.idleTimeout = DefaultIdleTimeout;
+        this.lowFallbackDelay = DefaultLowFallbackDelay;
+    }
+
+    /**
      * Queues a task and returns a promise with an attached cancellation handle.
      * The promise resolves with the task result, or with the result of the promise the task
      * returns. A synchronous throw or a rejected returned promise rejects it. Cancelling a queued
      * task prevents it from running; cancelling a running task discards its eventual result.
      * @param run - Work to run; may return a value or a promise.
-     * @param options - Priority, abort signal, and diagnostic label.
+     * @param options - Priority, abort signal, diagnostic label, and timeout.
      * @example
      * const pending: TaskPromise<number> = task.schedule((): number => 42, { priority: "high" });
      * const value: number = await pending;
-     * @returns A promise augmented with an id, priority, label, and cancel method.
+     * @returns A promise augmented with an id, priority, label, live status, and cancel method.
      * @throws TypeError When the priority is not "high", "medium", or "low".
      */
     public schedule<T>(run: () => T | Promise<T>, options?: TaskScheduleOptions): TaskPromise<T> {
@@ -576,6 +845,11 @@ export class Task {
         const priority: TaskPriority = normalisePriority(options?.priority);
         const label: string | null = options?.label === (void 0) ? null : options.label;
         const signal: AbortSignal | null = options?.signal === (void 0) ? null : options.signal;
+        const requestedTimeout: number | void = options?.timeout;
+        const timeout: number | void =
+            requestedTimeout === (void 0) || !Number.isFinite(requestedTimeout)
+                ? (void 0)
+                : Math.max(0, requestedTimeout);
         const id: number = this.nextId();
         const deferred: Deferred<T> = createDeferred<T>();
         const entry: ScheduledTask = {
@@ -591,39 +865,70 @@ export class Task {
             },
             signal,
             abort: null,
-            state: "queued",
+            timer: null,
+            status: "queued",
         };
-        const cancelHandle: () => void = (): void => {
-            this.cancel(id);
+        const cancelHandle: (reason?: unknown) => void = (reason?: unknown): void => {
+            this.cancel(id, reason);
         };
-        const promise: TaskPromise<T> = Object.assign(deferred.promise, {
-            id,
-            priority,
-            label,
-            cancel: cancelHandle,
-        });
+        const promise: TaskPromise<T> = Object.defineProperties(deferred.promise, {
+            id: { value: id, enumerable: true },
+            priority: { value: priority, enumerable: true },
+            label: { value: label, enumerable: true },
+            status: { get: (): TaskStatus => entry.status, enumerable: true },
+            settled: {
+                get: (): boolean => entry.status === "settled" || entry.status === "cancelled",
+                enumerable: true,
+            },
+            cancel: { value: cancelHandle, enumerable: true },
+        }) as TaskPromise<T>;
 
-        if (signal !== null) {
-            const reason: () => unknown = (): unknown => {
-                return signal.reason === (void 0) ? new TaskCancelledError(label) : signal.reason;
-            };
+        const signalReason: () => unknown = (): unknown => {
+            return signal === null || signal.reason === (void 0)
+                ? new TaskCancelledError(label)
+                : signal.reason;
+        };
 
-            if (signal.aborted) {
-                deferred.reject(reason());
+        this.active.set(id, entry);
 
-                return promise;
-            }
-
+        if (signal !== null && !signal.aborted) {
             const abort: () => void = (): void => {
-                this.abortTask(id, reason());
+                this.abortTask(id, signalReason());
             };
 
             entry.abort = abort;
             signal.addEventListener("abort", abort, { once: true });
         }
 
-        this.active.set(id, entry);
         this.enqueue(entry);
+        this.record("scheduled", entry);
+
+        if (entry.status !== "queued") {
+            return promise;
+        }
+
+        if (signal !== null && signal.aborted) {
+            const abortReason: unknown = signalReason();
+
+            this.remove(entry);
+            this.releaseRequestsIfIdle();
+            this.settle(
+                entry,
+                (): void => {
+                    deferred.reject(abortReason);
+                },
+                "cancelled",
+                abortReason,
+            );
+
+            return promise;
+        }
+
+        if (timeout !== (void 0)) {
+            entry.timer = setTimeout((): void => {
+                this.abortTask(id, new TaskTimeoutError(label));
+            }, timeout);
+        }
 
         return promise;
     }
@@ -635,12 +940,13 @@ export class Task {
      * task rejects with {@link TaskCancelledError}; aborting through an AbortSignal uses the
      * signal reason instead.
      * @param target - Handle returned by schedule, or its numeric id.
+     * @param reason - Optional rejection reason; defaults to a {@link TaskCancelledError}.
      * @example
      * const pending: TaskPromise<void> = task.schedule((): void => {});
      * task.cancel(pending);
      * @returns True when an outstanding task was cancelled, false when it had already settled.
      */
-    public cancel(target: TaskHandle | number): boolean {
+    public cancel(target: TaskHandle | number, reason?: unknown): boolean {
         const id: number = typeof target === "number" ? target : target.id;
         const entry: ScheduledTask | undefined = this.active.get(id);
 
@@ -648,13 +954,43 @@ export class Task {
             return false;
         }
 
+        const cancellation: unknown = reason === (void 0) ? new TaskCancelledError(entry.label) : reason;
+
         this.remove(entry);
         this.releaseRequestsIfIdle();
-        this.settle(entry, (): void => {
-            entry.reject(new TaskCancelledError(entry.label));
-        });
+        this.settle(
+            entry,
+            (): void => {
+                entry.reject(cancellation);
+            },
+            "cancelled",
+            cancellation,
+        );
 
         return true;
+    }
+
+    /**
+     * Cancels every outstanding task, optionally limited to one priority queue.
+     * Each cancelled promise rejects with {@link TaskCancelledError}.
+     * @param priority - Queue to cancel, or undefined to cancel every queue.
+     * @example
+     * const cancelled: number = task.cancelAll("low");
+     * @returns Number of tasks that were cancelled.
+     */
+    public cancelAll(priority?: TaskPriority): number {
+        const entries: ScheduledTask[] = Array.from(this.active.values()).filter(
+            (entry: ScheduledTask): boolean => priority === (void 0) || entry.priority === priority,
+        );
+        let cancelled: number = 0;
+
+        entries.forEach((entry: ScheduledTask): void => {
+            if (this.cancel(entry.id)) {
+                cancelled += 1;
+            }
+        });
+
+        return cancelled;
     }
 
     /**
@@ -689,6 +1025,71 @@ export class Task {
     }
 
     /**
+     * Checks whether this scheduler has no queued or running work.
+     * A pending frame or idle request is not treated as work.
+     * @example
+     * const idle: boolean = task.isIdle();
+     * @returns True when no tasks are outstanding.
+     */
+    public isIdle(): boolean {
+        return this.active.size === 0;
+    }
+
+    /**
+     * Subscribes to lifecycle events from this scheduler.
+     * Listener failures are ignored so observation cannot break scheduling. Subscriptions survive
+     * {@link Task.dispose}; remove them with the returned function when they are no longer needed.
+     * @param listener - Observer called for every lifecycle event.
+     * @example
+     * const unsubscribe: () => void = task.subscribe((event: TaskEvent): void => {
+     *     lastEvent = event;
+     * });
+     * unsubscribe();
+     * @returns A function that removes the subscription.
+     */
+    public subscribe(listener: TaskSubscriber): () => void {
+        this.listeners.add(listener);
+
+        return (): void => {
+            this.listeners.delete(listener);
+        };
+    }
+
+    /**
+     * Reads cumulative counters for this scheduler.
+     * @example
+     * const metrics: TaskMetrics = task.metrics();
+     * @returns A snapshot of the counters since the last reset.
+     */
+    public metrics(): TaskMetrics {
+        return {
+            scheduled: this.scheduledCount,
+            started: this.startedCount,
+            resolved: this.resolvedCount,
+            rejected: this.rejectedCount,
+            cancelled: this.cancelledCount,
+            disposed: this.disposedCount,
+            peakRunning: this.peakRunning,
+        };
+    }
+
+    /**
+     * Resets the cumulative counters and seeds the peak running count with the current running total.
+     * @example
+     * task.resetMetrics();
+     * @returns Nothing.
+     */
+    public resetMetrics(): void {
+        this.scheduledCount = 0;
+        this.startedCount = 0;
+        this.resolvedCount = 0;
+        this.rejectedCount = 0;
+        this.cancelledCount = 0;
+        this.disposedCount = 0;
+        this.peakRunning = this.running;
+    }
+
+    /**
      * Cancels every outstanding task, clears the queues, and releases the frame and idle requests.
      * Pending promises reject with {@link TaskDisposedError}. The singleton is not destroyed:
      * scheduling again re-arms the same instance, and Task.instance keeps returning it.
@@ -712,9 +1113,16 @@ export class Task {
         const entries: ScheduledTask[] = Array.from(this.active.values());
 
         entries.forEach((entry: ScheduledTask): void => {
-            this.settle(entry, (): void => {
-                entry.reject(new TaskDisposedError(entry.label));
-            });
+            const disposedError: TaskDisposedError = new TaskDisposedError(entry.label);
+
+            this.settle(
+                entry,
+                (): void => {
+                    entry.reject(disposedError);
+                },
+                "disposed",
+                disposedError,
+            );
         });
 
         this.high.clear();
@@ -781,7 +1189,7 @@ export class Task {
      * @returns Nothing.
      */
     private remove(entry: ScheduledTask): void {
-        if (entry.state !== "queued") {
+        if (entry.status !== "queued") {
             return;
         }
 
@@ -789,38 +1197,51 @@ export class Task {
     }
 
     /**
-     * Marks a task settled and releases its abort listener.
+     * Marks a task settled, releases its abort listener and timeout, and publishes the outcome.
      * @param entry - Task to settle.
      * @param completion - Resolve or reject action for the task promise.
+     * @param outcome - Final lifecycle outcome used for status, counters, and observers.
+     * @param reason - Optional rejection reason reported to observers.
      * @example
-     * this.settle(entry, (): void => entry.resolve(value));
+     * this.settle(entry, (): void => entry.resolve(value), "resolved");
      * @returns Nothing.
      */
-    private settle(entry: ScheduledTask, completion: () => void): void {
-        if (entry.state === "settled") {
+    private settle(
+        entry: ScheduledTask,
+        completion: () => void,
+        outcome: TaskOutcome,
+        reason?: unknown,
+    ): void {
+        if (entry.status === "settled" || entry.status === "cancelled") {
             return;
         }
 
-        if (entry.state === "running") {
+        if (entry.status === "running") {
             this.running -= 1;
         }
 
-        entry.state = "settled";
+        entry.status = outcome === "resolved" || outcome === "rejected" ? "settled" : "cancelled";
         this.active.delete(entry.id);
 
         if (entry.signal !== null && entry.abort !== null) {
             entry.signal.removeEventListener("abort", entry.abort);
         }
 
+        if (entry.timer !== null) {
+            clearTimeout(entry.timer);
+            entry.timer = null;
+        }
+
         entry.signal = null;
         entry.abort = null;
         completion();
+        this.record(outcome, entry, reason);
     }
 
     /**
-     * Rejects a task because its AbortSignal fired.
+     * Rejects a task because its AbortSignal fired or its timeout elapsed.
      * @param id - Identifier of the aborted task.
-     * @param reason - Signal reason used as the rejection value.
+     * @param reason - Signal or timeout reason used as the rejection value.
      * @example
      * this.abortTask(id, signal.reason);
      * @returns Nothing.
@@ -834,8 +1255,73 @@ export class Task {
 
         this.remove(entry);
         this.releaseRequestsIfIdle();
-        this.settle(entry, (): void => {
-            entry.reject(reason);
+        this.settle(
+            entry,
+            (): void => {
+                entry.reject(reason);
+            },
+            "cancelled",
+            reason,
+        );
+    }
+
+    /**
+     * Counts a lifecycle event and publishes it to every subscriber.
+     * Observer failures are swallowed so diagnostics cannot disturb scheduling.
+     * @param type - Lifecycle event type.
+     * @param entry - Task that changed state.
+     * @param reason - Optional rejection reason for terminal events.
+     * @example
+     * this.record("started", entry);
+     * @returns Nothing.
+     */
+    private record(type: TaskEventType, entry: ScheduledTask, reason?: unknown): void {
+        if (type === "scheduled") {
+            this.scheduledCount += 1;
+        } else if (type === "started") {
+            this.startedCount += 1;
+        } else if (type === "resolved") {
+            this.resolvedCount += 1;
+        } else if (type === "rejected") {
+            this.rejectedCount += 1;
+        } else if (type === "cancelled") {
+            this.cancelledCount += 1;
+        } else {
+            this.disposedCount += 1;
+        }
+
+        this.emit(type, entry, reason);
+    }
+
+    /**
+     * Publishes one lifecycle event to every subscriber.
+     * @param type - Lifecycle event type.
+     * @param entry - Task that changed state.
+     * @param reason - Optional rejection reason for terminal events.
+     * @example
+     * this.emit("resolved", entry);
+     * @returns Nothing.
+     */
+    private emit(type: TaskEventType, entry: ScheduledTask, reason?: unknown): void {
+        if (this.listeners.size === 0) {
+            return;
+        }
+
+        const event: TaskEvent = {
+            type,
+            id: entry.id,
+            priority: entry.priority,
+            label: entry.label,
+            timestamp: currentTime(),
+            reason,
+        };
+
+        this.listeners.forEach((listener: TaskSubscriber): void => {
+            try {
+                listener(event);
+            } catch {
+                // Diagnostics must not disturb scheduling.
+            }
         });
     }
 
@@ -869,40 +1355,68 @@ export class Task {
      * @returns Nothing.
      */
     private execute(entry: ScheduledTask): void {
-        if (entry.state !== "queued") {
+        if (entry.status !== "queued") {
             return;
         }
 
-        entry.state = "running";
+        entry.status = "running";
         this.running += 1;
+
+        if (this.running > this.peakRunning) {
+            this.peakRunning = this.running;
+        }
+
+        this.record("started", entry);
+
+        if (entry.status !== "running") {
+            return;
+        }
 
         try {
             const result: unknown = entry.run();
 
             if (!isPromiseLike(result)) {
-                this.settle(entry, (): void => {
-                    entry.resolve(result);
-                });
+                this.settle(
+                    entry,
+                    (): void => {
+                        entry.resolve(result);
+                    },
+                    "resolved",
+                );
 
                 return;
             }
 
             Promise.resolve(result).then(
                 (value: unknown): void => {
-                    this.settle(entry, (): void => {
-                        entry.resolve(value);
-                    });
+                    this.settle(
+                        entry,
+                        (): void => {
+                            entry.resolve(value);
+                        },
+                        "resolved",
+                    );
                 },
                 (reason: unknown): void => {
-                    this.settle(entry, (): void => {
-                        entry.reject(reason);
-                    });
+                    this.settle(
+                        entry,
+                        (): void => {
+                            entry.reject(reason);
+                        },
+                        "rejected",
+                        reason,
+                    );
                 },
             );
         } catch (error: unknown) {
-            this.settle(entry, (): void => {
-                entry.reject(error);
-            });
+            this.settle(
+                entry,
+                (): void => {
+                    entry.reject(error);
+                },
+                "rejected",
+                error,
+            );
         }
     }
 

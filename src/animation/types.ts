@@ -1,3 +1,5 @@
+import type { HTMLElementType, JSX } from "react";
+
 /**
  * Visual preset applied by the animation system.
  * Type: type alias.
@@ -28,42 +30,26 @@ export type AnimationPreset =
 export type ReducedMotionBehaviour = "system" | "always" | "never";
 
 /**
- * Element types accepted by the Animated wrapper.
+ * Native HTML element names accepted by the Animated wrapper.
+ * Every intrinsic HTML tag is supported, so element-specific attributes and events remain typed.
  * Type: type alias.
- * Fields: common HTML block, inline, heading, list, and form elements.
+ * Fields: every HTML tag name understood by React.
  * @example
  * const element: AnimatedElement = "section";
  */
-export type AnimatedElement =
-    | "div"
-    | "span"
-    | "p"
-    | "section"
-    | "article"
-    | "header"
-    | "footer"
-    | "main"
-    | "nav"
-    | "aside"
-    | "form"
-    | "ul"
-    | "ol"
-    | "li"
-    | "figure"
-    | "figcaption"
-    | "a"
-    | "button"
-    | "label"
-    | "strong"
-    | "em"
-    | "small"
-    | "code"
-    | "h1"
-    | "h2"
-    | "h3"
-    | "h4"
-    | "h5"
-    | "h6";
+export type AnimatedElement = Extract<keyof JSX.IntrinsicElements, HTMLElementType>;
+
+/**
+ * Native attributes accepted by one animated element, excluding props owned by the wrapper.
+ * Type: type alias.
+ * Fields: every intrinsic attribute and event for `K`, including `ref`.
+ * @example
+ * const props: AnimatedElementAttributes<"a"> = { href: "/pricing" };
+ */
+export type AnimatedElementAttributes<K extends AnimatedElement> = Omit<
+    JSX.IntrinsicElements[K],
+    "children" | "className" | "style"
+>;
 
 /**
  * Animation settings shared by the Animation provider and the Animated wrapper.
@@ -103,19 +89,31 @@ export interface AnimationConfig {
 export type AnimationOptions = Partial<AnimationConfig>;
 
 /**
+ * Key of one animation configuration field.
+ * Type: type alias.
+ * Fields: enabled, preset, duration, delay, easing, reducedMotion.
+ * @example
+ * const key: AnimationConfigKey = "duration";
+ */
+export type AnimationConfigKey = keyof AnimationConfig;
+
+/**
  * Resolved animation state exposed by useAnimation and the default context.
  * Type: interface.
  * @param prefersReducedMotion - Whether the operating system requests reduced motion.
  * @param reduced - Whether reduced motion is active after applying the behaviour.
  * @param resolvedDuration - Duration after disabled and reduced-motion handling, in milliseconds.
  * @param resolvedDelay - Delay after disabled and reduced-motion handling, in milliseconds.
+ * @param setConfig - Requests a configuration change from a descendant.
  * @example
  * const animation: AnimationContextValue = useAnimation();
  * const duration: number = animation.resolvedDuration;
+ * animation.setConfig({ duration: 320 });
  */
 export interface AnimationContextValue extends Readonly<AnimationConfig> {
     readonly prefersReducedMotion: boolean;
     readonly reduced: boolean;
     readonly resolvedDuration: number;
     readonly resolvedDelay: number;
+    readonly setConfig: (config: AnimationOptions) => void;
 }

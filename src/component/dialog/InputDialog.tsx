@@ -1,23 +1,23 @@
 import {
     useId,
-    useState,
     type ChangeEvent,
-    type Dispatch,
     type FC,
     type FormEvent,
     type ReactElement,
-    type SetStateAction,
 } from "react";
 import Button from "../button/Button";
+import cx from "../foundation/cx";
+import useControllableState from "../foundation/useControllableState";
 import TextInput from "../input/text/TextInput";
-import Dialog from "./Dialog";
+import Dialog, { type DialogProps } from "./Dialog";
 import "./InputDialog.css";
 
 /**
  * Props for the single-field input dialog.
  * Type: interface.
- * Fields: open, onClose, onSubmit, title, label, defaultValue, placeholder, hint, error,
- * submitLabel, cancelLabel, required.
+ * Fields: open, defaultOpen, onOpenChange, onClose, onSubmit, title, label, value, defaultValue,
+ * onValueChange, placeholder, hint, error, submitLabel, cancelLabel, required, className,
+ * plus all remaining dialog props and native dialog attributes.
  * @example
  * <InputDialog
  *     open={open}
@@ -28,23 +28,27 @@ import "./InputDialog.css";
  *     defaultValue="Morning pages"
  * />
  */
-export interface InputDialogProps {
-    open: boolean;
-    onClose: () => void;
-    onSubmit: (value: string) => void;
+export interface InputDialogProps
+    extends Omit<DialogProps, "role" | "size" | "title" | "children" | "footer" | "onSubmit"> {
     title: string;
     label: string;
+    /** Controlled draft value; omit to let the dialog own the draft. */
+    value?: string;
     defaultValue?: string;
+    /** Called with the next draft value whenever the field changes. */
+    onValueChange?: (value: string) => void;
     placeholder?: string;
     hint?: string;
     error?: string;
     submitLabel?: string;
     cancelLabel?: string;
     required?: boolean;
+    onSubmit: (value: string) => void;
 }
 
 /**
  * Renders the mounted body of an input dialog and owns its draft value.
+ * The draft may be controlled through `value` and `onValueChange`.
  * @param props - Open state, callbacks, field copy, and validation display.
  * @example
  * <InputDialogContent {...props} />
@@ -52,19 +56,32 @@ export interface InputDialogProps {
  */
 const InputDialogContent: FC<InputDialogProps> = ({
     open,
+    defaultOpen,
+    onOpenChange,
     onClose,
-    onSubmit,
     title,
     label,
+    value: valueProp,
     defaultValue = "",
+    onValueChange,
     placeholder,
     hint,
     error,
     submitLabel = "Submit",
     cancelLabel = "Cancel",
     required = false,
+    onSubmit,
+    className = "",
+    ...rest
 }: InputDialogProps): ReactElement => {
-    const [value, setValue]: [string, Dispatch<SetStateAction<string>>] = useState<string>(defaultValue);
+    const [value, setValue]: readonly [
+        string,
+        (next: string | ((previous: string) => string)) => void,
+    ] = useControllableState<string>({
+        value: valueProp,
+        defaultValue,
+        onChange: onValueChange,
+    });
     const formId: string = useId();
     const submitDisabled: boolean = required && value.trim().length === 0;
 
@@ -88,14 +105,17 @@ const InputDialogContent: FC<InputDialogProps> = ({
 
     return (
         <Dialog
+            {...rest}
             open={open}
+            defaultOpen={defaultOpen}
+            onOpenChange={onOpenChange}
             onClose={onClose}
             title={title}
-            className="input-dialog"
+            className={cx("input-dialog", className)}
             size="sm"
             footer={
                 <>
-                    <Button variant="ghost" onClick={onClose}>
+                    <Button variant="ghost" onClick={(): void => onClose("close-button")}>
                         {cancelLabel}
                     </Button>
                     <Button type="submit" form={formId} disabled={submitDisabled}>
@@ -136,7 +156,9 @@ const InputDialogContent: FC<InputDialogProps> = ({
  * @returns An input dialog, or null while closed.
  */
 const InputDialog: FC<InputDialogProps> = (props: InputDialogProps): ReactElement | null => {
-    if (!props.open) {
+    const isOpen: boolean = props.open ?? props.defaultOpen ?? false;
+
+    if (!isOpen) {
         return null;
     }
 

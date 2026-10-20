@@ -30,7 +30,7 @@ const editorCode: string = `<Editor
 />`;
 
 /**
- * Documents tokenised file previews and the completion editor.
+ * Documents tokenised file previews and the CodeMirror editor.
  * @example
  * <FileToolsPage />
  * @returns The Preview & editor entry.
@@ -42,7 +42,7 @@ const FileToolsPage: FC = () => {
         <>
             <Demo
                 title="Preview"
-                description="Tokenised file previews for source and prose, with line numbers and language hints."
+                description="Rendered prose and markup with a source toggle, syntax tokens, and copy."
                 code={previewCode}
             >
                 <Columns className="showcase__fields" count={2} gap="lg">
@@ -63,7 +63,7 @@ const FileToolsPage: FC = () => {
 
             <Demo
                 title="Editor"
-                description="A 500ms debounced N-gram completion editor with an explicit save callback."
+                description="CodeMirror editing with syntax highlighting, line numbers, history, search, and bracket handling. Completion is intentionally left to professional editor integrations."
                 code={editorCode}
             >
                 <Stack gap="sm">

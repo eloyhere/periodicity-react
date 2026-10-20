@@ -1,4 +1,4 @@
-import { useId, type FC, type InputHTMLAttributes, type ReactNode } from "react";
+import { useId, type FC, type InputHTMLAttributes, type ReactNode, type Ref } from "react";
 import cx from "../../foundation/cx";
 import Surface from "../../surface/Surface";
 import "./TextInput.css";
@@ -10,6 +10,7 @@ export type TextInputSize = "sm" | "md" | "lg";
 /**
  * Props for the Material-style text field.
  * Type: interface.
+ * Native input attributes are forwarded to the underlying `<input>`; `className` and `style` apply to the field root.
  * @param label - Floating label.
  * @param hint - Supporting text shown below the field.
  * @param error - Validation message; replaces the hint and marks the field invalid.
@@ -17,6 +18,8 @@ export type TextInputSize = "sm" | "md" | "lg";
  * @param size - Control size.
  * @param leading - Optional node before the input.
  * @param trailing - Optional node after the input.
+ * @param className - Extra classes for the field root.
+ * @param ref - Ref to the underlying input element.
  * @example
  * <TextInput label="Email" variant="fill" hint="name@example.com" />
  */
@@ -29,6 +32,7 @@ export interface TextInputProps extends Omit<InputHTMLAttributes<HTMLInputElemen
     leading?: ReactNode;
     trailing?: ReactNode;
     className?: string;
+    ref?: Ref<HTMLInputElement>;
 }
 
 /**
@@ -47,10 +51,13 @@ const TextInput: FC<TextInputProps> = ({
     leading,
     trailing,
     className = "",
+    style,
     id,
     placeholder,
     "aria-describedby": ariaDescribedBy,
+    "aria-invalid": ariaInvalid,
     required = false,
+    ref,
     ...rest
 }: TextInputProps) => {
     const generatedId: string = useId();
@@ -75,6 +82,7 @@ const TextInput: FC<TextInputProps> = ({
                 hasError && "text-field--invalid",
                 className,
             )}
+            style={style}
             data-invalid={hasError ? "true" : "false"}
         >
             <div className="text-field__control">
@@ -91,11 +99,12 @@ const TextInput: FC<TextInputProps> = ({
                         )}
                         <input
                             {...rest}
+                            ref={ref}
                             id={inputId}
                             className="text-field__input"
                             placeholder={placeholder === (void 0) || placeholder.length === 0 ? " " : placeholder}
                             required={required}
-                            aria-invalid={hasError}
+                            aria-invalid={hasError ? true : ariaInvalid}
                             aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
                         />
                         {trailing === (void 0) ? null : (

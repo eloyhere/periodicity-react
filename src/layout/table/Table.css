@@ -99,6 +99,14 @@
     cursor: pointer;
 }
 
+.table__row--disabled {
+    opacity: var(--state-disabled-opacity);
+}
+
+.table__row--disabled td {
+    cursor: not-allowed;
+}
+
 .table__state {
     height: 120px !important;
     color: var(--color-on-surface-variant);

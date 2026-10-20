@@ -1,5 +1,14 @@
-import type { FC, HTMLAttributes, MouseEvent, MouseEventHandler, ReactNode } from "react";
+import type {
+    FC,
+    HTMLAttributes,
+    MouseEvent as ReactMouseEvent,
+    MouseEventHandler,
+    ReactNode,
+    Ref,
+    RefCallback,
+} from "react";
 import cx from "../foundation/cx";
+import useMergedRef from "../foundation/useMergedRef";
 import Icon, { type IconName } from "../icon/Icon";
 import "./Tag.css";
 
@@ -33,7 +42,10 @@ export type TagSize = "sm" | "md";
 /**
  * Props for the Tag component.
  * Type: interface.
- * Fields: children, label, tone, variant, size, icon, removable, onRemove, removeLabel, disabled, className, onClick.
+ * Extends the native `span` attributes, so `id`, `title`, `aria-*`, `data-*`, `tabIndex`, and pointer,
+ * mouse, keyboard, and focus handlers are forwarded to the rendered root element.
+ * Fields: children, label, tone, variant, size, icon, removable, onRemove, removeLabel, disabled,
+ * className, onClick.
  * @example
  * <Tag tone="success" variant="outlined" icon="Check" removable onRemove={removeTag}>
  *     Active
@@ -47,11 +59,12 @@ export interface TagProps extends Omit<HTMLAttributes<HTMLElement>, "children" |
     size?: TagSize;
     icon?: IconName;
     removable?: boolean;
-    onRemove?: () => void;
+    onRemove?: (event: ReactMouseEvent<HTMLButtonElement>) => void;
     removeLabel?: string;
     disabled?: boolean;
     className?: string;
     onClick?: MouseEventHandler<HTMLElement>;
+    ref?: Ref<HTMLElement>;
 }
 
 /**
@@ -76,9 +89,11 @@ const Tag: FC<TagProps> = ({
     disabled = false,
     className = "",
     onClick,
+    ref,
     "aria-label": ariaLabel,
     ...rest
 }: TagProps) => {
+    const mergedRef: RefCallback<HTMLElement> = useMergedRef<HTMLElement>(ref);
     const isClickable: boolean = onClick !== (void 0);
     const canRemove: boolean = removable && onRemove !== (void 0);
     const visibleLabel: ReactNode = children ?? label;
@@ -103,7 +118,7 @@ const Tag: FC<TagProps> = ({
     );
 
     const handleRemove: MouseEventHandler<HTMLButtonElement> = (
-        event: MouseEvent<HTMLButtonElement>,
+        event: ReactMouseEvent<HTMLButtonElement>,
     ): void => {
         event.stopPropagation();
 
@@ -111,7 +126,7 @@ const Tag: FC<TagProps> = ({
             return;
         }
 
-        onRemove?.();
+        onRemove?.(event);
     };
 
     const content: ReactNode = (
@@ -147,6 +162,7 @@ const Tag: FC<TagProps> = ({
     if (isClickable && !canRemove) {
         return (
             <button
+                ref={mergedRef}
                 type="button"
                 className={classes}
                 disabled={disabled}
@@ -162,6 +178,7 @@ const Tag: FC<TagProps> = ({
     if (canRemove) {
         return (
             <span
+                ref={mergedRef}
                 role="group"
                 className={classes}
                 aria-label={groupLabel}
@@ -176,6 +193,7 @@ const Tag: FC<TagProps> = ({
 
     return (
         <span
+            ref={mergedRef}
             className={classes}
             aria-disabled={disabled ? true : (void 0)}
             aria-label={ariaLabel}

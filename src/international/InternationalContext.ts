@@ -1,12 +1,15 @@
 import { createContext, useContext, type Context } from "react";
-import type { MessageVariables } from "./messages";
+import type { MessageDictionary, MessageVariables } from "./messages";
 
 /**
  * Controller returned by `useInternational`.
  * Type: interface.
  * @param locale - Active locale for the subtree.
  * @param fallbackLocale - Locale consulted when a key is missing; may be absent.
+ * @param messages - Raw message source shared with nested providers.
  * @param setLocale - Requests a locale change from a descendant.
+ * @param setMessages - Requests a new message source from a descendant.
+ * @param setFallbackLocale - Requests a fallback locale from a descendant.
  * @param t - Resolves a message by flat key or nested dot path.
  * @param formatNumber - Formats a number with the active locale.
  * @param formatDate - Formats a date with the active locale.
@@ -16,15 +19,21 @@ import type { MessageVariables } from "./messages";
 export interface InternationalContextValue {
     locale: string;
     fallbackLocale: string | void;
+    messages: MessageDictionary;
     setLocale: (locale: string) => void;
+    setMessages: (messages: MessageDictionary) => void;
+    setFallbackLocale: (locale: string) => void;
     t: (key: string, variables?: MessageVariables) => string;
     formatNumber: (value: number, options?: Intl.NumberFormatOptions) => string;
     formatDate: (value: Date | number, options?: Intl.DateTimeFormatOptions) => string;
 }
 
 const DefaultLocale: string = "en-GB";
+const emptyMessages: MessageDictionary = {};
 
 const noopSetLocale: (locale: string) => void = (): void => {};
+const noopSetMessages: (messages: MessageDictionary) => void = (): void => {};
+const noopSetFallbackLocale: (locale: string) => void = (): void => {};
 
 const identityTranslation: (key: string, variables?: MessageVariables) => string = (
     key: string,
@@ -43,14 +52,18 @@ const defaultFormatDate: (value: Date | number, options?: Intl.DateTimeFormatOpt
 /**
  * Fallback used when `useInternational` is called outside a provider.
  * Type: constant.
- * Fields: locale, fallbackLocale, setLocale, t, formatNumber, formatDate.
+ * Fields: locale, fallbackLocale, messages, setLocale, setMessages, setFallbackLocale, t, formatNumber,
+ * formatDate.
  * @example
  * const fallback: InternationalContextValue = DefaultInternationalContext;
  */
 export const DefaultInternationalContext: InternationalContextValue = {
     locale: DefaultLocale,
     fallbackLocale: (void 0),
+    messages: emptyMessages,
     setLocale: noopSetLocale,
+    setMessages: noopSetMessages,
+    setFallbackLocale: noopSetFallbackLocale,
     t: identityTranslation,
     formatNumber: defaultFormatNumber,
     formatDate: defaultFormatDate,

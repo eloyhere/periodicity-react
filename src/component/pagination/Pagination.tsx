@@ -1,5 +1,6 @@
-import { useMemo, type FC, type ReactNode } from "react";
+import { useMemo, type FC, type HTMLAttributes, type ReactNode, type Ref } from "react";
 import cx from "../foundation/cx";
+import useControllableState from "../foundation/useControllableState";
 import VisuallyHidden from "../foundation/VisuallyHidden";
 import Icon from "../icon/Icon";
 import Surface, { type RippleOptions } from "../surface/Surface";
@@ -20,27 +21,42 @@ type PaginationToken = number | "start-ellipsis" | "end-ellipsis";
 /**
  * Props for the Pagination component.
  * Type: interface.
+ * Extends the native `nav` attributes, so `id`, `style`, `title`, `aria-*`, `data-*`, `tabIndex`, and
+ * pointer, mouse, keyboard, and focus handlers are forwarded to the navigation landmark.
  * Fields:
  * - `page`: Controlled current page, one-based.
+ * - `defaultPage`: Uncontrolled initial page; defaults to `1`.
  * - `pageCount`: Total number of pages.
  * - `onPageChange`: Called with the next requested page.
  * - `siblingCount`: Pages shown on each side of the current page.
  * - `showEdges`: Whether the first and last page shortcuts are rendered.
  * - `size`: Control size; defaults to `md`.
  * - `disabled`: Disables every control.
+ * - `label`: Accessible name of the landmark; defaults to `Pagination`.
+ * - `previousLabel`: Accessible name of the previous control.
+ * - `nextLabel`: Accessible name of the next control.
+ * - `ellipsisLabel`: Screen-reader text for a skipped range; defaults to `More pages`.
  * - `className`: Extra class names for the navigation element.
  * @example
  * <Pagination page={3} pageCount={20} onPageChange={setPage} />
+ * @example
+ * <Pagination defaultPage={1} pageCount={8} onPageChange={setPage} />
  */
-export interface PaginationProps {
-    page: number;
+export interface PaginationProps extends Omit<HTMLAttributes<HTMLElement>, "children" | "className"> {
+    page?: number;
+    defaultPage?: number;
     pageCount: number;
     onPageChange: (page: number) => void;
     siblingCount?: number;
     showEdges?: boolean;
     size?: "sm" | "md";
     disabled?: boolean;
+    label?: string;
+    previousLabel?: string;
+    nextLabel?: string;
+    ellipsisLabel?: string;
     className?: string;
+    ref?: Ref<HTMLElement>;
 }
 
 /**
@@ -120,25 +136,42 @@ const buildPageTokens: (
 
 /**
  * Renders a pagination landmark with previous, next, numbered, and skipped pages.
- * @param props - Current page, page count, change handler, range settings, and size.
+ * @param props - Current page, page count, change handler, range settings, size, labels, and native
+ * navigation attributes.
  * @example
  * <Pagination page={page} pageCount={12} onPageChange={setPage} />
  * @returns The pagination navigation, or nothing when `pageCount` is below one.
  */
 const Pagination: FC<PaginationProps> = ({
     page,
+    defaultPage = 1,
     pageCount,
     onPageChange,
     siblingCount = 1,
     showEdges = true,
     size = "md",
     disabled = false,
+    label = "Pagination",
+    previousLabel = "Previous page",
+    nextLabel = "Next page",
+    ellipsisLabel = "More pages",
     className = "",
+    ref,
+    ...rest
 }: PaginationProps): ReactNode => {
+    const [currentPage, setCurrentPage]: readonly [number, (next: number) => void] =
+        useControllableState<number>({
+            value: page,
+            defaultValue: defaultPage,
+            onChange: onPageChange,
+        });
     const safePageCount: number = Number.isFinite(pageCount) ? Math.floor(pageCount) : 0;
     const totalPages: number = Math.max(1, safePageCount);
     const siblings: number = Number.isFinite(siblingCount) ? Math.max(0, Math.floor(siblingCount)) : 0;
-    const activePage: number = Math.min(Math.max(1, Number.isFinite(page) ? Math.floor(page) : 1), totalPages);
+    const activePage: number = Math.min(
+        Math.max(1, Number.isFinite(currentPage) ? Math.floor(currentPage) : 1),
+        totalPages,
+    );
     const tokenList: readonly PaginationToken[] = useMemo<readonly PaginationToken[]>(
         () => buildPageTokens(activePage, totalPages, siblings, showEdges),
         [activePage, siblings, showEdges, totalPages],
@@ -158,7 +191,7 @@ const Pagination: FC<PaginationProps> = ({
             return;
         }
 
-        onPageChange(target);
+        setCurrentPage(target);
     };
 
     if (safePageCount < 1) {
@@ -167,9 +200,11 @@ const Pagination: FC<PaginationProps> = ({
 
     return (
         <nav
+            ref={ref}
             className={cx("pagination", `pagination--${size}`, className)}
-            aria-label="Pagination"
+            aria-label={label}
             data-disabled={disabled ? "true" : "false"}
+            {...rest}
         >
             <ul className="pagination__list">
                 <li className="pagination__item">
@@ -184,7 +219,7 @@ const Pagination: FC<PaginationProps> = ({
                         <button
                             type="button"
                             className="pagination__button pagination__button--edge"
-                            aria-label="Previous page"
+                            aria-label={previousLabel}
                             disabled={isPreviousDisabled}
                             onClick={(): void => {
                                 goToPage(activePage - 1);
@@ -201,7 +236,7 @@ const Pagination: FC<PaginationProps> = ({
                                 <span className="pagination__ellipsis" aria-hidden="true">
                                     …
                                 </span>
-                                <VisuallyHidden>More pages</VisuallyHidden>
+                                <VisuallyHidden>{ellipsisLabel}</VisuallyHidden>
                             </li>
                         );
                     }
@@ -243,7 +278,7 @@ const Pagination: FC<PaginationProps> = ({
                         <button
                             type="button"
                             className="pagination__button pagination__button--edge"
-                            aria-label="Next page"
+                            aria-label={nextLabel}
                             disabled={isNextDisabled}
                             onClick={(): void => {
                                 goToPage(activePage + 1);

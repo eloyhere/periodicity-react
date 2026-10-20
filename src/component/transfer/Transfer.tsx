@@ -7,10 +7,12 @@ import {
     type CSSProperties,
     type Dispatch,
     type FC,
+    type HTMLAttributes,
     type KeyboardEvent as ReactKeyboardEvent,
     type MouseEvent as ReactMouseEvent,
     type MutableRefObject,
     type ReactNode,
+    type Ref,
     type SetStateAction,
 } from "react";
 import type { IconName } from "../icon/Icon";
@@ -22,6 +24,7 @@ import Checkbox from "../input/check/Checkbox";
 import Spinner from "../progress/Spinner";
 import Surface from "../surface/Surface";
 import cx from "../foundation/cx";
+import useControllableState from "../foundation/useControllableState";
 import useVirtualWindow, { type VirtualWindow } from "../foundation/useVirtualWindow";
 import "./Transfer.css";
 
@@ -43,17 +46,38 @@ export interface TransferItem {
 /**
  * Props for the two-pane transfer control.
  * Type: interface.
- * Fields: items, sourceAdapter, targetAdapter, value, onChange, titles, searchable,
+ * Native div attributes are forwarded to the control root; `className` and `style` apply to that element.
+ * Fields: items, sourceAdapter, targetAdapter, value, defaultValue, onChange, titles, searchable,
  * disabled, loading, emptySource, emptyTarget, renderItem, virtual, listHeight,
- * itemHeight, className.
+ * itemHeight, className, id, ref, and native div attributes.
+ * @param items - Items offered in the source pane.
+ * @param sourceAdapter - Indexed source items used instead of `items`.
+ * @param targetAdapter - Indexed selected items used instead of deriving them from `value`.
+ * @param value - Controlled selected keys.
+ * @param defaultValue - Initial selected keys when uncontrolled.
+ * @param onChange - Called with the next selected keys.
+ * @param titles - Source and target pane titles.
+ * @param searchable - Shows the filter field when true.
+ * @param disabled - Disables selection, search, and movement.
+ * @param loading - Shows a spinner in the source pane.
+ * @param emptySource - Content shown when the source pane has no rows.
+ * @param emptyTarget - Content shown when the target pane has no rows.
+ * @param renderItem - Renders the visible label of a row.
+ * @param virtual - Enables a fixed-row window over long lists.
+ * @param listHeight - Maximum height of a virtual list.
+ * @param itemHeight - Fixed row height used by the virtual window.
+ * @param className - Extra classes for the control root.
+ * @param ref - Ref to the control root.
  * @example
  * <Transfer items={people} value={selected} onChange={setSelected} />
  */
-export interface TransferProps {
+export interface TransferProps
+    extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "className" | "children"> {
     items?: readonly TransferItem[];
     sourceAdapter?: ListAdapter<TransferItem>;
     targetAdapter?: ListAdapter<TransferItem>;
-    value: readonly string[];
+    value?: readonly string[];
+    defaultValue?: readonly string[];
     onChange: (next: readonly string[]) => void;
     titles?: readonly [string, string];
     searchable?: boolean;
@@ -66,6 +90,7 @@ export interface TransferProps {
     listHeight?: number;
     itemHeight?: number;
     className?: string;
+    ref?: Ref<HTMLDivElement>;
 }
 
 /**
@@ -174,6 +199,7 @@ const Transfer: FC<TransferProps> = ({
     sourceAdapter,
     targetAdapter,
     value,
+    defaultValue,
     onChange,
     titles = ["Available", "Selected"],
     searchable = true,
@@ -186,7 +212,18 @@ const Transfer: FC<TransferProps> = ({
     listHeight = 260,
     itemHeight = 48,
     className = "",
+    style,
+    ref,
+    ...rest
 }: TransferProps) => {
+    const [selectedKeys, setSelectedKeys]: readonly [
+        readonly string[],
+        (next: readonly string[] | ((previous: readonly string[]) => readonly string[])) => void,
+    ] = useControllableState<readonly string[]>({
+        value,
+        defaultValue: defaultValue ?? [],
+        onChange,
+    });
     const source: ListAdapter<TransferItem> = useMemo((): ListAdapter<TransferItem> => {
         if (sourceAdapter !== (void 0)) {
             return sourceAdapter;
@@ -209,10 +246,10 @@ const Transfer: FC<TransferProps> = ({
             byKey.set(entry.key, entry.item);
         }
 
-        return value
+        return selectedKeys
             .map((key: string): TransferItem | null => byKey.get(key) ?? null)
             .filter((item: TransferItem | null): item is TransferItem => item !== null);
-    }, [source, targetAdapter, value]);
+    }, [source, targetAdapter, selectedKeys]);
     const [sourceChecked, setSourceChecked]: [
         ReadonlySet<string>,
         Dispatch<SetStateAction<ReadonlySet<string>>>,
@@ -223,8 +260,8 @@ const Transfer: FC<TransferProps> = ({
     ] = useState<ReadonlySet<string>>(new Set<string>());
     const [query, setQuery]: [string, Dispatch<SetStateAction<string>>] = useState<string>("");
     const selected: ReadonlySet<string> = useMemo(
-        (): ReadonlySet<string> => new Set<string>(value),
-        [value],
+        (): ReadonlySet<string> => new Set<string>(selectedKeys),
+        [selectedKeys],
     );
     const normalizedQuery: string = query.trim().toLowerCase();
     const sourceRows: readonly ListEntry<TransferItem>[] = source
@@ -311,23 +348,23 @@ const Transfer: FC<TransferProps> = ({
     };
 
     const moveRight: () => void = (): void => {
-        const next: Set<string> = new Set<string>(value);
+        const next: Set<string> = new Set<string>(selectedKeys);
 
         for (const key of sourceChecked) {
             next.add(key);
         }
 
-        onChange([...next]);
+        setSelectedKeys([...next]);
         setSourceChecked(new Set<string>());
     };
 
     const moveLeft: () => void = (): void => {
-        onChange(value.filter((key: string): boolean => !targetChecked.has(key)));
+        setSelectedKeys(selectedKeys.filter((key: string): boolean => !targetChecked.has(key)));
         setTargetChecked(new Set<string>());
     };
 
     const moveAllRight: () => void = (): void => {
-        const next: Set<string> = new Set<string>(value);
+        const next: Set<string> = new Set<string>(selectedKeys);
 
         for (const entry of sourceRows) {
             if (!entry.item.disabled) {
@@ -335,12 +372,12 @@ const Transfer: FC<TransferProps> = ({
             }
         }
 
-        onChange([...next]);
+        setSelectedKeys([...next]);
         setSourceChecked(new Set<string>());
     };
 
     const moveAllLeft: () => void = (): void => {
-        onChange([]);
+        setSelectedKeys([]);
         setTargetChecked(new Set<string>());
     };
 
@@ -348,7 +385,13 @@ const Transfer: FC<TransferProps> = ({
     const targetHeaderId: string = "transfer-target-title";
 
     return (
-        <div className={cx("transfer", className)} data-disabled={disabled ? "true" : "false"}>
+        <div
+            {...rest}
+            ref={ref}
+            className={cx("transfer", className)}
+            style={style}
+            data-disabled={disabled ? "true" : "false"}
+        >
             <section className="transfer__pane" aria-labelledby={sourceHeaderId}>
                 <header className="transfer__header">
                     <h3 className="transfer__title" id={sourceHeaderId}>

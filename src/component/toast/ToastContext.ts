@@ -9,6 +9,14 @@ import { createContext, useContext, type Context } from "react";
 export type ToastTone = "neutral" | "success" | "danger" | "warning";
 
 /**
+ * Why a toast was dismissed.
+ * Type: type alias.
+ * @example
+ * const reason: ToastDismissReason = "timeout";
+ */
+export type ToastDismissReason = "action" | "dismiss" | "programmatic" | "timeout";
+
+/**
  * Optional action rendered inside a toast.
  * Type: interface.
  * @param label - Visible action label.
@@ -24,20 +32,26 @@ export interface ToastAction {
 /**
  * Content and behaviour of one toast notification.
  * Type: interface.
+ * @param id - Optional caller-supplied identifier; a random one is generated when omitted.
  * @param title - Short summary announced by assistive technology.
  * @param description - Optional supporting sentence.
  * @param tone - Semantic tone; defaults to `neutral`.
  * @param duration - Lifetime in milliseconds; zero keeps the toast until dismissed.
  * @param action - Optional single action such as Undo.
+ * @param className - Extra class applied to the toast row.
+ * @param onDismiss - Called once with the reason when the toast is dismissed.
  * @example
  * const options: ToastOptions = { title: "Task archived", action: { label: "Undo", onClick: undo } };
  */
 export interface ToastOptions {
+    id?: string;
     title: string;
     description?: string;
     tone?: ToastTone;
     duration?: number;
     action?: ToastAction;
+    className?: string;
+    onDismiss?: (reason: ToastDismissReason) => void;
 }
 
 /**
@@ -50,7 +64,7 @@ export interface ToastOptions {
  */
 export interface ToastApi {
     show: (options: ToastOptions) => string;
-    dismiss: (id: string) => void;
+    dismiss: (id: string, reason?: ToastDismissReason) => void;
 }
 
 /**

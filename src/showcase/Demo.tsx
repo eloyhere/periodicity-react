@@ -1,4 +1,5 @@
 import {
+    useContext,
     useEffect,
     useId,
     useRef,
@@ -11,6 +12,8 @@ import {
 } from "react";
 import Button from "../component/button/Button";
 import Text from "../component/text/Text";
+import { demoAnchor } from "./anchors";
+import { ShowcaseFocusContext } from "./focus";
 import "./Demo.css";
 
 /**
@@ -156,7 +159,9 @@ export const DemoGroup: FC<DemoGroupProps> = ({ label, children }: DemoGroupProp
 /**
  * Renders one documentation demo: a live preview followed by its copyable source.
  * The preview and the code sample are supplied together, so the documentation
- * always shows the markup that produced what the reader can see.
+ * always shows the markup that produced what the reader can see. Every demo
+ * also carries a deterministic id derived from its title, so a component
+ * entry can scroll straight to the live example it documents.
  * @param props - Demo identity, code sample, layout, and preview content.
  * @example
  * <Demo title="Ghost action" code={'<Button variant="ghost">Open</Button>'}>
@@ -172,11 +177,15 @@ const Demo: FC<DemoProps> = ({
     children,
 }: DemoProps) => {
     const titleId: string = useId();
+    const focusedAnchor: string = useContext(ShowcaseFocusContext);
+    const anchorId: string = demoAnchor(title);
+    const isFocused: boolean = focusedAnchor === anchorId;
+    const className: string = isFocused ? "demo demo--focused" : "demo";
     const previewClassName: string =
         layout === "row" ? "demo__preview demo__preview--row" : "demo__preview";
 
     return (
-        <section className="demo" aria-labelledby={titleId}>
+        <section className={className} id={anchorId} aria-labelledby={titleId}>
             <header className="demo__header">
                 <Text as="h2" id={titleId} variant="h4">
                     {title}

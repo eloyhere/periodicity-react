@@ -43,6 +43,10 @@
     cursor: not-allowed;
 }
 
+.date-time-picker__trigger[aria-readonly="true"] {
+    cursor: default;
+}
+
 .date-time-picker__panel {
     display: flex;
     flex-direction: column;

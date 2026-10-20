@@ -4,7 +4,9 @@ import {
     useState,
     type ChangeEvent,
     type FC,
+    type HTMLAttributes,
     type ReactNode,
+    type Ref,
     type RefObject,
 } from "react";
 import Badge from "../../component/badge/Badge";
@@ -32,26 +34,57 @@ import type { ExportRecord } from "./exportation";
 import { parseExports } from "./exportation";
 import type { StructureNode } from "./structure";
 import { parseStructure } from "./structure";
-import type { RenderedFile } from "./render";
-import { renderFile } from "./render";
+import Preview from "./Preview";
+import Editor from "./Editor";
 import "./ProjectManager.css";
 
 /**
  * Props for the generic project manager.
  * Type: interface.
- * Fields: project, dependencies, onFileChange, onProjectImport, onProjectExport,
- * defaultMode, className.
+ * Fields: project, files, defaultFiles, dependencies, mode, defaultMode,
+ * selectedId, defaultSelectedId, expandedKeys, defaultExpandedKeys,
+ * onFileChange, onFileSave, onFilesChange, onProjectChange, onModeChange,
+ * onSelectedChange, onExpandedChange, onProjectImport, onProjectImportError,
+ * onProjectExport, onProjectDownload, downloadExport, exportFileName,
+ * importAccept, className, ref.
+ * `project` supplies metadata and the initial tree; pass `files` to control the tree.
+ * Native container attributes and events are forwarded to the root element.
  * @example
- * <ProjectManager project={project} dependencies={dependencies} />
+ * <ProjectManager
+ *     project={project}
+ *     files={files}
+ *     mode={mode}
+ *     onModeChange={setMode}
+ *     onFileChange={(file, content) => save(file, content)}
+ * />
  */
-export interface ProjectManagerProps {
+export interface ProjectManagerProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
     project: Project;
+    files?: readonly FileNode[];
+    defaultFiles?: readonly FileNode[];
     dependencies?: readonly ProjectDependency[];
-    onFileChange?: (file: FileNode, content: string) => void;
-    onProjectImport?: (project: Project) => void;
-    onProjectExport?: (project: Project) => void;
+    mode?: ProjectMode;
     defaultMode?: ProjectMode;
+    selectedId?: string;
+    defaultSelectedId?: string;
+    expandedKeys?: ReadonlySet<string>;
+    defaultExpandedKeys?: ReadonlySet<string>;
+    onFileChange?: (file: FileNode, content: string) => void;
+    onFileSave?: (file: FileNode, content: string) => void;
+    onFilesChange?: (files: readonly FileNode[]) => void;
+    onProjectChange?: (project: Project) => void;
+    onModeChange?: (mode: ProjectMode) => void;
+    onSelectedChange?: (id: string, file: FileNode | null) => void;
+    onExpandedChange?: (keys: ReadonlySet<string>) => void;
+    onProjectImport?: (project: Project) => void;
+    onProjectImportError?: (error: unknown, source: File) => void;
+    onProjectExport?: (project: Project) => void;
+    onProjectDownload?: (project: Project, blob: Blob, fileName: string) => void;
+    downloadExport?: boolean;
+    exportFileName?: string;
+    importAccept?: string;
     className?: string;
+    ref?: Ref<HTMLDivElement>;
 }
 
 const modes: readonly NavigationItem[] = [
@@ -91,19 +124,102 @@ const fileIcon: (file: FileNode) => IconName = (file: FileNode): IconName => {
     return "File";
 };
 
-interface ProjectFileTreeProps {
+/**
+ * Checks whether a value is a well-formed project file node.
+ * @param value - Candidate value.
+ * @example
+ * const valid = isFileNode({ id: "a", name: "a.txt", path: "a.txt", kind: "file" });
+ * @returns True for a file or directory node with valid children.
+ */
+const isFileNode: (value: unknown) => value is FileNode = (value: unknown): value is FileNode => {
+    if (typeof value !== "object" || value === null) {
+        return false;
+    }
+
+    const record: Record<string, unknown> = value as Record<string, unknown>;
+
+    if (
+        typeof record.id !== "string" ||
+        typeof record.name !== "string" ||
+        typeof record.path !== "string" ||
+        (record.kind !== "file" && record.kind !== "directory")
+    ) {
+        return false;
+    }
+
+    if (record.children === (void 0)) {
+        return true;
+    }
+
+    return Array.isArray(record.children) && record.children.every(isFileNode);
+};
+
+/**
+ * Checks whether a value is a project that can be imported safely.
+ * @param value - Candidate value.
+ * @example
+ * const valid = isProject(JSON.parse(text));
+ * @returns True for a project with string metadata and valid file nodes.
+ */
+const isProject: (value: unknown) => value is Project = (value: unknown): value is Project => {
+    if (typeof value !== "object" || value === null) {
+        return false;
+    }
+
+    const record: Record<string, unknown> = value as Record<string, unknown>;
+
+    return (
+        typeof record.id === "string" &&
+        typeof record.name === "string" &&
+        typeof record.root === "string" &&
+        typeof record.manager === "string" &&
+        typeof record.language === "string" &&
+        (record.entry === (void 0) || typeof record.entry === "string") &&
+        Array.isArray(record.files) &&
+        record.files.every(isFileNode)
+    );
+};
+
+/**
+ * Resolves the initial selected file id from an explicit entry or the first file.
+ * @param files - Project root nodes.
+ * @param project - Project metadata providing the optional entry id.
+ * @example
+ * const id = initialSelection(project.files, project);
+ * @returns A node id, or an empty string when the project has no files.
+ */
+const initialSelection: (files: readonly FileNode[], project: Project) => string = (
+    files: readonly FileNode[],
+    project: Project,
+): string => {
+    if (project.entry !== (void 0)) {
+        const entry: FileNode | null = findFile(files, project.entry);
+
+        if (entry !== null) {
+            return entry.id;
+        }
+    }
+
+    return (
+        flattenFiles(files).find((node: FileNode): boolean => node.kind === "file")?.id ?? ""
+    );
+};
+
+interface ProjectFileTreeProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
     files: readonly FileNode[];
     selectedId: string;
     expanded: ReadonlySet<string>;
     onExpandedChange: (keys: ReadonlySet<string>) => void;
-    onSelect: (id: string) => void;
+    onFileSelect: (id: string) => void;
+    className?: string;
 }
 
 /**
  * Reusable project file tree used by the Files and Architecture pages.
- * @param props - Files, selection, and expansion state.
+ * Native container attributes are forwarded to the wrapping tree region.
+ * @param props - Files, selection, expansion state, and native attributes.
  * @example
- * <ProjectFileTree files={files} selectedId={id} expanded={keys} />
+ * <ProjectFileTree files={files} selectedId={id} expanded={keys} onFileSelect={select} />
  * @returns A project tree.
  */
 const ProjectFileTree: FC<ProjectFileTreeProps> = ({
@@ -111,113 +227,186 @@ const ProjectFileTree: FC<ProjectFileTreeProps> = ({
     selectedId,
     expanded,
     onExpandedChange,
-    onSelect,
+    onFileSelect,
+    className = "",
+    ...rest
 }: ProjectFileTreeProps) => (
-    <Tree
-        items={files}
-        getKey={(file: FileNode): string => file.id}
-        getChildren={(file: FileNode): readonly FileNode[] => file.children ?? []}
-        selectionMode="single"
-        selectedKeys={selectedId.length > 0 ? [selectedId] : []}
-        expandedKeys={expanded}
-        onExpandedChange={onExpandedChange}
-        onSelectionChange={(keys: readonly string[]): void => {
-            if (keys[0] !== (void 0)) {
-                onSelect(keys[0]);
-            }
-        }}
-        renderItem={(file: FileNode): ReactNode => (
-            <span className="project-manager__file">
-                <Icon name={fileIcon(file)} size={14} />
-                <span className="project-manager__file-name">{file.name}</span>
-            </span>
-        )}
-    />
+    <div {...rest} className={cx("project-manager__tree", className)}>
+        <Tree
+            items={files}
+            getKey={(file: FileNode): string => file.id}
+            getChildren={(file: FileNode): readonly FileNode[] => file.children ?? []}
+            selectionMode="single"
+            selectedKeys={selectedId.length > 0 ? [selectedId] : []}
+            expandedKeys={expanded}
+            onExpandedChange={onExpandedChange}
+            onSelectionChange={(keys: readonly string[]): void => {
+                if (keys[0] !== (void 0)) {
+                    onFileSelect(keys[0]);
+                }
+            }}
+            renderItem={(file: FileNode): ReactNode => (
+                <span className="project-manager__file">
+                    <Icon name={fileIcon(file)} size={14} />
+                    <span className="project-manager__file-name">{file.name}</span>
+                </span>
+            )}
+        />
+    </div>
 );
 
-interface StructureOutlineProps {
+interface StructureOutlineItemProps {
+    node: StructureNode;
+    depth: number;
+}
+
+/**
+ * Renders one parsed structure node with tree semantics.
+ * @param props - Node and visual depth.
+ * @example
+ * <StructureOutlineItem node={node} depth={0} />
+ * @returns A nested outline item.
+ */
+const StructureOutlineItem: FC<StructureOutlineItemProps> = ({
+    node,
+    depth,
+}: StructureOutlineItemProps) => {
+    const children: readonly StructureNode[] = node.children ?? [];
+
+    return (
+        <li
+            className="project-manager__outline-item"
+            data-depth={depth}
+            role="treeitem"
+            aria-level={depth + 1}
+            aria-expanded={children.length > 0 ? true : (void 0)}
+        >
+            <div className="project-manager__outline-row" data-kind={node.kind}>
+                <span className="project-manager__outline-kind">{node.kind}</span>
+                <span className="project-manager__outline-label">{node.label}</span>
+                {node.line === (void 0) ? null : (
+                    <span className="project-manager__outline-line">L{node.line}</span>
+                )}
+            </div>
+            {children.length === 0 ? null : (
+                <ul className="project-manager__outline" role="group">
+                    {children.map(
+                        (child: StructureNode): ReactNode => (
+                            <StructureOutlineItem key={child.id} node={child} depth={depth + 1} />
+                        ),
+                    )}
+                </ul>
+            )}
+        </li>
+    );
+};
+
+interface StructureOutlineProps extends Omit<HTMLAttributes<HTMLUListElement>, "children"> {
     nodes: readonly StructureNode[];
-    depth?: number;
+    className?: string;
 }
 
 /**
  * Renders a parsed file outline with kind labels and recursive children.
- * @param props - Structure nodes and current depth.
+ * Native list attributes are forwarded to the root list.
+ * @param props - Structure nodes, depth, and native attributes.
  * @example
  * <StructureOutline nodes={parseStructure(file).children ?? []} />
  * @returns A nested outline.
  */
 const StructureOutline: FC<StructureOutlineProps> = ({
     nodes,
-    depth = 0,
+    className = "",
+    role = "tree",
+    ...rest
 }: StructureOutlineProps) => (
-    <ul className="project-manager__outline" data-depth={depth}>
-        {nodes.map((node: StructureNode): ReactNode => (
-            <li key={node.id} className="project-manager__outline-item">
-                <div className="project-manager__outline-row">
-                    <span className="project-manager__outline-kind">{node.kind}</span>
-                    <span className="project-manager__outline-label">{node.label}</span>
-                    {node.line === (void 0) ? null : (
-                        <span className="project-manager__outline-line">L{node.line}</span>
-                    )}
-                </div>
-                {node.children === (void 0) || node.children.length === 0 ? null : (
-                    <StructureOutline nodes={node.children} depth={depth + 1} />
-                )}
-            </li>
-        ))}
+    <ul {...rest} role={role} className={cx("project-manager__outline", className)}>
+        {nodes.map(
+            (node: StructureNode): ReactNode => (
+                <StructureOutlineItem key={node.id} node={node} depth={0} />
+            ),
+        )}
     </ul>
 );
 
 /**
  * Renders the project file tree, view navigation, pager pages, dependency graph,
  * preview, editor, architecture, imports, exports, and project import/export.
- * @param props - Project, dependency metadata, and change callbacks.
+ * Native container attributes and events are forwarded to the root element.
+ * @param props - Project metadata, controlled state, change callbacks, and native attributes.
  * @example
- * <ProjectManager project={project} dependencies={dependencies} />
+ * <ProjectManager
+ *     project={project}
+ *     dependencies={dependencies}
+ *     onFileChange={(file, content) => save(file, content)}
+ * />
  * @returns A complete project manager.
  */
 const ProjectManager: FC<ProjectManagerProps> = ({
     project,
+    files,
+    defaultFiles,
     dependencies,
-    onFileChange,
-    onProjectImport,
-    onProjectExport,
+    mode,
     defaultMode = "files",
+    selectedId,
+    defaultSelectedId,
+    expandedKeys,
+    defaultExpandedKeys,
+    onFileChange,
+    onFileSave,
+    onFilesChange,
+    onProjectChange,
+    onModeChange,
+    onSelectedChange,
+    onExpandedChange,
+    onProjectImport,
+    onProjectImportError,
+    onProjectExport,
+    onProjectDownload,
+    downloadExport,
+    exportFileName,
+    importAccept = "application/json,.json",
     className = "",
+    "aria-label": ariaLabel,
+    role = "region",
+    ref,
+    ...rest
 }: ProjectManagerProps) => {
-    const [files, setFiles]: [
+    const initialFiles: readonly FileNode[] = files ?? defaultFiles ?? project.files;
+    const [internalFiles, setInternalFiles]: [
         readonly FileNode[],
         (next: readonly FileNode[]) => void,
-    ] = useState<readonly FileNode[]>(project.files);
-    const [mode, setMode]: [ProjectMode, (next: ProjectMode) => void] =
+    ] = useState<readonly FileNode[]>(initialFiles);
+    const [internalMode, setInternalMode]: [ProjectMode, (next: ProjectMode) => void] =
         useState<ProjectMode>(defaultMode);
-    const initialId: string =
-        project.entry ?? flattenFiles(files).find((node: FileNode): boolean => node.kind === "file")?.id ?? "";
-    const [selectedId, setSelectedId]: [string, (next: string) => void] =
-        useState<string>(initialId);
-    const selected: FileNode | null = findFile(files, selectedId);
-    const [draft, setDraft]: [string, (next: string) => void] = useState<string>(
-        selected?.content ?? "",
-    );
-    const [expanded, setExpanded]: [
+    const [internalSelectedId, setInternalSelectedId]: [string, (next: string) => void] =
+        useState<string>(defaultSelectedId ?? initialSelection(initialFiles, project));
+    const [internalExpanded, setInternalExpanded]: [
         ReadonlySet<string>,
         (next: ReadonlySet<string>) => void,
-    ] = useState<ReadonlySet<string>>(directoryKeys(files));
+    ] = useState<ReadonlySet<string>>(
+        defaultExpandedKeys ?? directoryKeys(initialFiles),
+    );
+    const activeFiles: readonly FileNode[] = files ?? internalFiles;
+    const activeMode: ProjectMode = mode ?? internalMode;
+    const activeSelectedId: string = selectedId ?? internalSelectedId;
+    const activeExpanded: ReadonlySet<string> = expandedKeys ?? internalExpanded;
+    const selected: FileNode | null = findFile(activeFiles, activeSelectedId);
     const inputRef: RefObject<HTMLInputElement | null> = useRef<HTMLInputElement | null>(null);
     const fileNodes: readonly FileNode[] = useMemo(
         (): readonly FileNode[] =>
-            flattenFiles(files).filter((node: FileNode): boolean => node.kind === "file"),
-        [files],
+            flattenFiles(activeFiles).filter((node: FileNode): boolean => node.kind === "file"),
+        [activeFiles],
     );
     const projectDependencies: readonly ProjectDependency[] = useMemo(
         (): readonly ProjectDependency[] =>
-            dependencies ?? dependenciesFromFiles(files, project.manager),
-        [dependencies, files, project.manager],
+            dependencies ?? dependenciesFromFiles(activeFiles, project.manager),
+        [dependencies, activeFiles, project.manager],
     );
     const graph: DependencyGraph = useMemo(
-        () => createDependencyGraph(files, projectDependencies),
-        [files, projectDependencies],
+        () => createDependencyGraph(activeFiles, projectDependencies),
+        [activeFiles, projectDependencies],
     );
     const imports: readonly ImportRecord[] = useMemo(
         () => (selected === null ? [] : parseImports(selected)),
@@ -227,107 +416,172 @@ const ProjectManager: FC<ProjectManagerProps> = ({
         () => (selected === null ? [] : parseExports(selected)),
         [selected],
     );
-    const rendered: RenderedFile | null = useMemo(
-        (): RenderedFile | null => (selected === null ? null : renderFile(selected)),
-        [selected],
-    );
     const packageDependencies: readonly ProjectDependency[] = projectDependencies.filter(
         (dependency: ProjectDependency): boolean => dependency.kind === "package",
     );
     const references: readonly ProjectDependency[] = projectDependencies.filter(
         (dependency: ProjectDependency): boolean => dependency.kind === "reference",
     );
+    const filesDetail: string = [
+        `${fileNodes.length} files`,
+        `${packageDependencies.length} packages`,
+        `${references.length} references`,
+    ].join(" · ");
+
+    const changeMode: (next: ProjectMode) => void = (next: ProjectMode): void => {
+        if (!modeSet.has(next)) {
+            return;
+        }
+
+        if (mode === (void 0)) {
+            setInternalMode(next);
+        }
+
+        onModeChange?.(next);
+    };
+
+    const changeExpanded: (next: ReadonlySet<string>) => void = (
+        next: ReadonlySet<string>,
+    ): void => {
+        if (expandedKeys === (void 0)) {
+            setInternalExpanded(next);
+        }
+
+        onExpandedChange?.(next);
+    };
+
+    const changeSelected: (id: string, file: FileNode | null) => void = (
+        id: string,
+        file: FileNode | null,
+    ): void => {
+        if (selectedId === (void 0)) {
+            setInternalSelectedId(id);
+        }
+
+        onSelectedChange?.(id, file);
+    };
 
     const select: (id: string) => void = (id: string): void => {
-        const file: FileNode | null = findFile(files, id);
+        const file: FileNode | null = findFile(activeFiles, id);
 
         if (file === null) {
             return;
         }
 
-        setSelectedId(id);
-        setDraft(file.content ?? "");
+        changeSelected(id, file);
 
         if (file.kind === "file") {
-            const nextExpanded: Set<string> = new Set<string>(expanded);
             const parent: string = file.path.slice(0, Math.max(0, file.path.lastIndexOf("/")));
 
-            if (parent.length > 0) {
+            if (parent.length > 0 && !activeExpanded.has(parent)) {
+                const nextExpanded: Set<string> = new Set<string>(activeExpanded);
                 nextExpanded.add(parent);
+                changeExpanded(nextExpanded);
             }
-
-            setExpanded(nextExpanded);
         }
     };
 
-    const save: () => void = (): void => {
-        if (selected === null) {
-            return;
+    const commitFiles: (next: readonly FileNode[]) => void = (
+        next: readonly FileNode[],
+    ): void => {
+        if (files === (void 0)) {
+            setInternalFiles(next);
         }
 
-        const next: readonly FileNode[] = updateFileContent(files, selected.id, draft);
-        setFiles(next);
-        onFileChange?.(selected, draft);
+        onFilesChange?.(next);
+        onProjectChange?.({ ...project, files: next });
+    };
+
+    const save: (target: FileNode, content: string) => void = (
+        target: FileNode,
+        content: string,
+    ): void => {
+        commitFiles(updateFileContent(activeFiles, target.id, content));
+        onFileChange?.(target, content);
+    };
+
+    const saveFile: (target: FileNode, content: string) => void = (
+        target: FileNode,
+        content: string,
+    ): void => {
+        save(target, content);
+        onFileSave?.(target, content);
+    };
+
+    const applyImportedProject: (imported: Project) => void = (imported: Project): void => {
+        commitFiles(imported.files);
+        changeExpanded(directoryKeys(imported.files));
+
+        const entryId: string = initialSelection(imported.files, imported);
+        const entry: FileNode | null =
+            entryId.length === 0 ? null : findFile(imported.files, entryId);
+        changeSelected(entryId, entry);
+        onProjectImport?.(imported);
     };
 
     const importProject: (event: ChangeEvent<HTMLInputElement>) => void = (
         event: ChangeEvent<HTMLInputElement>,
     ): void => {
-        const file: File | undefined = event.target.files?.[0];
+        const input: HTMLInputElement = event.target;
+        const source: File | void = input.files?.[0];
+        input.value = "";
 
-        if (file === (void 0)) {
+        if (source === (void 0)) {
             return;
         }
 
-        void file.text().then((text: string): void => {
-            try {
-                const parsed: unknown = JSON.parse(text);
+        void source
+            .text()
+            .then((text: string): void => {
+                let parsed: unknown;
 
-                if (
-                    typeof parsed !== "object" ||
-                    parsed === null ||
-                    !Array.isArray((parsed as Project).files)
-                ) {
+                try {
+                    parsed = JSON.parse(text);
+                } catch (error: unknown) {
+                    onProjectImportError?.(error, source);
                     return;
                 }
 
-                const imported: Project = parsed as Project;
-                const importedEntry: FileNode | null =
-                    imported.entry === (void 0)
-                        ? flattenFiles(imported.files).find(
-                              (node: FileNode): boolean => node.kind === "file",
-                          ) ?? null
-                        : findFile(imported.files, imported.entry);
+                if (!isProject(parsed)) {
+                    onProjectImportError?.(
+                        new Error("The selected file is not a valid project."),
+                        source,
+                    );
+                    return;
+                }
 
-                setFiles(imported.files);
-                setExpanded(directoryKeys(imported.files));
-                setSelectedId(importedEntry?.id ?? "");
-                setDraft(importedEntry?.content ?? "");
-                onProjectImport?.(imported);
-            } catch {
-                // An invalid project file is ignored; the current project stays intact.
-            }
-        });
-        event.target.value = "";
+                applyImportedProject(parsed);
+            })
+            .catch((error: unknown): void => {
+                onProjectImportError?.(error, source);
+            });
     };
 
     const exportProject: () => void = (): void => {
-        const payload: Project = { ...project, files };
+        const payload: Project = { ...project, files: activeFiles };
         onProjectExport?.(payload);
+        const shouldDownload: boolean =
+            downloadExport === (void 0) ? onProjectExport === (void 0) : downloadExport;
 
-        if (onProjectExport !== (void 0)) {
+        if (!shouldDownload) {
             return;
         }
 
         const blob: Blob = new Blob([JSON.stringify(payload, null, 2)], {
             type: "application/json",
         });
+        const fileName: string = exportFileName ?? `${project.id}.project.json`;
+        onProjectDownload?.(payload, blob, fileName);
         const url: string = URL.createObjectURL(blob);
         const anchor: HTMLAnchorElement = document.createElement("a");
         anchor.href = url;
-        anchor.download = `${project.id}.project.json`;
+        anchor.download = fileName;
+        document.body.appendChild(anchor);
         anchor.click();
-        URL.revokeObjectURL(url);
+        anchor.remove();
+        window.setTimeout((): void => {
+            URL.revokeObjectURL(url);
+        }, 0);
     };
 
     const renderPageTitle: (title: string, detail: string) => ReactNode = (
@@ -343,15 +597,23 @@ const ProjectManager: FC<ProjectManagerProps> = ({
     );
 
     return (
-        <div className={cx("project-manager", className)}>
+        <div
+            {...rest}
+            ref={ref}
+            role={role}
+            className={cx("project-manager", className)}
+            aria-label={ariaLabel ?? `${project.name} project manager`}
+            data-project={project.id}
+            data-mode={activeMode}
+            data-selected-id={selected === null ? (void 0) : selected.id}
+            data-file-count={fileNodes.length}
+        >
             <aside className="project-manager__modes" aria-label="Project views">
                 <NavigationView
                     items={modes}
-                    value={mode}
+                    value={activeMode}
                     onValueChange={(value: string): void => {
-                        if (modeSet.has(value)) {
-                            setMode(value as ProjectMode);
-                        }
+                        changeMode(value as ProjectMode);
                     }}
                     ariaLabel="Project views"
                 />
@@ -388,7 +650,8 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                             ref={inputRef}
                             className="visually-hidden"
                             type="file"
-                            accept="application/json,.json"
+                            accept={importAccept}
+                            aria-label="Import project file"
                             onChange={importProject}
                         />
                     </div>
@@ -396,11 +659,9 @@ const ProjectManager: FC<ProjectManagerProps> = ({
 
                 <div className="project-manager__pager">
                     <Pager
-                        route={mode}
+                        route={activeMode}
                         onRouteChange={(route: string): void => {
-                            if (modeSet.has(route)) {
-                                setMode(route as ProjectMode);
-                            }
+                            changeMode(route as ProjectMode);
                         }}
                         ariaLabel="Project views"
                     >
@@ -408,7 +669,7 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                             <section className="project-manager__page">
                                 {renderPageTitle(
                                     "Project files",
-                                    `${fileNodes.length} files · ${packageDependencies.length} packages · ${references.length} references`,
+                                    filesDetail,
                                 )}
                                 <div className="project-manager__files-layout">
                                     <aside
@@ -416,11 +677,11 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                                         aria-label="Project files"
                                     >
                                         <ProjectFileTree
-                                            files={files}
-                                            selectedId={selectedId}
-                                            expanded={expanded}
-                                            onExpandedChange={setExpanded}
-                                            onSelect={select}
+                                            files={activeFiles}
+                                            selectedId={activeSelectedId}
+                                            expanded={activeExpanded}
+                                            onExpandedChange={changeExpanded}
+                                            onFileSelect={select}
                                         />
                                     </aside>
                                     <div className="project-manager__files-content">
@@ -485,17 +746,8 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                                 )}
                                 {selected === null ? (
                                     <p className="project-manager__empty">Select a file to preview.</p>
-                                ) : rendered === null ? null : rendered.mode === "code" ? (
-                                    <pre className="project-manager__code selectable">
-                                        <code
-                                            dangerouslySetInnerHTML={{ ["__html"]: rendered.html }}
-                                        />
-                                    </pre>
                                 ) : (
-                                    <div
-                                        className="project-manager__html selectable"
-                                        dangerouslySetInnerHTML={{ ["__html"]: rendered.html }}
-                                    />
+                                    <Preview key={selected.id} file={selected} />
                                 )}
                             </section>
                         </PagerPage>
@@ -509,24 +761,14 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                                 {selected === null ? (
                                     <p className="project-manager__empty">Select a file to edit.</p>
                                 ) : (
-                                    <>
-                                        <textarea
-                                            className="project-manager__editor"
-                                            value={draft}
-                                            spellCheck={false}
-                                            onChange={(
-                                                event: ChangeEvent<HTMLTextAreaElement>,
-                                            ): void => setDraft(event.target.value)}
-                                        />
-                                        <div className="project-manager__editor-actions">
-                                            <Text variant="body-sm" tone="muted">
-                                                {draft.length} characters
-                                            </Text>
-                                            <Button size="sm" onClick={save}>
-                                                Save file
-                                            </Button>
-                                        </div>
-                                    </>
+                                    <Editor
+                                        key={selected.id}
+                                        file={selected}
+                                        onChange={(content: string, target: FileNode): void =>
+                                            save(target, content)
+                                        }
+                                        onSave={saveFile}
+                                    />
                                 )}
                             </section>
                         </PagerPage>
@@ -543,11 +785,11 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                                         aria-label="Project structure"
                                     >
                                         <ProjectFileTree
-                                            files={files}
-                                            selectedId={selectedId}
-                                            expanded={expanded}
-                                            onExpandedChange={setExpanded}
-                                            onSelect={select}
+                                            files={activeFiles}
+                                            selectedId={activeSelectedId}
+                                            expanded={activeExpanded}
+                                            onExpandedChange={changeExpanded}
+                                            onFileSelect={select}
                                         />
                                     </aside>
                                     <div className="project-manager__structure">
@@ -564,6 +806,7 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                                                     nodes={
                                                         parseStructure(selected).children ?? []
                                                     }
+                                                    aria-label="Selected file structure"
                                                 />
                                             </>
                                         )}
@@ -655,7 +898,11 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                                             const target: FileNode | null =
                                                 selected === null
                                                     ? null
-                                                    : resolveImport(selected, record.specifier, files);
+                                                    : resolveImport(
+                                                          selected,
+                                                          record.specifier,
+                                                          activeFiles,
+                                                      );
 
                                             return (
                                                 <li key={record.id}>

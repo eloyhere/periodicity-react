@@ -1,7 +1,7 @@
 import type { FC, ReactElement, ReactNode } from "react";
 import Button from "../button/Button";
 import cx from "../foundation/cx";
-import Dialog from "./Dialog";
+import Dialog, { type DialogProps } from "./Dialog";
 import "./ConfirmDialog.css";
 
 /**
@@ -16,7 +16,8 @@ export type ConfirmDialogTone = "default" | "danger";
 /**
  * Props for the confirmation dialog.
  * Type: interface.
- * Fields: open, onClose, onConfirm, title, description, confirmLabel, cancelLabel, tone, loading.
+ * Fields: open, defaultOpen, onOpenChange, onClose, onConfirm, title, description, confirmLabel,
+ * cancelLabel, tone, loading, className, plus all remaining dialog props and native dialog attributes.
  * @example
  * <ConfirmDialog
  *     open={open}
@@ -26,12 +27,11 @@ export type ConfirmDialogTone = "default" | "danger";
  *     tone="danger"
  * />
  */
-export interface ConfirmDialogProps {
-    open: boolean;
-    onClose: () => void;
-    onConfirm: () => void;
+export interface ConfirmDialogProps
+    extends Omit<DialogProps, "role" | "size" | "title" | "description" | "children" | "footer"> {
     title: string;
     description?: ReactNode;
+    onConfirm: () => void;
     confirmLabel?: string;
     cancelLabel?: string;
     tone?: ConfirmDialogTone;
@@ -40,6 +40,8 @@ export interface ConfirmDialogProps {
 
 /**
  * Renders a destructive or neutral confirmation with an alert dialog role.
+ * Remaining dialog props (open state, close rules, native attributes, and refs) pass through
+ * to the underlying dialog.
  * @param props - Open state, callbacks, copy, tone, and loading flag.
  * @example
  * <ConfirmDialog
@@ -61,6 +63,8 @@ const ConfirmDialog: FC<ConfirmDialogProps> = ({
     cancelLabel = "Cancel",
     tone = "default",
     loading = false,
+    className = "",
+    ...rest
 }: ConfirmDialogProps): ReactElement => {
     const isDanger: boolean = tone === "danger";
     const cancelFocus: string | void = isDanger ? "true" : (void 0);
@@ -76,16 +80,21 @@ const ConfirmDialog: FC<ConfirmDialogProps> = ({
 
     return (
         <Dialog
+            {...rest}
             open={open}
             onClose={onClose}
             title={title}
             description={description}
-            className="confirm-dialog"
+            className={cx("confirm-dialog", className)}
             size="sm"
             role="alertdialog"
             footer={
                 <>
-                    <Button variant="ghost" data-autofocus={cancelFocus} onClick={onClose}>
+                    <Button
+                        variant="ghost"
+                        data-autofocus={cancelFocus}
+                        onClick={(): void => onClose("close-button")}
+                    >
                         {cancelLabel}
                     </Button>
                     <Button

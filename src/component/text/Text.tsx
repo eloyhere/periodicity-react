@@ -31,11 +31,14 @@ export type TextElement =
 /**
  * Props for the Text component.
  * Type: interface.
+ * Extends the native element attributes, so `id`, `style`, `title`, `aria-*`, `data-*`, `tabIndex`, and
+ * pointer, mouse, keyboard, and focus handlers are forwarded to the rendered element.
  * @param as - Element to render; defaults to `p`.
  * @param variant - Typographic scale.
  * @param tone - Semantic colour.
  * @param truncate - Clips overflow with an ellipsis.
  * @param numeric - Uses tabular figures.
+ * @param ref - Ref forwarded to the rendered element.
  * @example
  * <Text as="h2" variant="h2">Today</Text>
  */

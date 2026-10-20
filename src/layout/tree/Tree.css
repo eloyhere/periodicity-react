@@ -56,6 +56,11 @@
     color: var(--color-on-primary-container);
 }
 
+.tree__row--disabled {
+    opacity: var(--state-disabled-opacity);
+    cursor: not-allowed;
+}
+
 .tree__row:focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: -2px;

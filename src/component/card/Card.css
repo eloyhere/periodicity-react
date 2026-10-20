@@ -44,6 +44,19 @@
     box-shadow: var(--elevation-1);
 }
 
+.card--disabled {
+    opacity: var(--state-disabled-opacity);
+}
+
+.card--disabled.card--interactive:hover {
+    border-color: var(--card-border);
+    box-shadow: var(--shadow-sm);
+}
+
+.card--disabled .card__hit {
+    cursor: not-allowed;
+}
+
 .card__wash {
     position: absolute;
     inset: 0;

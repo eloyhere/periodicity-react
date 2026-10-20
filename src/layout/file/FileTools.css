@@ -1,5 +1,5 @@
 /* ==========================================================================
-   File preview and editor surfaces with syntax tokens
+   File preview and CodeMirror editor
    ========================================================================== */
 
 .file-preview,
@@ -44,19 +44,27 @@
     font-size: 10px;
 }
 
+.file-preview__actions,
+.file-editor__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    margin-left: auto;
+    gap: 2px;
+}
+
 .file-preview__body {
     min-height: 180px;
+    max-height: 480px;
     overflow: auto;
 }
 
-.file-preview__body > .preview,
-.file-editor__highlight {
+.file-preview__body > pre {
     margin: 0;
-    min-height: 100%;
 }
 
-.file-preview__body pre,
-.file-editor__highlight pre {
+.file-preview__body pre {
     margin: 0;
     padding: var(--space-3);
     overflow: visible;
@@ -68,105 +76,72 @@
     white-space: pre;
 }
 
-.file-editor__body {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
+.file-preview__html {
+    padding: var(--space-4);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.65;
 }
 
-.file-editor__surface {
-    position: relative;
-    display: flex;
-    min-width: 0;
-    min-height: 320px;
+.file-preview__html > :first-child {
+    margin-top: 0;
 }
 
-.file-editor__input {
-    flex: 1 1 50%;
-    width: 50%;
-    min-width: 0;
-    min-height: 320px;
+.file-preview__html > :last-child {
+    margin-bottom: 0;
+}
+
+.file-preview__html h1,
+.file-preview__html h2,
+.file-preview__html h3,
+.file-preview__html h4 {
+    margin: 1.2em 0 0.45em;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.file-preview__html p {
+    margin: 0 0 0.8em;
+}
+
+.file-preview__html ul,
+.file-preview__html ol {
+    margin: 0 0 0.8em;
+    padding-left: 1.25em;
+}
+
+.file-preview__html pre {
     padding: var(--space-3);
-    border: 0;
-    border-right: 1px solid var(--line);
-    background: transparent;
-    color: var(--text);
-    font-family: var(--font-mono);
-    font-size: 12px;
-    line-height: 1.6;
-    outline: none;
-    resize: none;
-    white-space: pre;
-}
-
-.file-editor__input:focus {
-    box-shadow: inset 2px 0 0 var(--color-primary);
-}
-
-.file-editor__highlight {
-    flex: 1 1 50%;
-    width: 50%;
-    min-width: 0;
-    max-height: 480px;
     overflow: auto;
+    border-radius: var(--radius-xs);
     background: var(--color-surface-container-low);
-}
-
-.file-editor__completions {
-    position: absolute;
-    right: var(--space-3);
-    bottom: var(--space-3);
-    left: var(--space-3);
-    display: flex;
-    flex-direction: column;
-    max-height: 220px;
-    overflow-y: auto;
-    padding: 4px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-xs);
-    background: var(--color-surface);
-    box-shadow: var(--elevation-2);
-    gap: 1px;
-}
-
-.file-editor__completions-title {
-    padding: 4px var(--space-2);
-    color: var(--muted);
-    font-family: var(--font-sans);
-    font-size: 10px;
-}
-
-.file-editor__completion {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 32px;
-    padding: 0 var(--space-2);
-    border: 0;
-    border-radius: var(--radius-xs);
-    background: transparent;
-    color: var(--text);
     font-family: var(--font-mono);
     font-size: 12px;
-    text-align: left;
-    cursor: pointer;
-    gap: var(--space-2);
 }
 
-.file-editor__completion:hover,
-.file-editor__completion--active {
-    background: var(--color-primary-container);
-    color: var(--color-on-primary-container);
+.file-preview__html code {
+    font-family: var(--font-mono);
+    font-size: 0.92em;
 }
 
-.file-editor__completion small {
-    color: var(--muted);
-    font-family: var(--font-sans);
-    font-size: 9px;
+/* ==========================================================================
+   CodeMirror shell
+   ========================================================================== */
+
+.code-mirror {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 420px;
+}
+
+.code-mirror .cm-editor {
+    height: 100%;
 }
 
 .file-editor__footer {
     display: flex;
+    flex: none;
     align-items: center;
     justify-content: space-between;
     min-height: 44px;
@@ -177,6 +152,10 @@
     font-size: 10px;
     gap: var(--space-2);
 }
+
+/* ==========================================================================
+   Syntax tokens used by the preview source view
+   ========================================================================== */
 
 .tok-comment {
     color: var(--muted);
@@ -220,18 +199,171 @@
 }
 
 @media (max-width: 720px) {
-    .file-editor__surface {
-        flex-direction: column;
+    .code-mirror {
+        height: 320px;
     }
+}
 
-    .file-editor__input,
-    .file-editor__highlight {
-        width: 100%;
-        min-height: 220px;
-    }
+/* ==========================================================================
+   Code structure outline
+   ========================================================================== */
 
-    .file-editor__input {
-        border-right: 0;
-        border-bottom: 1px solid var(--line);
-    }
+.file-structure {
+    padding: var(--space-3);
+}
+
+.file-structure__summary {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: var(--space-3);
+    gap: var(--space-2);
+}
+
+.file-structure__summary > span {
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-container);
+    color: var(--muted);
+    font-family: var(--font-sans);
+    font-size: 10px;
+}
+
+.file-structure__tree,
+.file-structure__children {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.file-structure__children {
+    margin-left: 14px;
+    padding-left: 10px;
+    border-left: 1px solid var(--line);
+}
+
+.file-structure__row {
+    display: flex;
+    align-items: baseline;
+    min-height: 26px;
+    gap: var(--space-2);
+}
+
+.file-structure__kind {
+    flex: none;
+    min-width: 58px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.03em;
+    text-transform: capitalize;
+}
+
+.file-structure__row[data-kind="function"] .file-structure__kind,
+.file-structure__row[data-kind="method"] .file-structure__kind {
+    color: #1565c0;
+}
+
+.file-structure__row[data-kind="class"] .file-structure__kind,
+.file-structure__row[data-kind="interface"] .file-structure__kind,
+.file-structure__row[data-kind="type"] .file-structure__kind {
+    color: #7b1fa2;
+}
+
+.file-structure__row[data-kind="constant"] .file-structure__kind,
+.file-structure__row[data-kind="property"] .file-structure__kind {
+    color: #00695c;
+}
+
+.file-structure__label {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-structure__line {
+    margin-left: auto;
+    color: var(--faint);
+    font-family: var(--font-mono);
+    font-size: 9px;
+}
+
+.file-structure__empty {
+    margin: var(--space-3) 0 0;
+    color: var(--muted);
+    font-family: var(--font-sans);
+    font-size: 12px;
+}
+
+/* Use the browser's native selection painting inside CodeMirror. It handles
+   single-line and endpoint selections correctly, unlike the rectangle layer
+   when the editor is embedded in a transformed panel. */
+.code-mirror .cm-content::selection,
+.code-mirror .cm-content ::selection {
+    color: var(--text) !important;
+    background: rgba(25, 118, 210, 0.24) !important;
+}
+
+.code-mirror .cm-editor .cm-selectionLayer .cm-selectionBackground {
+    background: transparent !important;
+}
+
+.code-mirror .cm-focused {
+    outline: none;
+}
+
+/* CodeMirror autocomplete window: presentation only; positioning and
+   keyboard behaviour remain CodeMirror's. */
+.code-mirror .cm-editor {
+    position: relative;
+}
+
+.code-mirror .cm-tooltip {
+    z-index: var(--z-dropdown, 40);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xs);
+    background: var(--color-surface);
+    color: var(--text);
+    box-shadow: var(--elevation-2);
+}
+
+.code-mirror .cm-tooltip-autocomplete {
+    min-width: 240px;
+    max-width: 320px;
+    padding: 4px;
+}
+
+.code-mirror .cm-tooltip-autocomplete > ul {
+    max-height: 240px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+
+.code-mirror .cm-tooltip-autocomplete > ul > li {
+    display: flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0 8px;
+    border-radius: var(--radius-xs);
+    gap: 8px;
+}
+
+.code-mirror .cm-tooltip-autocomplete > ul > li[aria-selected] {
+    background: var(--color-primary-container);
+    color: var(--color-on-primary-container);
+}
+
+.code-mirror .cm-completionLabel {
+    font-family: var(--font-mono);
+}
+
+.code-mirror .cm-completionDetail {
+    margin-left: auto;
+    color: var(--muted);
+    font-family: var(--font-sans);
+    font-size: 9px;
 }

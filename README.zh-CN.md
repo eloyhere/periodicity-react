@@ -52,10 +52,10 @@ npm run preview     # 预览生产构建
 
 ## 在项目中使用
 
-从源码统一入口导入组件：
+每个组件都有 `Periodicity` 前缀的公共导出，例如 `PeriodicityButton`、`PeriodicityTable`、`PeriodicityDialog`。不带前缀的名称继续作为兼容别名保留。从源码统一入口导入组件：
 
 ```tsx
-import { Button, TextInput } from "./component";
+import { PeriodicityButton, PeriodicityTextInput } from "./component";
 import { Stack } from "./arrange/layout";
 import "./index.css";
 ```
@@ -65,7 +65,7 @@ import "./index.css";
 
 ```tsx
 import { useState } from "react";
-import { Button, TextInput } from "./component";
+import { PeriodicityButton, PeriodicityTextInput } from "./component";
 import { Stack } from "./arrange/layout";
 
 export const SignIn = () => {
@@ -73,13 +73,13 @@ export const SignIn = () => {
 
     return (
         <Stack gap="md">
-            <TextInput
+            <PeriodicityTextInput
                 label="邮箱"
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
             />
-            <Button onClick={() => console.log(email)}>继续</Button>
+            <PeriodicityButton onClick={() => console.log(email)}>继续</PeriodicityButton>
         </Stack>
     );
 };
@@ -89,26 +89,26 @@ export const SignIn = () => {
 
 `src/layout` 提供结构性布局组件。所有布局以 Flex 为基础，不使用 CSS Grid。
 
-| 组件 | 用途 |
-| --- | --- |
-| `Stack` / `Inline` / `Columns` | 垂直、水平、等宽多列排列 |
-| `LinearLayout` | 方向、重力、对齐、间距、换行与权重 |
-| `GridLayout` | 基于 Flex 的响应式卡片列 |
-| `WaterfallLayout` | 轮询分配的瀑布流列 |
-| `ConstraintLayout` / `Constraint` | 锚点定位与偏移 |
-| `DrawerLayout` | 五向推入布局 |
-| `Drawer` | 模态侧边抽屉 |
-| `Tabs` / `TabPanel` | 标签导航与面板 |
-| `Menu` / `MenuItem` | 弹出式或内联菜单 |
-| `NavigationView` | 侧边栏、窄栏与底部导航 |
-| `Pager` / `PagerPage` | 可滑动、滚动吸附的分页 |
-| `Table` | 语义化数据表格 |
-| `List` | 适配器驱动的列表与虚拟列表 |
-| `Tree` | 适配器驱动的可展开树与虚拟树 |
-| `Contact` | 适配器驱动、带在线状态的联系人列表 |
-| `MessageList` | 适配器驱动的聊天消息列表 |
-| `Chat` | 联系人、消息记录与输入框组合的聊天布局 |
-| `ProjectManager` | 文件树、依赖图、预览、编辑器与项目导入导出 |
+| 组件                              | 用途                                       |
+| --------------------------------- | ------------------------------------------ |
+| `Stack` / `Inline` / `Columns`    | 垂直、水平、等宽多列排列                   |
+| `LinearLayout`                    | 方向、重力、对齐、间距、换行与权重         |
+| `GridLayout`                      | 基于 Flex 的响应式卡片列                   |
+| `WaterfallLayout`                 | 轮询分配的瀑布流列                         |
+| `ConstraintLayout` / `Constraint` | 锚点定位与偏移                             |
+| `DrawerLayout`                    | 五向推入布局                               |
+| `Drawer`                          | 模态侧边抽屉                               |
+| `Tabs` / `TabPanel`               | 标签导航与面板                             |
+| `Menu` / `MenuItem`               | 弹出式或内联菜单                           |
+| `NavigationView`                  | 侧边栏、窄栏与底部导航                     |
+| `Pager` / `PagerPage`             | 可滑动、滚动吸附的分页                     |
+| `Table`                           | 语义化数据表格                             |
+| `List`                            | 适配器驱动的列表与虚拟列表                 |
+| `Tree`                            | 适配器驱动的可展开树与虚拟树               |
+| `Contact`                         | 适配器驱动、带在线状态的联系人列表         |
+| `MessageList`                     | 适配器驱动的聊天消息列表                   |
+| `Chat`                            | 联系人、消息记录与输入框组合的聊天布局     |
+| `ProjectManager`                  | 文件树、依赖图、预览、编辑器与项目导入导出 |
 
 ### DrawerLayout
 
@@ -134,7 +134,7 @@ import { DrawerLayout } from "./component";
     onRightOpenChange={setRightOpen}
     topHeight={112}
     bottomHeight={88}
-/>
+/>;
 ```
 
 五个方向都有宽度或高度动画，当前打开的一侧由遮罩和外部指针拦截保护。通过 ref 暴露的命令式方法包括：
@@ -239,7 +239,7 @@ const adapter = createListAdapter(people, {
     selectionMode="multiple"
     defaultSelectedKeys={["mira"]}
     onSelectionChange={(keys, items) => console.log(keys, items)}
-/>
+/>;
 ```
 
 可用预设：
@@ -264,7 +264,7 @@ const options: ListOption<string>[] = [
     items={options}
     getKey={(option) => option.value}
     slots={{ item: (option) => <strong>{option.label}</strong> }}
-/>
+/>;
 ```
 
 `slots.item` 会收到节点和 `{ index, selected, disabled }`。简单自定义仍可使用 `renderItem`。
@@ -280,7 +280,7 @@ import { CheckTree } from "./component";
     getChildren={(node) => node.children ?? []}
     defaultExpandedKeys={new Set(["practice"])}
     defaultCheckedKeys={["breath"]}
-/>
+/>;
 ```
 
 可用预设：
@@ -305,7 +305,7 @@ const nodes: TreeOption<string>[] = [
     },
 ];
 
-<Tree items={nodes} slots={{ item: (node, state) => <span>{node.label}</span> }} />
+<Tree items={nodes} slots={{ item: (node, state) => <span>{node.label}</span> }} />;
 ```
 
 `slots.item` 会收到 `{ index, level, expanded, selected, checked }`。节点提供 `depth` 时，树会用它计算缩进和
@@ -335,7 +335,7 @@ const columns: TableColumn<Person>[] = [
     onSelectionChange={setSelected}
     density="compact"
     striped
-/>
+/>;
 ```
 
 `Table` 也可以用 `adapter` 代替 `rows`。它支持行选择、全选、indeterminate 状态、吸顶表头、紧凑密度、
@@ -393,7 +393,7 @@ import { ProjectManager } from "./component";
     onFileChange={(file, content) => saveFile(file, content)}
     onProjectImport={(imported) => loadProject(imported)}
     onProjectExport={(exported) => downloadProject(exported)}
-/>
+/>;
 ```
 
 文件对象是以 `FileNode` 表示的树，包含 `id`、`path`、`kind`、可选 `content`、语言、扩展名与子节点。
@@ -512,20 +512,20 @@ const value = Optional.ofNullable(map.get("focus")).orElse(0);
 
 ## 项目结构
 
-| 路径 | 内容 |
-| --- | --- |
-| `src/component` | 组件、输入、选择器、浮层与反馈 |
-| `src/component/input/select` | 普通/虚拟 Select 入口与共享选择适配器 |
-| `src/layout` | 布局原语与数据组件 |
-| `src/layout/contact` | 联系人适配器、普通列表与虚拟列表 |
-| `src/layout/message` | 消息适配器、普通消息记录与虚拟消息记录 |
-| `src/layout/chat` | 聊天适配器与普通/虚拟聊天布局 |
-| `src/layout/file` | 项目管理器、文件节点、依赖图、导入/导出解析 |
-| `src/layout/list/adapter` | 列表适配器接口 |
-| `src/layout/tree/adapter` | 树适配器接口 |
-| `src/structure` | 数据结构工具 |
-| `src/showcase` | 组件展示与文档示例 |
-| `src/arrange` | `Stack`、`Inline`、`Columns` |
+| 路径                         | 内容                                        |
+| ---------------------------- | ------------------------------------------- |
+| `src/component`              | 组件、输入、选择器、浮层与反馈              |
+| `src/component/input/select` | 普通/虚拟 Select 入口与共享选择适配器       |
+| `src/layout`                 | 布局原语与数据组件                          |
+| `src/layout/contact`         | 联系人适配器、普通列表与虚拟列表            |
+| `src/layout/message`         | 消息适配器、普通消息记录与虚拟消息记录      |
+| `src/layout/chat`            | 聊天适配器与普通/虚拟聊天布局               |
+| `src/layout/file`            | 项目管理器、文件节点、依赖图、导入/导出解析 |
+| `src/layout/list/adapter`    | 列表适配器接口                              |
+| `src/layout/tree/adapter`    | 树适配器接口                                |
+| `src/structure`              | 数据结构工具                                |
+| `src/showcase`               | 组件展示与文档示例                          |
+| `src/arrange`                | `Stack`、`Inline`、`Columns`                |
 
 ## 代码约定
 

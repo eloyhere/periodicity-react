@@ -63,6 +63,49 @@
     max-width: var(--measure-prose);
 }
 
+/* Component entries reuse a family page; this bar keeps the selected
+   component and its demo visible while the reader scrolls the shared demos. */
+.showcase-page__focus {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+    gap: var(--space-2) var(--space-4);
+}
+
+.showcase-page__focus-copy {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 1px;
+}
+
+.showcase-page__family-link {
+    color: var(--color-primary);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.showcase-page__family-link:hover {
+    text-decoration: underline;
+}
+
+.showcase-page__family-link:focus-visible {
+    border-radius: var(--radius-xs);
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
 /* --------------------------------------------------------------------------
    Shared demo layouts
    -------------------------------------------------------------------------- */
@@ -261,6 +304,37 @@
 
 .showcase__timeline {
     width: min(100%, 520px);
+}
+
+/* Primitives: a portal layer that visibly escapes its demo card. */
+.showcase__portal-layer {
+    position: fixed;
+    right: clamp(16px, 3vw, 32px);
+    bottom: clamp(16px, 3vw, 32px);
+    z-index: var(--z-toast);
+    display: flex;
+    flex-direction: column;
+    width: min(280px, calc(100vw - 32px));
+    padding: var(--space-4);
+    gap: var(--space-2);
+}
+
+/* Primitives: a positioned surface so StateLayer has something to tint. */
+.showcase__state-demo {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 160px;
+    min-height: 48px;
+    padding: 0 var(--space-4);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+}
+
+.showcase__state-demo .text {
+    position: relative;
 }
 
 @media (max-width: 960px) {

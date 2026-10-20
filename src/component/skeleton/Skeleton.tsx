@@ -1,4 +1,4 @@
-import type { CSSProperties, FC, ReactNode } from "react";
+import type { CSSProperties, FC, HTMLAttributes, ReactNode, Ref } from "react";
 import cx from "../foundation/cx";
 import "./Skeleton.css";
 
@@ -14,16 +14,20 @@ export type SkeletonVariant = "text" | "rect" | "circle";
 /**
  * Props for the Skeleton component.
  * Type: interface.
+ * Extends the native `div` attributes, so `id`, `title`, `aria-*`, `data-*`, `tabIndex`, and pointer,
+ * mouse, keyboard, and focus handlers are forwarded to the placeholder element. A caller supplied
+ * `aria-hidden` takes precedence over the default `true`.
  * Fields: variant, width, height, lines, className.
  * @example
  * <Skeleton variant="text" lines={3} />
  */
-export interface SkeletonProps {
+export interface SkeletonProps extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "className"> {
     variant?: SkeletonVariant;
     width?: string | number;
     height?: string | number;
     lines?: number;
     className?: string;
+    ref?: Ref<HTMLDivElement>;
 }
 
 /**
@@ -38,7 +42,7 @@ const toCssSize: (value: string | number) => string = (value: string | number): 
 
 /**
  * Renders an aria-hidden loading placeholder for text, rectangles, or circles.
- * @param props - Variant, width, height, line count, and class name.
+ * @param props - Variant, width, height, line count, class name, and native div attributes.
  * @example
  * <Skeleton variant="rect" height={180} />
  * @returns A skeleton placeholder element.
@@ -49,13 +53,17 @@ const Skeleton: FC<SkeletonProps> = ({
     height,
     lines = 1,
     className = "",
+    style,
+    ref,
+    ...rest
 }: SkeletonProps) => {
     const cssWidth: string = width === (void 0) ? "" : toCssSize(width);
     const cssHeight: string = height === (void 0) ? "" : toCssSize(height);
     const lineCount: number = variant === "text" ? Math.max(1, Math.trunc(lines)) : 1;
     const rootStyle: CSSProperties = {
-        width: cssWidth.length > 0 ? cssWidth : (void 0),
-        height: variant === "text" ? (void 0) : cssHeight.length > 0 ? cssHeight : (void 0),
+        ...style,
+        width: cssWidth.length > 0 ? cssWidth : style?.width,
+        height: variant === "text" ? style?.height : cssHeight.length > 0 ? cssHeight : style?.height,
     };
     const lineStyle: CSSProperties = { height: cssHeight.length > 0 ? cssHeight : (void 0) };
     const lineItems: ReactNode[] = [];
@@ -72,7 +80,13 @@ const Skeleton: FC<SkeletonProps> = ({
 
     if (variant === "text") {
         return (
-            <div className={cx("skeleton", "skeleton--text", className)} style={rootStyle} aria-hidden="true">
+            <div
+                ref={ref}
+                className={cx("skeleton", "skeleton--text", className)}
+                style={rootStyle}
+                aria-hidden="true"
+                {...rest}
+            >
                 {lineItems}
             </div>
         );
@@ -80,9 +94,11 @@ const Skeleton: FC<SkeletonProps> = ({
 
     return (
         <div
+            ref={ref}
             className={cx("skeleton", `skeleton--${variant}`, className)}
             style={rootStyle}
             aria-hidden="true"
+            {...rest}
         />
     );
 };

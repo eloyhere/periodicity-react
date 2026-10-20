@@ -92,7 +92,7 @@
 }
 
 /* Show the placeholder only after the label has floated out of the way. */
-.mention--has-label .mention__editor:focus:empty::before {
+.mention--has-label .mention__editor[data-floating="true"]:empty::before {
     opacity: 1;
     transition-delay: var(--duration-medium);
 }
@@ -100,9 +100,13 @@
 /* ---- floating label, matching TextInput exactly ------------------------- */
 
 /* These values duplicate TextInput.css so the mention field keeps the same
-   top/left/font-size/transform transition when it is focused or filled. */
+   top/left/font-size/transform transition when it is focused or filled.
+   The explicit `data-floating` hook mirrors the `mention--focused` and
+   `mention--filled` classes and is applied directly by the component, so the
+   label never depends on `:has()` support. */
 
 .mention .text-field__label {
+    z-index: 4;
     transform-origin: left center;
     transition:
         top var(--duration-medium) var(--ease-decelerate),
@@ -114,9 +118,11 @@
         transform var(--duration-medium) var(--ease-decelerate);
 }
 
-.mention.text-field--outline:focus-within .text-field__label,
-.mention.mention--focused.text-field--outline .text-field__label,
-.mention.mention--filled.text-field--outline .text-field__label {
+/* ---- outline ------------------------------------------------------------ */
+
+.mention.text-field--outline .text-field__label[data-floating="true"],
+.mention.text-field--outline.mention--focused .text-field__label,
+.mention.text-field--outline:focus-within .text-field__label {
     top: 0;
     left: calc(var(--text-field-pad-inline) - 4px);
     padding: 0 5px;
@@ -126,9 +132,11 @@
     transform: translateY(-50%);
 }
 
-.mention.text-field--fill:focus-within .text-field__label,
-.mention.mention--focused.text-field--fill .text-field__label,
-.mention.mention--filled.text-field--fill .text-field__label {
+/* ---- fill --------------------------------------------------------------- */
+
+.mention.text-field--fill .text-field__label[data-floating="true"],
+.mention.text-field--fill.mention--focused .text-field__label,
+.mention.text-field--fill:focus-within .text-field__label {
     top: 6px;
     left: var(--text-field-pad-inline);
     padding: 0;
@@ -138,9 +146,11 @@
     transform: none;
 }
 
-.mention.text-field--standard:focus-within .text-field__label,
-.mention.mention--focused.text-field--standard .text-field__label,
-.mention.mention--filled.text-field--standard .text-field__label {
+/* ---- standard ----------------------------------------------------------- */
+
+.mention.text-field--standard .text-field__label[data-floating="true"],
+.mention.text-field--standard.mention--focused .text-field__label,
+.mention.text-field--standard:focus-within .text-field__label {
     top: 2px;
     left: 0;
     padding: 0;
@@ -150,11 +160,18 @@
     transform: none;
 }
 
-.mention.text-field--invalid.mention--filled .text-field__label {
+/* ---- invalid and disabled ---------------------------------------------- */
+
+.mention.text-field--invalid .text-field__label[data-floating="true"],
+.mention.text-field--invalid.mention--focused .text-field__label,
+.mention.text-field--invalid:focus-within .text-field__label {
     color: var(--color-error);
 }
 
-.mention.mention--disabled.mention--filled .text-field__label {
+.mention.mention--disabled .text-field__label,
+.mention.mention--disabled .text-field__label[data-floating="true"],
+.mention.mention--disabled.mention--focused .text-field__label,
+.mention.mention--disabled:focus-within .text-field__label {
     color: var(--faint);
 }
 

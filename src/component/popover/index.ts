@@ -1,2 +1,2 @@
 export { default as Popover } from "./Popover";
-export type { PopoverProps } from "./Popover";
+export type { PopoverCloseReason, PopoverProps } from "./Popover";

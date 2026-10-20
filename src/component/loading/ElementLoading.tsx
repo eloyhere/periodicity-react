@@ -4,8 +4,11 @@ import {
     useRef,
     useState,
     type FC,
+    type HTMLAttributes,
+    type Ref,
     type RefObject,
 } from "react";
+import cx from "../foundation/cx";
 import Portal from "../foundation/Portal";
 import CircularProgress from "../progress/CircularProgress";
 import "./ElementLoading.css";
@@ -27,20 +30,26 @@ interface LoadingRect {
 /**
  * Props for an element-bound loading overlay.
  * Type: interface.
- * Fields: loading, target, label, className.
+ * Fields: loading, target, label, className, ref, plus native div attributes.
+ * The overlay is announced as a polite status and does not accept `aria-label`, `aria-live`,
+ * or `role`, because `label` supplies its accessible name.
  * @example
  * <ElementLoading loading={saving} target={panelRef} />
  */
-export interface ElementLoadingProps {
+export interface ElementLoadingProps
+    extends Omit<HTMLAttributes<HTMLDivElement>, "aria-label" | "aria-live" | "role"> {
     loading: boolean;
     target: RefObject<HTMLElement | null> | string;
     label?: string;
     className?: string;
+    /** Ref for the native loading overlay. */
+    ref?: Ref<HTMLDivElement>;
 }
 
 /**
  * Mounts an overlay and spinner directly on top of a referenced element.
- * @param props - Loading state and target element.
+ * Native attributes and handlers are forwarded to the portalled overlay.
+ * @param props - Loading state, target element, and native overlay attributes.
  * @example
  * <ElementLoading loading={loading} target={panelRef} label="Saving" />
  * @returns A portalled loading overlay, or null when inactive.
@@ -50,6 +59,9 @@ const ElementLoading: FC<ElementLoadingProps> = ({
     target,
     label = "Loading",
     className = "",
+    ref,
+    style,
+    ...rest
 }: ElementLoadingProps) => {
     const [rect, setRect]: [LoadingRect | null, (next: LoadingRect | null) => void] =
         useState<LoadingRect | null>(null);
@@ -122,8 +134,11 @@ const ElementLoading: FC<ElementLoadingProps> = ({
     return (
         <Portal>
             <div
-                className={`element-loading ${className}`.trim()}
+                {...rest}
+                ref={ref}
+                className={cx("element-loading", className)}
                 style={{
+                    ...style,
                     top: rect.top,
                     left: rect.left,
                     width: rect.width,

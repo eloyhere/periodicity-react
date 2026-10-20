@@ -7,11 +7,15 @@ import type {
     FC,
     FocusEvent,
     FocusEventHandler,
+    InputHTMLAttributes,
     KeyboardEvent,
     KeyboardEventHandler,
+    MouseEvent,
     MouseEventHandler,
     PointerEvent,
     ReactNode,
+    Ref,
+    RefCallback,
     RefObject,
     SetStateAction,
 } from "react";
@@ -19,7 +23,9 @@ import { createListAdapter } from "../../layout/list/adapter";
 import type { ListAdapter, ListEntry } from "../../layout/list/adapter";
 import Dropdown, { DropdownItem } from "../dropdown/Dropdown";
 import cx from "../foundation/cx";
+import useControllableState from "../foundation/useControllableState";
 import useField, { type FieldState } from "../foundation/useField";
+import useMergedRef from "../foundation/useMergedRef";
 import useVirtualWindow, { type VirtualWindow } from "../foundation/useVirtualWindow";
 import Icon from "../icon/Icon";
 import Surface from "../surface/Surface";
@@ -44,39 +50,57 @@ export interface ComboboxOption {
 /**
  * Props for the Combobox filterable input.
  * Type: interface.
+ * Native input attributes are forwarded to the underlying `<input>`; `className` and `style` apply to the field root.
  * Fields:
  * - `label`: Visible field label and accessible name.
  * - `value`: Controlled selected value.
+ * - `defaultValue`: Initial selected value when uncontrolled.
  * - `options`: Choices filtered by the typed text.
  * - `onChange`: Called with the selected option value.
  * - `onInputChange`: Called with every typed filter text.
+ * - `open`: Controlled listbox visibility.
+ * - `defaultOpen`: Initial listbox visibility when uncontrolled.
+ * - `onOpenChange`: Called when the listbox visibility changes.
  * - `placeholder`: Input placeholder.
  * - `hint`: Supporting text shown below the field.
  * - `error`: Validation message; replaces the hint and marks the field invalid.
  * - `disabled`: Disables the input and listbox.
+ * - `readOnly`: Keeps the field focusable and copyable but suppresses filtering and selection.
  * - `loading`: Shows a loading message in the listbox and marks the field busy.
  * - `virtual`: Enables a fixed-row window over very long option lists.
  * - `listHeight`: Maximum height of the virtual listbox.
  * - `itemHeight`: Fixed row height used by the virtual listbox.
  * - `className`: Extra class names for the field root.
+ * - `ref`: Ref to the underlying input element.
  * @example
  * <Combobox label="Ritual" value={ritual} options={options} onChange={setRitual} />
  */
-export interface ComboboxProps {
+export interface ComboboxProps
+    extends Omit<
+        InputHTMLAttributes<HTMLInputElement>,
+        "value" | "defaultValue" | "onChange" | "type" | "role" | "className" | "children"
+    > {
     label: string;
-    value: string;
+    value?: string;
+    defaultValue?: string;
     options: ComboboxOption[];
     onChange: (value: string) => void;
     onInputChange?: (text: string) => void;
+    open?: boolean;
+    defaultOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
     placeholder?: string;
     hint?: string;
     error?: string;
     disabled?: boolean;
+    readOnly?: boolean;
     loading?: boolean;
     virtual?: boolean;
     listHeight?: number;
     itemHeight?: number;
     className?: string;
+    id?: string;
+    ref?: Ref<HTMLInputElement>;
 }
 
 /**
@@ -147,29 +171,56 @@ const findLastEnabled: (adapter: ListAdapter<ComboboxOption>) => number = (
 const Combobox: FC<ComboboxProps> = ({
     label,
     value,
+    defaultValue,
     options,
     onChange,
     onInputChange,
+    open: openProp,
+    defaultOpen = false,
+    onOpenChange,
     placeholder,
     hint,
     error,
     disabled = false,
+    readOnly = false,
     loading = false,
     virtual = false,
     listHeight = 280,
     itemHeight = 40,
     className = "",
+    style,
+    id,
+    inputMode,
+    autoComplete = "off",
+    spellCheck = false,
+    "aria-invalid": ariaInvalid,
+    "aria-describedby": ariaDescribedBy,
+    onFocus,
+    onClick,
+    onKeyDown,
+    onBlur,
+    ref,
+    ...rest
 }: ComboboxProps) => {
-    const fieldState: FieldState = useField({ label, hint, error });
+    const fieldState: FieldState = useField({ id, label, hint, error });
     const controlId: string = fieldState.controlId;
     const labelId: string = `${controlId}-label`;
     const listboxId: string = `${controlId}-listbox`;
     const hasError: boolean = fieldState.invalid;
-    const describedBy: string = hasError
-        ? fieldState.errorId
-        : hint !== (void 0) && hint.length > 0
-          ? fieldState.hintId
-          : "";
+    const describedBy: string = [
+        hasError ? fieldState.errorId : hint !== (void 0) && hint.length > 0 ? fieldState.hintId : "",
+        ariaDescribedBy ?? "",
+    ]
+        .filter((item: string): boolean => item.length > 0)
+        .join(" ");
+    const [selectedValue, setSelectedValue]: readonly [
+        string,
+        (next: string | ((previous: string) => string)) => void,
+    ] = useControllableState<string>({
+        value,
+        defaultValue: defaultValue ?? "",
+        onChange,
+    });
 
     const allAdapter: ListAdapter<ComboboxOption> = useMemo(
         (): ListAdapter<ComboboxOption> =>
@@ -178,21 +229,32 @@ const Combobox: FC<ComboboxProps> = ({
             }),
         [options],
     );
-    const selectedIndex: number = allAdapter.indexOf(value);
+    const selectedIndex: number = allAdapter.indexOf(selectedValue);
     const selectedOption: ComboboxOption | void =
         selectedIndex >= 0 ? allAdapter.getItem(selectedIndex) : (void 0);
-    const selectedLabel: string = selectedOption === (void 0) ? value : selectedOption.label;
+    const selectedLabel: string = selectedOption === (void 0) ? selectedValue : selectedOption.label;
 
     const [inputText, setInputText]: [string, Dispatch<SetStateAction<string>>] =
         useState<string>(selectedLabel);
     const [editing, setEditing]: [boolean, Dispatch<SetStateAction<boolean>>] =
         useState<boolean>(false);
     const [query, setQuery]: [string, Dispatch<SetStateAction<string>>] = useState<string>("");
-    const [open, setOpen]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false);
+    const [open, setOpen]: readonly [
+        boolean,
+        (next: boolean | ((previous: boolean) => boolean)) => void,
+    ] = useControllableState<boolean>({
+        value: openProp,
+        defaultValue: defaultOpen,
+        onChange: onOpenChange,
+    });
     const [activeIndex, setActiveIndex]: [number, Dispatch<SetStateAction<number>>] =
         useState<number>(-1);
     const fieldRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
     const inputRef: RefObject<HTMLInputElement | null> = useRef<HTMLInputElement | null>(null);
+    const mergedInputRef: RefCallback<HTMLInputElement> = useMergedRef<HTMLInputElement>(
+        inputRef,
+        ref,
+    );
 
     const filteredOptions: readonly ComboboxOption[] = useMemo((): readonly ComboboxOption[] => {
         const normalizedQuery: string = query.trim().toLowerCase();
@@ -239,13 +301,13 @@ const Combobox: FC<ComboboxProps> = ({
         windowEnd,
     );
 
-    const isOpen: boolean = open && !disabled;
+    const isOpen: boolean = open && !disabled && !readOnly;
     const effectiveActiveIndex: number =
         activeIndex >= 0 && activeIndex < filteredAdapter.size
             ? activeIndex
             : isOpen
-              ? filteredAdapter.indexOf(value) >= 0
-                  ? filteredAdapter.indexOf(value)
+              ? filteredAdapter.indexOf(selectedValue) >= 0
+                  ? filteredAdapter.indexOf(selectedValue)
                   : findFirstEnabled(filteredAdapter)
               : -1;
     const activeOption: ComboboxOption | void =
@@ -290,7 +352,7 @@ const Combobox: FC<ComboboxProps> = ({
      * @returns Nothing.
      */
     const openListbox: () => void = (): void => {
-        if (disabled) {
+        if (disabled || readOnly) {
             return;
         }
 
@@ -343,11 +405,11 @@ const Combobox: FC<ComboboxProps> = ({
         option: ComboboxOption,
         index: number,
     ): void => {
-        if (option.disabled === true) {
+        if (disabled || readOnly || option.disabled === true) {
             return;
         }
 
-        onChange(option.value);
+        setSelectedValue(option.value);
         setInputText(option.label);
         setQuery("");
         setEditing(false);
@@ -376,8 +438,10 @@ const Combobox: FC<ComboboxProps> = ({
      * <input onFocus={handleFocus} />
      * @returns Nothing.
      */
-    const handleFocus: FocusEventHandler<HTMLInputElement> = (): void => {
-        if (disabled || open) {
+    const handleFocus: FocusEventHandler<HTMLInputElement> = (event: FocusEvent<HTMLInputElement>): void => {
+        onFocus?.(event);
+
+        if (disabled || readOnly || open) {
             return;
         }
 
@@ -388,11 +452,18 @@ const Combobox: FC<ComboboxProps> = ({
 
     /**
      * Reopens the dropdown when the input is clicked.
+     * @param event - Input click event.
      * @example
      * <input onClick={handleClick} />
      * @returns Nothing.
      */
-    const handleClick: MouseEventHandler<HTMLInputElement> = (): void => {
+    const handleClick: MouseEventHandler<HTMLInputElement> = (event: MouseEvent<HTMLInputElement>): void => {
+        onClick?.(event);
+
+        if (event.defaultPrevented) {
+            return;
+        }
+
         openListbox();
     };
 
@@ -406,6 +477,10 @@ const Combobox: FC<ComboboxProps> = ({
     const handleInputChange: ChangeEventHandler<HTMLInputElement> = (
         event: ChangeEvent<HTMLInputElement>,
     ): void => {
+        if (readOnly) {
+            return;
+        }
+
         const text: string = event.target.value;
 
         setInputText(text);
@@ -442,6 +517,8 @@ const Combobox: FC<ComboboxProps> = ({
     const handleBlur: FocusEventHandler<HTMLInputElement> = (
         event: FocusEvent<HTMLInputElement>,
     ): void => {
+        onBlur?.(event);
+
         const nextTarget: EventTarget | null = event.relatedTarget;
 
         if (!(nextTarget instanceof Node)) {
@@ -468,7 +545,9 @@ const Combobox: FC<ComboboxProps> = ({
     const handleInputKeyDown: KeyboardEventHandler<HTMLInputElement> = (
         event: KeyboardEvent<HTMLInputElement>,
     ): void => {
-        if (disabled) {
+        onKeyDown?.(event);
+
+        if (event.defaultPrevented || disabled || readOnly) {
             return;
         }
 
@@ -532,12 +611,15 @@ const Combobox: FC<ComboboxProps> = ({
                 isOpen && "combobox--open",
                 hasError && "combobox--invalid",
                 disabled && "combobox--disabled",
+                readOnly && "combobox--readonly",
                 virtual && "combobox--virtual",
                 className,
             )}
+            style={style}
             data-open={isOpen ? "true" : "false"}
             data-invalid={hasError ? "true" : "false"}
             data-disabled={disabled ? "true" : "false"}
+            data-readonly={readOnly ? "true" : "false"}
         >
             <Surface
                 className="combobox__surface"
@@ -552,23 +634,26 @@ const Combobox: FC<ComboboxProps> = ({
                     }}
                 >
                     <input
-                        ref={inputRef}
+                        {...rest}
+                        ref={mergedInputRef}
                         id={controlId}
                         type="text"
                         role="combobox"
                         className="combobox__input"
                         value={displayText}
                         placeholder={placeholder === (void 0) || placeholder.length === 0 ? " " : placeholder}
-                        autoComplete="off"
-                        spellCheck={false}
+                        inputMode={inputMode}
+                        autoComplete={autoComplete}
+                        spellCheck={spellCheck}
                         aria-autocomplete="list"
                         aria-haspopup="listbox"
                         aria-expanded={isOpen}
                         aria-controls={listboxId}
-                        aria-invalid={hasError}
+                        aria-invalid={hasError ? true : ariaInvalid}
                         aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
                         aria-busy={loading ? true : (void 0)}
                         disabled={disabled}
+                        readOnly={readOnly}
                         onFocus={handleFocus}
                         onClick={handleClick}
                         onChange={handleInputChange}
@@ -647,7 +732,7 @@ const Combobox: FC<ComboboxProps> = ({
                         return (
                             <DropdownItem
                                 key={option.value}
-                                selected={option.value === value}
+                                selected={option.value === selectedValue}
                                 disabled={option.disabled === true}
                                 role="option"
                                 className={cx(

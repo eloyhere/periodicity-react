@@ -279,13 +279,13 @@
 
 .text-area--standard:focus-within .text-area__label,
 .text-area--standard:has(.text-area__field:not(:placeholder-shown)) .text-area__label {
-    top: 0;
+    top: 2px;
     left: 0;
     padding: 0;
     background: transparent;
     color: var(--color-primary);
     font-size: 12px;
-    transform: translateY(-100%);
+    transform: none;
 }
 
 .text-area--standard:focus-within .text-area__edge {

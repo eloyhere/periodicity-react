@@ -9,14 +9,18 @@ import {
     type FC,
     type FocusEvent as ReactFocusEvent,
     type FormEvent,
+    type HTMLAttributes,
     type KeyboardEvent as ReactKeyboardEvent,
     type MouseEvent as ReactMouseEvent,
     type ReactNode,
+    type Ref,
+    type RefCallback,
     type RefObject,
 } from "react";
 import Dropdown, { DropdownItem } from "../dropdown/Dropdown";
 import Spinner from "../progress/Spinner";
 import cx from "../foundation/cx";
+import useMergedRef from "../foundation/useMergedRef";
 import Surface from "../surface/Surface";
 import type { TextInputSize, TextInputVariant } from "../input/text/TextInput";
 // Reuse the TextInput field shell (surface, edge, variants, floating label)
@@ -84,10 +88,39 @@ export interface MentionToken {
 /**
  * Props for the Material mention input.
  * Type: interface.
- * Fields: value, onChange, onSearch, suggestions, onMention, onOpenChange,
- * multiline, rows, label, hint, error, placeholder, disabled, trigger,
+ * Native div attributes are forwarded to the field root; the editable editor keeps its combobox semantics.
+ * Fields: value, defaultValue, onChange, onSearch, suggestions, onMention, onOpenChange,
+ * multiline, rows, label, hint, error, placeholder, disabled, readOnly, trigger,
  * minChars, maxSuggestions, variant, size, leading, trailing, required,
- * mentions, onMentionsChange, ariaLabel, className, id.
+ * mentions, onMentionsChange, ariaLabel, className, id, ref, and native div attributes.
+ * @param value - Controlled editor text, including committed mention tokens.
+ * @param defaultValue - Initial editor text when uncontrolled.
+ * @param onChange - Called with the serialised editor text after every committed edit.
+ * @param onSearch - Async or sync loader used when the trigger query changes.
+ * @param suggestions - Local suggestions used when `onSearch` is absent.
+ * @param onMention - Called when a suggestion is committed.
+ * @param onOpenChange - Called when the suggestion list opens or closes.
+ * @param multiline - Allows line breaks when true.
+ * @param rows - Minimum visible rows for the multiline editor.
+ * @param label - Floating label; also supplies the accessible name.
+ * @param hint - Supporting text shown below the field.
+ * @param error - Validation message; marks the field invalid.
+ * @param placeholder - Placeholder shown after the label floats.
+ * @param disabled - Disables editing and the suggestion list.
+ * @param readOnly - Keeps the field focusable and copyable while rejecting edits.
+ * @param trigger - Character that opens the suggestion list.
+ * @param minChars - Query length required before suggestions load.
+ * @param maxSuggestions - Maximum number of rendered suggestions.
+ * @param variant - Field variant: outline, fill, or standard.
+ * @param size - Control size.
+ * @param leading - Optional node before the editor.
+ * @param trailing - Optional node after the editor.
+ * @param required - Marks the field as required.
+ * @param mentions - Controlled committed token ranges.
+ * @param onMentionsChange - Called with the committed token ranges.
+ * @param ariaLabel - Accessible name used when no visible label is supplied.
+ * @param className - Extra classes for the field root.
+ * @param ref - Ref to the field root.
  * @example
  * <Mention
  *     label="Reply"
@@ -97,8 +130,13 @@ export interface MentionToken {
  *     onSearch={async (query) => searchPeople(query)}
  * />
  */
-export interface MentionProps {
-    value: string;
+export interface MentionProps
+    extends Omit<
+        HTMLAttributes<HTMLDivElement>,
+        "children" | "className" | "contentEditable" | "id" | "onChange" | "role"
+    > {
+    value?: string;
+    defaultValue?: string;
     onChange: (value: string) => void;
     onSearch?: MentionSearch;
     suggestions?: readonly MentionItem[];
@@ -111,6 +149,7 @@ export interface MentionProps {
     error?: string;
     placeholder?: string;
     disabled?: boolean;
+    readOnly?: boolean;
     trigger?: string;
     minChars?: number;
     maxSuggestions?: number;
@@ -124,6 +163,7 @@ export interface MentionProps {
     ariaLabel?: string;
     className?: string;
     id?: string;
+    ref?: Ref<HTMLDivElement>;
 }
 
 /**
@@ -796,6 +836,7 @@ const placeCaretAtIndex: (editor: HTMLElement, index: number) => void = (
  */
 const Mention: FC<MentionProps> = ({
     value,
+    defaultValue,
     onChange,
     onSearch,
     suggestions = [],
@@ -808,6 +849,7 @@ const Mention: FC<MentionProps> = ({
     error,
     placeholder,
     disabled = false,
+    readOnly = false,
     trigger = "@",
     minChars = 0,
     maxSuggestions = 8,
@@ -820,7 +862,17 @@ const Mention: FC<MentionProps> = ({
     onMentionsChange,
     ariaLabel,
     className = "",
+    style,
     id,
+    tabIndex,
+    spellCheck = false,
+    "aria-label": ariaLabelAttribute,
+    "aria-invalid": ariaInvalid,
+    "aria-describedby": ariaDescribedBy,
+    onFocus,
+    onBlur,
+    ref,
+    ...rest
 }: MentionProps) => {
     const generatedId: string = useId();
     const inputId: string = id ?? generatedId;
@@ -829,13 +881,19 @@ const Mention: FC<MentionProps> = ({
     const hintId: string = `${inputId}-hint`;
     const errorId: string = `${inputId}-error`;
     const fieldRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
+    const mergedRef: RefCallback<HTMLDivElement> = useMergedRef<HTMLDivElement>(fieldRef, ref);
     const editorRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
     const requestRef: RefObject<number> = useRef<number>(0);
     const abortRef: RefObject<AbortController | null> = useRef<AbortController | null>(null);
     const startRef: RefObject<number> = useRef<number>(-1);
     const caretRef: RefObject<number> = useRef<number>(0);
     const composingRef: RefObject<boolean> = useRef<boolean>(false);
-    const lastEmittedRef: RefObject<string> = useRef<string>(value);
+    const controlled: boolean = value !== (void 0);
+    const [uncontrolledValue, setUncontrolledValue]: [string, (next: string) => void] = useState<string>(
+        defaultValue ?? "",
+    );
+    const currentValue: string = controlled ? (value as string) : uncontrolledValue;
+    const lastEmittedRef: RefObject<string> = useRef<string>(currentValue);
     const tokenItemsRef: RefObject<Map<string, MentionItem>> = useRef<Map<string, MentionItem>>(
         new Map<string, MentionItem>(),
     );
@@ -849,8 +907,16 @@ const Mention: FC<MentionProps> = ({
     const [activeIndex, setActiveIndex]: [number, (next: number) => void] = useState<number>(-1);
     const hasError: boolean = error !== (void 0) && error.length > 0;
     const hasHint: boolean = hint !== (void 0) && hint.length > 0;
-    const describedBy: string = hasError ? errorId : hasHint ? hintId : "";
-    const filled: boolean = value.length > 0;
+    const describedBy: string = [
+        hasError ? errorId : hasHint ? hintId : "",
+        ariaDescribedBy ?? "",
+    ]
+        .filter((item: string): boolean => item.length > 0)
+        .join(" ");
+    const hasMentions: boolean = mentions !== (void 0) && mentions.length > 0;
+    const filled: boolean = currentValue.length > 0 || hasMentions;
+    const editable: boolean = !disabled && !readOnly;
+    const floating: boolean = label !== (void 0) && (focused || filled || open);
     const mentionsSignature: string =
         mentions === (void 0)
             ? ""
@@ -861,7 +927,7 @@ const Mention: FC<MentionProps> = ({
                   )
                   .join("|");
     const previousMentionsSignatureRef: RefObject<string> = useRef<string>(mentionsSignature);
-    const previousDisabledRef: RefObject<boolean> = useRef<boolean>(disabled);
+    const previousEditableRef: RefObject<boolean> = useRef<boolean>(editable);
     const editorStyle: CSSProperties = { "--mention-rows": `${rows}` } as CSSProperties;
     const status: string = open
         ? loading
@@ -881,44 +947,44 @@ const Mention: FC<MentionProps> = ({
         }
 
         const signatureChanged: boolean = previousMentionsSignatureRef.current !== mentionsSignature;
-        const disabledChanged: boolean = previousDisabledRef.current !== disabled;
+        const editableChanged: boolean = previousEditableRef.current !== editable;
         previousMentionsSignatureRef.current = mentionsSignature;
-        previousDisabledRef.current = disabled;
+        previousEditableRef.current = editable;
         const snapshot: EditorSnapshot = readEditorSnapshot(editor, tokenItemsRef.current);
 
-        if (snapshot.value === value && !signatureChanged && !disabledChanged) {
+        if (snapshot.value === currentValue && !signatureChanged && !editableChanged) {
             return;
         }
 
         const providedTokens: readonly EditorToken[] | null =
-            mentions === (void 0) ? null : resolveProvidedTokens(value, mentions);
+            mentions === (void 0) ? null : resolveProvidedTokens(currentValue, mentions);
         const layoutMatches: boolean =
             providedTokens !== null &&
-            snapshot.value === value &&
+            snapshot.value === currentValue &&
             sameTokenLayout(snapshot.tokens, providedTokens);
 
-        if (snapshot.value === value && !disabledChanged && layoutMatches) {
+        if (snapshot.value === currentValue && !editableChanged && layoutMatches) {
             return;
         }
 
         const nextTokens: readonly EditorToken[] =
-            providedTokens ?? reconcileTokens(value, tokenRecordsRef.current);
+            providedTokens ?? reconcileTokens(currentValue, tokenRecordsRef.current);
         const focused: boolean =
             document.activeElement === editor || editor.contains(document.activeElement);
         const offsets: SelectionOffsets | null = focused ? getSelectionOffsets(editor) : null;
         const caret: number | null =
-            offsets === null ? null : Math.min(offsets.end, value.length);
+            offsets === null ? null : Math.min(offsets.end, currentValue.length);
 
-        tokenItemsRef.current = renderEditor(editor, value, nextTokens, disabled);
+        tokenItemsRef.current = renderEditor(editor, currentValue, nextTokens, !editable);
         tokenRecordsRef.current = nextTokens;
-        lastEmittedRef.current = value;
+        lastEmittedRef.current = currentValue;
 
-        if (caret !== null && !disabled) {
+        if (caret !== null && editable) {
             caretRef.current = caret;
             editor.focus({ preventScroll: true });
             placeCaretAtIndex(editor, caret);
         }
-    }, [value, mentions, mentionsSignature, disabled]);
+    }, [currentValue, mentions, mentionsSignature, editable]);
 
     /**
      * Closes the suggestion list and clears the active option.
@@ -999,6 +1065,14 @@ const Mention: FC<MentionProps> = ({
         caret: number | null,
         records: readonly EditorToken[],
     ): void => {
+        if (!editable) {
+            if (open) {
+                close();
+            }
+
+            return;
+        }
+
         const position: number = caret ?? nextValue.length;
         const before: string = nextValue.slice(0, position);
         const triggerIndex: number = before.lastIndexOf(trigger);
@@ -1064,7 +1138,7 @@ const Mention: FC<MentionProps> = ({
         nextValue: string,
         records: readonly EditorToken[],
     ): void => {
-        tokenItemsRef.current = renderEditor(editor, nextValue, records, disabled);
+        tokenItemsRef.current = renderEditor(editor, nextValue, records, !editable);
         tokenRecordsRef.current = records;
         lastEmittedRef.current = nextValue;
     };
@@ -1082,6 +1156,11 @@ const Mention: FC<MentionProps> = ({
 
         if (snapshot.value !== lastEmittedRef.current) {
             lastEmittedRef.current = snapshot.value;
+
+            if (!controlled) {
+                setUncontrolledValue(snapshot.value);
+            }
+
             onChange(snapshot.value);
             onMentionsChange?.(toPublicTokens(snapshot.tokens));
         }
@@ -1131,7 +1210,7 @@ const Mention: FC<MentionProps> = ({
     ): void => {
         const editor: HTMLDivElement | null = editorRef.current;
 
-        if (editor === null) {
+        if (editor === null || !editable) {
             return;
         }
 
@@ -1155,15 +1234,18 @@ const Mention: FC<MentionProps> = ({
         }
 
         rebuildEditor(editor, nextValue, nextTokens);
+
+        if (!controlled) {
+            setUncontrolledValue(nextValue);
+        }
+
         onChange(nextValue);
         onMentionsChange?.(toPublicTokens(nextTokens));
         detect(nextValue, caret, nextTokens);
 
-        if (!disabled) {
-            caretRef.current = caret;
-            editor.focus({ preventScroll: true });
-            placeCaretAtIndex(editor, caret);
-        }
+        caretRef.current = caret;
+        editor.focus({ preventScroll: true });
+        placeCaretAtIndex(editor, caret);
     };
 
     /**
@@ -1228,7 +1310,7 @@ const Mention: FC<MentionProps> = ({
     const choose: (item: MentionItem) => void = (item: MentionItem): void => {
         const editor: HTMLDivElement | null = editorRef.current;
 
-        if (editor === null) {
+        if (editor === null || !editable) {
             return;
         }
 
@@ -1314,7 +1396,7 @@ const Mention: FC<MentionProps> = ({
     ): void => {
         const native: InputEvent = event.nativeEvent as InputEvent;
 
-        if (composingRef.current || native.isComposing) {
+        if (!editable || composingRef.current || native.isComposing) {
             return;
         }
 
@@ -1332,7 +1414,7 @@ const Mention: FC<MentionProps> = ({
     const handleBeforeInput: (event: FormEvent<HTMLDivElement>) => void = (
         event: FormEvent<HTMLDivElement>,
     ): void => {
-        if (composingRef.current) {
+        if (!editable || composingRef.current) {
             return;
         }
 
@@ -1393,7 +1475,7 @@ const Mention: FC<MentionProps> = ({
     const handleKeyDown: (event: ReactKeyboardEvent<HTMLDivElement>) => void = (
         event: ReactKeyboardEvent<HTMLDivElement>,
     ): void => {
-        if (event.nativeEvent.isComposing) {
+        if (!editable || event.nativeEvent.isComposing) {
             return;
         }
 
@@ -1508,7 +1590,7 @@ const Mention: FC<MentionProps> = ({
     const handleCut: (event: ReactClipboardEvent<HTMLDivElement>) => void = (
         event: ReactClipboardEvent<HTMLDivElement>,
     ): void => {
-        if (disabled) {
+        if (!editable) {
             return;
         }
 
@@ -1550,7 +1632,7 @@ const Mention: FC<MentionProps> = ({
     const handlePaste: (event: ReactClipboardEvent<HTMLDivElement>) => void = (
         event: ReactClipboardEvent<HTMLDivElement>,
     ): void => {
-        if (disabled) {
+        if (!editable) {
             return;
         }
 
@@ -1572,7 +1654,7 @@ const Mention: FC<MentionProps> = ({
     const handleDrop: (event: ReactDragEvent<HTMLDivElement>) => void = (
         event: ReactDragEvent<HTMLDivElement>,
     ): void => {
-        if (disabled) {
+        if (!editable) {
             return;
         }
 
@@ -1613,11 +1695,15 @@ const Mention: FC<MentionProps> = ({
     /**
      * Marks the field as focused so the floating label works even when the
      * focused node is a token close button.
+     * @param event - Focus event from the field root.
      * @example
      * <div onFocus={handleRootFocus} />
      * @returns Nothing.
      */
-    const handleRootFocus: () => void = (): void => {
+    const handleRootFocus: (event: ReactFocusEvent<HTMLDivElement>) => void = (
+        event: ReactFocusEvent<HTMLDivElement>,
+    ): void => {
+        onFocus?.(event);
         setFocused(true);
     };
 
@@ -1631,6 +1717,8 @@ const Mention: FC<MentionProps> = ({
     const handleRootBlur: (event: ReactFocusEvent<HTMLDivElement>) => void = (
         event: ReactFocusEvent<HTMLDivElement>,
     ): void => {
+        onBlur?.(event);
+
         const next: EventTarget | null = event.relatedTarget;
 
         if (!(next instanceof Node) || !event.currentTarget.contains(next)) {
@@ -1648,7 +1736,7 @@ const Mention: FC<MentionProps> = ({
     const handleEditorClick: (event: ReactMouseEvent<HTMLDivElement>) => void = (
         event: ReactMouseEvent<HTMLDivElement>,
     ): void => {
-        if (disabled) {
+        if (!editable) {
             return;
         }
 
@@ -1721,7 +1809,8 @@ const Mention: FC<MentionProps> = ({
 
     return (
         <div
-            ref={fieldRef}
+            {...rest}
+            ref={mergedRef}
             className={cx(
                 "text-field",
                 `text-field--${variant}`,
@@ -1729,16 +1818,21 @@ const Mention: FC<MentionProps> = ({
                 "mention",
                 multiline && "mention--multiline",
                 disabled && "mention--disabled",
+                readOnly && "mention--readonly",
                 filled && "mention--filled",
                 focused && "mention--focused",
+                floating && "mention--floating",
                 hasError && "text-field--invalid",
                 leading !== (void 0) && "text-field--leading",
                 label !== (void 0) && "mention--has-label",
                 className,
             )}
+            style={style}
             data-invalid={hasError ? "true" : "false"}
             data-disabled={disabled ? "true" : "false"}
+            data-readonly={readOnly ? "true" : "false"}
             data-filled={filled ? "true" : "false"}
+            data-floating={floating ? "true" : "false"}
             data-open={open ? "true" : "false"}
             onFocus={handleRootFocus}
             onBlur={handleRootBlur}
@@ -1759,13 +1853,14 @@ const Mention: FC<MentionProps> = ({
                             ref={editorRef}
                             id={inputId}
                             className="mention__editor"
-                            contentEditable={!disabled}
+                            contentEditable={editable}
                             suppressContentEditableWarning
                             role="combobox"
-                            tabIndex={disabled ? -1 : 0}
-                            spellCheck={false}
+                            tabIndex={disabled ? -1 : (tabIndex ?? 0)}
+                            spellCheck={spellCheck}
                             data-placeholder={placeholder}
                             data-filled={filled ? "true" : "false"}
+                            data-floating={floating ? "true" : "false"}
                             data-multiline={multiline ? "true" : "false"}
                             style={multiline ? editorStyle : (void 0)}
                             aria-autocomplete="list"
@@ -1773,12 +1868,15 @@ const Mention: FC<MentionProps> = ({
                             aria-controls={listboxId}
                             aria-haspopup="listbox"
                             aria-multiline={multiline}
-                            aria-invalid={hasError}
+                            aria-invalid={hasError ? true : ariaInvalid}
                             aria-required={required}
                             aria-disabled={disabled}
+                            aria-readonly={readOnly ? true : (void 0)}
                             aria-busy={loading}
                             aria-labelledby={label === (void 0) ? (void 0) : labelId}
-                            aria-label={label === (void 0) ? (ariaLabel ?? placeholder) : (void 0)}
+                            aria-label={
+                                label === (void 0) ? (ariaLabel ?? ariaLabelAttribute ?? placeholder) : (void 0)
+                            }
                             aria-placeholder={placeholder}
                             aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
                             onInput={handleInput}
@@ -1809,6 +1907,7 @@ const Mention: FC<MentionProps> = ({
                         id={labelId}
                         className="text-field__label"
                         htmlFor={inputId}
+                        data-floating={floating ? "true" : "false"}
                         onMouseDown={handleLabelMouseDown}
                     >
                         {label}

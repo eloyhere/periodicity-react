@@ -30,7 +30,7 @@ export type MessageAction =
 /**
  * One chat message.
  * Type: interface.
- * Fields: id, author, content, timestamp, avatar, self, contactId, status.
+ * Fields: id, author, content, timestamp, avatar, self, contactId, status, disabled.
  * @example
  * const message: MessageItem = { id: "m1", author: "Mira", content: "Hello" };
  */
@@ -43,6 +43,7 @@ export interface MessageItem {
     self?: boolean;
     contactId?: string;
     status?: MessageStatus;
+    disabled?: boolean;
 }
 
 /**

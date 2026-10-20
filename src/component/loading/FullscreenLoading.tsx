@@ -1,25 +1,61 @@
-import { useEffect, useRef, type FC, type RefObject, type SyntheticEvent } from "react";
+import {
+    useEffect,
+    useRef,
+    type AriaRole,
+    type DialogHTMLAttributes,
+    type FC,
+    type ReactEventHandler,
+    type Ref,
+    type RefCallback,
+    type RefObject,
+    type SyntheticEvent,
+} from "react";
 import { createRoot } from "react-dom/client";
 import type { Root } from "react-dom/client";
+import cx from "../foundation/cx";
+import useControllableState from "../foundation/useControllableState";
+import useMergedRef from "../foundation/useMergedRef";
 import CircularProgress from "../progress/CircularProgress";
 import Portal from "../foundation/Portal";
 import Text from "../text/Text";
 import "./FullscreenLoading.css";
 
 /**
+ * Why the fullscreen loader asked to close.
+ * Type: type alias.
+ * Fields: none.
+ * @example
+ * const reason: FullscreenLoadingCloseReason = "duration";
+ */
+export type FullscreenLoadingCloseReason = "duration" | "escape";
+
+/**
  * Props for the native-dialog fullscreen loader.
  * Type: interface.
- * Fields: open, label, description, className.
+ * Fields: open, defaultOpen, onOpenChange, label, description, duration, onClose, closeOnEscape,
+ * className, role, ref, plus native dialog attributes.
  * @example
  * <FullscreenLoading open={saving} label="Saving" />
  */
-export interface FullscreenLoadingProps {
-    open: boolean;
+export interface FullscreenLoadingProps
+    extends Omit<DialogHTMLAttributes<HTMLDialogElement>, "open" | "onClose"> {
+    /** Controlled open state; omit to let the loader manage its own state. */
+    open?: boolean;
+    /** Initial open state when uncontrolled; defaults to `false`. */
+    defaultOpen?: boolean;
+    /** Called with the requested open state whenever the loader opens or closes. */
+    onOpenChange?: (open: boolean) => void;
     label?: string;
     description?: string;
     duration?: number;
-    onClose?: () => void;
+    /** Called with the reason whenever the loader asks to close. */
+    onClose?: (reason: FullscreenLoadingCloseReason) => void;
+    /** Whether Escape asks the loader to close; defaults to `false`. */
+    closeOnEscape?: boolean;
     className?: string;
+    role?: AriaRole;
+    /** Ref for the native dialog element. */
+    ref?: Ref<HTMLDialogElement>;
 }
 
 /**
@@ -38,20 +74,38 @@ export interface FullscreenLoadingOptions {
 
 /**
  * Fullscreen loading layer built on the native dialog top layer.
- * @param props - Open state and optional copy.
+ * Native dialog attributes and handlers are forwarded to the underlying dialog.
+ * @param props - Open state, copy, duration, and native dialog attributes.
  * @example
  * <FullscreenLoading open={busy} label="Preparing workspace" />
  * @returns A native dialog loader.
  */
 const FullscreenLoading: FC<FullscreenLoadingProps> = ({
-    open,
+    open: openProp,
+    defaultOpen = false,
+    onOpenChange,
     label = "Loading",
     description,
     duration,
     onClose,
+    closeOnEscape = false,
     className = "",
+    role = "status",
+    ref,
+    onCancel,
+    "aria-label": ariaLabel,
+    ...rest
 }: FullscreenLoadingProps) => {
     const dialogRef: RefObject<HTMLDialogElement | null> = useRef<HTMLDialogElement | null>(null);
+    const [open, setOpen]: readonly [
+        boolean,
+        (next: boolean | ((previous: boolean) => boolean)) => void,
+    ] = useControllableState<boolean>({
+        value: openProp,
+        defaultValue: defaultOpen,
+        onChange: onOpenChange,
+    });
+    const mergedRef: RefCallback<HTMLDialogElement> = useMergedRef<HTMLDialogElement>(dialogRef, ref);
 
     useEffect((): void => {
         const dialog: HTMLDialogElement | null = dialogRef.current;
@@ -73,25 +127,38 @@ const FullscreenLoading: FC<FullscreenLoadingProps> = ({
         }
 
         const timer: number = window.setTimeout((): void => {
-            onClose?.();
+            setOpen(false);
+            onClose?.("duration");
         }, Math.max(0, duration));
 
         return (): void => {
             window.clearTimeout(timer);
         };
-    }, [open, duration, onClose]);
+    }, [duration, onClose, open, setOpen]);
+
+    const handleCancel: ReactEventHandler<HTMLDialogElement> = (
+        event: SyntheticEvent<HTMLDialogElement>,
+    ): void => {
+        event.preventDefault();
+
+        if (closeOnEscape) {
+            setOpen(false);
+            onClose?.("escape");
+        }
+
+        onCancel?.(event);
+    };
 
     return (
         <Portal>
             <dialog
-                ref={dialogRef}
-                className={`fullscreen-loading ${className}`.trim()}
-                aria-label={label}
+                {...rest}
+                ref={mergedRef}
+                className={cx("fullscreen-loading", className)}
+                aria-label={ariaLabel ?? label}
                 aria-busy="true"
-                role="status"
-                onCancel={(event: SyntheticEvent<HTMLDialogElement>): void =>
-                    event.preventDefault()
-                }
+                role={role}
+                onCancel={handleCancel}
             >
                 <div className="fullscreen-loading__content">
                     <CircularProgress size={56} label={label} />

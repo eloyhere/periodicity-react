@@ -5,7 +5,8 @@ import "./PickerField.css";
 /**
  * Props for the shared picker field shell.
  * Type: interface.
- * Fields: label, hint, error, htmlFor, disabled, children, className, onClick.
+ * Fields: label, hint, error, htmlFor, hintId, errorId, required, disabled, children,
+ * className, onClick.
  * @example
  * <PickerField label="Time">...</PickerField>
  */
@@ -14,6 +15,9 @@ export interface PickerFieldProps {
     hint?: string;
     error?: string;
     htmlFor?: string;
+    hintId?: string;
+    errorId?: string;
+    required?: boolean;
     disabled?: boolean;
     children: ReactNode;
     className?: string;
@@ -22,7 +26,7 @@ export interface PickerFieldProps {
 
 /**
  * Renders a Material outlined shell around any native picker control.
- * @param props - Label, support text, and control.
+ * @param props - Label, support text, linking ids, required state, and control.
  * @example
  * <PickerField label="Time" hint="24 hour clock"><input type="time" /></PickerField>
  * @returns A picker field shell.
@@ -32,6 +36,9 @@ const PickerField: FC<PickerFieldProps> = ({
     hint,
     error,
     htmlFor,
+    hintId,
+    errorId,
+    required = false,
     disabled = false,
     children,
     className = "",
@@ -47,14 +54,21 @@ const PickerField: FC<PickerFieldProps> = ({
         >
             <label className="picker-field__label" htmlFor={htmlFor}>
                 {label}
+                {required ? (
+                    <span className="picker-field__required" aria-hidden="true">
+                        *
+                    </span>
+                ) : null}
             </label>
             <div className="picker-field__control">{children}</div>
             {invalid ? (
-                <p className="picker-field__error" role="alert">
+                <p className="picker-field__error" id={errorId} role="alert">
                     {error}
                 </p>
             ) : hint === (void 0) || hint.length === 0 ? null : (
-                <p className="picker-field__hint">{hint}</p>
+                <p className="picker-field__hint" id={hintId}>
+                    {hint}
+                </p>
             )}
         </div>
     );

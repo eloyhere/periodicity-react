@@ -12,10 +12,13 @@ import {
     type Dispatch,
     type DragEvent as ReactDragEvent,
     type FC,
+    type HTMLAttributes,
     type KeyboardEvent as ReactKeyboardEvent,
     type MouseEvent as ReactMouseEvent,
     type PointerEvent as ReactPointerEvent,
     type ReactNode,
+    type Ref,
+    type RefCallback,
     type RefObject,
     type SetStateAction,
 } from "react";
@@ -23,6 +26,7 @@ import Button from "../../button/Button";
 import Icon from "../../icon/Icon";
 import cx from "../../foundation/cx";
 import useControllableState from "../../foundation/useControllableState";
+import useMergedRef from "../../foundation/useMergedRef";
 import {
     createNumberPickerAdapter,
     resolveWheelNotch,
@@ -30,17 +34,27 @@ import {
     type WheelAccumulatorState,
     type WheelNotchResult,
 } from "./adapter";
+import type { PickerDataAttributes } from "../shared/native";
 import "./NumberPicker.css";
 
 /**
  * Props for the Android-style number picker.
  * Type: interface.
  * Fields: value, defaultValue, onChange, min, max, step, label, hint, error, disabled,
- * disabledValues, formatter, className, id.
+ * readOnly, disabledValues, formatter, name, required, onOpenChange, className, id, ref,
+ * and the native wheel attributes.
+ * The wheel receives `id`, `style`, `aria-*`, data attributes, and focus, blur, click, and
+ * key handlers; `name` and `required` belong to the editable value field. `onOpenChange`
+ * reports whether the suggestion popup is visible.
  * @example
  * <NumberPicker label="Minutes" value={minutes} onChange={setMinutes} min={0} max={59} />
  */
-export interface NumberPickerProps {
+export interface NumberPickerProps
+    extends Omit<
+            HTMLAttributes<HTMLDivElement>,
+            "children" | "className" | "defaultValue" | "onChange" | "role"
+        >,
+        PickerDataAttributes {
     value?: number;
     defaultValue?: number;
     onChange?: (value: number) => void;
@@ -51,10 +65,15 @@ export interface NumberPickerProps {
     hint?: string;
     error?: string;
     disabled?: boolean;
+    readOnly?: boolean;
     disabledValues?: readonly number[];
     formatter?: (value: number) => string;
+    name?: string;
+    required?: boolean;
+    onOpenChange?: (open: boolean) => void;
     className?: string;
     id?: string;
+    ref?: Ref<HTMLDivElement>;
 }
 
 /**
@@ -177,10 +196,21 @@ const NumberPicker: FC<NumberPickerProps> = ({
     hint,
     error,
     disabled = false,
+    readOnly = false,
     disabledValues,
     formatter,
+    name,
+    required = false,
+    onOpenChange,
     className = "",
     id,
+    tabIndex,
+    onKeyDown: onWheelKeyDown,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledBy,
+    "aria-describedby": ariaDescribedBy,
+    ref,
+    ...rest
 }: NumberPickerProps) => {
     const generatedId: string = useId();
     const pickerId: string = id ?? generatedId;
@@ -205,18 +235,30 @@ const NumberPicker: FC<NumberPickerProps> = ({
         onChange,
     });
     const clamped: number = adapter.clamp(currentValue);
-    const interactive: boolean = !disabled && (value === (void 0) || onChange !== (void 0));
+    const interactive: boolean =
+        !disabled && !readOnly && (value === (void 0) || onChange !== (void 0));
+    const focusable: boolean = !disabled && (interactive || readOnly);
     const format: (next: number) => string = formatter ?? ((next: number): string => `${next}`);
     const canDecrease: boolean = interactive && adapter.step(clamped, -1) !== null;
     const canIncrease: boolean = interactive && adapter.step(clamped, 1) !== null;
-    const describedBy: string | undefined = invalid
+    const internalDescribedBy: string = invalid
         ? `${pickerId}-error`
-        : hint === (void 0)
-          ? (void 0)
+        : hint === (void 0) || hint.length === 0
+          ? ""
           : `${pickerId}-hint`;
+    const describedBy: string = [internalDescribedBy, ariaDescribedBy ?? ""]
+        .filter((entry: string): boolean => entry.length > 0)
+        .join(" ");
+    const labelledBy: string | undefined =
+        ariaLabel !== (void 0)
+            ? ariaLabelledBy
+            : [`${pickerId}-label`, ariaLabelledBy ?? ""]
+                  .filter((entry: string): boolean => entry.length > 0)
+                  .join(" ");
     const suggestionsId: string = `${pickerId}-suggestions`;
     const pickerRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
     const wheelRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
+    const mergedWheelRef: RefCallback<HTMLDivElement> = useMergedRef(wheelRef, ref);
     const shellRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
     const inputRef: RefObject<HTMLInputElement | null> = useRef<HTMLInputElement | null>(null);
     const adapterRef: RefObject<NumberPickerAdapter> = useRef<NumberPickerAdapter>(adapter);
@@ -248,8 +290,18 @@ const NumberPicker: FC<NumberPickerProps> = ({
     const showSuggestions: boolean = suggestionsOpen && suggestions.length > 0;
     const activeIndex: number =
         activeSuggestion >= 0 && activeSuggestion < suggestions.length ? activeSuggestion : -1;
+    const suggestionsVisibleRef: RefObject<boolean> = useRef<boolean>(false);
     const trackStyle: CSSProperties = { transform: `translateY(${dragOffset}px)` };
     const inputValue: string = draft ?? (editing ? `${clamped}` : format(clamped));
+
+    useEffect((): void => {
+        if (suggestionsVisibleRef.current === showSuggestions) {
+            return;
+        }
+
+        suggestionsVisibleRef.current = showSuggestions;
+        onOpenChange?.(showSuggestions);
+    }, [onOpenChange, showSuggestions]);
 
     useLayoutEffect((): void => {
         adapterRef.current = adapter;
@@ -887,12 +939,18 @@ const NumberPicker: FC<NumberPickerProps> = ({
             className={cx(
                 "number-picker-field",
                 disabled && "number-picker-field--disabled",
+                readOnly && "number-picker-field--readonly",
                 invalid && "number-picker-field--invalid",
                 className,
             )}
         >
             <span className="number-picker-field__label" id={`${pickerId}-label`}>
                 {label}
+                {required ? (
+                    <span className="number-picker-field__required" aria-hidden="true">
+                        *
+                    </span>
+                ) : null}
             </span>
             <div className="number-picker" ref={pickerRef} onClickCapture={handleClickCapture}>
                 <Button
@@ -919,7 +977,8 @@ const NumberPicker: FC<NumberPickerProps> = ({
                     onDragStart={handleDragStart}
                 >
                     <div
-                        ref={wheelRef}
+                        {...rest}
+                        ref={mergedWheelRef}
                         id={pickerId}
                         className={cx(
                             "number-picker__wheel",
@@ -927,17 +986,25 @@ const NumberPicker: FC<NumberPickerProps> = ({
                         )}
                         role="spinbutton"
                         aria-orientation="vertical"
-                        tabIndex={interactive ? 0 : -1}
-                        aria-labelledby={`${pickerId}-label`}
+                        tabIndex={tabIndex ?? (focusable ? 0 : -1)}
+                        aria-label={ariaLabel}
+                        aria-labelledby={labelledBy}
                         aria-valuemin={min}
                         aria-valuemax={max}
                         aria-valuenow={clamped}
                         aria-valuetext={format(clamped)}
-                        aria-describedby={describedBy}
-                        aria-disabled={!interactive ? "true" : (void 0)}
-                        aria-readonly={!interactive && !disabled ? "true" : (void 0)}
+                        aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
+                        aria-disabled={!interactive && !readOnly ? "true" : (void 0)}
+                        aria-readonly={readOnly || (!interactive && !disabled) ? "true" : (void 0)}
+                        aria-required={required ? "true" : (void 0)}
                         data-dragging={dragging ? "true" : "false"}
-                        onKeyDown={handleKeyDown}
+                        onKeyDown={(event: ReactKeyboardEvent<HTMLDivElement>): void => {
+                            onWheelKeyDown?.(event);
+
+                            if (!event.defaultPrevented) {
+                                handleKeyDown(event);
+                            }
+                        }}
                     >
                         <div className="number-picker__track" style={trackStyle}>
                             {WheelOffsets.map((offset: number): ReactNode => {
@@ -981,9 +1048,12 @@ const NumberPicker: FC<NumberPickerProps> = ({
                         className="number-picker__input"
                         type="text"
                         value={inputValue}
+                        name={name}
+                        required={required}
+                        readOnly={readOnly}
                         role="combobox"
                         aria-label={`Edit ${label}`}
-                        aria-describedby={describedBy}
+                        aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
                         aria-invalid={invalid ? "true" : (void 0)}
                         aria-autocomplete="list"
                         aria-expanded={showSuggestions}
@@ -995,7 +1065,7 @@ const NumberPicker: FC<NumberPickerProps> = ({
                         autoComplete="off"
                         spellCheck={false}
                         inputMode={min < 0 ? "text" : "decimal"}
-                        disabled={!interactive}
+                        disabled={!interactive && !readOnly}
                         onFocus={handleInputFocus}
                         onChange={handleInputChange}
                         onCompositionStart={handleInputCompositionStart}

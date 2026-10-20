@@ -1,4 +1,11 @@
-import { createElement, type FC, type ReactNode } from "react";
+import {
+    createElement,
+    type FC,
+    type HTMLAttributes,
+    type MouseEvent as ReactMouseEvent,
+    type ReactNode,
+    type Ref,
+} from "react";
 import cx from "../foundation/cx";
 import Surface, { type RippleLayer, type RippleOptions, type SurfaceTone } from "../surface/Surface";
 import "./Card.css";
@@ -15,13 +22,18 @@ export type CardTone = "default" | "accent" | "mint" | "violet" | "amber";
 /**
  * Props for the Card component.
  * Type: interface.
- * Fields: children, className, eyebrow, title, action, ripple, tone, interactive, onClick, media, headingLevel, footer.
+ * Extends the native `div` attributes, so `id`, `style`, `aria-*`, `data-*`, `tabIndex`, and pointer,
+ * mouse, keyboard, and focus handlers are forwarded to the card surface. `title` remains the card
+ * heading rather than a tooltip, and `onClick` remains the card activation callback.
+ * Fields: children, className, eyebrow, title, action, ripple, tone, interactive, disabled, onClick,
+ * media, headingLevel, footer.
  * @example
  * <Card eyebrow="Today" title="Rituals" action={<Badge>3</Badge>}>
  *     <p>Three small loops.</p>
  * </Card>
  */
-export interface CardProps {
+export interface CardProps
+    extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "className" | "title" | "onClick"> {
     children: ReactNode;
     className?: string;
     eyebrow?: string;
@@ -30,10 +42,12 @@ export interface CardProps {
     ripple?: RippleLayer | RippleOptions | false;
     tone?: CardTone;
     interactive?: boolean;
-    onClick?: () => void;
+    disabled?: boolean;
+    onClick?: (event: ReactMouseEvent<HTMLButtonElement>) => void;
     media?: ReactNode;
     headingLevel?: 2 | 3 | 4;
     footer?: ReactNode;
+    ref?: Ref<HTMLDivElement>;
 }
 
 const SurfaceTones: Record<CardTone, SurfaceTone> = {
@@ -67,7 +81,8 @@ const getHeadingElement: (level: 2 | 3 | 4) => "h2" | "h3" | "h4" = (
 
 /**
  * Renders an elevated content card with an optional media slot, configurable heading, and footer.
- * @param props - Header content, tone, ripple, media, heading level, footer, click behaviour, and children.
+ * @param props - Header content, tone, ripple, media, heading level, footer, click behaviour, children,
+ * and native div attributes.
  * @example
  * <Card title="Momentum" headingLevel={2} interactive onClick={openMomentum} footer={<Button>View</Button>}>
  *     <p>Focused minutes across the week.</p>
@@ -83,10 +98,13 @@ const Card: FC<CardProps> = ({
     ripple = { layer: "foreground", trigger: ["hover", "click"] },
     tone = "default",
     interactive = false,
+    disabled = false,
     onClick,
     media,
     headingLevel = 3,
     footer,
+    ref,
+    ...rest
 }: CardProps) => {
     const isClickable: boolean = onClick !== (void 0);
     const hasEyebrow: boolean = eyebrow !== (void 0) && eyebrow.length > 0;
@@ -102,21 +120,31 @@ const Card: FC<CardProps> = ({
 
     return (
         <Surface
+            ref={ref}
             className={cx(
                 "card",
                 `card--${tone}`,
                 (interactive || isClickable) && "card--interactive",
                 isClickable && "card--clickable",
+                disabled && "card--disabled",
                 className,
             )}
             tone={surfaceTone}
             ripple={surfaceRipple}
-            stateLayer={isClickable}
+            stateLayer={isClickable && !disabled}
+            disabled={disabled}
             background={<span className="card__wash" />}
             foreground={<span className="card__edge" />}
+            {...rest}
         >
             {isClickable ? (
-                <button type="button" className="card__hit" aria-label={hitLabel} onClick={onClick} />
+                <button
+                    type="button"
+                    className="card__hit"
+                    aria-label={hitLabel}
+                    disabled={disabled}
+                    onClick={onClick}
+                />
             ) : null}
             {media === (void 0) || media === null || media === false ? null : (
                 <div className="card__media">{media}</div>

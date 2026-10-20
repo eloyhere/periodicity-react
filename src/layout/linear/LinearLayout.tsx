@@ -1,4 +1,4 @@
-import { type CSSProperties, type FC, type ReactNode } from "react";
+import { type CSSProperties, type FC, type HTMLAttributes, type ReactNode, type Ref } from "react";
 import cx from "../../component/foundation/cx";
 import "./LinearLayout.css";
 
@@ -41,11 +41,14 @@ export type LinearGap = "none" | "xs" | "sm" | "md" | "lg" | "xl";
 /**
  * Props for the Android-style linear layout.
  * Type: interface.
- * Fields: children, orientation, gravity, align, gap, wrap, reverse, className, ariaLabel.
+ * Fields: children, orientation, gravity, align, gap, wrap, reverse, ariaLabel, ref,
+ * and native `div` attributes.
+ * Native `id`, `className`, `style`, `title`, `tabIndex`, `role`, `aria-*`, `data-*`, pointer,
+ * mouse, keyboard, and focus handlers are forwarded to the linear container.
  * @example
- * <LinearLayout orientation="vertical" gap="md">...</LinearLayout>
+ * <LinearLayout orientation="vertical" gap="md" aria-label="Actions">...</LinearLayout>
  */
-export interface LinearLayoutProps {
+export interface LinearLayoutProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
     children: ReactNode;
     orientation?: LinearOrientation;
     gravity?: LinearGravity;
@@ -53,13 +56,13 @@ export interface LinearLayoutProps {
     gap?: LinearGap;
     wrap?: boolean;
     reverse?: boolean;
-    className?: string;
     ariaLabel?: string;
+    ref?: Ref<HTMLDivElement>;
 }
 
 /**
  * Flex row or column with Android LinearLayout gravity and gap semantics.
- * @param props - Direction, distribution, alignment, and gap.
+ * @param props - Direction, distribution, alignment, gap, and native attributes.
  * @example
  * <LinearLayout gravity="between" align="center">...</LinearLayout>
  * @returns A linear layout element.
@@ -74,41 +77,50 @@ const LinearLayout: FC<LinearLayoutProps> = ({
     reverse = false,
     className = "",
     ariaLabel,
-}: LinearLayoutProps) => (
-    <div
-        className={cx(
-            "linear",
-            `linear--${orientation}`,
-            `linear--gravity-${gravity}`,
-            `linear--align-${align}`,
-            `linear--gap-${gap}`,
-            wrap && "linear--wrap",
-            reverse && "linear--reverse",
-            className,
-        )}
-        aria-label={ariaLabel}
-    >
-        {children}
-    </div>
-);
+    ref,
+    ...rest
+}: LinearLayoutProps) => {
+    const label: string | undefined = rest["aria-label"] ?? ariaLabel;
+
+    return (
+        <div
+            {...rest}
+            ref={ref}
+            className={cx(
+                "linear",
+                `linear--${orientation}`,
+                `linear--gravity-${gravity}`,
+                `linear--align-${align}`,
+                `linear--gap-${gap}`,
+                wrap && "linear--wrap",
+                reverse && "linear--reverse",
+                className,
+            )}
+            aria-label={label}
+        >
+            {children}
+        </div>
+    );
+};
 
 /**
  * Props for a weighted linear child.
  * Type: interface.
- * Fields: children, weight, alignSelf, className.
+ * Fields: children, weight, alignSelf, ref, and native `div` attributes.
+ * Caller `style` is merged after the computed weight, so it can override it deliberately.
  * @example
- * <LinearLayoutItem weight={2}>...</LinearLayoutItem>
+ * <LinearLayoutItem weight={2} aria-label="Weighted pane">...</LinearLayoutItem>
  */
-export interface LinearLayoutItemProps {
+export interface LinearLayoutItemProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
     children: ReactNode;
     weight?: number;
     alignSelf?: LinearAlign;
-    className?: string;
+    ref?: Ref<HTMLDivElement>;
 }
 
 /**
  * Child with Android layout_weight and per-child cross-axis alignment.
- * @param props - Weight and alignment.
+ * @param props - Weight, alignment, and native attributes.
  * @example
  * <LinearLayoutItem weight={1}>...</LinearLayoutItem>
  * @returns A weighted linear child.
@@ -118,17 +130,22 @@ export const LinearLayoutItem: FC<LinearLayoutItemProps> = ({
     weight = 0,
     alignSelf,
     className = "",
+    style,
+    ref,
+    ...rest
 }: LinearLayoutItemProps) => {
-    const style: CSSProperties = weight > 0 ? { flexGrow: weight, flexBasis: 0 } : {};
+    const weightStyle: CSSProperties = weight > 0 ? { flexGrow: weight, flexBasis: 0 } : {};
 
     return (
         <div
+            {...rest}
+            ref={ref}
             className={cx(
                 "linear__item",
                 alignSelf === (void 0) ? "" : `linear__item--align-${alignSelf}`,
                 className,
             )}
-            style={style}
+            style={{ ...weightStyle, ...style }}
         >
             {children}
         </div>

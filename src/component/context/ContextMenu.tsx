@@ -6,13 +6,17 @@ import {
     useLayoutEffect,
     useRef,
     useState,
+    type ButtonHTMLAttributes,
     type Context,
     type Dispatch,
     type FC,
+    type HTMLAttributes,
     type KeyboardEventHandler,
     type MouseEventHandler,
     type PointerEvent as ReactPointerEvent,
     type ReactNode,
+    type Ref,
+    type RefCallback,
     type RefObject,
     type SetStateAction,
 } from "react";
@@ -21,6 +25,7 @@ import cx from "../foundation/cx";
 import Portal from "../foundation/Portal";
 import useControllableState from "../foundation/useControllableState";
 import useDismiss from "../foundation/useDismiss";
+import useMergedRef from "../foundation/useMergedRef";
 import Surface from "../surface/Surface";
 import "./ContextMenu.css";
 
@@ -37,6 +42,15 @@ export interface ContextMenuPoint {
 }
 
 /**
+ * Why the context menu asked to close.
+ * Type: type alias.
+ * Fields: none.
+ * @example
+ * const reason: ContextMenuCloseReason = "select";
+ */
+export type ContextMenuCloseReason = "escape" | "outside" | "select" | "tab";
+
+/**
  * Shared menu state consumed by items.
  * Type: interface.
  * Fields: close.
@@ -50,14 +64,15 @@ interface ContextMenuContextValue {
 /**
  * Props for the context menu.
  * Type: interface.
- * Fields: children, menu, header, footer, empty, disabled, open, defaultOpen,
- * onOpenChange, ariaLabel, className, menuClassName, closeOnSelect.
+ * Fields: children, menu, header, footer, empty, disabled, open, defaultOpen, onOpenChange,
+ * onClose, closeOnEscape, ariaLabel, className, menuClassName, closeOnSelect, longPress,
+ * longPressDelay, ref, plus native div attributes forwarded to the trigger zone.
  * @example
  * <ContextMenu menu={<ContextMenuItem onSelect={copy}>Copy</ContextMenuItem>}>
  *     <div>Right-click this area</div>
  * </ContextMenu>
  */
-export interface ContextMenuProps {
+export interface ContextMenuProps extends HTMLAttributes<HTMLDivElement> {
     children: ReactNode;
     menu?: ReactNode;
     header?: ReactNode;
@@ -67,12 +82,18 @@ export interface ContextMenuProps {
     open?: boolean;
     defaultOpen?: boolean;
     onOpenChange?: (open: boolean) => void;
+    /** Called with the reason whenever the menu asks to close. */
+    onClose?: (reason: ContextMenuCloseReason) => void;
+    /** Whether Escape asks the menu to close; defaults to `true`. */
+    closeOnEscape?: boolean;
     ariaLabel?: string;
     className?: string;
     menuClassName?: string;
     closeOnSelect?: boolean;
     longPress?: boolean;
     longPressDelay?: number;
+    /** Ref for the native trigger zone element. */
+    ref?: Ref<HTMLDivElement>;
 }
 
 const ContextMenuContext: Context<ContextMenuContextValue | null> =
@@ -82,7 +103,7 @@ const edgePadding: number = 8;
 
 /**
  * Gives every descendant menu item a single close action.
- * @param props - Target area, slots, and menu state.
+ * @param props - Target area, slots, menu state, and native zone attributes.
  * @example
  * <ContextMenu menu={<ContextMenuItem>Copy</ContextMenuItem>}>Area</ContextMenu>
  * @returns A right-click zone and its portalled menu.
@@ -97,12 +118,24 @@ const ContextMenu: FC<ContextMenuProps> = ({
     open: openProp,
     defaultOpen = false,
     onOpenChange,
-    ariaLabel = "Context menu",
+    onClose,
+    closeOnEscape = true,
+    ariaLabel,
     className = "",
     menuClassName = "",
     closeOnSelect = true,
     longPress = false,
     longPressDelay = 500,
+    ref,
+    "aria-label": ariaLabelAttribute,
+    onContextMenu,
+    onKeyDown,
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+    onPointerLeave,
+    onPointerCancel,
+    ...rest
 }: ContextMenuProps) => {
     const zoneRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
     const panelRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
@@ -125,21 +158,45 @@ const ContextMenu: FC<ContextMenuProps> = ({
         defaultValue: defaultOpen,
         onChange: onOpenChange,
     });
+    const mergedZoneRef: RefCallback<HTMLDivElement> = useMergedRef<HTMLDivElement>(zoneRef, ref);
 
-    const close: () => void = useCallback((): void => {
-        setOpen(false);
+    const close: (reason?: ContextMenuCloseReason) => void = useCallback(
+        (reason: ContextMenuCloseReason = "outside"): void => {
+            setOpen(false);
+            onClose?.(reason);
 
-        if (keyboardOpened.current) {
-            keyboardOpened.current = false;
-            zoneRef.current?.focus({ preventScroll: true });
-        }
-    }, [setOpen]);
+            if (keyboardOpened.current) {
+                keyboardOpened.current = false;
+                zoneRef.current?.focus({ preventScroll: true });
+            }
+        },
+        [onClose, setOpen],
+    );
 
     useDismiss({
         enabled: open,
         refs: [zoneRef, panelRef],
-        onDismiss: close,
+        onDismiss: (): void => close("outside"),
+        escape: false,
     });
+
+    useEffect((): (() => void) | void => {
+        if (!open || !closeOnEscape) {
+            return;
+        }
+
+        const handleKeyDown: (event: KeyboardEvent) => void = (event: KeyboardEvent): void => {
+            if (event.key === "Escape") {
+                close("escape");
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+
+        return (): void => {
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [close, closeOnEscape, open]);
 
     useLayoutEffect((): void => {
         const panel: HTMLDivElement | null = panelRef.current;
@@ -197,12 +254,12 @@ const ContextMenu: FC<ContextMenuProps> = ({
     const handleContextMenu: MouseEventHandler<HTMLDivElement> = (
         event: Parameters<MouseEventHandler<HTMLDivElement>>[0],
     ): void => {
-        if (disabled) {
-            return;
+        if (!disabled) {
+            event.preventDefault();
+            openAt(event.clientX, event.clientY, false);
         }
 
-        event.preventDefault();
-        openAt(event.clientX, event.clientY, false);
+        onContextMenu?.(event);
     };
 
     const handleZoneKeyDown: KeyboardEventHandler<HTMLDivElement> = (
@@ -210,16 +267,16 @@ const ContextMenu: FC<ContextMenuProps> = ({
     ): void => {
         const isMenuKey: boolean = event.key === "ContextMenu" || (event.shiftKey && event.key === "F10");
 
-        if (!isMenuKey || disabled) {
-            return;
+        if (isMenuKey && !disabled) {
+            event.preventDefault();
+            const rect: DOMRect | undefined = zoneRef.current?.getBoundingClientRect();
+
+            if (rect !== (void 0)) {
+                openAt(rect.left + rect.width / 2, rect.top + rect.height / 2, true);
+            }
         }
 
-        event.preventDefault();
-        const rect: DOMRect | undefined = zoneRef.current?.getBoundingClientRect();
-
-        if (rect !== (void 0)) {
-            openAt(rect.left + rect.width / 2, rect.top + rect.height / 2, true);
-        }
+        onKeyDown?.(event);
     };
 
     const clearLongPress: () => void = (): void => {
@@ -241,41 +298,61 @@ const ContextMenu: FC<ContextMenuProps> = ({
     const handlePointerDown: (event: ReactPointerEvent<HTMLDivElement>) => void = (
         event: ReactPointerEvent<HTMLDivElement>,
     ): void => {
-        if (!longPress || disabled || event.button !== 0) {
-            return;
+        if (longPress && !disabled && event.button === 0) {
+            clearLongPress();
+            longPressPointRef.current = { x: event.clientX, y: event.clientY };
+            longPressTimerRef.current = window.setTimeout((): void => {
+                const pointAtPress: ContextMenuPoint | null = longPressPointRef.current;
+
+                if (pointAtPress !== null) {
+                    openAt(pointAtPress.x, pointAtPress.y, false);
+                }
+            }, longPressDelay);
         }
 
-        clearLongPress();
-        longPressPointRef.current = { x: event.clientX, y: event.clientY };
-        longPressTimerRef.current = window.setTimeout((): void => {
-            const point: ContextMenuPoint | null = longPressPointRef.current;
-
-            if (point !== null) {
-                openAt(point.x, point.y, false);
-            }
-        }, longPressDelay);
+        onPointerDown?.(event);
     };
 
     const handlePointerMove: (event: ReactPointerEvent<HTMLDivElement>) => void = (
         event: ReactPointerEvent<HTMLDivElement>,
     ): void => {
-        const point: ContextMenuPoint | null = longPressPointRef.current;
+        const pointAtPress: ContextMenuPoint | null = longPressPointRef.current;
 
         if (
-            point !== null &&
-            (Math.abs(event.clientX - point.x) > 8 || Math.abs(event.clientY - point.y) > 8)
+            pointAtPress !== null &&
+            (Math.abs(event.clientX - pointAtPress.x) > 8 || Math.abs(event.clientY - pointAtPress.y) > 8)
         ) {
             clearLongPress();
         }
+
+        onPointerMove?.(event);
     };
 
-    const handlePointerUp: () => void = (): void => {
+    const handlePointerUp: (event: ReactPointerEvent<HTMLDivElement>) => void = (
+        event: ReactPointerEvent<HTMLDivElement>,
+    ): void => {
         clearLongPress();
+        onPointerUp?.(event);
+    };
+
+    const handlePointerLeave: (event: ReactPointerEvent<HTMLDivElement>) => void = (
+        event: ReactPointerEvent<HTMLDivElement>,
+    ): void => {
+        clearLongPress();
+        onPointerLeave?.(event);
+    };
+
+    const handlePointerCancel: (event: ReactPointerEvent<HTMLDivElement>) => void = (
+        event: ReactPointerEvent<HTMLDivElement>,
+    ): void => {
+        clearLongPress();
+        onPointerCancel?.(event);
     };
 
     const focusItem: (direction: 1 | -1 | "first" | "last") => void = (
         direction: 1 | -1 | "first" | "last",
-    ): void => {        const panel: HTMLDivElement | null = panelRef.current;
+    ): void => {
+        const panel: HTMLDivElement | null = panelRef.current;
 
         if (panel === null) {
             return;
@@ -320,32 +397,31 @@ const ContextMenu: FC<ContextMenuProps> = ({
         } else if (event.key === "End") {
             event.preventDefault();
             focusItem("last");
-        } else if (event.key === "Escape") {
-            event.preventDefault();
-            close();
         } else if (event.key === "Tab") {
-            close();
+            close("tab");
         }
     };
 
     const contextValue: ContextMenuContextValue = {
-        close: closeOnSelect ? close : (): void => {},
+        close: closeOnSelect ? (): void => close("select") : (): void => {},
     };
     const hasMenu: boolean = menu !== (void 0) && menu !== null && menu !== false;
     const hasHeader: boolean = header !== (void 0) && header !== null && header !== false;
     const hasFooter: boolean = footer !== (void 0) && footer !== null && footer !== false;
+    const menuLabel: string = ariaLabelAttribute ?? ariaLabel ?? "Context menu";
 
     return (
         <div
-            ref={zoneRef}
+            {...rest}
+            ref={mergedZoneRef}
             className={cx("context-menu__zone", className)}
             onContextMenu={handleContextMenu}
             onKeyDown={handleZoneKeyDown}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
-            onPointerLeave={handlePointerUp}
-            onPointerCancel={handlePointerUp}
+            onPointerLeave={handlePointerLeave}
+            onPointerCancel={handlePointerCancel}
         >
             {children}
 
@@ -365,7 +441,7 @@ const ContextMenu: FC<ContextMenuProps> = ({
                         tone="neutral"
                         role="menu"
                         tabIndex={-1}
-                        aria-label={ariaLabel}
+                        aria-label={menuLabel}
                         onKeyDown={handlePanelKeyDown}
                     >
                         {hasHeader ? <div className="context-menu__header">{header}</div> : null}
@@ -391,24 +467,27 @@ const ContextMenu: FC<ContextMenuProps> = ({
 /**
  * Props for a single context-menu action.
  * Type: interface.
- * Fields: children, onSelect, icon, shortcut, selected, disabled, danger, className.
+ * Fields: children, onSelect, icon, shortcut, selected, disabled, danger, className, ref,
+ * plus native button attributes forwarded to the menu item control.
  * @example
  * <ContextMenuItem icon="Copy" onSelect={copy}>Copy</ContextMenuItem>
  */
-export interface ContextMenuItemProps {
+export interface ContextMenuItemProps
+    extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onSelect" | "type" | "role"> {
     children: ReactNode;
     onSelect?: () => void;
     icon?: IconName;
     shortcut?: string;
     selected?: boolean;
-    disabled?: boolean;
     danger?: boolean;
-    className?: string;
+    /** Ref for the native menu item button. */
+    ref?: Ref<HTMLButtonElement>;
 }
 
 /**
  * Renders one Material menu item, closing its menu after selection.
- * @param props - Label, icon, shortcut, and state.
+ * Caller event handlers are composed with the internal selection behaviour.
+ * @param props - Label, icon, shortcut, state, and native button attributes.
  * @example
  * <ContextMenuItem icon="Copy" shortcut="⌘C">Copy</ContextMenuItem>
  * @returns A menu item.
@@ -422,8 +501,22 @@ export const ContextMenuItem: FC<ContextMenuItemProps> = ({
     disabled = false,
     danger = false,
     className = "",
+    ref,
+    onClick,
+    ...rest
 }: ContextMenuItemProps) => {
     const menu: ContextMenuContextValue | null = useContext(ContextMenuContext);
+
+    const handleClick: MouseEventHandler<HTMLButtonElement> = (
+        event: Parameters<MouseEventHandler<HTMLButtonElement>>[0],
+    ): void => {
+        if (!disabled) {
+            onSelect?.();
+            menu?.close();
+        }
+
+        onClick?.(event);
+    };
 
     return (
         <Surface
@@ -438,18 +531,13 @@ export const ContextMenuItem: FC<ContextMenuItemProps> = ({
             disabled={disabled}
         >
             <button
+                {...rest}
+                ref={ref}
                 className="context-menu__item-control"
                 type="button"
                 role="menuitem"
                 disabled={disabled}
-                onClick={(): void => {
-                    if (disabled) {
-                        return;
-                    }
-
-                    onSelect?.();
-                    menu?.close();
-                }}
+                onClick={handleClick}
             >
                 <span className="context-menu__item-icon" aria-hidden="true">
                     {icon === (void 0) ? null : <Icon name={icon} size={16} />}
@@ -467,31 +555,47 @@ export const ContextMenuItem: FC<ContextMenuItemProps> = ({
 };
 
 /**
+ * Props for the menu separator.
+ * Type: type alias.
+ * Fields: native div attributes and a ref.
+ * @example
+ * const props: ContextMenuSeparatorProps = { className: "context-menu__separator--wide" };
+ */
+export type ContextMenuSeparatorProps = HTMLAttributes<HTMLDivElement> & {
+    ref?: Ref<HTMLDivElement>;
+};
+
+/**
  * Renders a Material menu separator.
+ * @param props - Native div attributes and a ref.
  * @example
  * <ContextMenuSeparator />
  * @returns A separator.
  */
-export const ContextMenuSeparator: FC = () => (
-    <div className="context-menu__separator" role="separator" />
+export const ContextMenuSeparator: FC<ContextMenuSeparatorProps> = ({
+    className = "",
+    ref,
+    ...rest
+}: ContextMenuSeparatorProps) => (
+    <div {...rest} ref={ref} className={cx("context-menu__separator", className)} role="separator" />
 );
 
 /**
  * Props for a labelled context-menu group.
  * Type: interface.
- * Fields: label, children, className.
+ * Fields: label, children, className, ref, plus native div attributes.
  * @example
  * <ContextMenuGroup label="Edit">...</ContextMenuGroup>
  */
-export interface ContextMenuGroupProps {
+export interface ContextMenuGroupProps extends HTMLAttributes<HTMLDivElement> {
     label: string;
     children: ReactNode;
-    className?: string;
+    ref?: Ref<HTMLDivElement>;
 }
 
 /**
  * Groups related menu items under a small caption.
- * @param props - Group label and items.
+ * @param props - Group label, items, and native div attributes.
  * @example
  * <ContextMenuGroup label="Edit"><ContextMenuItem>Copy</ContextMenuItem></ContextMenuGroup>
  * @returns A labelled group.
@@ -500,8 +604,10 @@ export const ContextMenuGroup: FC<ContextMenuGroupProps> = ({
     label,
     children,
     className = "",
+    ref,
+    ...rest
 }: ContextMenuGroupProps) => (
-    <div className={cx("context-menu__group", className)}>
+    <div {...rest} ref={ref} className={cx("context-menu__group", className)}>
         <div className="context-menu__group-label">{label}</div>
         {children}
     </div>

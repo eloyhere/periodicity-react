@@ -22,7 +22,7 @@ export type ContactAction = "profile" | "chat" | "delete" | "block";
 /**
  * One person in a contact list.
  * Type: interface.
- * Fields: id, name, avatar, description, presence.
+ * Fields: id, name, avatar, description, presence, disabled.
  * @example
  * const contact: ContactItem = { id: "mira", name: "Mira Chen", presence: "online" };
  */
@@ -32,6 +32,7 @@ export interface ContactItem {
     avatar?: string;
     description?: string;
     presence?: ContactPresence;
+    disabled?: boolean;
 }
 
 /**

@@ -7,18 +7,26 @@ import {
     useMemo,
     useRef,
     useState,
+    type ButtonHTMLAttributes,
     type Context,
     type Dispatch,
     type FC,
+    type FocusEventHandler,
+    type HTMLAttributes,
     type KeyboardEvent,
     type KeyboardEventHandler,
+    type MouseEvent as ReactMouseEvent,
+    type MouseEventHandler,
     type MutableRefObject,
     type ReactNode,
+    type Ref,
     type RefCallback,
     type RefObject,
     type SetStateAction,
 } from "react";
 import cx from "../../component/foundation/cx";
+import useControllableState from "../../component/foundation/useControllableState";
+import useMergedRef from "../../component/foundation/useMergedRef";
 import type { Placement } from "../../component/foundation/useAnchoredPosition";
 import { useRovingTabIndex, type RovingTabIndexResult } from "../../component/foundation/useRovingTabIndex";
 import Icon, { type IconName } from "../../component/icon/Icon";
@@ -41,7 +49,10 @@ interface MenuContextValue {
     getTabIndex: (id: string) => 0 | -1;
     registerItem: (id: string, node: HTMLButtonElement | null) => void;
     setActive: (id: string) => void;
-    select: (onSelect?: () => void) => void;
+    select: (
+        event: ReactMouseEvent<HTMLButtonElement>,
+        onSelect?: (event: ReactMouseEvent<HTMLButtonElement>) => void,
+    ) => void;
 }
 
 const MenuContext: Context<MenuContextValue | null> = createContext<MenuContextValue | null>(null);
@@ -49,24 +60,32 @@ const MenuContext: Context<MenuContextValue | null> = createContext<MenuContextV
 /**
  * Props for the menu root.
  * Type: interface.
- * @param open - Whether the menu is visible.
+ * @param open - Controlled visibility state; omit for an uncontrolled menu.
+ * @param defaultOpen - Initial visibility when the menu is uncontrolled.
  * @param onOpenChange - Called with the requested open state.
  * @param anchorRef - Trigger element the menu is anchored to.
  * @param children - Menu items, groups, and separators.
  * @param placement - Preferred menu placement relative to the trigger.
  * @param ariaLabel - Accessible name announced for the menu.
+ * @param className - Extra class applied to the menu panel.
+ * @param ref - Ref forwarded to the menu panel.
  * @example
  * <Menu open={open} onOpenChange={setOpen} anchorRef={buttonRef}>
  *     <MenuItem onSelect={rename}>Rename</MenuItem>
  * </Menu>
  */
-export interface MenuProps {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
+export interface MenuProps
+    extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
+    open?: boolean;
+    defaultOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
     anchorRef: RefObject<HTMLElement | null>;
     children: ReactNode;
     placement?: Placement;
     ariaLabel?: string;
+    className?: string;
+    ref?: Ref<HTMLDivElement>;
+    [dataAttribute: `data-${string}`]: string | number | boolean | undefined;
 }
 
 /**
@@ -94,28 +113,36 @@ export interface MenuComponent extends FC<MenuProps> {
  * @param shortcut - Optional keyboard hint shown at the row end.
  * @param selected - Marks a radio-style selection and exposes it to assistive technology.
  * @param className - Extra class applied to the row surface.
+ * @param ref - Ref forwarded to the row button.
  * @example
  * <MenuItem icon="Refresh" shortcut="R" onSelect={refresh}>Refresh</MenuItem>
  */
-export interface MenuItemProps {
+export interface MenuItemProps
+    extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children" | "disabled" | "onSelect"> {
     children: ReactNode;
-    onSelect?: () => void;
+    onSelect?: (event: ReactMouseEvent<HTMLButtonElement>) => void;
     icon?: IconName;
     disabled?: boolean;
     shortcut?: string;
     selected?: boolean;
     className?: string;
+    ref?: Ref<HTMLButtonElement>;
+    [dataAttribute: `data-${string}`]: string | number | boolean | undefined;
 }
 
 /**
  * Props for a menu separator.
  * Type: interface.
  * @param className - Extra class applied to the separator.
+ * @param ref - Ref forwarded to the separator element.
  * @example
  * <MenuSeparator className="menu__separator--wide" />
  */
-export interface MenuSeparatorProps {
+export interface MenuSeparatorProps
+    extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
     className?: string;
+    ref?: Ref<HTMLDivElement>;
+    [dataAttribute: `data-${string}`]: string | number | boolean | undefined;
 }
 
 /**
@@ -124,18 +151,22 @@ export interface MenuSeparatorProps {
  * @param label - Group heading text.
  * @param children - Items belonging to the group.
  * @param className - Extra class applied to the group wrapper.
+ * @param ref - Ref forwarded to the group wrapper.
  * @example
  * <MenuGroup label="Actions"><MenuItem onSelect={archive}>Archive</MenuItem></MenuGroup>
  */
-export interface MenuGroupProps {
+export interface MenuGroupProps
+    extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
     label: string;
     children: ReactNode;
     className?: string;
+    ref?: Ref<HTMLDivElement>;
+    [dataAttribute: `data-${string}`]: string | number | boolean | undefined;
 }
 
 /**
  * Implements the APG menu pattern: roving tab stop, arrow keys, Home/End, and focus return.
- * @param props - Open state, anchor, placement, and composed menu children.
+ * @param props - Open state, anchor, placement, native panel attributes, and composed menu children.
  * @example
  * <Menu open={open} onOpenChange={setOpen} anchorRef={triggerRef}>
  *     <MenuItem onSelect={copy}>Copy</MenuItem>
@@ -144,11 +175,17 @@ export interface MenuGroupProps {
  */
 const MenuRoot: FC<MenuProps> = ({
     open,
+    defaultOpen,
     onOpenChange,
     anchorRef,
     children,
     placement = "bottom-start",
-    ariaLabel = "Menu",
+    ariaLabel,
+    className = "",
+    ref,
+    onKeyDown,
+    "aria-label": ariaLabelAttribute,
+    ...rest
 }: MenuProps) => {
     const [itemIds, setItemIds]: [readonly string[], Dispatch<SetStateAction<readonly string[]>>] =
         useState<readonly string[]>([]);
@@ -157,6 +194,13 @@ const MenuRoot: FC<MenuProps> = ({
     const nodesRef: MutableRefObject<Record<string, HTMLButtonElement>> = useRef<
         Record<string, HTMLButtonElement>
     >({});
+    const [resolvedOpen, setOpen]: readonly [boolean, (next: boolean | ((previous: boolean) => boolean)) => void] =
+        useControllableState<boolean>({
+            value: open,
+            defaultValue: defaultOpen ?? false,
+            onChange: onOpenChange,
+        });
+    const resolvedAriaLabel: string = ariaLabel ?? ariaLabelAttribute ?? "Menu";
 
     const registerItem: (id: string, node: HTMLButtonElement | null) => void = useCallback(
         (id: string, node: HTMLButtonElement | null): void => {
@@ -182,9 +226,9 @@ const MenuRoot: FC<MenuProps> = ({
                 setActiveId(null);
             }
 
-            onOpenChange(nextOpen);
+            setOpen(nextOpen);
         },
-        [onOpenChange],
+        [setOpen],
     );
 
     const closeAndRestoreFocus: () => void = useCallback((): void => {
@@ -192,9 +236,15 @@ const MenuRoot: FC<MenuProps> = ({
         anchorRef.current?.focus({ preventScroll: true });
     }, [anchorRef, handleOpenChange]);
 
-    const handleSelect: (onSelect?: () => void) => void = useCallback(
-        (onSelect?: () => void): void => {
-            onSelect?.();
+    const handleSelect: (
+        event: ReactMouseEvent<HTMLButtonElement>,
+        onSelect?: (event: ReactMouseEvent<HTMLButtonElement>) => void,
+    ) => void = useCallback(
+        (
+            event: ReactMouseEvent<HTMLButtonElement>,
+            onSelect?: (event: ReactMouseEvent<HTMLButtonElement>) => void,
+        ): void => {
+            onSelect?.(event);
             closeAndRestoreFocus();
         },
         [closeAndRestoreFocus],
@@ -234,27 +284,25 @@ const MenuRoot: FC<MenuProps> = ({
         [itemIds, tabIndexFor],
     );
 
-    const handleMenuKeyDown: KeyboardEventHandler<HTMLElement> = (
-        event: KeyboardEvent<HTMLElement>,
+    const handleMenuKeyDown: KeyboardEventHandler<HTMLDivElement> = (
+        event: KeyboardEvent<HTMLDivElement>,
     ): void => {
         if (event.key === "Escape") {
             event.preventDefault();
             event.stopPropagation();
             closeAndRestoreFocus();
-            return;
-        }
-
-        if (event.key === "Tab") {
+        } else if (event.key === "Tab") {
             handleOpenChange(false);
             anchorRef.current?.focus({ preventScroll: true });
-            return;
+        } else {
+            handleRovingKeyDown(event);
         }
 
-        handleRovingKeyDown(event);
+        onKeyDown?.(event);
     };
 
     useEffect((): void => {
-        if (!open || resolvedActiveId === null) {
+        if (!resolvedOpen || resolvedActiveId === null) {
             return;
         }
 
@@ -263,7 +311,7 @@ const MenuRoot: FC<MenuProps> = ({
         if (node !== (void 0) && document.activeElement !== node) {
             node.focus();
         }
-    }, [open, resolvedActiveId]);
+    }, [resolvedOpen, resolvedActiveId]);
 
     const contextValue: MenuContextValue = useMemo<MenuContextValue>(
         () => ({ getTabIndex, registerItem, setActive: setActiveId, select: handleSelect }),
@@ -272,13 +320,20 @@ const MenuRoot: FC<MenuProps> = ({
 
     return (
         <Popover
-            open={open}
+            open={resolvedOpen}
             onOpenChange={handleOpenChange}
             anchorRef={anchorRef}
             placement={placement}
         >
             <MenuContext.Provider value={contextValue}>
-                <div className="menu" role="menu" aria-label={ariaLabel} onKeyDown={handleMenuKeyDown}>
+                <div
+                    {...rest}
+                    ref={ref}
+                    className={cx("menu", className)}
+                    role="menu"
+                    aria-label={resolvedAriaLabel}
+                    onKeyDown={handleMenuKeyDown}
+                >
                     {children}
                 </div>
             </MenuContext.Provider>
@@ -288,7 +343,7 @@ const MenuRoot: FC<MenuProps> = ({
 
 /**
  * Renders a selectable menu row on a rippling Surface.
- * @param props - Label, selection callback, icon, shortcut, and disabled state.
+ * @param props - Label, selection callback, icon, shortcut, native button attributes, and disabled state.
  * @example
  * <MenuItem icon="Check" selected onSelect={apply}>Apply</MenuItem>
  * @returns A menu row button.
@@ -301,6 +356,13 @@ export const MenuItem: FC<MenuItemProps> = ({
     shortcut,
     selected,
     className = "",
+    ref,
+    onClick,
+    onFocus,
+    type = "button",
+    id,
+    tabIndex,
+    ...rest
 }: MenuItemProps) => {
     const itemId: string = useId();
     const menuContext: MenuContextValue | null = useContext(MenuContext);
@@ -312,18 +374,24 @@ export const MenuItem: FC<MenuItemProps> = ({
         },
         [itemId, registerItem],
     );
-    const tabIndex: 0 | -1 = menuContext === null ? 0 : menuContext.getTabIndex(itemId);
+    const mergedRef: RefCallback<HTMLButtonElement> = useMergedRef(handleRef, ref);
+    const rovingTabIndex: 0 | -1 = menuContext === null ? 0 : menuContext.getTabIndex(itemId);
 
-    const handleFocus: () => void = (): void => {
+    const handleFocus: FocusEventHandler<HTMLButtonElement> = (
+        event: Parameters<FocusEventHandler<HTMLButtonElement>>[0],
+    ): void => {
         menuContext?.setActive(itemId);
+        onFocus?.(event);
     };
 
-    const handleClick: () => void = (): void => {
-        if (disabled) {
-            return;
+    const handleClick: MouseEventHandler<HTMLButtonElement> = (
+        event: Parameters<MouseEventHandler<HTMLButtonElement>>[0],
+    ): void => {
+        if (!disabled) {
+            menuContext?.select(event, onSelect);
         }
 
-        menuContext?.select(onSelect);
+        onClick?.(event);
     };
 
     return (
@@ -333,14 +401,17 @@ export const MenuItem: FC<MenuItemProps> = ({
             disabled={disabled}
         >
             <button
-                ref={handleRef}
-                type="button"
+                {...rest}
+                ref={mergedRef}
+                type={type}
+                id={id ?? itemId}
                 className="menu__item-control"
                 role={selected === (void 0) ? "menuitem" : "menuitemradio"}
                 aria-checked={selected}
                 aria-disabled={disabled ? true : (void 0)}
                 data-selected={selected === true ? "true" : "false"}
-                tabIndex={tabIndex}
+                data-disabled={disabled ? "true" : "false"}
+                tabIndex={tabIndex ?? rovingTabIndex}
                 onFocus={handleFocus}
                 onClick={handleClick}
             >
@@ -364,27 +435,43 @@ export const MenuItem: FC<MenuItemProps> = ({
 
 /**
  * Renders a divider between groups of menu items.
- * @param props - Optional class name.
+ * @param props - Optional class name and native separator attributes.
  * @example
  * <MenuSeparator />
  * @returns A decorative separator row.
  */
-export const MenuSeparator: FC<MenuSeparatorProps> = ({ className = "" }: MenuSeparatorProps) => (
-    <div role="separator" className={cx("menu__separator", className)} />
+export const MenuSeparator: FC<MenuSeparatorProps> = ({
+    className = "",
+    ref,
+    ...rest
+}: MenuSeparatorProps) => (
+    <div {...rest} ref={ref} role="separator" className={cx("menu__separator", className)} />
 );
 
 /**
  * Renders a labelled group of related menu items.
- * @param props - Group label, items, and optional class name.
+ * @param props - Group label, items, class name, ref, and native group attributes.
  * @example
  * <MenuGroup label="Layout"><MenuItem onSelect={grid}>Grid</MenuItem></MenuGroup>
  * @returns A labelled group container.
  */
-export const MenuGroup: FC<MenuGroupProps> = ({ label, children, className = "" }: MenuGroupProps) => {
+export const MenuGroup: FC<MenuGroupProps> = ({
+    label,
+    children,
+    className = "",
+    ref,
+    ...rest
+}: MenuGroupProps) => {
     const labelId: string = useId();
 
     return (
-        <div role="group" aria-labelledby={labelId} className={cx("menu__group", className)}>
+        <div
+            {...rest}
+            ref={ref}
+            role="group"
+            aria-labelledby={labelId}
+            className={cx("menu__group", className)}
+        >
             <Text as="div" variant="label" tone="soft" className="menu__group-label" id={labelId}>
                 {label}
             </Text>

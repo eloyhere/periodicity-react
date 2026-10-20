@@ -2,14 +2,16 @@ import {
     useRef,
     useState,
     type ChangeEvent,
-    type Dispatch,
+    type FocusEvent,
+    type FocusEventHandler,
     type FC,
     type ReactNode,
+    type Ref,
     type RefObject,
-    type SetStateAction,
 } from "react";
 import Dropdown, { DropdownItem } from "../../dropdown/Dropdown";
-import TextInput from "../text/TextInput";
+import useControllableState from "../../foundation/useControllableState";
+import TextInput, { type TextInputProps } from "../text/TextInput";
 import "./CompleteInput.css";
 
 /**
@@ -27,22 +29,43 @@ export interface CompleteOption {
 /**
  * Props for the free-text autocomplete input.
  * Type: interface.
- * Fields: label, value, options, onChange, onSelect, hint, error, disabled, placeholder, minChars, className.
+ * Native input attributes are forwarded to the underlying text field; `className` and `style` apply to the field root.
+ * Fields: label, value, defaultValue, options, onChange, onSelect, open, defaultOpen, onOpenChange,
+ * hint, error, disabled, readOnly, placeholder, minChars, className, id, ref, and native input attributes.
+ * @param label - Floating label.
+ * @param value - Controlled text value.
+ * @param defaultValue - Initial text value when uncontrolled.
+ * @param options - Strings or options filtered by the typed text.
+ * @param onChange - Called with every edited text value.
+ * @param onSelect - Called with the committed suggestion.
+ * @param open - Controlled suggestion panel visibility.
+ * @param defaultOpen - Initial panel visibility when uncontrolled.
+ * @param onOpenChange - Called when the suggestion panel visibility changes.
+ * @param hint - Supporting text shown below the field.
+ * @param error - Validation message; replaces the hint and marks the field invalid.
+ * @param disabled - Disables the field and suggestion panel.
+ * @param readOnly - Keeps the value focusable but suppresses edits and selection.
+ * @param placeholder - Placeholder text.
+ * @param minChars - Query length required before suggestions are shown.
+ * @param className - Extra classes for the field root.
+ * @param ref - Ref to the underlying input element.
  * @example
  * <CompleteInput label="Ritual" value={value} options={options} onChange={setValue} />
  */
-export interface CompleteInputProps {
+export interface CompleteInputProps
+    extends Omit<TextInputProps, "type" | "value" | "defaultValue" | "onChange" | "onSelect" | "className"> {
     label: string;
-    value: string;
+    value?: string;
+    defaultValue?: string;
     options: ReadonlyArray<string | CompleteOption>;
     onChange: (value: string) => void;
     onSelect?: (option: CompleteOption) => void;
-    hint?: string;
-    error?: string;
-    disabled?: boolean;
-    placeholder?: string;
+    open?: boolean;
+    defaultOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
     minChars?: number;
     className?: string;
+    ref?: Ref<HTMLInputElement>;
 }
 
 /**
@@ -67,41 +90,102 @@ const toOption: (value: string | CompleteOption) => CompleteOption = (
 const CompleteInput: FC<CompleteInputProps> = ({
     label,
     value,
+    defaultValue,
     options,
     onChange,
     onSelect,
+    open: openProp,
+    defaultOpen = false,
+    onOpenChange,
     hint,
     error,
     disabled = false,
+    readOnly = false,
     placeholder,
     minChars = 0,
     className = "",
+    style,
+    autoComplete = "off",
+    onFocus,
+    ref,
+    ...rest
 }: CompleteInputProps) => {
     const anchorRef: RefObject<HTMLSpanElement | null> = useRef<HTMLSpanElement | null>(null);
-    const [open, setOpen]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false);
+    const controlled: boolean = value !== (void 0);
+    const [uncontrolledValue, setUncontrolledValue]: [string, (next: string) => void] = useState<string>(
+        defaultValue ?? "",
+    );
+    const currentValue: string = controlled ? (value as string) : uncontrolledValue;
+    const [isOpen, setOpen]: readonly [
+        boolean,
+        (next: boolean | ((previous: boolean) => boolean)) => void,
+    ] = useControllableState<boolean>({
+        value: openProp,
+        defaultValue: defaultOpen,
+        onChange: onOpenChange,
+    });
     const normalized: CompleteOption[] = options.map(toOption);
-    const query: string = value.trim().toLowerCase();
+    const query: string = currentValue.trim().toLowerCase();
     const visible: CompleteOption[] = normalized.filter(
         (option: CompleteOption): boolean =>
             query.length >= minChars && option.label.toLowerCase().includes(query),
     );
-    const shouldOpen: boolean = open && !disabled && query.length >= minChars;
+    const shouldOpen: boolean = isOpen && !disabled && !readOnly && query.length >= minChars;
+
+    const commit: (option: CompleteOption) => void = (option: CompleteOption): void => {
+        if (readOnly) {
+            return;
+        }
+
+        if (!controlled) {
+            setUncontrolledValue(option.value);
+        }
+
+        onChange(option.value);
+        onSelect?.(option);
+        setOpen(false);
+    };
+
+    const handleFocus: FocusEventHandler<HTMLInputElement> = (event: FocusEvent<HTMLInputElement>): void => {
+        onFocus?.(event);
+
+        if (!disabled && !readOnly) {
+            setOpen(true);
+        }
+    };
+
+    const handleChange: (event: ChangeEvent<HTMLInputElement>) => void = (
+        event: ChangeEvent<HTMLInputElement>,
+    ): void => {
+        const next: string = event.target.value;
+
+        if (readOnly) {
+            return;
+        }
+
+        if (!controlled) {
+            setUncontrolledValue(next);
+        }
+
+        onChange(next);
+        setOpen(true);
+    };
 
     return (
-        <span ref={anchorRef} className={`complete-input ${className}`}>
+        <span ref={anchorRef} className={`complete-input ${className}`.trim()} style={style}>
             <TextInput
+                {...rest}
+                ref={ref}
                 label={label}
-                value={value}
+                value={currentValue}
                 hint={hint}
                 error={error}
                 disabled={disabled}
+                readOnly={readOnly}
                 placeholder={placeholder}
-                autoComplete="off"
-                onFocus={(): void => setOpen(true)}
-                onChange={(event: ChangeEvent<HTMLInputElement>): void => {
-                    onChange(event.target.value);
-                    setOpen(true);
-                }}
+                autoComplete={autoComplete}
+                onFocus={handleFocus}
+                onChange={handleChange}
             />
             <Dropdown
                 open={shouldOpen}
@@ -117,12 +201,8 @@ const CompleteInput: FC<CompleteInputProps> = ({
                     <DropdownItem
                         key={option.value}
                         role="option"
-                        selected={option.value === value}
-                        onSelect={(): void => {
-                            onChange(option.value);
-                            onSelect?.(option);
-                            setOpen(false);
-                        }}
+                        selected={option.value === currentValue}
+                        onSelect={(): void => commit(option)}
                     >
                         {option.label}
                     </DropdownItem>

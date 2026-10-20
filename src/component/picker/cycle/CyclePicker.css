@@ -19,6 +19,11 @@
     cursor: grabbing;
 }
 
+.cycle-picker.number-picker-field--readonly .cycle-picker__wheel,
+.cycle-picker.number-picker-field--readonly .cycle-picker__input {
+    cursor: default;
+}
+
 .cycle-picker.number-picker-field .number-picker__item {
     flex: 0 0 32px;
     line-height: 32px;

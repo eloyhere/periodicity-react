@@ -8,10 +8,12 @@ import {
     type FC,
     type FocusEvent,
     type FocusEventHandler,
+    type InputHTMLAttributes,
     type KeyboardEvent,
     type KeyboardEventHandler,
     type MouseEvent,
     type MutableRefObject,
+    type Ref,
 } from "react";
 import Icon from "../../icon/Icon";
 import cx from "../../foundation/cx";
@@ -31,13 +33,36 @@ export type NumberInputVariant = "outline" | "fill" | "standard";
 /**
  * Props for the NumberInput.
  * Type: interface.
- * Fields: label, value, onChange, min, max, step, precision, hint, error, disabled, placeholder, variant, className.
+ * Native input attributes are forwarded to the underlying `<input>`; `className` and `style` apply to the field root.
+ * Fields: label, value, defaultValue, onChange, min, max, step, precision, hint, error, disabled, readOnly,
+ * placeholder, variant, className, id, ref, and native input attributes.
+ * @param label - Floating label.
+ * @param value - Controlled numeric value, or null for an empty field.
+ * @param defaultValue - Initial value when the field is uncontrolled.
+ * @param onChange - Called with the next numeric value, or null when the field is cleared.
+ * @param min - Lower bound applied to typed and stepped values.
+ * @param max - Upper bound applied to typed and stepped values.
+ * @param step - Amount added or removed by the stepper buttons.
+ * @param precision - Decimal places kept when formatting; defaults to the step precision.
+ * @param hint - Supporting text shown below the field.
+ * @param error - Validation message; replaces the hint and marks the field invalid.
+ * @param disabled - Disables the field and stepper buttons natively.
+ * @param readOnly - Keeps the value visible and focusable but suppresses stepper changes.
+ * @param placeholder - Placeholder text.
+ * @param variant - Field variant: outline, fill, or standard.
+ * @param className - Extra classes for the field root.
+ * @param ref - Ref to the underlying input element.
  * @example
  * <NumberInput label="Servings" value={4} min={1} max={12} onChange={setServings} />
  */
-export interface NumberInputProps {
+export interface NumberInputProps
+    extends Omit<
+        InputHTMLAttributes<HTMLInputElement>,
+        "value" | "defaultValue" | "onChange" | "type" | "role"
+    > {
     label: string;
-    value: number | null;
+    value?: number | null;
+    defaultValue?: number | null;
     onChange: (value: number | null) => void;
     min?: number;
     max?: number;
@@ -46,9 +71,12 @@ export interface NumberInputProps {
     hint?: string;
     error?: string;
     disabled?: boolean;
+    readOnly?: boolean;
     placeholder?: string;
     variant?: NumberInputVariant;
     className?: string;
+    id?: string;
+    ref?: Ref<HTMLInputElement>;
 }
 
 /**
@@ -177,6 +205,7 @@ const preventFocusLoss: (event: MouseEvent<HTMLButtonElement>) => void = (
 const NumberInput: FC<NumberInputProps> = ({
     label,
     value,
+    defaultValue = null,
     onChange,
     min,
     max,
@@ -185,28 +214,61 @@ const NumberInput: FC<NumberInputProps> = ({
     hint,
     error,
     disabled = false,
+    readOnly = false,
     placeholder,
     variant = "outline",
     className = "",
+    style,
+    id,
+    inputMode = "decimal",
+    autoComplete = "off",
+    spellCheck = false,
+    "aria-invalid": ariaInvalid,
+    "aria-describedby": ariaDescribedBy,
+    onBlur,
+    onKeyDown,
+    onCompositionStart,
+    onCompositionEnd,
+    ref,
+    ...rest
 }: NumberInputProps) => {
-    const field: FieldState = useField({ label, hint, error });
+    const field: FieldState = useField({ id, label, hint, error });
+    const controlled: boolean = value !== (void 0);
+    const [uncontrolledValue, setUncontrolledValue]: [number | null, (next: number | null) => void] =
+        useState<number | null>(defaultValue);
     const [draft, setDraft]: [string | null, (next: string | null) => void] = useState<string | null>(null);
     const composingRef: MutableRefObject<boolean> = useRef<boolean>(false);
+    const currentValue: number | null = controlled ? (value as number | null) : uncontrolledValue;
     const resolvedPrecision: number = Math.min(Math.max(precision ?? countDecimals(step), 0), 20);
     const hasHint: boolean = hint !== (void 0) && hint.length > 0;
-    const describedBy: string = field.invalid ? field.errorId : hasHint ? field.hintId : "";
-    const displayValue: string = draft ?? formatNumber(value, resolvedPrecision);
-    const atMinimum: boolean = disabled || (value !== null && min !== (void 0) && value <= min);
-    const atMaximum: boolean = disabled || (value !== null && max !== (void 0) && value >= max);
+    const describedBy: string = [
+        field.invalid ? field.errorId : hasHint ? field.hintId : "",
+        ariaDescribedBy ?? "",
+    ]
+        .filter((item: string): boolean => item.length > 0)
+        .join(" ");
+    const displayValue: string = draft ?? formatNumber(currentValue, resolvedPrecision);
+    const atMinimum: boolean =
+        disabled || readOnly || (currentValue !== null && min !== (void 0) && currentValue <= min);
+    const atMaximum: boolean =
+        disabled || readOnly || (currentValue !== null && max !== (void 0) && currentValue >= max);
 
     const normalise: (candidate: number) => number = (candidate: number): number =>
         clampValue(roundTo(candidate, resolvedPrecision), min, max);
+
+    const commit: (next: number | null) => void = (next: number | null): void => {
+        if (!controlled) {
+            setUncontrolledValue(next);
+        }
+
+        onChange(next);
+    };
 
     const commitText: (text: string) => void = (text: string): void => {
         const parsed: number | null | void = parseNumber(text);
 
         if (parsed === null) {
-            onChange(null);
+            commit(null);
             return;
         }
 
@@ -214,20 +276,20 @@ const NumberInput: FC<NumberInputProps> = ({
             return;
         }
 
-        onChange(normalise(parsed));
+        commit(normalise(parsed));
     };
 
     const applyStep: (direction: number) => void = (direction: number): void => {
-        if (disabled) {
+        if (disabled || readOnly) {
             return;
         }
 
         const parsedDraft: number | null | void = draft === null ? (void 0) : parseNumber(draft);
-        const base: number = typeof parsedDraft === "number" ? parsedDraft : (value ?? min ?? 0);
+        const base: number = typeof parsedDraft === "number" ? parsedDraft : (currentValue ?? min ?? 0);
         const next: number = normalise(base + direction * step);
 
         setDraft(null);
-        onChange(next);
+        commit(next);
     };
 
     const handleChange: ChangeEventHandler<HTMLInputElement> = (event: ChangeEvent<HTMLInputElement>): void => {
@@ -241,6 +303,8 @@ const NumberInput: FC<NumberInputProps> = ({
     };
 
     const handleBlur: FocusEventHandler<HTMLInputElement> = (event: FocusEvent<HTMLInputElement>): void => {
+        onBlur?.(event);
+
         if (composingRef.current || draft === null) {
             return;
         }
@@ -250,7 +314,7 @@ const NumberInput: FC<NumberInputProps> = ({
         setDraft(null);
 
         if (parsed === null) {
-            onChange(null);
+            commit(null);
             return;
         }
 
@@ -258,11 +322,13 @@ const NumberInput: FC<NumberInputProps> = ({
             return;
         }
 
-        onChange(normalise(parsed));
+        commit(normalise(parsed));
     };
 
     const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = (event: KeyboardEvent<HTMLInputElement>): void => {
-        if (composingRef.current || event.nativeEvent.isComposing) {
+        onKeyDown?.(event);
+
+        if (event.defaultPrevented || composingRef.current || event.nativeEvent.isComposing) {
             return;
         }
 
@@ -275,7 +341,10 @@ const NumberInput: FC<NumberInputProps> = ({
         }
     };
 
-    const handleCompositionStart: CompositionEventHandler<HTMLInputElement> = (): void => {
+    const handleCompositionStart: CompositionEventHandler<HTMLInputElement> = (
+        event: CompositionEvent<HTMLInputElement>,
+    ): void => {
+        onCompositionStart?.(event);
         composingRef.current = true;
     };
 
@@ -284,6 +353,7 @@ const NumberInput: FC<NumberInputProps> = ({
     ): void => {
         const text: string = event.currentTarget.value;
 
+        onCompositionEnd?.(event);
         composingRef.current = false;
         setDraft(text);
         commitText(text);
@@ -303,10 +373,14 @@ const NumberInput: FC<NumberInputProps> = ({
                 "number-field",
                 `number-field--${variant}`,
                 field.invalid && "number-field--invalid",
+                disabled && "number-field--disabled",
+                readOnly && "number-field--readonly",
                 className,
             )}
+            style={style}
             data-invalid={field.invalid ? "true" : "false"}
             data-disabled={disabled ? "true" : "false"}
+            data-readonly={readOnly ? "true" : "false"}
         >
             <div className="number-field__control">
                 <Surface
@@ -318,20 +392,25 @@ const NumberInput: FC<NumberInputProps> = ({
                 >
                     <div className="number-field__row">
                         <input
+                            {...rest}
+                            ref={ref}
                             id={field.controlId}
                             className="number-field__input"
                             type="text"
-                            inputMode="decimal"
+                            inputMode={inputMode}
                             role="spinbutton"
-                            autoComplete="off"
+                            autoComplete={autoComplete}
+                            spellCheck={spellCheck}
                             value={displayValue}
                             placeholder={placeholder === (void 0) || placeholder.length === 0 ? " " : placeholder}
                             disabled={disabled}
-                            aria-invalid={field.invalid}
+                            readOnly={readOnly}
+                            aria-invalid={field.invalid ? true : ariaInvalid}
                             aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
                             aria-valuemin={min}
                             aria-valuemax={max}
-                            aria-valuenow={value === null ? (void 0) : value}
+                            aria-valuenow={currentValue === null ? (void 0) : currentValue}
+                            aria-readonly={readOnly ? true : (void 0)}
                             onChange={handleChange}
                             onBlur={handleBlur}
                             onKeyDown={handleKeyDown}

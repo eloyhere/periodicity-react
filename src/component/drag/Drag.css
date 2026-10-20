@@ -1,0 +1,42 @@
+/* ==========================================================================
+   Drag — draggable direct children of one slotted container
+   ========================================================================== */
+
+.drag {
+    display: contents;
+}
+
+.drag__slot {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.drag [data-drag-child] {
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.drag [data-drag-child]:active {
+    cursor: grabbing;
+}
+
+.drag [data-drag-active="true"] {
+    opacity: 0.45;
+    cursor: grabbing;
+}
+
+.drag--disabled [data-drag-child] {
+    cursor: default;
+    touch-action: auto;
+}
+
+.drag__ghost {
+    border-radius: var(--radius-sm);
+    box-shadow: var(--elevation-3);
+    opacity: 0.96;
+    pointer-events: none;
+}

@@ -4,6 +4,8 @@ import {
     useImperativeHandle,
     useRef,
     type FC,
+    type HTMLAttributes,
+    type MouseEvent as ReactMouseEvent,
     type ReactNode,
     type Ref,
     type RefObject,
@@ -17,13 +19,16 @@ import "./NavigationView.css";
 /**
  * Imperative navigation controls exposed through a ref.
  * Type: interface.
- * Fields: select, getValue.
+ * Fields: select, getValue, getElement, focus, blur.
  * @example
  * navigation.current?.select("settings");
  */
 export interface NavigationViewHandle {
     select(value: string): void;
     getValue(): string;
+    getElement(): HTMLElement | null;
+    focus(options?: FocusOptions): void;
+    blur(): void;
 }
 
 /**
@@ -54,30 +59,38 @@ export type NavigationVariant = "sidebar" | "rail" | "bottom";
  * Props for the Material navigation view.
  * Type: interface.
  * Fields: items, value, defaultValue, onValueChange, onItemClick, header, footer,
- * variant, ariaLabel, className, ref.
+ * variant, ariaLabel, disabled, className, ref, plus native landmark attributes and events.
+ * Scroll events are observed on the scrolling destination list.
  * @example
- * <NavigationView items={items} defaultValue="today" />
+ * <NavigationView items={items} defaultValue="today" data-testid="primary-navigation" />
  */
-export interface NavigationViewProps {
+export interface NavigationViewProps
+    extends Omit<HTMLAttributes<HTMLElement>, "children" | "defaultValue"> {
     items: readonly NavigationItem[];
     value?: string;
     defaultValue?: string;
     onValueChange?: (value: string) => void;
-    onItemClick?: (item: NavigationItem, index: number) => void;
+    onItemClick?: (
+        item: NavigationItem,
+        index: number,
+        event: ReactMouseEvent<HTMLButtonElement>,
+    ) => void;
     header?: ReactNode;
     footer?: ReactNode;
     variant?: NavigationVariant;
     ariaLabel?: string;
+    disabled?: boolean;
     className?: string;
     ref?: Ref<NavigationViewHandle>;
+    [dataAttribute: `data-${string}`]: string | number | boolean | undefined;
 }
 
 /**
  * Renders a Material sidebar, rail, or bottom navigation with selection state.
- * @param props - Destinations, selected value, slots, and variant.
+ * @param props - Destinations, selected value, slots, variant, and native landmark attributes.
  * @example
- * <NavigationView items={items} variant="bottom" />
- * @returns A navigation landmark.
+ * <NavigationView items={items} variant="bottom" ariaLabel="Primary" />
+ * @returns A navigation landmark with a forwarded handle and native event support.
  */
 const NavigationView: FC<NavigationViewProps> = ({
     items,
@@ -88,9 +101,13 @@ const NavigationView: FC<NavigationViewProps> = ({
     header,
     footer,
     variant = "sidebar",
-    ariaLabel = "Navigation",
+    ariaLabel,
+    disabled = false,
     className = "",
     ref,
+    onScroll,
+    "aria-label": ariaLabelAttribute,
+    ...rest
 }: NavigationViewProps) => {
     const fallback: string = items.find((item: NavigationItem): boolean => !item.disabled)?.value ?? "";
     const [active, setActive]: readonly [
@@ -100,8 +117,10 @@ const NavigationView: FC<NavigationViewProps> = ({
         value,
         defaultValue: defaultValue ?? fallback,
     });
+    const navRef: RefObject<HTMLElement | null> = useRef<HTMLElement | null>(null);
     const notifyTimerRef: RefObject<number | null> = useRef<number | null>(null);
     const pendingValueRef: RefObject<string | null> = useRef<string | null>(null);
+    const resolvedAriaLabel: string = ariaLabel ?? ariaLabelAttribute ?? "Navigation";
 
     useEffect(
         (): (() => void) => (): void => {
@@ -125,7 +144,7 @@ const NavigationView: FC<NavigationViewProps> = ({
 
     const select: (next: string) => void = useCallback(
         (next: string): void => {
-            if (next === active) {
+            if (disabled || next === active) {
                 return;
             }
 
@@ -142,7 +161,7 @@ const NavigationView: FC<NavigationViewProps> = ({
                 onValueChange?.(next);
             }, 80);
         },
-        [active, onValueChange, setActive],
+        [active, disabled, onValueChange, setActive],
     );
 
     useImperativeHandle(
@@ -150,20 +169,32 @@ const NavigationView: FC<NavigationViewProps> = ({
         (): NavigationViewHandle => ({
             select,
             getValue: (): string => active,
+            getElement: (): HTMLElement | null => navRef.current,
+            focus: (options?: FocusOptions): void => {
+                navRef.current?.focus(options);
+            },
+            blur: (): void => {
+                navRef.current?.blur();
+            },
         }),
         [active, select],
     );
 
     return (
         <nav
+            {...rest}
+            ref={navRef}
             className={cx("navigation-view", `navigation-view--${variant}`, className)}
-            aria-label={ariaLabel}
+            aria-label={resolvedAriaLabel}
+            aria-disabled={disabled ? true : (void 0)}
+            data-disabled={disabled ? "true" : "false"}
         >
             {header === (void 0) ? null : <div className="navigation-view__header">{header}</div>}
 
-            <div className="navigation-view__list">
+            <div className="navigation-view__list" onScroll={onScroll}>
                 {items.map((item: NavigationItem, index: number): ReactNode => {
                     const selected: boolean = item.value === active;
+                    const itemDisabled: boolean = disabled || item.disabled === true;
 
                     return (
                         <Surface
@@ -173,17 +204,17 @@ const NavigationView: FC<NavigationViewProps> = ({
                                 selected && "navigation-view__item--selected",
                             )}
                             tone="accent"
-                            disabled={item.disabled}
+                            disabled={itemDisabled}
                             ripple={{ layer: "foreground", trigger: ["hover", "click"] }}
                         >
                             <button
                                 type="button"
                                 className="navigation-view__button"
-                                disabled={item.disabled}
+                                disabled={itemDisabled}
                                 aria-current={selected ? "page" : (void 0)}
-                                onClick={(): void => {
+                                onClick={(event: ReactMouseEvent<HTMLButtonElement>): void => {
                                     select(item.value);
-                                    onItemClick?.(item, index);
+                                    onItemClick?.(item, index, event);
                                 }}
                             >
                                 <span className="navigation-view__indicator" aria-hidden="true" />

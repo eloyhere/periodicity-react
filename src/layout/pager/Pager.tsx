@@ -6,7 +6,9 @@ import {
     useImperativeHandle,
     useRef,
     type FC,
+    type HTMLAttributes,
     type KeyboardEventHandler,
+    type PointerEventHandler,
     type ReactNode,
     type Ref,
     type RefObject,
@@ -30,7 +32,7 @@ export interface PagerScrollOptions {
 /**
  * Imperative pager controls exposed through a ref.
  * Type: interface.
- * Fields: goTo, scrollTo, next, previous, getRoute, getIndex.
+ * Fields: goTo, scrollTo, next, previous, getRoute, getIndex, getElement, focus, blur.
  * @example
  * pager.current?.goTo("settings");
  */
@@ -41,6 +43,9 @@ export interface PagerHandle {
     previous(): void;
     getRoute(): string;
     getIndex(): number;
+    getElement(): HTMLDivElement | null;
+    focus(options?: FocusOptions): void;
+    blur(): void;
 }
 
 /**
@@ -70,11 +75,12 @@ export const PagerPage: FC<PagerPageProps> = ({ children }: PagerPageProps) => <
  * Props for the horizontal pager.
  * Type: interface.
  * Fields: children, value, defaultValue, route, defaultRoute, onChange, onRouteChange,
- * ariaLabel, className, ref.
+ * ariaLabel, className, ref, plus native region attributes and events.
  * @example
- * <Pager value={page} onChange={setPage}>...</Pager>
+ * <Pager value={page} onChange={setPage} onScroll={handleScroll}>...</Pager>
  */
-export interface PagerProps {
+export interface PagerProps
+    extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "defaultValue" | "onChange"> {
     children: ReactNode;
     value?: number;
     defaultValue?: number;
@@ -85,14 +91,15 @@ export interface PagerProps {
     ariaLabel?: string;
     className?: string;
     ref?: Ref<PagerHandle>;
+    [dataAttribute: `data-${string}`]: string | number | boolean | undefined;
 }
 
 /**
  * Swipeable, scroll-snapped page container with controlled and uncontrolled state.
- * @param props - Pages and active index.
+ * @param props - Pages, active index, route controls, callbacks, and native region attributes.
  * @example
  * <Pager defaultValue={0}><Page /><Page /></Pager>
- * @returns A horizontal pager.
+ * @returns A horizontal pager with a forwarded imperative handle.
  */
 const Pager: FC<PagerProps> = ({
     children,
@@ -102,9 +109,15 @@ const Pager: FC<PagerProps> = ({
     route,
     defaultRoute,
     onRouteChange,
-    ariaLabel = "Pages",
+    ariaLabel,
     className = "",
     ref,
+    tabIndex = 0,
+    onScroll,
+    onKeyDown,
+    onPointerDown,
+    "aria-label": ariaLabelAttribute,
+    ...rest
 }: PagerProps) => {
     const trackRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
     const programmaticRef: RefObject<boolean> = useRef<boolean>(false);
@@ -132,6 +145,7 @@ const Pager: FC<PagerProps> = ({
         onChange,
     });
     const activeRoute: string = routes[active] ?? "";
+    const resolvedAriaLabel: string = ariaLabel ?? ariaLabelAttribute ?? "Pages";
     const previousRouteRef: RefObject<string> = useRef<string>(activeRoute);
     const activeRef: RefObject<number> = useRef<number>(active);
 
@@ -225,39 +239,39 @@ const Pager: FC<PagerProps> = ({
     const handleScroll: UIEventHandler<HTMLDivElement> = (
         event: Parameters<UIEventHandler<HTMLDivElement>>[0],
     ): void => {
-        if (programmaticRef.current) {
-            return;
-        }
+        if (!programmaticRef.current) {
+            const node: HTMLDivElement = event.currentTarget;
 
-        const node: HTMLDivElement = event.currentTarget;
-
-        if (scrollTimerRef.current !== null) {
-            window.clearTimeout(scrollTimerRef.current);
-        }
-
-        scrollTimerRef.current = window.setTimeout((): void => {
-            scrollTimerRef.current = null;
-
-            if (node.clientWidth === 0) {
-                return;
+            if (scrollTimerRef.current !== null) {
+                window.clearTimeout(scrollTimerRef.current);
             }
 
-            const next: number = Math.round(node.scrollLeft / node.clientWidth);
-            const target: number | null = targetRef.current;
+            scrollTimerRef.current = window.setTimeout((): void => {
+                scrollTimerRef.current = null;
 
-            if (target !== null) {
-                if (next === target) {
-                    targetRef.current = null;
+                if (node.clientWidth === 0) {
+                    return;
                 }
 
-                return;
-            }
+                const next: number = Math.round(node.scrollLeft / node.clientWidth);
+                const target: number | null = targetRef.current;
 
-            if (next !== activeRef.current && next >= 0 && next < pages.length) {
-                routeDrivenRef.current = false;
-                setActive(next);
-            }
-        }, 80);
+                if (target !== null) {
+                    if (next === target) {
+                        targetRef.current = null;
+                    }
+
+                    return;
+                }
+
+                if (next !== activeRef.current && next >= 0 && next < pages.length) {
+                    routeDrivenRef.current = false;
+                    setActive(next);
+                }
+            }, 80);
+        }
+
+        onScroll?.(event);
     };
 
     const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = (
@@ -283,11 +297,16 @@ const Pager: FC<PagerProps> = ({
             event.preventDefault();
             select(pages.length - 1);
         }
+
+        onKeyDown?.(event);
     };
 
-    const handlePointerDown: () => void = (): void => {
+    const handlePointerDown: PointerEventHandler<HTMLDivElement> = (
+        event: Parameters<PointerEventHandler<HTMLDivElement>>[0],
+    ): void => {
         targetRef.current = null;
         programmaticRef.current = false;
+        onPointerDown?.(event);
     };
 
     const scrollToIndex: (index: number, behavior: ScrollBehavior) => void = useCallback(
@@ -343,18 +362,26 @@ const Pager: FC<PagerProps> = ({
             previous: (): void => goTo(active - 1),
             getRoute: (): string => routes[active] ?? "",
             getIndex: (): number => active,
+            getElement: (): HTMLDivElement | null => trackRef.current,
+            focus: (options?: FocusOptions): void => {
+                trackRef.current?.focus(options);
+            },
+            blur: (): void => {
+                trackRef.current?.blur();
+            },
         }),
         [active, goTo, routes, scrollOnly],
     );
 
     return (
         <div
+            {...rest}
             ref={trackRef}
             className={cx("pager", className)}
             role="region"
             aria-roledescription="carousel"
-            aria-label={ariaLabel}
-            tabIndex={0}
+            aria-label={resolvedAriaLabel}
+            tabIndex={tabIndex}
             onScroll={handleScroll}
             onKeyDown={handleKeyDown}
             onPointerDown={handlePointerDown}

@@ -4,13 +4,17 @@ import {
     type ChangeEvent,
     type ChangeEventHandler,
     type FC,
+    type InputHTMLAttributes,
     type ReactNode,
+    type Ref,
+    type RefCallback,
     type RefObject,
 } from "react";
 import Icon from "../../icon/Icon";
 import cx from "../../foundation/cx";
 import useControllableState from "../../foundation/useControllableState";
 import useField, { type FieldState } from "../../foundation/useField";
+import useMergedRef from "../../foundation/useMergedRef";
 import Surface from "../../surface/Surface";
 import "./Checkbox.css";
 
@@ -27,12 +31,33 @@ const hasContent: (value: ReactNode) => boolean = (value: ReactNode): boolean =>
 /**
  * Props for the Material checkbox.
  * Type: interface.
- * Fields: checked, defaultChecked, onCheckedChange, indeterminate, label, description,
- * error, disabled, required, name, value, size, className.
+ * Fields: checked, defaultChecked, onCheckedChange, onChange, indeterminate, label, description, error,
+ * disabled, readOnly, required, name, value, size, className, id, ref, and native input attributes.
+ * Native input attributes are forwarded to the hidden `<input>`; `className` and `style` apply to the field root.
+ * @param checked - Controlled checked state.
+ * @param defaultChecked - Initial checked state when uncontrolled.
+ * @param onCheckedChange - Called with the next checked state.
+ * @param onChange - Native change handler, called after the internal state update.
+ * @param indeterminate - Paints the mixed state without changing `checked`.
+ * @param label - Visible label content.
+ * @param description - Supporting text shown below the label.
+ * @param error - Validation message; marks the field invalid.
+ * @param disabled - Disables the native input and the state layer.
+ * @param readOnly - Keeps the native input focusable but suppresses internal state changes.
+ * @param required - Marks the input as required natively.
+ * @param name - Form field name.
+ * @param value - Form field value.
+ * @param size - Control size.
+ * @param className - Extra classes for the field root.
+ * @param ref - Ref to the underlying input element.
  * @example
  * <Checkbox label="Remember me" description="Stay signed in" defaultChecked />
  */
-export interface CheckboxProps {
+export interface CheckboxProps
+    extends Omit<
+        InputHTMLAttributes<HTMLInputElement>,
+        "checked" | "defaultChecked" | "type" | "value" | "size" | "children"
+    > {
     checked?: boolean;
     defaultChecked?: boolean;
     onCheckedChange?: (checked: boolean) => void;
@@ -41,11 +66,13 @@ export interface CheckboxProps {
     description?: ReactNode;
     error?: ReactNode;
     disabled?: boolean;
+    readOnly?: boolean;
     required?: boolean;
     name?: string;
     value?: string;
     size?: "sm" | "md" | "lg";
     className?: string;
+    ref?: Ref<HTMLInputElement>;
 }
 
 /**
@@ -59,19 +86,29 @@ const Checkbox: FC<CheckboxProps> = ({
     checked,
     defaultChecked = false,
     onCheckedChange,
+    onChange,
     indeterminate = false,
     label,
     description,
     error,
     disabled = false,
+    readOnly = false,
     required = false,
     name,
     value,
     size = "md",
     className = "",
+    style,
+    id,
+    "aria-describedby": ariaDescribedBy,
+    "aria-invalid": ariaInvalid,
+    "aria-labelledby": ariaLabelledBy,
+    ref,
+    ...rest
 }: CheckboxProps) => {
-    const field: FieldState = useField({ label, hint: description, error, required });
+    const field: FieldState = useField({ id, label, hint: description, error, required });
     const inputRef: RefObject<HTMLInputElement | null> = useRef<HTMLInputElement>(null);
+    const mergedRef: RefCallback<HTMLInputElement> = useMergedRef<HTMLInputElement>(inputRef, ref);
     const [isChecked, setChecked]: readonly [
         boolean,
         (next: boolean | ((previous: boolean) => boolean)) => void,
@@ -92,10 +129,20 @@ const Checkbox: FC<CheckboxProps> = ({
     const handleChange: ChangeEventHandler<HTMLInputElement> = (
         event: ChangeEvent<HTMLInputElement>,
     ): void => {
-        setChecked(event.currentTarget.checked);
+        if (!disabled && !readOnly) {
+            setChecked(event.currentTarget.checked);
+        }
+
+        onChange?.(event);
     };
 
     const labelId: string = `${field.controlId}-label`;
+    const describedBy: string = [field.describedBy, ariaDescribedBy ?? ""]
+        .filter((item: string): boolean => item.length > 0)
+        .join(" ");
+    const labelledBy: string = [labelId, ariaLabelledBy ?? ""]
+        .filter((item: string): boolean => item.length > 0)
+        .join(" ");
     const hasDescription: boolean = hasContent(description);
     const iconSize: number = size === "sm" ? 12 : size === "lg" ? 18 : 14;
 
@@ -107,9 +154,13 @@ const Checkbox: FC<CheckboxProps> = ({
                 indeterminate && "checkbox--mixed",
                 !indeterminate && isChecked && "checkbox--checked",
                 disabled && "checkbox--disabled",
+                readOnly && "checkbox--readonly",
                 className,
             )}
+            style={style}
             data-invalid={field.invalid ? "true" : "false"}
+            data-disabled={disabled ? "true" : "false"}
+            data-readonly={readOnly ? "true" : "false"}
         >
             <label className="checkbox__label" htmlFor={field.controlId}>
                 <Surface
@@ -134,7 +185,8 @@ const Checkbox: FC<CheckboxProps> = ({
                 </Surface>
 
                 <input
-                    ref={inputRef}
+                    {...rest}
+                    ref={mergedRef}
                     id={field.controlId}
                     className="checkbox__native"
                     type="checkbox"
@@ -142,10 +194,11 @@ const Checkbox: FC<CheckboxProps> = ({
                     value={value}
                     checked={isChecked}
                     disabled={disabled}
+                    readOnly={readOnly}
                     required={required}
-                    aria-labelledby={labelId}
-                    aria-invalid={field.invalid}
-                    aria-describedby={field.describedBy.length > 0 ? field.describedBy : (void 0)}
+                    aria-labelledby={labelledBy}
+                    aria-invalid={field.invalid ? true : ariaInvalid}
+                    aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
                     onChange={handleChange}
                 />
 

@@ -1,0 +1,121 @@
+/* ==========================================================================
+   Scrollbar — native scrolling with Material overlay thumbs
+   ========================================================================== */
+
+.scrollbar {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+}
+
+.scrollbar__viewport {
+    flex: 1 1 auto;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.scrollbar__viewport::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar__content {
+    min-width: 0;
+}
+
+.scrollbar__track {
+    position: absolute;
+    z-index: 4;
+    border-radius: var(--radius-pill);
+    opacity: 1;
+    transition: opacity 140ms var(--ease-standard);
+}
+
+.scrollbar--auto-hide .scrollbar__track {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.scrollbar--auto-hide.scrollbar--visible .scrollbar__track {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.scrollbar__track--vertical {
+    top: 2px;
+    right: 2px;
+    bottom: 2px;
+    width: var(--scrollbar-thickness);
+}
+
+.scrollbar__track--horizontal {
+    right: 2px;
+    bottom: 2px;
+    left: 2px;
+    height: var(--scrollbar-thickness);
+}
+
+.scrollbar__thumb {
+    position: absolute;
+    border-radius: var(--radius-pill);
+    background: var(--color-on-surface-variant);
+    opacity: 0.56;
+    cursor: grab;
+    touch-action: none;
+    transition: opacity 140ms var(--ease-standard);
+}
+
+.scrollbar__track--vertical .scrollbar__thumb {
+    top: var(--scrollbar-thumb-offset);
+    left: 0;
+    width: 100%;
+    height: var(--scrollbar-thumb-size);
+}
+
+.scrollbar__track--horizontal .scrollbar__thumb {
+    top: 0;
+    left: var(--scrollbar-thumb-offset);
+    width: var(--scrollbar-thumb-size);
+    height: 100%;
+}
+
+.scrollbar__thumb:hover,
+.scrollbar--dragging .scrollbar__thumb {
+    opacity: 0.72;
+    cursor: grabbing;
+}
+
+.scrollbar__thumb:active {
+    opacity: 0.8;
+}
+
+.scrollbar--dragging {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .scrollbar__track,
+    .scrollbar__thumb {
+        transition: none;
+    }
+}
+
+.scrollbar__slot {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+}
+
+.scrollbar__slot > * {
+    pointer-events: auto;
+}

@@ -5,10 +5,14 @@ import {
     type ChangeEvent,
     type ChangeEventHandler,
     type FC,
+    type Ref,
+    type RefCallback,
     type RefObject,
+    type TextareaHTMLAttributes,
 } from "react";
 import cx from "../../foundation/cx";
 import useField, { type FieldState } from "../../foundation/useField";
+import useMergedRef from "../../foundation/useMergedRef";
 import Surface from "../../surface/Surface";
 import "./TextArea.css";
 
@@ -24,15 +28,33 @@ export type TextAreaVariant = "outline" | "fill" | "standard";
 /**
  * Props for the TextArea.
  * Type: interface.
- * Fields: label, value, onChange, hint, error, rows, maxLength, showCount, variant,
- * disabled, placeholder, autoGrow, className.
+ * Native textarea attributes are forwarded to the `<textarea>`; `className` and `style` apply to the field root.
+ * Fields: label, value, defaultValue, onChange, hint, error, rows, maxLength, showCount, variant, disabled,
+ * readOnly, required, placeholder, autoGrow, className, id, ref, and native textarea attributes.
+ * @param label - Floating label.
+ * @param value - Controlled text value.
+ * @param defaultValue - Initial text value when uncontrolled.
+ * @param onChange - Called after every edit with the native change event.
+ * @param hint - Supporting text shown below the field.
+ * @param error - Validation message; replaces the hint and marks the field invalid.
+ * @param rows - Visible row count.
+ * @param maxLength - Maximum accepted character count.
+ * @param showCount - Shows the character counter when true.
+ * @param variant - Field variant: outline, fill, or standard.
+ * @param disabled - Disables the field natively and suppresses the ripple.
+ * @param placeholder - Placeholder text.
+ * @param autoGrow - Resizes the field to fit its content.
+ * @param className - Extra classes for the field root.
+ * @param ref - Ref to the underlying textarea element.
  * @example
  * <TextArea label="Notes" rows={4} maxLength={240} showCount />
  */
-export interface TextAreaProps {
+export interface TextAreaProps
+    extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "children" | "value" | "onChange"> {
     label: string;
     value?: string;
-    onChange?: (event: ChangeEvent<HTMLTextAreaElement>) => void;
+    defaultValue?: string;
+    onChange?: ChangeEventHandler<HTMLTextAreaElement>;
     hint?: string;
     error?: string;
     rows?: number;
@@ -43,6 +65,7 @@ export interface TextAreaProps {
     placeholder?: string;
     autoGrow?: boolean;
     className?: string;
+    ref?: Ref<HTMLTextAreaElement>;
 }
 
 /**
@@ -67,6 +90,7 @@ const resizeTextArea: (element: HTMLTextAreaElement) => void = (element: HTMLTex
 const TextArea: FC<TextAreaProps> = ({
     label,
     value,
+    defaultValue,
     onChange,
     hint,
     error,
@@ -78,14 +102,33 @@ const TextArea: FC<TextAreaProps> = ({
     placeholder,
     autoGrow = false,
     className = "",
+    style,
+    id,
+    "aria-invalid": ariaInvalid,
+    "aria-describedby": ariaDescribedBy,
+    ref,
+    ...rest
 }: TextAreaProps) => {
-    const field: FieldState = useField({ label, hint, error });
+    const field: FieldState = useField({ id, label, hint, error });
     const textAreaRef: RefObject<HTMLTextAreaElement | null> = useRef<HTMLTextAreaElement>(null);
+    const mergedRef: RefCallback<HTMLTextAreaElement> = useMergedRef<HTMLTextAreaElement>(
+        textAreaRef,
+        ref,
+    );
     const [uncontrolledLength, setUncontrolledLength]: [number, (next: number) => void] = useState<number>(
-        value === (void 0) ? 0 : value.length,
+        value !== (void 0)
+            ? value.length
+            : typeof defaultValue === "string"
+              ? defaultValue.length
+              : 0,
     );
     const hasHint: boolean = hint !== (void 0) && hint.length > 0;
-    const describedBy: string = field.invalid ? field.errorId : hasHint ? field.hintId : "";
+    const describedBy: string = [
+        field.invalid ? field.errorId : hasHint ? field.hintId : "",
+        ariaDescribedBy ?? "",
+    ]
+        .filter((item: string): boolean => item.length > 0)
+        .join(" ");
     const length: number = value === (void 0) ? uncontrolledLength : value.length;
     const counter: string = maxLength === (void 0) ? `${length}` : `${length}/${maxLength}`;
 
@@ -128,6 +171,7 @@ const TextArea: FC<TextAreaProps> = ({
                 autoGrow && "text-area--auto-grow",
                 className,
             )}
+            style={style}
             data-invalid={field.invalid ? "true" : "false"}
             data-disabled={disabled ? "true" : "false"}
         >
@@ -141,15 +185,17 @@ const TextArea: FC<TextAreaProps> = ({
                 >
                     <div className="text-area__row">
                         <textarea
-                            ref={textAreaRef}
+                            {...rest}
+                            ref={mergedRef}
                             id={field.controlId}
                             className="text-area__field"
                             value={value}
+                            defaultValue={defaultValue}
                             rows={rows}
                             maxLength={maxLength}
                             placeholder={placeholder === (void 0) || placeholder.length === 0 ? " " : placeholder}
                             disabled={disabled}
-                            aria-invalid={field.invalid}
+                            aria-invalid={field.invalid ? true : ariaInvalid}
                             aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
                             onChange={handleChange}
                         />

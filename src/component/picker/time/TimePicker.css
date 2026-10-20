@@ -45,6 +45,10 @@
     cursor: not-allowed;
 }
 
+.time-picker__trigger[aria-readonly="true"] {
+    cursor: default;
+}
+
 .time-picker__trigger[data-placeholder="true"] {
     color: var(--muted);
 }

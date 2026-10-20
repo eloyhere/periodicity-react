@@ -210,8 +210,10 @@
     transform-origin: center;
 }
 
-.text-field--fill .text-field__row {
-    padding-top: 18px;
+.text-field--fill .text-field__row,
+.text-field--standard .text-field__row {
+    padding-top: 20px;
+    padding-bottom: 4px;
 }
 
 .text-field--fill .text-field__label {
@@ -262,7 +264,8 @@
 }
 
 .text-field--standard .text-field__row {
-    padding-top: 18px;
+    padding-top: 20px;
+    padding-bottom: 4px;
 }
 
 .text-field--standard .text-field__label {
@@ -362,7 +365,8 @@
 /* Fill and standard reserve space for the floating label above the input. */
 .text-field--fill .text-field__input,
 .text-field--standard .text-field__input {
-    height: calc(var(--text-field-height) - 18px);
+    height: calc(var(--text-field-height) - 24px);
+    line-height: 1.4;
 }
 
 /* The resting label doubles as the placeholder; keep the two from overlapping. */

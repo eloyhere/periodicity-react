@@ -2,6 +2,8 @@ import {
     useState,
     type Dispatch,
     type FC,
+    type HTMLAttributes,
+    type Ref,
     type SetStateAction,
 } from "react";
 import cx from "../foundation/cx";
@@ -38,17 +40,21 @@ export type AvatarStatus = "online" | "offline" | "busy" | "away";
 /**
  * Props for the Avatar component.
  * Type: interface.
- * Fields: name, src, size, tone, status, className.
+ * Extends the native `span` attributes, so `id`, `style`, `title`, `aria-*`, `data-*`, `tabIndex`, and
+ * pointer, mouse, keyboard, and focus handlers are forwarded to the avatar element.
+ * Fields: name, src, size, tone, status, statusLabel, className.
  * @example
  * <Avatar name="Mira Chen" src="/mira.png" status="online" />
  */
-export interface AvatarProps {
+export interface AvatarProps extends Omit<HTMLAttributes<HTMLSpanElement>, "children" | "className"> {
     name: string;
     src?: string;
     size?: AvatarSize;
     tone?: AvatarTone;
     status?: AvatarStatus;
+    statusLabel?: string;
     className?: string;
+    ref?: Ref<HTMLSpanElement>;
 }
 
 const StatusLabels: Record<AvatarStatus, string> = {
@@ -83,7 +89,8 @@ const getInitials: (name: string) => string = (name: string): string => {
 
 /**
  * Renders an avatar image with an initials fallback and an optional presence dot.
- * @param props - Name, image source, size, tone, status, and class name.
+ * @param props - Name, image source, size, tone, status, status label, class name, and native span
+ * attributes.
  * @example
  * <Avatar name="Ada Lovelace" tone="violet" status="busy" />
  * @returns An avatar element.
@@ -94,7 +101,10 @@ const Avatar: FC<AvatarProps> = ({
     size = "md",
     tone = "neutral",
     status,
+    statusLabel,
     className = "",
+    ref,
+    ...rest
 }: AvatarProps) => {
     const [failedSrc, setFailedSrc]: [string | void, Dispatch<SetStateAction<string | void>>] = useState<
         string | void
@@ -108,7 +118,7 @@ const Avatar: FC<AvatarProps> = ({
     };
 
     return (
-        <span className={cx("avatar", `avatar--${size}`, `avatar--${tone}`, className)}>
+        <span ref={ref} className={cx("avatar", `avatar--${size}`, `avatar--${tone}`, className)} {...rest}>
             <span className="avatar__frame" role="img" aria-label={name}>
                 {showImage ? (
                     <img className="avatar__image" src={src} alt="" onError={handleImageError} />
@@ -121,7 +131,7 @@ const Avatar: FC<AvatarProps> = ({
             {status === (void 0) ? null : (
                 <>
                     <span className={cx("avatar__status", `avatar__status--${status}`)} aria-hidden="true" />
-                    <VisuallyHidden>{StatusLabels[status]}</VisuallyHidden>
+                    <VisuallyHidden>{statusLabel ?? StatusLabels[status]}</VisuallyHidden>
                 </>
             )}
         </span>

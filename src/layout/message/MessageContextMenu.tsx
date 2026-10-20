@@ -1,25 +1,91 @@
-import type { FC, ReactNode } from "react";
+import type { FC, HTMLAttributes, ReactNode, Ref } from "react";
 import ContextMenu, { ContextMenuItem } from "../../component/context/ContextMenu";
+import type { IconName } from "../../component/icon/Icon";
+import cx from "../../component/foundation/cx";
 import type { MessageAction, MessageItem } from "./adapter";
 import "./Message.css";
 
 /**
+ * Presentation of one message menu action.
+ * Type: interface.
+ * Fields: icon, label, danger.
+ * @example
+ * const definition: MessageActionDefinition = MessageActionDefinitions.copy;
+ */
+interface MessageActionDefinition {
+    icon: IconName;
+    label: string;
+    danger?: boolean;
+}
+
+/**
+ * Canonical order of the message menu actions.
+ * Type: constant.
+ * Fields: none.
+ * @example
+ * const actions = MessageActionOrder;
+ */
+const MessageActionOrder: readonly MessageAction[] = [
+    "recall",
+    "copy",
+    "forward",
+    "favourite",
+    "select",
+    "quote",
+    "delete",
+];
+
+/**
+ * Icon, label, and tone of every message menu action.
+ * Type: constant.
+ * Fields: recall, copy, forward, favourite, select, quote, delete.
+ * @example
+ * <ContextMenuItem icon={MessageActionDefinitions.copy.icon}>Copy</ContextMenuItem>
+ */
+const MessageActionDefinitions: Record<MessageAction, MessageActionDefinition> = {
+    recall: { icon: "Refresh", label: "Recall" },
+    copy: { icon: "Clipboard", label: "Copy" },
+    forward: { icon: "Forward", label: "Forward" },
+    favourite: { icon: "Star", label: "Favourite" },
+    select: { icon: "Select", label: "Multi-select" },
+    quote: { icon: "Reply", label: "Quote" },
+    delete: { icon: "Close", label: "Delete", danger: true },
+};
+
+/**
  * Props for the message context-menu wrapper.
  * Type: interface.
- * Fields: message, self, onAction, children.
+ * Fields: message, self, onAction, actions, disabled, open, defaultOpen, onOpenChange, longPress,
+ * longPressDelay, header, empty, closeOnSelect, className, menuClassName, ariaLabel, children,
+ * ref, plus native div attributes and events.
  * @example
  * <MessageContextMenu message={message} self={false} onAction={act}>...</MessageContextMenu>
  */
-export interface MessageContextMenuProps {
+export interface MessageContextMenuProps
+    extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
     message: MessageItem;
     self: boolean;
     onAction: (action: MessageAction, message: MessageItem) => void;
+    actions?: readonly MessageAction[];
+    disabled?: boolean;
+    open?: boolean;
+    defaultOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    longPress?: boolean;
+    longPressDelay?: number;
+    header?: ReactNode;
+    empty?: ReactNode;
+    closeOnSelect?: boolean;
+    className?: string;
+    menuClassName?: string;
+    ariaLabel?: string;
     children: ReactNode;
+    ref?: Ref<HTMLDivElement>;
 }
 
 /**
  * Wraps a message row in the shared ContextMenu and supplies its menu slot.
- * @param props - Message, ownership, action handler, and row content.
+ * @param props - Message, ownership, action handler, menu content, and native zone attributes.
  * @example
  * <MessageContextMenu message={message} self onAction={act}>...</MessageContextMenu>
  * @returns A right-click and long-press message zone.
@@ -28,62 +94,66 @@ const MessageContextMenu: FC<MessageContextMenuProps> = ({
     message,
     self,
     onAction,
+    actions = MessageActionOrder,
+    disabled = false,
+    open,
+    defaultOpen,
+    onOpenChange,
+    longPress = true,
+    longPressDelay,
+    header,
+    empty,
+    closeOnSelect,
+    className = "",
+    menuClassName = "",
+    ariaLabel = "Message actions",
     children,
-}: MessageContextMenuProps) => (
-    <ContextMenu
-        className="message-menu-zone"
-        menuClassName="message-menu"
-        longPress
-        header={self ? "Your message" : "Message"}
-        menu={
-            <>
-                {self ? (
-                    <ContextMenuItem
-                        icon="Refresh"
-                        onSelect={(): void => onAction("recall", message)}
-                    >
-                        Recall
-                    </ContextMenuItem>
-                ) : null}
-                <ContextMenuItem
-                    icon="Clipboard"
-                    onSelect={(): void => onAction("copy", message)}
-                >
-                    Copy
-                </ContextMenuItem>
-                <ContextMenuItem
-                    icon="Forward"
-                    onSelect={(): void => onAction("forward", message)}
-                >
-                    Forward
-                </ContextMenuItem>
-                <ContextMenuItem
-                    icon="Star"
-                    onSelect={(): void => onAction("favourite", message)}
-                >
-                    Favourite
-                </ContextMenuItem>
-                <ContextMenuItem
-                    icon="Select"
-                    onSelect={(): void => onAction("select", message)}
-                >
-                    Multi-select
-                </ContextMenuItem>
-                <ContextMenuItem icon="Reply" onSelect={(): void => onAction("quote", message)}>
-                    Quote
-                </ContextMenuItem>
-                <ContextMenuItem
-                    icon="Close"
-                    danger
-                    onSelect={(): void => onAction("delete", message)}
-                >
-                    Delete
-                </ContextMenuItem>
-            </>
-        }
-    >
-        {children}
-    </ContextMenu>
-);
+    ref,
+    ...rest
+}: MessageContextMenuProps) => {
+    const available: readonly MessageAction[] = MessageActionOrder.filter(
+        (action: MessageAction): boolean =>
+            actions.includes(action) && (action !== "recall" || self),
+    );
+    const menu: ReactNode =
+        available.length === 0
+            ? (void 0)
+            : available.map((action: MessageAction): ReactNode => {
+                  const definition: MessageActionDefinition = MessageActionDefinitions[action];
+
+                  return (
+                      <ContextMenuItem
+                          key={action}
+                          icon={definition.icon}
+                          danger={definition.danger === true}
+                          onSelect={(): void => onAction(action, message)}
+                      >
+                          {definition.label}
+                      </ContextMenuItem>
+                  );
+              });
+
+    return (
+        <ContextMenu
+            {...rest}
+            ref={ref}
+            className={cx("message-menu-zone", className)}
+            menuClassName={cx("message-menu", menuClassName)}
+            menu={menu}
+            header={header ?? (self ? "Your message" : "Message")}
+            empty={empty}
+            disabled={disabled}
+            open={open}
+            defaultOpen={defaultOpen}
+            onOpenChange={onOpenChange}
+            longPress={longPress}
+            longPressDelay={longPressDelay}
+            closeOnSelect={closeOnSelect}
+            ariaLabel={ariaLabel}
+        >
+            {children}
+        </ContextMenu>
+    );
+};
 
 export default MessageContextMenu;

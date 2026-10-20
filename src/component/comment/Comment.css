@@ -173,8 +173,22 @@
     cursor: pointer;
 }
 
-.comment__action:hover {
+.comment__action:hover:not(:disabled) {
     color: var(--color-primary);
+}
+
+.comment__action:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.comment__action--danger {
+    color: var(--color-error);
+}
+
+.comment__action--danger:hover:not(:disabled) {
+    color: var(--color-error);
+    text-decoration: underline;
 }
 
 .comment__composer {
@@ -232,7 +246,8 @@
     border-bottom: 0;
 }
 
-.comment-thread__empty {
+.comment-thread__empty,
+.comment-thread__state {
     display: flex;
     align-items: center;
     justify-content: center;

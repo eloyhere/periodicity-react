@@ -85,6 +85,15 @@
     color: var(--color-on-primary-container);
 }
 
+.contact__row--disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.contact__row--disabled:hover {
+    background: transparent;
+}
+
 .contact__row:focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: -2px;
@@ -137,7 +146,13 @@
     background: var(--color-error);
 }
 
-.contact__empty {
+.contact__search-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.contact__empty,
+.contact__state {
     display: flex;
     align-items: center;
     justify-content: center;

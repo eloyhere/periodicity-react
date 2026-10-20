@@ -2,8 +2,10 @@ import {
     useMemo,
     useState,
     type ChangeEvent,
+    type HTMLAttributes,
     type KeyboardEvent as ReactKeyboardEvent,
     type ReactNode,
+    type Ref,
 } from "react";
 import Button from "../../../component/button/Button";
 import Dialog from "../../../component/dialog/Dialog";
@@ -12,9 +14,9 @@ import Avatar from "../../../component/thumb/Avatar";
 import Contact from "../../contact/normal/Contact";
 import MessageList from "../../message/normal/MessageList";
 import cx from "../../../component/foundation/cx";
-import type { ContactItem } from "../../contact/adapter";
+import type { ContactAction, ContactItem } from "../../contact/adapter";
 import type { ListEntry } from "../../list/adapter";
-import type { MessageAdapter, MessageItem } from "../../message/adapter";
+import type { MessageAction, MessageAdapter, MessageItem } from "../../message/adapter";
 import type { ChatAdapter } from "../adapter";
 import { conversationMessages, createChatAdapter } from "../adapter";
 import "../Chat.css";
@@ -22,27 +24,54 @@ import "../Chat.css";
 /**
  * Props for the normal chat layout.
  * Type: interface.
- * Fields: contacts, messages, adapter, value, defaultValue, onContactSelect,
- * onSend, onForward, currentUser, className.
+ * Fields: contacts, messages, adapter, value, defaultValue, onValueChange, onContactSelect,
+ * onContactAction, onMessageAction, onQuote, onForward, onDelete, onRecall, onFavourite,
+ * onCopyMessage, onSend, onDraftChange, onQuoteCancel, currentUser, contactsTitle,
+ * contactsLabel, conversationLabel, empty, messageEmpty, placeholder, composerLabel, sendLabel,
+ * contactsLoading, loading, sending, disabled, className, ref, plus native div attributes and
+ * events.
  * @example
  * <Chat contacts={contacts} messages={messages} onSend={sendMessage} />
  */
-export interface ChatProps {
+export interface ChatProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
     contacts?: readonly ContactItem[];
     messages?: readonly MessageItem[];
     adapter?: ChatAdapter;
     value?: string;
     defaultValue?: string;
+    onValueChange?: (value: string, contact: ContactItem | null) => void;
     onContactSelect?: (contact: ContactItem) => void;
-    onSend?: (body: string, contact: ContactItem) => void;
+    onContactAction?: (action: ContactAction, contact: ContactItem) => void;
+    onMessageAction?: (action: MessageAction, message: MessageItem) => void;
+    onQuote?: (message: MessageItem) => void;
     onForward?: (messages: readonly MessageItem[], contact: ContactItem) => void;
+    onDelete?: (messages: readonly MessageItem[]) => void;
+    onRecall?: (message: MessageItem) => void;
+    onFavourite?: (message: MessageItem) => void;
+    onCopyMessage?: (message: MessageItem, content: string) => void;
+    onSend?: (body: string, contact: ContactItem) => void;
+    onDraftChange?: (draft: string) => void;
+    onQuoteCancel?: () => void;
     currentUser?: string;
+    contactsTitle?: ReactNode;
+    contactsLabel?: string;
+    conversationLabel?: string;
+    empty?: ReactNode;
+    messageEmpty?: ReactNode;
+    placeholder?: string;
+    composerLabel?: string;
+    sendLabel?: string;
+    contactsLoading?: boolean;
+    loading?: boolean;
+    sending?: boolean;
+    disabled?: boolean;
     className?: string;
+    ref?: Ref<HTMLDivElement>;
 }
 
 /**
  * Renders a two-pane chat with contacts, transcript, and composer.
- * @param props - Contacts, messages, active conversation, and send handler.
+ * @param props - Contacts, messages, active conversation, composer options, and send handler.
  * @example
  * <Chat contacts={contacts} messages={messages} onSend={sendMessage} />
  * @returns A chat layout.
@@ -53,11 +82,36 @@ const Chat: (props: ChatProps) => ReactNode = ({
     adapter,
     value,
     defaultValue,
+    onValueChange,
     onContactSelect,
-    onSend,
+    onContactAction,
+    onMessageAction,
+    onQuote,
     onForward,
+    onDelete,
+    onRecall,
+    onFavourite,
+    onCopyMessage,
+    onSend,
+    onDraftChange,
+    onQuoteCancel,
     currentUser = "",
+    contactsTitle = "Conversations",
+    contactsLabel = "Conversations",
+    conversationLabel = "Conversation",
+    empty = "Select a conversation",
+    messageEmpty = "Start the conversation",
+    placeholder,
+    composerLabel = "Message",
+    sendLabel = "Send message",
+    contactsLoading = false,
+    loading = false,
+    sending = false,
+    disabled = false,
     className = "",
+    "aria-label": ariaLabel,
+    ref,
+    ...rest
 }: ChatProps): ReactNode => {
     const source: ChatAdapter = useMemo(
         (): ChatAdapter => adapter ?? createChatAdapter(contacts, messages),
@@ -98,15 +152,23 @@ const Chat: (props: ChatProps) => ReactNode = ({
         typeof content === "string" ? content : "";
 
     const choose: (contact: ContactItem) => void = (contact: ContactItem): void => {
-        if (value === (void 0)) {
-            setInternalValue(contact.id);
+        if (disabled) {
+            return;
+        }
+
+        if (active !== contact.id) {
+            if (value === (void 0)) {
+                setInternalValue(contact.id);
+            }
+
+            onValueChange?.(contact.id, contact);
         }
 
         onContactSelect?.(contact);
     };
 
     const send: () => void = (): void => {
-        if (draft.trim().length === 0 || activeContact === null) {
+        if (disabled || sending || draft.trim().length === 0 || activeContact === null) {
             return;
         }
 
@@ -119,19 +181,36 @@ const Chat: (props: ChatProps) => ReactNode = ({
         setQuoted(null);
     };
 
+    const cancelQuote: () => void = (): void => {
+        setQuoted(null);
+        onQuoteCancel?.();
+    };
+
     return (
-        <div className={cx("chat", className)}>
-            <aside className="chat__contacts" aria-label="Conversations">
+        <div
+            {...rest}
+            ref={ref}
+            className={cx("chat", className)}
+            aria-label={ariaLabel ?? "Chat"}
+            aria-busy={loading ? "true" : (void 0)}
+            aria-disabled={disabled ? "true" : (void 0)}
+        >
+            <aside className="chat__contacts" aria-label={contactsLabel}>
                 <Contact
                     adapter={source.contacts}
                     value={active}
                     onSelect={choose}
-                    title="Conversations"
+                    onContactAction={onContactAction}
+                    title={contactsTitle}
+                    aria-label={contactsLabel}
+                    listLabel={contactsLabel}
+                    loading={contactsLoading}
+                    disabled={disabled}
                 />
             </aside>
-            <section className="chat__main" aria-label="Conversation">
+            <section className="chat__main" aria-label={conversationLabel}>
                 {activeContact === null ? (
-                    <div className="chat__empty">Select a conversation</div>
+                    <div className="chat__empty">{empty}</div>
                 ) : (
                     <>
                         <header className="chat__header">
@@ -155,9 +234,19 @@ const Chat: (props: ChatProps) => ReactNode = ({
                             <MessageList
                                 messages={transcript}
                                 currentUser={currentUser}
-                                onQuote={setQuoted}
+                                loading={loading}
+                                disabled={disabled}
+                                empty={messageEmpty}
+                                onMessageAction={onMessageAction}
+                                onQuote={(message: MessageItem): void => {
+                                    setQuoted(message);
+                                    onQuote?.(message);
+                                }}
                                 onForward={setForwarding}
-                                empty="Start the conversation"
+                                onDelete={onDelete}
+                                onRecall={onRecall}
+                                onFavourite={onFavourite}
+                                onCopyMessage={onCopyMessage}
                             />
                         </div>
 
@@ -176,7 +265,8 @@ const Chat: (props: ChatProps) => ReactNode = ({
                                             type="button"
                                             className="chat__quote-close"
                                             aria-label="Cancel quote"
-                                            onClick={(): void => setQuoted(null)}
+                                            disabled={disabled}
+                                            onClick={cancelQuote}
                                         >
                                             <Icon name="Close" size={13} />
                                         </button>
@@ -186,10 +276,16 @@ const Chat: (props: ChatProps) => ReactNode = ({
                                     className="chat__input"
                                     rows={2}
                                     value={draft}
-                                    placeholder={`Message ${activeContact.name}`}
+                                    placeholder={placeholder ?? `Message ${activeContact.name}`}
+                                    aria-label={composerLabel}
+                                    disabled={disabled}
                                     onChange={(
                                         event: ChangeEvent<HTMLTextAreaElement>,
-                                    ): void => setDraft(event.target.value)}
+                                    ): void => {
+                                        const next: string = event.target.value;
+                                        setDraft(next);
+                                        onDraftChange?.(next);
+                                    }}
                                     onKeyDown={(
                                         event: ReactKeyboardEvent<HTMLTextAreaElement>,
                                     ): void => {
@@ -203,9 +299,9 @@ const Chat: (props: ChatProps) => ReactNode = ({
                             <Button
                                 size="sm"
                                 variant="solid"
-                                aria-label="Send message"
+                                aria-label={sendLabel}
                                 onClick={send}
-                                disabled={draft.trim().length === 0}
+                                disabled={disabled || sending || draft.trim().length === 0}
                             >
                                 <Icon name="Send" size={16} />
                             </Button>

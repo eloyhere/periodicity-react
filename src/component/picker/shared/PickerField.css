@@ -18,6 +18,11 @@
     line-height: 1.2;
 }
 
+.picker-field__required {
+    margin-left: 2px;
+    color: var(--color-error);
+}
+
 .picker-field__control {
     display: flex;
     align-items: center;

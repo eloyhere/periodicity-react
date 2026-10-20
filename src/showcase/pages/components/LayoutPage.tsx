@@ -17,6 +17,7 @@ import {
     Constraint,
     ConstraintLayout,
     DrawerLayout,
+    Drag,
     GridLayout,
     LinearLayout,
     LinearLayoutItem,
@@ -24,6 +25,8 @@ import {
     NavigationView,
     Pager,
     PagerPage,
+    Scroll,
+    Scrollbar,
     Surface,
     Switch,
     Table,
@@ -42,6 +45,7 @@ import type {
     NavigationItem,
     NavigationViewHandle,
     PagerHandle,
+    ScrollbarState,
     TreeItemState,
 } from "../../../component";
 import Demo from "../../Demo";
@@ -98,6 +102,35 @@ const tableCode: string = `<Table
     onSelectionChange={(keys) => setTableSelection([...keys])}
     onRowClick={(row) => toast.show({ title: \`Selected \${row.name}\` })}
 />`;
+
+const scrollbarCode: string = `<div style={{ height: 220 }}>
+    <Scrollbar orientation="vertical" autoHide>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: 12 }}>
+            {Array.from({ length: 24 }, (_, index) => (
+                <Surface key={index} elevation={1} shape="xs">
+                    Row {index + 1}
+                </Surface>
+            ))}
+        </div>
+    </Scrollbar>
+</div>`;
+
+const scrollSlotCode: string = `<Scroll
+    height={220}
+    direction="vertical"
+    size={8}
+    slots={{ scrollbar: (state) => <MyScrollbar state={state} /> }}
+>
+    <div style={{ padding: 12 }}>Long content…</div>
+</Scroll>`;
+
+const dragCode: string = `<Drag onReorder={(from, to) => reorder(from, to)}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {items.map((item) => (
+            <div key={item}>{item}</div>
+        ))}
+    </div>
+</Drag>`;
 
 const virtualTableCode: string = `<Table
     columns={tableColumns}
@@ -794,6 +827,114 @@ const LayoutPage: FC = () => {
                         }
                     />
                 </Stack>
+            </Demo>
+
+            <Demo
+                title="Scrollbar"
+                description="Native scrolling with a Material overlay thumb that appears on hover and scroll."
+                code={scrollbarCode}
+            >
+                <div style={{ height: 220 }}>
+                    <Scrollbar orientation="vertical" autoHide>
+                        <div
+                            style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 8,
+                                padding: 12,
+                            }}
+                        >
+                            {[...Array.from({ length: 24 }).keys()].map(
+                                (index: number): ReactNode => (
+                                    <Surface key={index} elevation={1} shape="sm">
+                                        <Text variant="body-sm">Row {index + 1}</Text>
+                                    </Surface>
+                                ),
+                            )}
+                        </div>
+                    </Scrollbar>
+                </div>
+            </Demo>
+
+            <Demo
+                title="Scroll slot"
+                description="Replace the built-in scrollbar UI through the slot, with configurable direction and size."
+                code={scrollSlotCode}
+            >
+                <div style={{ height: 220 }}>
+                    <Scroll
+                        height={220}
+                        direction="vertical"
+                        size={8}
+                        slots={{
+                            scrollbar: (state: ScrollbarState): ReactNode => (
+                                <div
+                                    style={{
+                                        position: "absolute",
+                                        top: 2,
+                                        right: 2,
+                                        bottom: 2,
+                                        width: 8,
+                                        borderRadius: 999,
+                                        background: "var(--color-surface-container-high)",
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            position: "absolute",
+                                            top: state.vertical.offset,
+                                            right: 0,
+                                            width: 8,
+                                            height: state.vertical.thumbSize,
+                                            borderRadius: 999,
+                                            background: "var(--color-primary)",
+                                        }}
+                                    />
+                                </div>
+                            ),
+                        }}
+                    >
+                        <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: 12 }}>
+                            {[...Array.from({ length: 18 }).keys()].map(
+                                (index: number): ReactNode => (
+                                    <Text key={index} variant="body-sm">
+                                        Scroll slot row {index + 1}
+                                    </Text>
+                                ),
+                            )}
+                        </div>
+                    </Scroll>
+                </div>
+            </Demo>
+
+            <Demo
+                title="Drag"
+                description="Every direct child of the single slotted container can be reordered by dragging."
+                code={dragCode}
+            >
+                <Drag
+                    onReorder={(from: number, to: number): void => {
+                        toast.show({ title: `Moved ${from + 1} → ${to + 1}` });
+                    }}
+                >
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {["Plan", "Write", "Review", "Publish"].map(
+                            (label: string): ReactNode => (
+                                <div
+                                    key={label}
+                                    style={{
+                                        padding: "10px 12px",
+                                        border: "1px solid var(--color-outline-variant)",
+                                        borderRadius: 8,
+                                        background: "var(--color-surface-container-low)",
+                                    }}
+                                >
+                                    <Text variant="body-sm">{label}</Text>
+                                </div>
+                            ),
+                        )}
+                    </div>
+                </Drag>
             </Demo>
 
             <Demo

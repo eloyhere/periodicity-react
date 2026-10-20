@@ -1,5 +1,9 @@
 import type { ReactNode } from "react";
 import { Badge } from "../component";
+import {
+    uiComponents,
+    type ComponentRecord,
+} from "./componentCatalogue";
 import type {
     AccordionItem,
     BreadcrumbItem,
@@ -685,88 +689,14 @@ export const variantOptions: VariantOption[] = [
 ];
 
 /**
- * Every public component and the entry that documents it.
+ * Every public UI component and the entry that documents it.
+ * Derived from the same catalogue as the sidebar, so the overview index can
+ * never drift from the component inventory.
  * Type: constant.
  * Fields: component name, entry id.
  * @example
  * const target: string = componentIndex[0][1];
  */
-export const componentIndex: ReadonlyArray<readonly [string, string]> = [
-    ["Buttons", "buttons"],
-    ["Text", "text"],
-    ["TextInput", "text-fields"],
-    ["TextArea", "text-fields"],
-    ["NumberInput", "choices"],
-    ["NumberPicker", "pickers"],
-    ["Mention", "discussion"],
-    ["Select", "text-fields"],
-    ["Combobox", "text-fields"],
-    ["CompleteInput", "text-fields"],
-    ["EmailInput", "text-fields"],
-    ["TelephoneInput", "text-fields"],
-    ["TimePicker", "pickers"],
-    ["DateTimePicker", "pickers"],
-    ["ColourPicker", "pickers"],
-    ["VariantPicker", "pickers"],
-    ["Checkbox", "choices"],
-    ["RadioGroup", "choices"],
-    ["Range", "choices"],
-    ["Switch", "choices"],
-    ["Chip", "feedback"],
-    ["Badge", "feedback"],
-    ["Rate", "feedback"],
-    ["Timeline", "feedback"],
-    ["Avatar", "feedback"],
-    ["Divider", "feedback"],
-    ["Alert", "feedback"],
-    ["Banner", "feedback"],
-    ["Progress", "feedback"],
-    ["CircularProgress", "feedback"],
-    ["ProgressRing", "feedback"],
-    ["Spinner", "feedback"],
-    ["Skeleton", "feedback"],
-    ["EmptyState", "feedback"],
-    ["Card", "cards"],
-    ["Surface", "cards"],
-    ["Tabs", "navigation"],
-    ["TabPanel", "navigation"],
-    ["Accordion", "navigation"],
-    ["Breadcrumbs", "navigation"],
-    ["Pagination", "navigation"],
-    ["Stepper", "navigation"],
-    ["NavigationView", "navigation"],
-    ["DrawerLayout", "navigation"],
-    ["Pager", "layout"],
-    ["LinearLayout", "layout"],
-    ["ConstraintLayout", "layout"],
-    ["Dropdown", "overlays"],
-    ["Menu", "overlays"],
-    ["Popover", "overlays"],
-    ["Tooltip", "overlays"],
-    ["ContextMenu", "overlays"],
-    ["CommentThread", "discussion"],
-    ["Transfer", "transfer"],
-    ["Contact", "messaging"],
-    ["MessageList", "messaging"],
-    ["Chat", "messaging"],
-    ["ProjectManager", "project"],
-    ["Preview", "file-tools"],
-    ["Editor", "file-tools"],
-    ["Dialog", "dialogs"],
-    ["ConfirmDialog", "dialogs"],
-    ["MessageDialog", "dialogs"],
-    ["InputDialog", "dialogs"],
-    ["Drawer", "dialogs"],
-    ["Toast", "dialogs"],
-    ["Snackbar", "dialogs"],
-    ["GridLayout", "layout"],
-    ["WaterfallLayout", "layout"],
-    ["Table", "layout"],
-    ["List", "layout"],
-    ["Tree", "layout"],
-    ["ElementLoading", "feedback"],
-    ["FullscreenLoading", "feedback"],
-    ["Field", "choices"],
-    ["FieldGroup", "choices"],
-    ["Icon", "icons"],
-];
+export const componentIndex: ReadonlyArray<readonly [string, string]> = uiComponents.map(
+    (component: ComponentRecord): readonly [string, string] => [component.name, component.id],
+);

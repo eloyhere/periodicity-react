@@ -1,16 +1,20 @@
-import { type CSSProperties, type FC } from "react";
+import type { CSSProperties, FC, HTMLAttributes, Ref } from "react";
 import cx from "../foundation/cx";
 import "./CircularProgress.css";
 
 /**
  * Props for the Material circular progress indicator.
  * Type: interface.
+ * Extends the native `span` attributes, so `id`, `title`, `aria-*`, `data-*`, `tabIndex`, and pointer,
+ * mouse, keyboard, and focus handlers are forwarded to the progressbar element. A caller supplied
+ * `aria-label` takes precedence over `label`.
  * Fields: value, minimum, maximum, step, size, stroke, label, className.
  * @example
  * <CircularProgress />
+ * @example
  * <CircularProgress value={42} minimum={0} maximum={100} />
  */
-export interface CircularProgressProps {
+export interface CircularProgressProps extends Omit<HTMLAttributes<HTMLSpanElement>, "children" | "className"> {
     value?: number;
     minimum?: number;
     maximum?: number;
@@ -19,12 +23,13 @@ export interface CircularProgressProps {
     stroke?: number;
     label?: string;
     className?: string;
+    ref?: Ref<HTMLSpanElement>;
 }
 
 /**
  * Renders an Android-style circular progress. A maximum less than or equal to
  * the minimum means the progress is unknown, so the arc spins forever.
- * @param props - Range, step, size, and accessible label.
+ * @param props - Range, step, size, accessible label, class name, and native span attributes.
  * @example
  * <CircularProgress minimum={0} maximum={0} step={0} />
  * @returns A determinate or indeterminate circular progress.
@@ -38,6 +43,8 @@ const CircularProgress: FC<CircularProgressProps> = ({
     stroke = 4,
     label = "Loading",
     className = "",
+    ref,
+    ...rest
 }: CircularProgressProps) => {
     const determinate: boolean =
         maximum > minimum && value !== (void 0) && Number.isFinite(value);
@@ -57,6 +64,7 @@ const CircularProgress: FC<CircularProgressProps> = ({
 
     return (
         <span
+            ref={ref}
             className={cx(
                 "circular-progress",
                 determinate ? "circular-progress--determinate" : "circular-progress--indeterminate",
@@ -69,6 +77,7 @@ const CircularProgress: FC<CircularProgressProps> = ({
             aria-valuenow={determinate ? Math.round(snapped) : (void 0)}
             aria-valuetext={determinate ? `${Math.round(ratio * 100)}%` : "Loading"}
             style={style}
+            {...rest}
         >
             <svg
                 className="circular-progress__svg"

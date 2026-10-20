@@ -1,4 +1,4 @@
-import type { FC, ReactNode } from "react";
+import type { FC, HTMLAttributes, ReactNode, Ref } from "react";
 import cx from "../foundation/cx";
 import Icon, { type IconName } from "../icon/Icon";
 import Text from "../text/Text";
@@ -7,6 +7,9 @@ import "./EmptyState.css";
 /**
  * Props for the EmptyState component.
  * Type: interface.
+ * Extends the native `div` attributes, so `id`, `style`, `aria-*`, `data-*`, `tabIndex`, and pointer,
+ * mouse, keyboard, and focus handlers are forwarded to the empty-state container. `title` remains the
+ * empty-state heading rather than a tooltip.
  * Fields: title, description, icon, action, className.
  * @example
  * <EmptyState
@@ -15,17 +18,18 @@ import "./EmptyState.css";
  *     action={<Button>New ritual</Button>}
  * />
  */
-export interface EmptyStateProps {
+export interface EmptyStateProps extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "className" | "title"> {
     title: string;
     description?: ReactNode;
     icon?: IconName;
     action?: ReactNode;
     className?: string;
+    ref?: Ref<HTMLDivElement>;
 }
 
 /**
  * Renders a centred empty-state message with an optional icon and action slot.
- * @param props - Title, description, icon, action, and class name.
+ * @param props - Title, description, icon, action, class name, and native div attributes.
  * @example
  * <EmptyState title="No results" description="Try a different filter." icon="Search" />
  * @returns An empty-state element.
@@ -36,8 +40,10 @@ const EmptyState: FC<EmptyStateProps> = ({
     icon,
     action,
     className = "",
+    ref,
+    ...rest
 }: EmptyStateProps) => (
-    <div className={cx("empty", className)}>
+    <div ref={ref} className={cx("empty", className)} {...rest}>
         {icon === (void 0) ? null : (
             <span className="empty__icon" aria-hidden="true">
                 <Icon name={icon} size={22} />

@@ -1,20 +1,23 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type {
-    Dispatch,
+    ButtonHTMLAttributes,
     FC,
     KeyboardEventHandler,
     MouseEventHandler,
     MutableRefObject,
     ReactNode,
+    Ref,
+    RefCallback,
     RefObject,
-    SetStateAction,
 } from "react";
 import type { SelectAdapter, SelectOption } from "../adapter";
 import { createSelectAdapter } from "../adapter";
 import type { ListEntry } from "../../../../layout/list/adapter";
 import Dropdown, { DropdownItem } from "../../../dropdown/Dropdown";
 import cx from "../../../foundation/cx";
+import useControllableState from "../../../foundation/useControllableState";
 import useField, { type FieldState } from "../../../foundation/useField";
+import useMergedRef from "../../../foundation/useMergedRef";
 import Icon from "../../../icon/Icon";
 import Surface from "../../../surface/Surface";
 import "../Select.css";
@@ -40,14 +43,40 @@ export type SelectSize = "sm" | "md" | "lg";
 /**
  * Props for the normal Select listbox.
  * Type: interface.
- * Fields: label, value, options, adapter, onChange, variant, size, hint, error,
- * placeholder, disabled, className, id.
+ * Native button attributes are forwarded to the trigger; `className` and `style` apply to the field root.
+ * Fields: label, value, defaultValue, options, adapter, onChange, variant, size, hint, error,
+ * placeholder, disabled, readOnly, open, defaultOpen, onOpenChange, className, id, ref,
+ * and native button attributes.
+ * @param label - Floating label and accessible name for the trigger.
+ * @param value - Controlled selected value.
+ * @param defaultValue - Initial selected value when uncontrolled.
+ * @param options - Choices rendered in the listbox.
+ * @param adapter - Indexed choices used instead of `options`.
+ * @param onChange - Called with the selected option value.
+ * @param variant - Field variant: outline, fill, or standard.
+ * @param size - Control size.
+ * @param hint - Supporting text shown below the field.
+ * @param error - Validation message; replaces the hint and marks the field invalid.
+ * @param placeholder - Text shown while the listbox is open without a selection.
+ * @param disabled - Disables the trigger natively.
+ * @param readOnly - Keeps the value visible but suppresses opening and selection.
+ * @param open - Controlled listbox visibility.
+ * @param defaultOpen - Initial listbox visibility when uncontrolled.
+ * @param onOpenChange - Called when the listbox visibility changes.
+ * @param className - Extra classes for the field root.
+ * @param id - Id for the trigger; generated when omitted.
+ * @param ref - Ref to the trigger button.
  * @example
  * <Select label="Cadence" value={value} options={options} onChange={setValue} />
  */
-export interface SelectProps {
+export interface SelectProps
+    extends Omit<
+        ButtonHTMLAttributes<HTMLButtonElement>,
+        "value" | "defaultValue" | "onChange" | "type" | "className" | "children"
+    > {
     label: string;
-    value: string;
+    value?: string;
+    defaultValue?: string;
     options?: readonly SelectOption[];
     adapter?: SelectAdapter;
     onChange: (value: string) => void;
@@ -57,8 +86,13 @@ export interface SelectProps {
     error?: string;
     placeholder?: string;
     disabled?: boolean;
+    readOnly?: boolean;
+    open?: boolean;
+    defaultOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
     className?: string;
     id?: string;
+    ref?: Ref<HTMLButtonElement>;
 }
 
 /**
@@ -71,6 +105,7 @@ export interface SelectProps {
 const Select: FC<SelectProps> = ({
     label,
     value,
+    defaultValue = "",
     options = [],
     adapter,
     onChange,
@@ -80,13 +115,38 @@ const Select: FC<SelectProps> = ({
     error,
     placeholder,
     disabled = false,
+    readOnly = false,
+    open: openProp,
+    defaultOpen = false,
+    onOpenChange,
     className = "",
+    style,
     id,
+    onClick,
+    onKeyDown,
+    ref,
+    ...rest
 }: SelectProps) => {
     const fieldState: FieldState = useField({ id, label, hint, error });
     const controlId: string = fieldState.controlId;
     const labelId: string = `${controlId}-label`;
     const listboxId: string = `${controlId}-listbox`;
+    const [selectedValue, setSelectedValue]: readonly [
+        string,
+        (next: string | ((previous: string) => string)) => void,
+    ] = useControllableState<string>({
+        value,
+        defaultValue,
+        onChange,
+    });
+    const [open, setOpen]: readonly [
+        boolean,
+        (next: boolean | ((previous: boolean) => boolean)) => void,
+    ] = useControllableState<boolean>({
+        value: openProp,
+        defaultValue: defaultOpen,
+        onChange: onOpenChange,
+    });
     const hasError: boolean = fieldState.invalid;
     const describedBy: string = hasError
         ? fieldState.errorId
@@ -98,14 +158,17 @@ const Select: FC<SelectProps> = ({
         (): SelectAdapter => adapter ?? createSelectAdapter(options),
         [adapter, options],
     );
-    const selectedIndex: number = source.indexOf(value);
+    const selectedIndex: number = source.indexOf(selectedValue);
     const selectedOption: SelectOption | void =
         selectedIndex >= 0 ? source.getItem(selectedIndex) : (void 0);
-    const displayText: string = selectedOption === (void 0) ? value : selectedOption.label;
-    const hasValue: boolean = selectedOption !== (void 0) || value.length > 0;
+    const displayText: string = selectedOption === (void 0) ? selectedValue : selectedOption.label;
+    const hasValue: boolean = selectedOption !== (void 0) || selectedValue.length > 0;
 
-    const [open, setOpen]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false);
     const triggerRef: RefObject<HTMLButtonElement | null> = useRef<HTMLButtonElement | null>(null);
+    const mergedTriggerRef: RefCallback<HTMLButtonElement> = useMergedRef<HTMLButtonElement>(
+        triggerRef,
+        ref,
+    );
     const listboxRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
     const typeBufferRef: MutableRefObject<string> = useRef<string>("");
     const typeTimerRef: MutableRefObject<number | void> = useRef<number | void>((void 0));
@@ -147,7 +210,7 @@ const Select: FC<SelectProps> = ({
     );
 
     const openListbox: () => void = (): void => {
-        if (!disabled) {
+        if (!disabled && !readOnly) {
             setOpen(true);
         }
     };
@@ -168,17 +231,25 @@ const Select: FC<SelectProps> = ({
     };
 
     const handleSelect: (option: SelectOption) => void = (option: SelectOption): void => {
-        if (option.disabled === true) {
+        if (disabled || readOnly || option.disabled === true) {
             return;
         }
 
-        onChange(option.value);
+        setSelectedValue(option.value);
         setOpen(false);
         typeBufferRef.current = "";
         triggerRef.current?.focus({ preventScroll: true });
     };
 
-    const handleTriggerClick: MouseEventHandler<HTMLButtonElement> = (): void => {
+    const handleTriggerClick: MouseEventHandler<HTMLButtonElement> = (
+        event: Parameters<MouseEventHandler<HTMLButtonElement>>[0],
+    ): void => {
+        onClick?.(event);
+
+        if (disabled || readOnly || event.defaultPrevented) {
+            return;
+        }
+
         if (open) {
             closeListbox();
         } else {
@@ -189,13 +260,13 @@ const Select: FC<SelectProps> = ({
     const handleTriggerKeyDown: KeyboardEventHandler<HTMLButtonElement> = (
         event: Parameters<KeyboardEventHandler<HTMLButtonElement>>[0],
     ): void => {
-        if (
-            !disabled &&
-            (event.key === "ArrowDown" ||
-                event.key === "ArrowUp" ||
-                event.key === "Enter" ||
-                event.key === " ")
-        ) {
+        onKeyDown?.(event);
+
+        if (event.defaultPrevented || disabled || readOnly) {
+            return;
+        }
+
+        if (event.key === "ArrowDown" || event.key === "ArrowUp" || event.key === "Enter" || event.key === " ") {
             event.preventDefault();
             openListbox();
         }
@@ -298,11 +369,14 @@ const Select: FC<SelectProps> = ({
                 hasValue && "select-field--filled",
                 hasError && "select-field--invalid",
                 disabled && "select-field--disabled",
+                readOnly && "select-field--readonly",
                 className,
             )}
+            style={style}
             data-open={open ? "true" : "false"}
             data-invalid={hasError ? "true" : "false"}
             data-disabled={disabled ? "true" : "false"}
+            data-readonly={readOnly ? "true" : "false"}
         >
             <Surface
                 className="select-field__surface"
@@ -311,7 +385,8 @@ const Select: FC<SelectProps> = ({
                 ripple={{ layer: "foreground", trigger: ["hover", "click"] }}
             >
                 <button
-                    ref={triggerRef}
+                    {...rest}
+                    ref={mergedTriggerRef}
                     id={controlId}
                     type="button"
                     role="combobox"
@@ -321,6 +396,7 @@ const Select: FC<SelectProps> = ({
                     aria-controls={listboxId}
                     aria-labelledby={labelId}
                     aria-invalid={hasError}
+                    aria-readonly={readOnly ? true : (void 0)}
                     aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
                     disabled={disabled}
                     onClick={handleTriggerClick}
@@ -379,7 +455,7 @@ const Select: FC<SelectProps> = ({
                                 <DropdownItem
                                     key={option.value}
                                     icon={option.icon}
-                                    selected={option.value === value}
+                                    selected={option.value === selectedValue}
                                     disabled={option.disabled === true}
                                     role="option"
                                     onSelect={(): void => handleSelect(option)}

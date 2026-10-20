@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { FC, HTMLAttributes, ReactNode, Ref } from "react";
 import Icon, { type IconName } from "../icon/Icon";
 import cx from "../foundation/cx";
 import "./Timeline.css";
@@ -15,7 +15,7 @@ export type TimelineTone = "neutral" | "accent" | "success" | "warning" | "dange
 /**
  * One timeline event.
  * Type: interface.
- * Fields: id, title, time, description, icon, tone, active.
+ * Fields: id, title, time, dateTime, description, icon, tone, active.
  * @example
  * const item: TimelineItem = { id: "saved", title: "Draft saved", time: "09:30" };
  */
@@ -23,6 +23,7 @@ export interface TimelineItem {
     id: string;
     title: ReactNode;
     time?: ReactNode;
+    dateTime?: string;
     description?: ReactNode;
     icon?: IconName;
     tone?: TimelineTone;
@@ -45,34 +46,41 @@ export interface TimelineItemState {
 /**
  * Props for the Material timeline.
  * Type: interface.
- * Fields: items, slots, className.
+ * Extends the native `ol` attributes, so `id`, `title`, `aria-*`, `data-*`, `tabIndex`, and pointer,
+ * mouse, keyboard, and focus handlers are forwarded to the timeline list.
+ * Fields: items, slots, activeId, className.
  * @example
  * <Timeline items={items} />
  */
-export interface TimelineProps {
+export interface TimelineProps extends Omit<HTMLAttributes<HTMLOListElement>, "children" | "className"> {
     items: readonly TimelineItem[];
     slots?: {
         item?: (item: TimelineItem, state: TimelineItemState) => ReactNode;
     };
+    activeId?: string;
     className?: string;
+    ref?: Ref<HTMLOListElement>;
 }
 
 /**
  * Renders a vertical Material timeline with tone markers and item slots.
- * @param props - Events and optional item renderer.
+ * @param props - Events, active override, optional item renderer, class name, and native list attributes.
  * @example
- * <Timeline items={events} />
+ * <Timeline items={events} activeId="saved" />
  * @returns A timeline list.
  */
-const Timeline: (props: TimelineProps) => ReactNode = ({
+const Timeline: FC<TimelineProps> = ({
     items,
     slots,
+    activeId,
     className = "",
+    ref,
+    ...rest
 }: TimelineProps): ReactNode => (
-    <ol className={cx("timeline", className)}>
+    <ol ref={ref} className={cx("timeline", className)} {...rest}>
         {items.map((item: TimelineItem, index: number): ReactNode => {
             const last: boolean = index === items.length - 1;
-            const active: boolean = item.active === true;
+            const active: boolean = activeId !== (void 0) ? item.id === activeId : item.active === true;
 
             return (
                 <li
@@ -83,6 +91,7 @@ const Timeline: (props: TimelineProps) => ReactNode = ({
                         active && "timeline__item--active",
                     )}
                     data-tone={item.tone ?? "neutral"}
+                    aria-current={active ? "true" : (void 0)}
                 >
                     <span className="timeline__marker" aria-hidden="true">
                         {item.icon === (void 0) ? (
@@ -97,7 +106,9 @@ const Timeline: (props: TimelineProps) => ReactNode = ({
                                 <div className="timeline__head">
                                     <span className="timeline__title">{item.title}</span>
                                     {item.time === (void 0) ? null : (
-                                        <time className="timeline__time">{item.time}</time>
+                                        <time className="timeline__time" dateTime={item.dateTime}>
+                                            {item.time}
+                                        </time>
                                     )}
                                 </div>
                                 {item.description === (void 0) ? null : (

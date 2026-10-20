@@ -1,6 +1,14 @@
-import { useMemo, type FC, type ReactNode } from "react";
+import {
+    useMemo,
+    type FC,
+    type HTMLAttributes,
+    type MouseEvent as ReactMouseEvent,
+    type ReactNode,
+    type Ref,
+} from "react";
 import { createListAdapter, type ListAdapter, type ListEntry } from "../../layout/list/adapter";
 import cx from "../foundation/cx";
+import useControllableState from "../foundation/useControllableState";
 import VisuallyHidden from "../foundation/VisuallyHidden";
 import Icon, { type IconName } from "../icon/Icon";
 import Surface from "../surface/Surface";
@@ -15,6 +23,7 @@ import "./Stepper.css";
  * - `description`: Optional supporting copy under the label.
  * - `icon`: Optional glyph shown instead of the step number.
  * - `optional`: Marks the step as optional.
+ * - `disabled`: Keeps the step visible but prevents selection.
  * @example
  * const step: StepItem = { value: "account", label: "Account" };
  */
@@ -24,6 +33,7 @@ export interface StepItem {
     description?: ReactNode;
     icon?: IconName;
     optional?: boolean;
+    disabled?: boolean;
 }
 
 /**
@@ -31,34 +41,53 @@ export interface StepItem {
  * Type: interface.
  * Fields:
  * - `steps`: Steps in display order.
- * - `current`: Zero-based index of the current step.
+ * - `current`: Controlled zero-based index of the current step.
+ * - `defaultCurrent`: Uncontrolled initial step index; defaults to `0`.
+ * - `onCurrentChange`: Called with the next step index.
  * - `orientation`: Layout direction; defaults to `horizontal`.
  * - `onStepClick`: Called with the clicked step index; omitted means read-only.
+ * - `disabled`: Disables every step without removing it from the list.
+ * - `ariaLabel`: Accessible name for the ordered step list.
  * - `className`: Extra class names for the root element.
+ * - `ref`: Ref forwarded to the root element.
  * @example
- * <Stepper steps={steps} current={1} onStepClick={setStep} />
+ * <Stepper steps={steps} defaultCurrent={1} onStepClick={setStep} />
  */
-export interface StepperProps {
-    steps: StepItem[];
-    current: number;
+export interface StepperProps
+    extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
+    steps: readonly StepItem[];
+    current?: number;
+    defaultCurrent?: number;
+    onCurrentChange?: (index: number) => void;
     orientation?: "horizontal" | "vertical";
-    onStepClick?: (index: number) => void;
+    onStepClick?: (index: number, step: StepItem, event: ReactMouseEvent<HTMLButtonElement>) => void;
+    disabled?: boolean;
+    ariaLabel?: string;
     className?: string;
+    ref?: Ref<HTMLDivElement>;
+    [dataAttribute: `data-${string}`]: string | number | boolean | undefined;
 }
 
 /**
  * Renders an ordered stepper with completed, current, and upcoming states.
- * @param props - Steps, current index, orientation, click handler, and class name.
+ * @param props - Steps, current index, orientation, callbacks, disabled state, and native attributes.
  * @example
- * <Stepper steps={steps} current={1} orientation="vertical" />
+ * <Stepper steps={steps} defaultCurrent={1} orientation="vertical" />
  * @returns An ordered list of steps with decorative connectors.
  */
 const Stepper: FC<StepperProps> = ({
     steps,
     current,
+    defaultCurrent,
+    onCurrentChange,
     orientation = "horizontal",
     onStepClick,
+    disabled = false,
+    ariaLabel,
     className = "",
+    ref,
+    "aria-label": ariaLabelAttribute,
+    ...rest
 }: StepperProps): ReactNode => {
     const adapter: ListAdapter<StepItem> = useMemo<ListAdapter<StepItem>>(
         () => createListAdapter<StepItem>(steps, { getKey: (step: StepItem): string => step.value }),
@@ -68,27 +97,50 @@ const Stepper: FC<StepperProps> = ({
         () => adapter.getRange(0, adapter.size),
         [adapter],
     );
-    const safeCurrent: number = Number.isFinite(current) ? Math.floor(current) : 0;
+    const [active, setActive]: readonly [number, (next: number | ((previous: number) => number)) => void] =
+        useControllableState<number>({
+            value: current,
+            defaultValue: defaultCurrent ?? 0,
+            onChange: onCurrentChange,
+        });
+    const safeCurrent: number = Number.isFinite(active) ? Math.floor(active) : 0;
     const activeIndex: number =
         steps.length === 0 ? -1 : Math.min(Math.max(0, safeCurrent), steps.length - 1);
-    const isInteractive: boolean = onStepClick !== (void 0);
+    const isInteractive: boolean = onStepClick !== (void 0) && !disabled;
+    const resolvedAriaLabel: string = ariaLabel ?? ariaLabelAttribute ?? "Progress";
 
-    const handleStepClick: (index: number) => void = (index: number): void => {
-        if (onStepClick === (void 0) || index === activeIndex) {
+    const handleStepClick: (
+        index: number,
+        step: StepItem,
+        event: ReactMouseEvent<HTMLButtonElement>,
+    ) => void = (
+        index: number,
+        step: StepItem,
+        event: ReactMouseEvent<HTMLButtonElement>,
+    ): void => {
+        if (onStepClick === (void 0) || disabled || step.disabled === true || index === activeIndex) {
             return;
         }
 
-        onStepClick(index);
+        setActive(index);
+        onStepClick(index, step, event);
     };
 
     return (
-        <div className={cx("stepper", `stepper--${orientation}`, className)}>
-            <ol className="stepper__list">
+        <div
+            {...rest}
+            ref={ref}
+            className={cx("stepper", `stepper--${orientation}`, className)}
+            data-disabled={disabled ? "true" : "false"}
+        >
+            <ol className="stepper__list" aria-label={resolvedAriaLabel}>
                 {entries.map((entry: ListEntry<StepItem>): ReactNode => {
                     const step: StepItem = entry.item;
                     const index: number = entry.index;
                     const isCompleted: boolean = index < activeIndex;
                     const isCurrent: boolean = index === activeIndex;
+                    const stepDisabled: boolean = disabled || step.disabled === true;
+                    const canActivate: boolean = isInteractive && !stepDisabled;
                     const markerNode: ReactNode = isCompleted ? (
                         <Icon name="Check" size={15} />
                     ) : step.icon ? (
@@ -123,9 +175,10 @@ const Stepper: FC<StepperProps> = ({
                                 "stepper__item",
                                 isCompleted && "stepper__item--completed",
                                 isCurrent && "stepper__item--current",
+                                stepDisabled && "stepper__item--disabled",
                             )}
                         >
-                            {isInteractive ? (
+                            {canActivate ? (
                                 <Surface
                                     className="stepper__surface"
                                     ripple={{ layer: "foreground", trigger: ["hover", "click"] }}
@@ -134,8 +187,8 @@ const Stepper: FC<StepperProps> = ({
                                         type="button"
                                         className="stepper__step"
                                         aria-current={isCurrent ? "step" : (void 0)}
-                                        onClick={(): void => {
-                                            handleStepClick(index);
+                                        onClick={(event: ReactMouseEvent<HTMLButtonElement>): void => {
+                                            handleStepClick(index, step, event);
                                         }}
                                     >
                                         {body}
@@ -145,6 +198,7 @@ const Stepper: FC<StepperProps> = ({
                                 <div
                                     className="stepper__step stepper__step--static"
                                     aria-current={isCurrent ? "step" : (void 0)}
+                                    aria-disabled={stepDisabled ? true : (void 0)}
                                 >
                                     {body}
                                 </div>

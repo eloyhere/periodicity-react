@@ -2,17 +2,24 @@ import {
     useMemo,
     useState,
     type CSSProperties,
+    type HTMLAttributes,
     type KeyboardEvent as ReactKeyboardEvent,
     type MouseEvent as ReactMouseEvent,
     type ReactNode,
+    type Ref,
+    type RefCallback,
+    type UIEvent,
+    type UIEventHandler,
 } from "react";
 import Checkbox from "../../component/input/check/Checkbox";
 import Surface from "../../component/surface/Surface";
 import Icon from "../../component/icon/Icon";
+import Spinner from "../../component/progress/Spinner";
 import cx from "../../component/foundation/cx";
 import useVirtualWindow, { type VirtualWindow } from "../../component/foundation/useVirtualWindow";
 import type { ListAdapter, ListEntry } from "../list/adapter";
 import { isTreeOption, optionKey, optionLabel } from "../list/node";
+import { composeRefs } from "../list/refs";
 import type { TreeAdapter } from "./adapter";
 import { createTreeAdapter } from "./adapter";
 import "./Tree.css";
@@ -62,14 +69,16 @@ export type TreeSelectionMode = "none" | "single" | "multiple";
  * Props for the adapter-backed tree.
  * Type: interface.
  * Fields: items, adapter, getKey, getChildren, expandedKeys, defaultExpandedKeys,
- * onExpandedChange, selectionMode, selectedKeys, defaultSelectedKeys,
- * onSelectionChange, checkable, checkedKeys, defaultCheckedKeys,
- * onCheckedChange, renderItem, slots, virtual, itemHeight, height, empty,
- * className.
+ * onExpandedChange, selectionMode, selectedKeys, defaultSelectedKeys, onSelectionChange,
+ * checkable, checkedKeys, defaultCheckedKeys, onCheckedChange, onItemClick, isDisabled,
+ * disabled, loading, loadingLabel, renderItem, slots, virtual, itemHeight, height, empty,
+ * ref, and native `div` attributes.
+ * Native `id`, `className`, `style`, `title`, `tabIndex`, `role`, `aria-*`, `data-*`, pointer,
+ * mouse, keyboard, and focus handlers are forwarded to the scrolling container.
  * @example
- * <Tree items={nodes} checkable virtual height={320} />
+ * <Tree items={nodes} checkable virtual height={320} aria-label="Outline" />
  */
-export interface TreeProps<Item> {
+export interface TreeProps<Item> extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
     items?: readonly Item[];
     adapter?: TreeAdapter<Item>;
     getKey?: (item: Item, index: number) => string;
@@ -85,21 +94,27 @@ export interface TreeProps<Item> {
     checkedKeys?: readonly string[];
     defaultCheckedKeys?: readonly string[];
     onCheckedChange?: (keys: readonly string[]) => void;
+    onItemClick?: (item: Item, key: string) => void;
+    isDisabled?: (item: Item, level: number) => boolean;
+    disabled?: boolean;
+    loading?: boolean;
+    loadingLabel?: string;
     renderItem?: (item: Item, level: number, expanded: boolean) => ReactNode;
     slots?: TreeSlots<Item>;
     virtual?: boolean;
     itemHeight?: number;
     height?: number;
     empty?: ReactNode;
-    className?: string;
+    ref?: Ref<HTMLDivElement>;
 }
 
 /**
- * Renders an expandable Material tree with adapter, selection, check, and
- * optional fixed-row virtualisation.
- * @param props - Tree data, expansion, selection, and check state.
+ * Renders an expandable Material tree with adapter, selection, check, optional
+ * fixed-row virtualisation, loading and empty states, and native `div`
+ * pass-through for attributes, events, and refs.
+ * @param props - Tree data, expansion, selection, check state, and native attributes.
  * @example
- * <Tree items={nodes} selectionMode="single" />
+ * <Tree items={nodes} selectionMode="single" aria-label="Outline" />
  * @returns A tree widget.
  */
 const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
@@ -118,6 +133,11 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
     checkedKeys,
     defaultCheckedKeys,
     onCheckedChange,
+    onItemClick,
+    isDisabled,
+    disabled = false,
+    loading = false,
+    loadingLabel = "Loading",
     renderItem,
     slots,
     virtual = false,
@@ -125,6 +145,11 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
     height = 320,
     empty = "No nodes",
     className = "",
+    style,
+    role = "tree",
+    ref,
+    onScroll,
+    ...rest
 }: TreeProps<Item>): ReactNode => {
     const tree: TreeAdapter<Item> = useMemo((): TreeAdapter<Item> => {
         if (adapter !== (void 0)) {
@@ -162,12 +187,13 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
         attachViewport,
         start: windowStart,
         end: windowEnd,
-        onScroll,
+        onScroll: handleVirtualScroll,
     }: VirtualWindow = useVirtualWindow({
         count: visible.size,
         itemHeight,
         fallbackHeight: height,
         overscan: 4,
+        resetKey: loading,
     });
     const start: number = virtual ? windowStart : 0;
     const end: number = virtual ? windowEnd : visible.size;
@@ -175,6 +201,18 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
     const spacerStyle: CSSProperties = virtual
         ? { height: visible.size * itemHeight, position: "relative" }
         : {};
+    const rootRef: RefCallback<HTMLDivElement> = useMemo(
+        (): RefCallback<HTMLDivElement> =>
+            composeRefs<HTMLDivElement>([virtual ? attachViewport : (void 0), ref]),
+        [virtual, attachViewport, ref],
+    );
+    const handleScroll: UIEventHandler<HTMLDivElement> = (event: UIEvent<HTMLDivElement>): void => {
+        if (virtual) {
+            handleVirtualScroll(event);
+        }
+
+        onScroll?.(event);
+    };
 
     const setExpansion: (next: ReadonlySet<string>) => void = (next: ReadonlySet<string>): void => {
         if (expandedKeys === (void 0)) {
@@ -259,33 +297,85 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
         onCheckedChange?.([...next]);
     };
 
-    const handleKeyDown: (event: ReactKeyboardEvent<HTMLDivElement>, key: string) => void = (
+    const handleRowKeyDown: (
         event: ReactKeyboardEvent<HTMLDivElement>,
-        key: string,
+        entry: ListEntry<Item>,
+        rowDisabled: boolean,
+    ) => void = (
+        event: ReactKeyboardEvent<HTMLDivElement>,
+        entry: ListEntry<Item>,
+        rowDisabled: boolean,
     ): void => {
+        if (rowDisabled || (event.target as Element).closest(".checkbox") !== null) {
+            return;
+        }
+
         if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
-            toggleSelection(key);
-        } else if (event.key === "ArrowRight" && tree.isExpandable(key) && !expanded.has(key)) {
-            event.preventDefault();
-            toggleExpansion(key);
-        } else if (event.key === "ArrowLeft" && expanded.has(key)) {
-            event.preventDefault();
-            toggleExpansion(key);
+            toggleSelection(entry.key);
+            onItemClick?.(entry.item, entry.key);
+            return;
         }
+
+        if (event.key === "ArrowRight" && tree.isExpandable(entry.key) && !expanded.has(entry.key)) {
+            event.preventDefault();
+            toggleExpansion(entry.key);
+            return;
+        }
+
+        if (event.key === "ArrowLeft" && expanded.has(entry.key)) {
+            event.preventDefault();
+            toggleExpansion(entry.key);
+        }
+    };
+
+    const handleRowClick: (
+        event: ReactMouseEvent<HTMLDivElement>,
+        entry: ListEntry<Item>,
+        rowDisabled: boolean,
+    ) => void = (
+        event: ReactMouseEvent<HTMLDivElement>,
+        entry: ListEntry<Item>,
+        rowDisabled: boolean,
+    ): void => {
+        if (rowDisabled) {
+            return;
+        }
+
+        if ((event.target as Element).closest(".tree__toggle, .checkbox") !== null) {
+            return;
+        }
+
+        if (tree.isExpandable(entry.key)) {
+            toggleExpansion(entry.key);
+        }
+
+        toggleSelection(entry.key);
+        onItemClick?.(entry.item, entry.key);
     };
 
     return (
         <div
-            ref={virtual ? attachViewport : (void 0)}
-            className={cx("tree", virtual && "tree--virtual", className)}
-            role="tree"
-            aria-multiselectable={selectionMode === "multiple" ? "true" : (void 0)}
-            style={virtual ? { height } : (void 0)}
-            onScroll={virtual ? onScroll : (void 0)}
+            {...rest}
+            ref={rootRef}
+            role={role}
+            className={cx("tree", virtual && "tree--virtual", disabled && "tree--disabled", className)}
+            style={virtual ? { ...style, height } : style}
+            aria-busy={loading ? "true" : rest["aria-busy"]}
+            aria-disabled={disabled ? "true" : rest["aria-disabled"]}
+            aria-multiselectable={selectionMode === "multiple" ? "true" : rest["aria-multiselectable"]}
+            data-disabled={disabled ? "true" : "false"}
+            data-loading={loading ? "true" : "false"}
+            onScroll={handleScroll}
         >
-            {entries.length === 0 ? (
-                <div className="tree__state">{empty}</div>
+            {loading ? (
+                <div className="tree__state">
+                    <Spinner size="sm" label={loadingLabel} />
+                </div>
+            ) : entries.length === 0 ? (
+                <div className="tree__state" role="status">
+                    {empty}
+                </div>
             ) : (
                 <div className="tree__spacer" style={spacerStyle}>
                     {entries.map((entry: ListEntry<Item>): ReactNode => {
@@ -296,6 +386,7 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
                         const depth: number = isTreeOption(entry.item)
                             ? entry.item.depth
                             : entry.level;
+                        const rowDisabled: boolean = disabled || isDisabled?.(entry.item, depth) === true;
                         const rowStyle: CSSProperties = virtual
                             ? {
                                   top: entry.index * itemHeight,
@@ -312,32 +403,25 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
                                 className={cx(
                                     "tree__row",
                                     isSelected && "tree__row--selected",
+                                    rowDisabled && "tree__row--disabled",
                                 )}
                                 style={rowStyle}
                                 role="treeitem"
                                 aria-selected={isSelected}
                                 aria-expanded={expandable ? isExpanded : (void 0)}
                                 aria-level={depth + 1}
-                                tabIndex={0}
+                                aria-disabled={rowDisabled ? "true" : (void 0)}
+                                aria-posinset={virtual ? entry.index + 1 : (void 0)}
+                                aria-setsize={virtual ? visible.size : (void 0)}
+                                tabIndex={rowDisabled ? -1 : 0}
+                                disabled={rowDisabled}
                                 ripple={{ layer: "foreground", trigger: ["hover", "click"] }}
                                 onClick={(event: ReactMouseEvent<HTMLDivElement>): void => {
-                                    if (
-                                        (event.target as Element).closest(
-                                            ".tree__toggle, .checkbox",
-                                        ) !== null
-                                    ) {
-                                        return;
-                                    }
-
-                                    if (expandable) {
-                                        toggleExpansion(entry.key);
-                                    }
-
-                                    toggleSelection(entry.key);
+                                    handleRowClick(event, entry, rowDisabled);
                                 }}
-                                onKeyDown={(event: ReactKeyboardEvent<HTMLDivElement>): void =>
-                                    handleKeyDown(event, entry.key)
-                                }
+                                onKeyDown={(event: ReactKeyboardEvent<HTMLDivElement>): void => {
+                                    handleRowKeyDown(event, entry, rowDisabled);
+                                }}
                             >
                                 <span
                                     className={
@@ -348,7 +432,7 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
                                     onClick={(event: ReactMouseEvent<HTMLSpanElement>): void => {
                                         event.stopPropagation();
 
-                                        if (expandable) {
+                                        if (expandable && !rowDisabled) {
                                             toggleExpansion(entry.key);
                                         }
                                     }}
@@ -372,7 +456,12 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
                                         <Checkbox
                                             size="sm"
                                             checked={isChecked}
-                                            onCheckedChange={(): void => toggleCheck(entry.key)}
+                                            disabled={rowDisabled}
+                                            onCheckedChange={(): void => {
+                                                if (!rowDisabled) {
+                                                    toggleCheck(entry.key);
+                                                }
+                                            }}
                                             label={
                                                 <span className="visually-hidden">
                                                     Check node {entry.index + 1}

@@ -5,8 +5,10 @@ export {
     ContextMenuSeparator,
 } from "./ContextMenu";
 export type {
+    ContextMenuCloseReason,
     ContextMenuGroupProps,
     ContextMenuItemProps,
     ContextMenuPoint,
     ContextMenuProps,
+    ContextMenuSeparatorProps,
 } from "./ContextMenu";

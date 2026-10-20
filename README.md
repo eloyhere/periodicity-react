@@ -52,10 +52,10 @@ npm run preview     # preview the production build
 
 ## Using the library
 
-Import components from the source barrel:
+Every component has a `Periodicity`-prefixed public export, for example `PeriodicityButton`, `PeriodicityTable`, and `PeriodicityDialog`. The unprefixed names remain available as compatibility aliases. Import components from the source barrel:
 
 ```tsx
-import { Button, TextInput } from "./component";
+import { PeriodicityButton, PeriodicityTextInput } from "./component";
 import { Stack } from "./arrange/layout";
 import "./index.css";
 ```
@@ -65,7 +65,7 @@ consumer that uses the source directly only needs the global entry once.
 
 ```tsx
 import { useState } from "react";
-import { Button, TextInput } from "./component";
+import { PeriodicityButton, PeriodicityTextInput } from "./component";
 import { Stack } from "./arrange/layout";
 
 export const SignIn = () => {
@@ -73,13 +73,13 @@ export const SignIn = () => {
 
     return (
         <Stack gap="md">
-            <TextInput
+            <PeriodicityTextInput
                 label="Email"
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
             />
-            <Button onClick={() => console.log(email)}>Continue</Button>
+            <PeriodicityButton onClick={() => console.log(email)}>Continue</PeriodicityButton>
         </Stack>
     );
 };
@@ -89,26 +89,26 @@ export const SignIn = () => {
 
 `src/layout` contains structural primitives. Layout is flex-first; CSS Grid is not used.
 
-| Component | Purpose |
-| --- | --- |
-| `Stack` / `Inline` / `Columns` | Vertical, horizontal, and equal-width column arrangements |
-| `LinearLayout` | Orientation, gravity, alignment, gap, wrapping, and weighted items |
-| `GridLayout` | Flex-based responsive card columns |
-| `WaterfallLayout` | Round-robin masonry columns |
-| `ConstraintLayout` / `Constraint` | Anchor-based positioning with offsets |
-| `DrawerLayout` | Five-region push layout |
-| `Drawer` | Modal side sheet |
-| `Tabs` / `TabPanel` | Tab navigation and panels |
-| `Menu` / `MenuItem` | Popup or inline menus |
-| `NavigationView` | Sidebar, rail, and bottom navigation |
-| `Pager` / `PagerPage` | Swipeable, scroll-snapped pages |
-| `Table` | Semantic data table |
-| `List` | Adapter-backed list and virtual list |
-| `Tree` | Adapter-backed expandable tree and virtual tree |
-| `Contact` | Adapter-backed contact list with presence |
-| `MessageList` | Adapter-backed chat transcript |
-| `Chat` | Contact, transcript, and composer layout |
-| `ProjectManager` | File tree, dependency graph, preview, editor, and project I/O |
+| Component                         | Purpose                                                            |
+| --------------------------------- | ------------------------------------------------------------------ |
+| `Stack` / `Inline` / `Columns`    | Vertical, horizontal, and equal-width column arrangements          |
+| `LinearLayout`                    | Orientation, gravity, alignment, gap, wrapping, and weighted items |
+| `GridLayout`                      | Flex-based responsive card columns                                 |
+| `WaterfallLayout`                 | Round-robin masonry columns                                        |
+| `ConstraintLayout` / `Constraint` | Anchor-based positioning with offsets                              |
+| `DrawerLayout`                    | Five-region push layout                                            |
+| `Drawer`                          | Modal side sheet                                                   |
+| `Tabs` / `TabPanel`               | Tab navigation and panels                                          |
+| `Menu` / `MenuItem`               | Popup or inline menus                                              |
+| `NavigationView`                  | Sidebar, rail, and bottom navigation                               |
+| `Pager` / `PagerPage`             | Swipeable, scroll-snapped pages                                    |
+| `Table`                           | Semantic data table                                                |
+| `List`                            | Adapter-backed list and virtual list                               |
+| `Tree`                            | Adapter-backed expandable tree and virtual tree                    |
+| `Contact`                         | Adapter-backed contact list with presence                          |
+| `MessageList`                     | Adapter-backed chat transcript                                     |
+| `Chat`                            | Contact, transcript, and composer layout                           |
+| `ProjectManager`                  | File tree, dependency graph, preview, editor, and project I/O      |
 
 ### DrawerLayout
 
@@ -135,7 +135,7 @@ import { DrawerLayout } from "./component";
     onRightOpenChange={setRightOpen}
     topHeight={112}
     bottomHeight={88}
-/>
+/>;
 ```
 
 All edges animate their width or height, and the active side is protected by a scrim and an outside-pointer guard.
@@ -241,7 +241,7 @@ const adapter = createListAdapter(people, {
     selectionMode="multiple"
     defaultSelectedKeys={["mira"]}
     onSelectionChange={(keys, items) => console.log(keys, items)}
-/>
+/>;
 ```
 
 Available presets:
@@ -266,7 +266,7 @@ const options: ListOption<string>[] = [
     items={options}
     getKey={(option) => option.value}
     slots={{ item: (option) => <strong>{option.label}</strong> }}
-/>
+/>;
 ```
 
 `slots.item` receives the node plus `{ index, selected, disabled }`. `renderItem` remains available for simpler
@@ -283,7 +283,7 @@ import { CheckTree } from "./component";
     getChildren={(node) => node.children ?? []}
     defaultExpandedKeys={new Set(["practice"])}
     defaultCheckedKeys={["breath"]}
-/>
+/>;
 ```
 
 Available presets:
@@ -308,7 +308,7 @@ const nodes: TreeOption<string>[] = [
     },
 ];
 
-<Tree items={nodes} slots={{ item: (node, state) => <span>{node.label}</span> }} />
+<Tree items={nodes} slots={{ item: (node, state) => <span>{node.label}</span> }} />;
 ```
 
 `slots.item` receives `{ index, level, expanded, selected, checked }`. If a node provides `depth`, the tree uses it
@@ -338,7 +338,7 @@ const columns: TableColumn<Person>[] = [
     onSelectionChange={setSelected}
     density="compact"
     striped
-/>
+/>;
 ```
 
 `Table` also accepts an `adapter` instead of `rows`. It supports row selection, select-all, indeterminate state,
@@ -397,7 +397,7 @@ import { ProjectManager } from "./component";
     onFileChange={(file, content) => saveFile(file, content)}
     onProjectImport={(imported) => loadProject(imported)}
     onProjectExport={(exported) => downloadProject(exported)}
-/>
+/>;
 ```
 
 File objects are `FileNode` trees with `id`, `path`, `kind`, optional `content`, language, extension, and children.
@@ -525,20 +525,20 @@ attributes. Always provide a meaningful `label`, `ariaLabel`, or visible heading
 
 ## Project layout
 
-| Path | Contents |
-| --- | --- |
-| `src/component` | Components, inputs, pickers, overlays, and feedback |
+| Path                         | Contents                                                              |
+| ---------------------------- | --------------------------------------------------------------------- |
+| `src/component`              | Components, inputs, pickers, overlays, and feedback                   |
 | `src/component/input/select` | Normal and virtual select entry points with the shared select adapter |
-| `src/layout` | Layout primitives and data components |
-| `src/layout/contact` | Contact adapter, normal list, and virtual list |
-| `src/layout/message` | Message adapter, normal transcript, and virtual transcript |
-| `src/layout/chat` | Chat adapter and normal/virtual chat layouts |
-| `src/layout/file` | Project manager, file nodes, dependency graph, import/export parsing |
-| `src/layout/list/adapter` | List adapter contract |
-| `src/layout/tree/adapter` | Tree adapter contract |
-| `src/structure` | Data-structure toolkit |
-| `src/showcase` | Component gallery and documentation demos |
-| `src/arrange` | `Stack`, `Inline`, and `Columns` |
+| `src/layout`                 | Layout primitives and data components                                 |
+| `src/layout/contact`         | Contact adapter, normal list, and virtual list                        |
+| `src/layout/message`         | Message adapter, normal transcript, and virtual transcript            |
+| `src/layout/chat`            | Chat adapter and normal/virtual chat layouts                          |
+| `src/layout/file`            | Project manager, file nodes, dependency graph, import/export parsing  |
+| `src/layout/list/adapter`    | List adapter contract                                                 |
+| `src/layout/tree/adapter`    | Tree adapter contract                                                 |
+| `src/structure`              | Data-structure toolkit                                                |
+| `src/showcase`               | Component gallery and documentation demos                             |
+| `src/arrange`                | `Stack`, `Inline`, and `Columns`                                      |
 
 ## Conventions
 

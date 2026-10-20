@@ -3,10 +3,13 @@ import {
     useState,
     type CSSProperties,
     type FC,
+    type HTMLAttributes,
     type KeyboardEventHandler,
     type MouseEvent as ReactMouseEvent,
+    type PointerEventHandler,
     type PointerEvent as ReactPointerEvent,
     type ReactNode,
+    type Ref,
 } from "react";
 import Icon from "../icon/Icon";
 import cx from "../foundation/cx";
@@ -25,15 +28,19 @@ export type RateSize = "sm" | "md" | "lg";
 /**
  * Props for the Material rating control.
  * Type: interface.
- * Fields: value, defaultValue, onChange, count, allowHalf, allowClear, readOnly,
+ * Extends the native `div` attributes, so `id`, `title`, `aria-*`, `data-*`, `tabIndex`, and pointer,
+ * mouse, keyboard, and focus handlers are forwarded to the field element. `onChange` keeps its
+ * rating-value signature and is not forwarded as a native change listener.
+ * Fields: value, defaultValue, onChange, onHoverChange, count, allowHalf, allowClear, readOnly,
  * disabled, size, label, hint, error, className.
  * @example
  * <Rate label="Rating" value={rating} onChange={setRating} />
  */
-export interface RateProps {
+export interface RateProps extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "className" | "onChange"> {
     value?: number;
     defaultValue?: number;
     onChange?: (value: number) => void;
+    onHoverChange?: (value: number | null) => void;
     count?: number;
     allowHalf?: boolean;
     allowClear?: boolean;
@@ -44,6 +51,7 @@ export interface RateProps {
     hint?: string;
     error?: string;
     className?: string;
+    ref?: Ref<HTMLDivElement>;
 }
 
 const rateSizes: Record<RateSize, number> = {
@@ -54,7 +62,7 @@ const rateSizes: Record<RateSize, number> = {
 
 /**
  * Renders a five-star Material rating with half-star support.
- * @param props - Value, count, half-step, read-only state, and labels.
+ * @param props - Value, count, half-step, read-only state, labels, class name, and native div attributes.
  * @example
  * <Rate label="How was it?" defaultValue={4} allowHalf />
  * @returns A rating control.
@@ -63,6 +71,7 @@ const Rate: FC<RateProps> = ({
     value,
     defaultValue = 0,
     onChange,
+    onHoverChange,
     count = 5,
     allowHalf = false,
     allowClear = true,
@@ -73,6 +82,10 @@ const Rate: FC<RateProps> = ({
     hint,
     error,
     className = "",
+    ref,
+    onKeyDown,
+    onPointerLeave,
+    ...rest
 }: RateProps) => {
     const generatedId: string = useId();
     const labelId: string = `${generatedId}-label`;
@@ -103,6 +116,11 @@ const Rate: FC<RateProps> = ({
         setRating(Math.min(max, Math.max(0, next)));
     };
 
+    const showHover: (next: number | null) => void = (next: number | null): void => {
+        setHovered(next);
+        onHoverChange?.(next);
+    };
+
     const valueAt: (
         index: number,
         event: ReactMouseEvent<HTMLButtonElement> | ReactPointerEvent<HTMLButtonElement>,
@@ -125,7 +143,7 @@ const Rate: FC<RateProps> = ({
         event: ReactPointerEvent<HTMLButtonElement>,
     ) => void = (index: number, event: ReactPointerEvent<HTMLButtonElement>): void => {
         if (interactive) {
-            setHovered(valueAt(index, event));
+            showHover(valueAt(index, event));
         }
     };
 
@@ -145,31 +163,39 @@ const Rate: FC<RateProps> = ({
     const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = (
         event: Parameters<KeyboardEventHandler<HTMLDivElement>>[0],
     ): void => {
-        if (!interactive) {
-            return;
+        if (interactive) {
+            const step: number = allowHalf ? 0.5 : 1;
+
+            if (event.key === "ArrowRight" || event.key === "ArrowUp") {
+                event.preventDefault();
+                update(rating + step);
+            } else if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
+                event.preventDefault();
+                update(rating - step);
+            } else if (event.key === "Home") {
+                event.preventDefault();
+                update(0);
+            } else if (event.key === "End") {
+                event.preventDefault();
+                update(max);
+            }
         }
 
-        const step: number = allowHalf ? 0.5 : 1;
+        onKeyDown?.(event);
+    };
 
-        if (event.key === "ArrowRight" || event.key === "ArrowUp") {
-            event.preventDefault();
-            update(rating + step);
-        } else if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
-            event.preventDefault();
-            update(rating - step);
-        } else if (event.key === "Home") {
-            event.preventDefault();
-            update(0);
-        } else if (event.key === "End") {
-            event.preventDefault();
-            update(max);
-        }
+    const handlePointerLeave: PointerEventHandler<HTMLDivElement> = (
+        event: Parameters<PointerEventHandler<HTMLDivElement>>[0],
+    ): void => {
+        showHover(null);
+        onPointerLeave?.(event);
     };
 
     const describedBy: string = invalid ? errorId : hint === (void 0) ? "" : hintId;
 
     return (
         <div
+            ref={ref}
             className={cx(
                 "rate-field",
                 `rate-field--${size}`,
@@ -179,6 +205,7 @@ const Rate: FC<RateProps> = ({
                 className,
             )}
             data-disabled={disabled ? "true" : "false"}
+            {...rest}
         >
             <span className="rate-field__label" id={labelId}>
                 {label}
@@ -191,7 +218,7 @@ const Rate: FC<RateProps> = ({
                 aria-readonly={readOnly ? "true" : (void 0)}
                 aria-disabled={disabled ? "true" : (void 0)}
                 onKeyDown={handleKeyDown}
-                onPointerLeave={(): void => setHovered(null)}
+                onPointerLeave={handlePointerLeave}
             >
                 {Array.from(
                     { length: max },

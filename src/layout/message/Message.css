@@ -97,7 +97,28 @@
     color: var(--color-primary);
 }
 
-.message-list__empty {
+.message__retry {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-error);
+    font-family: var(--font-sans);
+    font-size: 10px;
+    line-height: 1.2;
+    cursor: pointer;
+}
+
+.message__retry:hover {
+    text-decoration: underline;
+}
+
+.message__retry:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.message-list__empty,
+.message-list__state {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -107,10 +128,18 @@
     text-align: center;
 }
 
+.message-list__state {
+    padding: var(--space-3);
+}
+
 .message-list--virtual {
     position: relative;
     padding: 0;
     overflow-anchor: none;
+}
+
+.message-list--virtual .message-list__state {
+    min-height: 100%;
 }
 
 .message-list__spacer {
@@ -169,6 +198,14 @@
 
 .message--selectable {
     cursor: pointer;
+}
+
+.message--disabled {
+    opacity: 0.6;
+}
+
+.message-list[aria-disabled="true"] .message--selectable {
+    cursor: default;
 }
 
 .message--selected .message__bubble {

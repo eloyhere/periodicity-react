@@ -6,11 +6,14 @@ import {
     useState,
     type Dispatch,
     type FC,
+    type HTMLAttributes,
     type MutableRefObject,
     type ReactNode,
+    type Ref,
     type SetStateAction,
 } from "react";
 import Button from "../button/Button";
+import cx from "../foundation/cx";
 import Portal from "../foundation/Portal";
 import Icon, { type IconName } from "../icon/Icon";
 import Surface from "../surface/Surface";
@@ -19,6 +22,7 @@ import {
     ToastContext,
     type ToastAction,
     type ToastApi,
+    type ToastDismissReason,
     type ToastOptions,
     type ToastTone,
 } from "./ToastContext";
@@ -30,13 +34,20 @@ import "./Toast.css";
  * @param children - Application subtree that can call `useToast`.
  * @param max - Maximum simultaneously visible toasts; defaults to three.
  * @param duration - Default lifetime in milliseconds; defaults to 4000.
+ * @param regionLabel - Accessible name for the live region; defaults to `Notifications`.
+ * @param className - Extra class applied to the toast region.
+ * @param ref - Ref for the native toast region.
+ * Native div attributes (id, style, aria-*, data-*, and events) are forwarded to the toast region.
  * @example
  * <ToastProvider max={3} duration={4000}><App /></ToastProvider>
  */
-export interface ToastProviderProps {
+export interface ToastProviderProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
     children: ReactNode;
     max?: number;
     duration?: number;
+    regionLabel?: string;
+    /** Ref for the native toast region. */
+    ref?: Ref<HTMLDivElement>;
 }
 
 /**
@@ -73,13 +84,13 @@ interface ToastQueueState {
  * Props for one rendered toast.
  * Type: interface.
  * @param toast - Record with content, tone, duration, and leaving state.
- * @param onDismiss - Requests dismissal by identifier.
+ * @param onDismiss - Requests dismissal by identifier and reason.
  * @example
  * <ToastItem toast={record} onDismiss={dismiss} />
  */
 interface ToastItemProps {
     toast: ToastRecord;
-    onDismiss: (id: string) => void;
+    onDismiss: (id: string, reason: ToastDismissReason) => void;
 }
 
 const ToastExitDelay: number = 220;
@@ -108,7 +119,7 @@ const ToastItem: FC<ToastItemProps> = ({ toast, onDismiss }: ToastItemProps) => 
         }
 
         const timer: number = window.setTimeout((): void => {
-            onDismiss(toast.id);
+            onDismiss(toast.id, "timeout");
         }, toast.duration);
 
         return (): void => {
@@ -117,17 +128,17 @@ const ToastItem: FC<ToastItemProps> = ({ toast, onDismiss }: ToastItemProps) => 
     }, [onDismiss, toast.duration, toast.id, toast.leaving]);
 
     const handleDismiss: () => void = (): void => {
-        onDismiss(toast.id);
+        onDismiss(toast.id, "dismiss");
     };
 
     const handleAction: () => void = (): void => {
         action?.onClick();
-        onDismiss(toast.id);
+        onDismiss(toast.id, "action");
     };
 
     return (
         <div
-            className="toast"
+            className={cx("toast", toast.options.className)}
             role="status"
             aria-live="polite"
             aria-atomic="true"
@@ -183,7 +194,7 @@ const ToastItem: FC<ToastItemProps> = ({ toast, onDismiss }: ToastItemProps) => 
 
 /**
  * Owns the toast queue, timers, live region, and portal rendering.
- * @param props - Children plus optional queue size and default duration.
+ * @param props - Children plus optional queue size, default duration, region label, and native attributes.
  * @example
  * <ToastProvider>
  *     <App />
@@ -194,14 +205,25 @@ const ToastProvider: FC<ToastProviderProps> = ({
     children,
     max = 3,
     duration = 4000,
+    regionLabel = "Notifications",
+    className = "",
+    ref,
+    "aria-label": ariaLabel,
+    ...rest
 }: ToastProviderProps) => {
     const [queue, setQueue]: [ToastQueueState, Dispatch<SetStateAction<ToastQueueState>>] =
         useState<ToastQueueState>({ active: [], queued: [] });
     const timersRef: MutableRefObject<Record<string, number>> = useRef<Record<string, number>>({});
+    const recordsRef: MutableRefObject<Record<string, ToastRecord>> = useRef<
+        Record<string, ToastRecord>
+    >({});
+    const dismissedRef: MutableRefObject<Record<string, boolean>> = useRef<Record<string, boolean>>({});
     const capacity: number = max > 0 ? max : 1;
 
     const remove: (id: string) => void = useCallback((id: string): void => {
         delete timersRef.current[id];
+        delete recordsRef.current[id];
+        delete dismissedRef.current[id];
         setQueue((current: ToastQueueState): ToastQueueState => {
             const active: readonly ToastRecord[] = current.active.filter(
                 (toast: ToastRecord): boolean => toast.id !== id,
@@ -224,8 +246,17 @@ const ToastProvider: FC<ToastProviderProps> = ({
         });
     }, []);
 
-    const requestDismiss: (id: string) => void = useCallback(
-        (id: string): void => {
+    const requestDismiss: (id: string, reason?: ToastDismissReason) => void = useCallback(
+        (id: string, reason: ToastDismissReason = "programmatic"): void => {
+            const record: ToastRecord | void = recordsRef.current[id];
+
+            if (record === (void 0) || dismissedRef.current[id] === true) {
+                return;
+            }
+
+            dismissedRef.current[id] = true;
+            record.options.onDismiss?.(reason);
+
             setQueue((current: ToastQueueState): ToastQueueState => {
                 const visible: ToastRecord | void = current.active.find(
                     (toast: ToastRecord): boolean => toast.id === id,
@@ -272,14 +303,22 @@ const ToastProvider: FC<ToastProviderProps> = ({
 
     const show: (options: ToastOptions) => string = useCallback(
         (options: ToastOptions): string => {
-            const id: string = crypto.randomUUID();
+            const id: string = options.id ?? crypto.randomUUID();
             const record: ToastRecord = {
                 id,
                 options,
                 duration: options.duration ?? duration,
                 leaving: false,
             };
+            const pendingTimer: number | void = timersRef.current[id];
 
+            if (pendingTimer !== (void 0)) {
+                window.clearTimeout(pendingTimer);
+                delete timersRef.current[id];
+            }
+
+            recordsRef.current[id] = record;
+            delete dismissedRef.current[id];
             setQueue((current: ToastQueueState): ToastQueueState =>
                 current.active.length < capacity
                     ? { active: [...current.active, record], queued: current.queued }
@@ -309,7 +348,13 @@ const ToastProvider: FC<ToastProviderProps> = ({
             {children}
             {queue.active.length === 0 ? null : (
                 <Portal>
-                    <div className="toast-region" role="region" aria-label="Notifications">
+                    <div
+                        {...rest}
+                        ref={ref}
+                        className={cx("toast-region", className)}
+                        role="region"
+                        aria-label={ariaLabel ?? regionLabel}
+                    >
                         {queue.active.map(
                             (toast: ToastRecord): ReactNode => (
                                 <ToastItem key={toast.id} toast={toast} onDismiss={requestDismiss} />

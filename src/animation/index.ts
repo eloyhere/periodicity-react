@@ -13,7 +13,7 @@ export { default } from "./ripple/index";
 export { default as Animation } from "./Animation";
 export type { AnimationProps } from "./Animation";
 export { Animate, Animated } from "./Animated";
-export type { AnimatedProps } from "./Animated";
+export type { AnimatedComponent, AnimatedProps, AnimatedStyle } from "./Animated";
 export {
     AnimationContext,
     DefaultAnimation,
@@ -32,10 +32,12 @@ export {
 export type { AnimationClassNameOptions, AnimationStyle, AnimationStyleOptions } from "./presets";
 export type {
     AnimationConfig,
+    AnimationConfigKey,
     AnimationContextValue,
     AnimationOptions,
     AnimationPreset,
     AnimatedElement,
+    AnimatedElementAttributes,
     ReducedMotionBehaviour,
 } from "./types";
 export { usePrefersReducedMotion } from "./usePrefersReducedMotion";

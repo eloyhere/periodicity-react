@@ -2,9 +2,14 @@ import {
     useMemo,
     useState,
     type CSSProperties,
+    type HTMLAttributes,
     type KeyboardEvent as ReactKeyboardEvent,
     type MouseEvent as ReactMouseEvent,
     type ReactNode,
+    type Ref,
+    type RefCallback,
+    type UIEvent,
+    type UIEventHandler,
 } from "react";
 import Checkbox from "../../component/input/check/Checkbox";
 import Surface from "../../component/surface/Surface";
@@ -14,6 +19,7 @@ import useVirtualWindow, { type VirtualWindow } from "../../component/foundation
 import type { ListAdapter, ListEntry } from "./adapter";
 import { createListAdapter } from "./adapter";
 import { optionKey, optionLabel } from "./node";
+import { composeRefs } from "./refs";
 import "./List.css";
 
 /**
@@ -53,12 +59,14 @@ export type ListSelectionMode = "none" | "single" | "multiple";
  * Props for the adapter-backed list.
  * Type: interface.
  * Fields: items, adapter, getKey, selectionMode, selectedKeys, defaultSelectedKeys,
- * onSelectionChange, onItemClick, renderItem, slots, isDisabled, virtual,
- * itemHeight, height, loading, empty, className.
+ * onSelectionChange, onItemClick, renderItem, slots, isDisabled, disabled, virtual,
+ * itemHeight, height, loading, loadingLabel, empty, ref, and native `div` attributes.
+ * Native `id`, `className`, `style`, `title`, `tabIndex`, `role`, `aria-*`, `data-*`, pointer,
+ * mouse, keyboard, and focus handlers are forwarded to the scrolling container.
  * @example
- * <List items={items} selectionMode="multiple" virtual height={320} />
+ * <List items={items} selectionMode="multiple" virtual height={320} aria-label="Rituals" />
  */
-export interface ListProps<Item> {
+export interface ListProps<Item> extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
     items?: readonly Item[];
     adapter?: ListAdapter<Item>;
     getKey?: (item: Item, index: number) => string;
@@ -70,20 +78,23 @@ export interface ListProps<Item> {
     renderItem?: (item: Item, index: number) => ReactNode;
     slots?: ListSlots<Item>;
     isDisabled?: (item: Item, index: number) => boolean;
+    disabled?: boolean;
     virtual?: boolean;
     itemHeight?: number;
     height?: number;
     loading?: boolean;
+    loadingLabel?: string;
     empty?: ReactNode;
-    className?: string;
+    ref?: Ref<HTMLDivElement>;
 }
 
 /**
  * Renders a Material list backed by a list adapter, with optional virtual
- * windowing and single/multiple selection.
- * @param props - Items or adapter, selection mode, and virtual window.
+ * windowing, single/multiple selection, loading and empty states, and native
+ * `div` pass-through for attributes, events, and refs.
+ * @param props - Items or adapter, selection mode, virtual window, states, and native attributes.
  * @example
- * <List items={people} selectionMode="single" />
+ * <List items={people} selectionMode="single" aria-label="People" />
  * @returns A listbox.
  */
 const List: <Item>(props: ListProps<Item>) => ReactNode = <Item,>({
@@ -98,12 +109,19 @@ const List: <Item>(props: ListProps<Item>) => ReactNode = <Item,>({
     renderItem,
     slots,
     isDisabled,
+    disabled = false,
     virtual = false,
     itemHeight = 48,
     height = 320,
     loading = false,
+    loadingLabel = "Loading",
     empty = "No items",
     className = "",
+    style,
+    role = "listbox",
+    ref,
+    onScroll,
+    ...rest
 }: ListProps<Item>): ReactNode => {
     const list: ListAdapter<Item> = useMemo((): ListAdapter<Item> => {
         if (adapter !== (void 0)) {
@@ -125,7 +143,7 @@ const List: <Item>(props: ListProps<Item>) => ReactNode = <Item,>({
         attachViewport,
         start: windowStart,
         end: windowEnd,
-        onScroll,
+        onScroll: handleVirtualScroll,
     }: VirtualWindow = useVirtualWindow({
         count: list.size,
         itemHeight,
@@ -139,6 +157,18 @@ const List: <Item>(props: ListProps<Item>) => ReactNode = <Item,>({
     const spacerStyle: CSSProperties = virtual
         ? { height: list.size * itemHeight, position: "relative" }
         : {};
+    const rootRef: RefCallback<HTMLDivElement> = useMemo(
+        (): RefCallback<HTMLDivElement> =>
+            composeRefs<HTMLDivElement>([virtual ? attachViewport : (void 0), ref]),
+        [virtual, attachViewport, ref],
+    );
+    const handleScroll: UIEventHandler<HTMLDivElement> = (event: UIEvent<HTMLDivElement>): void => {
+        if (virtual) {
+            handleVirtualScroll(event);
+        }
+
+        onScroll?.(event);
+    };
 
     const setSelection: (next: ReadonlySet<string>) => void = (next: ReadonlySet<string>): void => {
         if (selectedKeys === (void 0)) {
@@ -178,7 +208,16 @@ const List: <Item>(props: ListProps<Item>) => ReactNode = <Item,>({
     const handleRowKeyDown: (
         event: ReactKeyboardEvent<HTMLDivElement>,
         entry: ListEntry<Item>,
-    ) => void = (event: ReactKeyboardEvent<HTMLDivElement>, entry: ListEntry<Item>): void => {
+        rowDisabled: boolean,
+    ) => void = (
+        event: ReactKeyboardEvent<HTMLDivElement>,
+        entry: ListEntry<Item>,
+        rowDisabled: boolean,
+    ): void => {
+        if (rowDisabled || (event.target as Element).closest(".checkbox") !== null) {
+            return;
+        }
+
         if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
             toggle(entry.key);
@@ -189,7 +228,16 @@ const List: <Item>(props: ListProps<Item>) => ReactNode = <Item,>({
     const handleRowClick: (
         event: ReactMouseEvent<HTMLDivElement>,
         entry: ListEntry<Item>,
-    ) => void = (event: ReactMouseEvent<HTMLDivElement>, entry: ListEntry<Item>): void => {
+        rowDisabled: boolean,
+    ) => void = (
+        event: ReactMouseEvent<HTMLDivElement>,
+        entry: ListEntry<Item>,
+        rowDisabled: boolean,
+    ): void => {
+        if (rowDisabled) {
+            return;
+        }
+
         if ((event.target as Element).closest(".checkbox") !== null) {
             return;
         }
@@ -200,23 +248,31 @@ const List: <Item>(props: ListProps<Item>) => ReactNode = <Item,>({
 
     return (
         <div
-            className={cx("list", virtual && "list--virtual", className)}
-            role="listbox"
-            aria-multiselectable={selectionMode === "multiple" ? "true" : (void 0)}
-            style={virtual ? { height } : (void 0)}
-            ref={virtual ? attachViewport : (void 0)}
-            onScroll={virtual ? onScroll : (void 0)}
+            {...rest}
+            ref={rootRef}
+            role={role}
+            className={cx("list", virtual && "list--virtual", disabled && "list--disabled", className)}
+            style={virtual ? { ...style, height } : style}
+            aria-busy={loading ? "true" : rest["aria-busy"]}
+            aria-disabled={disabled ? "true" : rest["aria-disabled"]}
+            aria-multiselectable={selectionMode === "multiple" ? "true" : rest["aria-multiselectable"]}
+            data-disabled={disabled ? "true" : "false"}
+            data-loading={loading ? "true" : "false"}
+            data-selection-mode={selectionMode}
+            onScroll={handleScroll}
         >
             {loading ? (
                 <div className="list__state">
-                    <Spinner size="sm" />
+                    <Spinner size="sm" label={loadingLabel} />
                 </div>
             ) : entries.length === 0 ? (
-                <div className="list__state">{empty}</div>
+                <div className="list__state" role="status">
+                    {empty}
+                </div>
             ) : (
                 <div className="list__spacer" style={spacerStyle}>
                     {entries.map((entry: ListEntry<Item>): ReactNode => {
-                        const disabled: boolean = isDisabled?.(entry.item, entry.index) === true;
+                        const rowDisabled: boolean = disabled || isDisabled?.(entry.item, entry.index) === true;
                         const isSelected: boolean = selected.has(entry.key);
                         const rowStyle: CSSProperties = virtual
                             ? { top: entry.index * itemHeight, height: itemHeight }
@@ -228,21 +284,23 @@ const List: <Item>(props: ListProps<Item>) => ReactNode = <Item,>({
                                 className={cx(
                                     "list__row",
                                     isSelected && "list__row--selected",
-                                    disabled && "list__row--disabled",
+                                    rowDisabled && "list__row--disabled",
                                 )}
                                 style={rowStyle}
                                 role="option"
                                 aria-selected={isSelected}
-                                aria-disabled={disabled ? "true" : (void 0)}
-                                tabIndex={disabled ? -1 : 0}
-                                disabled={disabled}
+                                aria-disabled={rowDisabled ? "true" : (void 0)}
+                                aria-posinset={virtual ? entry.index + 1 : (void 0)}
+                                aria-setsize={virtual ? list.size : (void 0)}
+                                tabIndex={rowDisabled ? -1 : 0}
+                                disabled={rowDisabled}
                                 ripple={{ layer: "foreground", trigger: ["hover", "click"] }}
-                                onClick={(event: ReactMouseEvent<HTMLDivElement>): void =>
-                                    handleRowClick(event, entry)
-                                }
-                                onKeyDown={(event: ReactKeyboardEvent<HTMLDivElement>): void =>
-                                    handleRowKeyDown(event, entry)
-                                }
+                                onClick={(event: ReactMouseEvent<HTMLDivElement>): void => {
+                                    handleRowClick(event, entry, rowDisabled);
+                                }}
+                                onKeyDown={(event: ReactKeyboardEvent<HTMLDivElement>): void => {
+                                    handleRowKeyDown(event, entry, rowDisabled);
+                                }}
                             >
                                 {selectionMode === "multiple" ? (
                                     <span
@@ -255,7 +313,7 @@ const List: <Item>(props: ListProps<Item>) => ReactNode = <Item,>({
                                         <Checkbox
                                             size="sm"
                                             checked={isSelected}
-                                            disabled={disabled}
+                                            disabled={rowDisabled}
                                             onCheckedChange={(): void => toggle(entry.key)}
                                             label={
                                                 <span className="visually-hidden">
@@ -270,7 +328,7 @@ const List: <Item>(props: ListProps<Item>) => ReactNode = <Item,>({
                                         ? slots.item(entry.item, {
                                               index: entry.index,
                                               selected: isSelected,
-                                              disabled,
+                                              disabled: rowDisabled,
                                           })
                                         : renderItem !== (void 0)
                                           ? renderItem(entry.item, entry.index)

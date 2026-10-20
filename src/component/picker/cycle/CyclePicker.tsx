@@ -6,18 +6,23 @@ import {
     type ChangeEvent as ReactChangeEvent,
     type Dispatch,
     type FocusEvent as ReactFocusEvent,
+    type InputHTMLAttributes,
     type KeyboardEvent as ReactKeyboardEvent,
     type MouseEvent as ReactMouseEvent,
     type MutableRefObject,
     type PointerEvent as ReactPointerEvent,
     type ReactNode,
+    type Ref,
+    type RefCallback,
     type RefObject,
     type SetStateAction,
 } from "react";
 import Button from "../../button/Button";
 import cx from "../../foundation/cx";
+import useMergedRef from "../../foundation/useMergedRef";
 import Icon from "../../icon/Icon";
 import "../number/NumberPicker.css";
+import type { PickerDataAttributes } from "../shared/native";
 import "./CyclePicker.css";
 
 /**
@@ -205,8 +210,12 @@ interface CycleSuggestion {
  * Props for the cyclic wheel picker.
  * Type: interface.
  * Fields: items, value, defaultValue, onChange, getKey, getLabel, label, hint, error,
- * disabled, className, id.
+ * disabled, readOnly, required, onOpenChange, className, id, ref, and the native search
+ * input attributes.
  * Keys from `getKey` must be unique; they identify the selected item and typed matches.
+ * The search input receives `id`, `name`, `style`, `aria-*`, data attributes, and focus,
+ * blur, click, and key handlers; callers can cancel the internal behaviour with
+ * `preventDefault`. `onOpenChange` reports whether the suggestion popup is visible.
  * @typeParam T - Item type; strings work without accessors, objects normally need both.
  * @example
  * <CyclePicker
@@ -216,7 +225,12 @@ interface CycleSuggestion {
  *     onChange={setWeekday}
  * />
  */
-export interface CyclePickerProps<T> {
+export interface CyclePickerProps<T>
+    extends Omit<
+            InputHTMLAttributes<HTMLInputElement>,
+            "children" | "className" | "defaultValue" | "onChange" | "size" | "type" | "value"
+        >,
+        PickerDataAttributes {
     items: readonly T[];
     value?: T;
     defaultValue?: T;
@@ -227,8 +241,12 @@ export interface CyclePickerProps<T> {
     hint?: string;
     error?: string;
     disabled?: boolean;
+    readOnly?: boolean;
+    required?: boolean;
+    onOpenChange?: (open: boolean) => void;
     className?: string;
     id?: string;
+    ref?: Ref<HTMLInputElement>;
 }
 
 /**
@@ -262,8 +280,20 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
     hint,
     error,
     disabled = false,
+    readOnly = false,
+    required = false,
+    onOpenChange,
     className = "",
     id,
+    onFocus: onInputFocus,
+    onClick: onInputClick,
+    onBlur: onInputBlur,
+    onKeyDown: onInputKeyDown,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledBy,
+    "aria-describedby": ariaDescribedBy,
+    ref,
+    ...rest
 }: CyclePickerProps<T>): ReactNode => {
     const generatedId: string = useId();
     const pickerId: string = id ?? generatedId;
@@ -274,7 +304,9 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
     const wheelAccumulatorRef: MutableRefObject<number> = useRef<number>(0);
     const wheelLockRef: MutableRefObject<number> = useRef<number>(0);
     const inputRef: RefObject<HTMLInputElement | null> = useRef<HTMLInputElement | null>(null);
+    const mergedInputRef: RefCallback<HTMLInputElement> = useMergedRef(inputRef, ref);
     const suggestionsRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
+    const suggestionsVisibleRef: RefObject<boolean> = useRef<boolean>(false);
     const [dragging, setDragging]: [boolean, Dispatch<SetStateAction<boolean>>] =
         useState<boolean>(false);
     const [draft, setDraft]: [string, Dispatch<SetStateAction<string>>] = useState<string>("");
@@ -368,12 +400,19 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
     const activeOptionId: string | undefined =
         items.length === 0 ? (void 0) : `${pickerId}-option-0-${selectedIndex}`;
     const invalid: boolean = error !== (void 0) && error.length > 0;
-    const canStep: boolean = !disabled && items.length > 1;
-    const describedBy: string | undefined = invalid
+    const canStep: boolean = !disabled && !readOnly && items.length > 1;
+    const labelledBy: string | undefined =
+        ariaLabel !== (void 0) || ariaLabelledBy !== (void 0)
+            ? ariaLabelledBy
+            : `${pickerId}-label`;
+    const internalDescribedBy: string = invalid
         ? `${pickerId}-error`
         : hint === (void 0) || hint.length === 0
-          ? (void 0)
+          ? ""
           : `${pickerId}-hint`;
+    const describedBy: string = [internalDescribedBy, ariaDescribedBy ?? ""]
+        .filter((entry: string): boolean => entry.length > 0)
+        .join(" ");
     const rows: readonly CycleRow[] =
         items.length === 0
             ? []
@@ -415,7 +454,7 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
         });
     const suggestionsId: string = `${pickerId}-suggestions`;
     const showSuggestions: boolean =
-        suggestionsOpen && editing && !disabled && items.length > 0;
+        suggestionsOpen && editing && !disabled && !readOnly && items.length > 0;
     const activeSuggestion: number =
         activeIndex >= 0 && activeIndex < suggestions.length ? activeIndex : -1;
     const activeSuggestionId: string | undefined =
@@ -423,7 +462,16 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
             ? `${pickerId}-suggestion-${suggestions[activeSuggestion].index}`
             : (void 0);
     const displayValue: string =
-        editing && !disabled && items.length > 0 ? draft : selectedLabel;
+        editing && !disabled && !readOnly && items.length > 0 ? draft : selectedLabel;
+
+    useEffect((): void => {
+        if (suggestionsVisibleRef.current === showSuggestions) {
+            return;
+        }
+
+        suggestionsVisibleRef.current = showSuggestions;
+        onOpenChange?.(showSuggestions);
+    }, [onOpenChange, showSuggestions]);
 
     useEffect((): void => {
         if (!showSuggestions || activeSuggestion < 0) {
@@ -462,7 +510,7 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
      * @returns Nothing.
      */
     const commitIndex: (nextIndex: number) => void = (nextIndex: number): void => {
-        if (disabled || items.length === 0) {
+        if (disabled || readOnly || items.length === 0) {
             return;
         }
 
@@ -491,14 +539,14 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
     };
 
     const wheelStateRef: MutableRefObject<WheelState> = useRef<WheelState>({
-        disabled,
+        disabled: disabled || readOnly,
         itemCount: items.length,
         move: commitDelta,
     });
 
     useEffect((): void => {
         wheelStateRef.current = {
-            disabled,
+            disabled: disabled || readOnly,
             itemCount: items.length,
             move: commitDelta,
         };
@@ -527,7 +575,7 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
      * @returns Nothing.
      */
     const handleInputFocus: (event: ReactFocusEvent<HTMLInputElement>) => void = (): void => {
-        if (disabled || items.length === 0) {
+        if (disabled || readOnly || items.length === 0) {
             return;
         }
 
@@ -555,7 +603,7 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
      * @returns Nothing.
      */
     const handleInputClick: (event: ReactMouseEvent<HTMLInputElement>) => void = (): void => {
-        if (disabled || items.length === 0 || suggestionsOpen) {
+        if (disabled || readOnly || items.length === 0 || suggestionsOpen) {
             return;
         }
 
@@ -577,6 +625,10 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
     const handleInputChange: (event: ReactChangeEvent<HTMLInputElement>) => void = (
         event: ReactChangeEvent<HTMLInputElement>,
     ): void => {
+        if (disabled || readOnly || items.length === 0) {
+            return;
+        }
+
         setEditing(true);
         setDraft(event.target.value);
         setFilterText(event.target.value);
@@ -609,7 +661,7 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
     const handleInputKeyDown: (event: ReactKeyboardEvent<HTMLInputElement>) => void = (
         event: ReactKeyboardEvent<HTMLInputElement>,
     ): void => {
-        if (disabled || items.length === 0 || event.nativeEvent.isComposing) {
+        if (disabled || readOnly || items.length === 0 || event.nativeEvent.isComposing) {
             return;
         }
 
@@ -707,7 +759,7 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
     const handleKeyDown: (event: ReactKeyboardEvent<HTMLDivElement>) => void = (
         event: ReactKeyboardEvent<HTMLDivElement>,
     ): void => {
-        if (disabled || items.length === 0) {
+        if (disabled || readOnly || items.length === 0) {
             return;
         }
 
@@ -793,7 +845,7 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
     const handlePointerDown: (event: ReactPointerEvent<HTMLDivElement>) => void = (
         event: ReactPointerEvent<HTMLDivElement>,
     ): void => {
-        if (disabled || items.length < 2) {
+        if (disabled || readOnly || items.length < 2) {
             return;
         }
 
@@ -930,6 +982,7 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
                 "number-picker-field",
                 "cycle-picker",
                 disabled && "number-picker-field--disabled",
+                readOnly && "number-picker-field--readonly",
                 invalid && "number-picker-field--invalid",
                 className,
             )}
@@ -940,11 +993,17 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
                 htmlFor={`${pickerId}-input`}
             >
                 {label}
+                {required ? (
+                    <span className="number-picker-field__required" aria-hidden="true">
+                        *
+                    </span>
+                ) : null}
             </label>
             <div className="number-picker">
                 <div className="cycle-picker__search">
                     <input
-                        ref={inputRef}
+                        {...rest}
+                        ref={mergedInputRef}
                         id={`${pickerId}-input`}
                         className="cycle-picker__input"
                         type="text"
@@ -953,8 +1012,11 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
                         spellCheck={false}
                         value={displayValue}
                         disabled={disabled || items.length === 0}
-                        aria-labelledby={`${pickerId}-label`}
-                        aria-describedby={describedBy}
+                        readOnly={readOnly}
+                        required={required}
+                        aria-label={ariaLabel}
+                        aria-labelledby={labelledBy}
+                        aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
                         aria-invalid={invalid ? "true" : (void 0)}
                         aria-expanded={showSuggestions}
                         aria-controls={
@@ -963,11 +1025,35 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
                         aria-activedescendant={activeSuggestionId}
                         aria-autocomplete="list"
                         aria-haspopup="listbox"
-                        onFocus={handleInputFocus}
-                        onClick={handleInputClick}
+                        onFocus={(event: ReactFocusEvent<HTMLInputElement>): void => {
+                            onInputFocus?.(event);
+
+                            if (!event.defaultPrevented) {
+                                handleInputFocus(event);
+                            }
+                        }}
+                        onClick={(event: ReactMouseEvent<HTMLInputElement>): void => {
+                            onInputClick?.(event);
+
+                            if (!event.defaultPrevented) {
+                                handleInputClick(event);
+                            }
+                        }}
                         onChange={handleInputChange}
-                        onBlur={handleInputBlur}
-                        onKeyDown={handleInputKeyDown}
+                        onBlur={(event: ReactFocusEvent<HTMLInputElement>): void => {
+                            onInputBlur?.(event);
+
+                            if (!event.defaultPrevented) {
+                                handleInputBlur(event);
+                            }
+                        }}
+                        onKeyDown={(event: ReactKeyboardEvent<HTMLInputElement>): void => {
+                            onInputKeyDown?.(event);
+
+                            if (!event.defaultPrevented) {
+                                handleInputKeyDown(event);
+                            }
+                        }}
                     />
                     {showSuggestions ? (
                         suggestions.length === 0 ? (
@@ -1050,8 +1136,10 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
                     tabIndex={disabled || items.length === 0 ? -1 : 0}
                     aria-labelledby={`${pickerId}-label`}
                     aria-activedescendant={activeOptionId}
-                    aria-describedby={describedBy}
+                    aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
                     aria-disabled={disabled || items.length === 0 ? "true" : (void 0)}
+                    aria-readonly={readOnly ? "true" : (void 0)}
+                    aria-required={required ? "true" : (void 0)}
                     aria-invalid={invalid ? "true" : (void 0)}
                     onKeyDown={handleKeyDown}
                     onPointerDown={handlePointerDown}

@@ -6,13 +6,16 @@ import {
     useState,
     type CSSProperties,
     type FC,
+    type HTMLAttributes,
     type PointerEvent as ReactPointerEvent,
     type ReactNode,
     type Ref,
+    type RefCallback,
     type RefObject,
 } from "react";
 import cx from "../../component/foundation/cx";
 import useControllableState from "../../component/foundation/useControllableState";
+import useMergedRef from "../../component/foundation/useMergedRef";
 import "./DrawerLayout.css";
 
 /**
@@ -50,7 +53,7 @@ export interface DrawerLayoutHandle {
  * Props for the five-region push drawer layout.
  * Type: interface.
  * Fields: left, top, centre, center, right, bottom, open state, callbacks,
- * sizes, labels, className, ref.
+ * sizes, labels, className, rootRef, ref, plus native div attributes forwarded to the layout root.
  * @example
  * <DrawerLayout
  *     left={<Navigation />}
@@ -59,7 +62,7 @@ export interface DrawerLayoutHandle {
  *     leftOpen={open}
  * />
  */
-export interface DrawerLayoutProps {
+export interface DrawerLayoutProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
     left?: ReactNode;
     top?: ReactNode;
     centre?: ReactNode;
@@ -97,6 +100,8 @@ export interface DrawerLayoutProps {
     bottomLabel?: string;
     centreLabel?: string;
     className?: string;
+    /** Ref for the native layout root, forwarded alongside the imperative handle. */
+    rootRef?: Ref<HTMLDivElement>;
     ref?: Ref<DrawerLayoutHandle>;
 }
 
@@ -158,7 +163,9 @@ const DrawerLayout: FC<DrawerLayoutProps> = ({
     bottomLabel = "Bottom drawer",
     centreLabel,
     className = "",
+    rootRef: rootRefProp,
     ref,
+    ...rest
 }: DrawerLayoutProps) => {
     const [leftOpen, setLeftOpen]: readonly [
         boolean,
@@ -209,6 +216,10 @@ const DrawerLayout: FC<DrawerLayoutProps> = ({
     const topPaneRef: RefObject<HTMLElement | null> = useRef<HTMLElement | null>(null);
     const bottomPaneRef: RefObject<HTMLElement | null> = useRef<HTMLElement | null>(null);
     const rootRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
+    const mergedRootRef: RefCallback<HTMLDivElement> = useMergedRef<HTMLDivElement>(
+        rootRef,
+        rootRefProp,
+    );
     const previousActiveRef: RefObject<DrawerSide | null> = useRef<DrawerSide | null>(null);
     const states: Record<DrawerSide, boolean> = {
         left: leftOpen,
@@ -311,7 +322,18 @@ const DrawerLayout: FC<DrawerLayoutProps> = ({
                 onOpenChange?.(openSide, true);
             }
         }
-    }, [openSide, onLeftOpen, onLeftClose, onRightOpen, onRightClose, onTopOpen, onTopClose, onBottomOpen, onBottomClose, onOpenChange]);
+    }, [
+        openSide,
+        onLeftOpen,
+        onLeftClose,
+        onRightOpen,
+        onRightClose,
+        onTopOpen,
+        onTopClose,
+        onBottomOpen,
+        onBottomClose,
+        onOpenChange,
+    ]);
 
     const paneFor: (side: DrawerSide) => HTMLElement | null = (side: DrawerSide): HTMLElement | null => {
         if (side === "left") {
@@ -428,7 +450,7 @@ const DrawerLayout: FC<DrawerLayoutProps> = ({
     };
 
     return (
-        <div ref={rootRef} className={cx("drawer-layout", className)}>
+        <div {...rest} ref={mergedRootRef} className={cx("drawer-layout", className)}>
             {left === (void 0) ? null : (
                 <aside
                     ref={leftPaneRef}

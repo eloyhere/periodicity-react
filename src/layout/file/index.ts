@@ -1,9 +1,9 @@
 export { default as ProjectManager } from "./ProjectManager";
-export { default as Preview } from "./Preview";
-export type { PreviewProps } from "./Preview";
-export { default as Editor } from "./Editor";
-export type { EditorProps } from "./Editor";
 export type { ProjectManagerProps } from "./ProjectManager";
+export { default as Preview } from "./Preview";
+export type { PreviewCodeView, PreviewProps, PreviewView } from "./Preview";
+export { default as Editor } from "./Editor";
+export type { EditorCursor, EditorProps, EditorSelection } from "./Editor";
 export * from "./dependency";
 export * from "./exportation";
 export * from "./extension";

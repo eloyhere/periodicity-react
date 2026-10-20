@@ -51,6 +51,18 @@
     cursor: not-allowed;
 }
 
+.variant-picker__options[aria-readonly="true"] .variant-picker__option {
+    cursor: default;
+}
+
+.variant-picker__options[aria-readonly="true"] .variant-picker__option:hover {
+    border-color: var(--line);
+}
+
+.variant-picker__options[aria-readonly="true"] .variant-picker__option--selected:hover {
+    border-color: var(--color-primary);
+}
+
 .variant-picker__swatch {
     width: 14px;
     height: 14px;

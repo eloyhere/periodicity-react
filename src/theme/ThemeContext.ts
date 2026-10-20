@@ -63,6 +63,9 @@ export type ThemeTokens = Readonly<Record<ThemeTokenName, string>>;
  * @param radius - Effective corner treatment.
  * @param tokens - Token overrides visible to this subtree.
  * @param setMode - Requests a new preference from a descendant.
+ * @param setDensity - Requests a new density from a descendant.
+ * @param setRadius - Requests a new corner treatment from a descendant.
+ * @param setTokens - Merges token overrides requested by a descendant.
  * @example
  * const { resolvedMode, setMode }: ThemeContextValue = useTheme();
  */
@@ -73,15 +76,21 @@ export interface ThemeContextValue {
     radius: ThemeRadius;
     tokens: ThemeTokens;
     setMode: (mode: ThemeMode) => void;
+    setDensity: (density: ThemeDensity) => void;
+    setRadius: (radius: ThemeRadius) => void;
+    setTokens: (tokens: ThemeTokens) => void;
 }
 
 const noopSetMode: (mode: ThemeMode) => void = (): void => {};
+const noopSetDensity: (density: ThemeDensity) => void = (): void => {};
+const noopSetRadius: (radius: ThemeRadius) => void = (): void => {};
+const noopSetTokens: (tokens: ThemeTokens) => void = (): void => {};
 const emptyTokens: ThemeTokens = {};
 
 /**
  * Fallback used when `useTheme` is called outside a Theme provider.
  * Type: constant.
- * Fields: mode, resolvedMode, density, radius, tokens, setMode.
+ * Fields: mode, resolvedMode, density, radius, tokens, setMode, setDensity, setRadius, setTokens.
  * @example
  * const fallback: ThemeContextValue = DefaultThemeContext;
  */
@@ -92,6 +101,9 @@ export const DefaultThemeContext: ThemeContextValue = {
     radius: "default",
     tokens: emptyTokens,
     setMode: noopSetMode,
+    setDensity: noopSetDensity,
+    setRadius: noopSetRadius,
+    setTokens: noopSetTokens,
 };
 
 /**

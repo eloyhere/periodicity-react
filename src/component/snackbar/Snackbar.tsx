@@ -1,6 +1,14 @@
-import { useEffect, type FC, type ReactNode } from "react";
+import {
+    useCallback,
+    useEffect,
+    type FC,
+    type HTMLAttributes,
+    type ReactNode,
+    type Ref,
+} from "react";
 import cx from "../foundation/cx";
 import Portal from "../foundation/Portal";
+import useControllableState from "../foundation/useControllableState";
 import Surface from "../surface/Surface";
 import Button from "../button/Button";
 import "./Snackbar.css";
@@ -24,33 +32,54 @@ export type SnackbarAnchor = "bottom-left" | "bottom-center" | "bottom-right";
 export type SnackbarTone = "neutral" | "success" | "warning" | "danger";
 
 /**
+ * Why the snackbar asked to close.
+ * Type: type alias.
+ * Fields: none.
+ * @example
+ * const reason: SnackbarCloseReason = "timeout";
+ */
+export type SnackbarCloseReason = "action" | "dismiss" | "timeout";
+
+/**
  * Props for the Material snackbar.
  * Type: interface.
- * Fields: open, message, actionLabel, onAction, onClose, autoHideDuration, anchor, tone, className.
+ * Fields: open, defaultOpen, onOpenChange, message, actionLabel, onAction, onClose, autoHideDuration,
+ * anchor, tone, className, ref, plus native div attributes forwarded to the snackbar wrapper.
  * @example
  * <Snackbar open={open} message="Saved" actionLabel="Undo" onAction={undo} onClose={close} />
  */
-export interface SnackbarProps {
-    open: boolean;
+export interface SnackbarProps extends HTMLAttributes<HTMLDivElement> {
+    /** Controlled open state; omit to let the snackbar manage its own state. */
+    open?: boolean;
+    /** Initial open state when uncontrolled; defaults to `false`. */
+    defaultOpen?: boolean;
+    /** Called with the requested open state whenever the snackbar asks to open or close. */
+    onOpenChange?: (open: boolean) => void;
     message: ReactNode;
     actionLabel?: string;
     onAction?: () => void;
-    onClose?: () => void;
+    /** Called with the reason whenever the snackbar asks to close. */
+    onClose?: (reason: SnackbarCloseReason) => void;
     autoHideDuration?: number;
     anchor?: SnackbarAnchor;
     tone?: SnackbarTone;
-    className?: string;
+    /** Ref for the native snackbar wrapper. */
+    ref?: Ref<HTMLDivElement>;
 }
 
 /**
  * Renders a transient Material snackbar above the page.
- * @param props - Open state, message, action, timeout, and placement.
+ * The `open` state may be controlled or uncontrolled, and `onClose` reports the reason
+ * (`action`, `dismiss`, or `timeout`).
+ * @param props - Open state, message, action, timeout, placement, and native wrapper attributes.
  * @example
  * <Snackbar open={open} message="Saved quietly" autoHideDuration={4000} />
  * @returns A portalled snackbar, or null when closed.
  */
 const Snackbar: FC<SnackbarProps> = ({
-    open,
+    open: openProp,
+    defaultOpen = false,
+    onOpenChange,
     message,
     actionLabel,
     onAction,
@@ -59,18 +88,42 @@ const Snackbar: FC<SnackbarProps> = ({
     anchor = "bottom-center",
     tone = "neutral",
     className = "",
+    ref,
+    ...rest
 }: SnackbarProps) => {
+    const [open, setOpen]: readonly [
+        boolean,
+        (next: boolean | ((previous: boolean) => boolean)) => void,
+    ] = useControllableState<boolean>({
+        value: openProp,
+        defaultValue: defaultOpen,
+        onChange: onOpenChange,
+    });
+    const canAutoHide: boolean =
+        openProp === (void 0) || onClose !== (void 0) || onOpenChange !== (void 0);
+    const closeable: boolean = onClose !== (void 0) || openProp === (void 0);
+
+    const requestClose: (reason: SnackbarCloseReason) => void = useCallback(
+        (reason: SnackbarCloseReason): void => {
+            setOpen(false);
+            onClose?.(reason);
+        },
+        [onClose, setOpen],
+    );
+
     useEffect((): (() => void) | void => {
-        if (!open || autoHideDuration <= 0 || onClose === (void 0)) {
+        if (!open || autoHideDuration <= 0 || !canAutoHide) {
             return;
         }
 
-        const timeout: number = window.setTimeout(onClose, autoHideDuration);
+        const timeout: number = window.setTimeout((): void => {
+            requestClose("timeout");
+        }, autoHideDuration);
 
         return (): void => {
             window.clearTimeout(timeout);
         };
-    }, [open, autoHideDuration, onClose]);
+    }, [open, autoHideDuration, canAutoHide, requestClose]);
 
     if (!open) {
         return null;
@@ -78,7 +131,7 @@ const Snackbar: FC<SnackbarProps> = ({
 
     return (
         <Portal>
-            <div className={cx("snackbar", `snackbar--${anchor}`, className)}>
+            <div {...rest} ref={ref} className={cx("snackbar", `snackbar--${anchor}`, className)}>
                 <Surface
                     className={cx("snackbar__surface", `snackbar__surface--${tone}`)}
                     elevation={3}
@@ -95,22 +148,22 @@ const Snackbar: FC<SnackbarProps> = ({
                             size="sm"
                             onClick={(): void => {
                                 onAction?.();
-                                onClose?.();
+                                requestClose("action");
                             }}
                         >
                             {actionLabel}
                         </Button>
                     )}
-                    {onClose === (void 0) ? null : (
+                    {closeable ? (
                         <Button
                             className="snackbar__close"
                             variant="quiet"
                             size="sm"
                             icon="Close"
                             aria-label="Dismiss snackbar"
-                            onClick={onClose}
+                            onClick={(): void => requestClose("dismiss")}
                         />
-                    )}
+                    ) : null}
                 </Surface>
             </div>
         </Portal>

@@ -1,5 +1,5 @@
 export { default as Dialog } from "./Dialog";
-export type { DialogHeadingLevel, DialogProps, DialogRole, DialogSize } from "./Dialog";
+export type { DialogCloseReason, DialogHeadingLevel, DialogProps, DialogRole, DialogSize } from "./Dialog";
 export { default as ConfirmDialog } from "./ConfirmDialog";
 export type { ConfirmDialogProps, ConfirmDialogTone } from "./ConfirmDialog";
 export { default as MessageDialog } from "./MessageDialog";

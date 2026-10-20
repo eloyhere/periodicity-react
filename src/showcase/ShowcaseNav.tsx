@@ -1,10 +1,21 @@
-import type { ChangeEvent, FC, MouseEvent, ReactNode } from "react";
-import Text from "../component/text/Text";
 import {
+    useEffect,
+    useRef,
+    type ChangeEvent,
+    type FC,
+    type MouseEvent,
+    type ReactNode,
+    type RefObject,
+} from "react";
+import Text from "../component/text/Text";
+import Scrollbar from "../component/scrollbar/Scrollbar";
+import {
+    componentEntries,
     defaultEntryId,
     showcaseGroups,
     type ShowcaseEntry,
     type ShowcaseGroup,
+    type ShowcaseSection,
 } from "./registry";
 import "./ShowcaseNav.css";
 
@@ -22,14 +33,23 @@ export interface ShowcaseNavProps {
 
 /**
  * Renders the grouped sidebar navigation.
- * The groups come straight from the entry registry, so adding an entry is
- * enough for it to appear here, in the mobile select, and in the page header.
+ * Groups are split into labelled sections so more than a hundred component
+ * entries stay navigable. The groups come straight from the entry registry,
+ * so adding an entry is enough for it to appear here, in the mobile select,
+ * and in the page header.
  * @param props - Active entry id and the navigation callback.
  * @example
  * <ShowcaseNav activeId="colours" onNavigate={navigate} />
- * @returns A sidebar with Foundations and Components groups.
+ * @returns A sidebar with Foundations, Components, and Family tours.
  */
 const ShowcaseNav: FC<ShowcaseNavProps> = ({ activeId, onNavigate }: ShowcaseNavProps) => {
+    const activeLinkRef: RefObject<HTMLAnchorElement | null> =
+        useRef<HTMLAnchorElement | null>(null);
+
+    useEffect((): void => {
+        activeLinkRef.current?.scrollIntoView({ block: "nearest" });
+    }, [activeId]);
+
     const handleLinkClick: (event: MouseEvent<HTMLAnchorElement>, id: string) => void = (
         event: MouseEvent<HTMLAnchorElement>,
         id: string,
@@ -76,51 +96,88 @@ const ShowcaseNav: FC<ShowcaseNavProps> = ({ activeId, onNavigate }: ShowcaseNav
                             onNavigate(event.target.value)
                         }
                     >
-                        {showcaseGroups.map((group: ShowcaseGroup): ReactNode => (
-                            <optgroup label={group.label} key={group.id}>
-                                {group.entries.map((entry: ShowcaseEntry): ReactNode => (
-                                    <option key={entry.id} value={entry.id}>
-                                        {entry.label}
-                                    </option>
-                                ))}
-                            </optgroup>
-                        ))}
+                        {showcaseGroups.map(
+                            (group: ShowcaseGroup): ReactNode =>
+                                group.sections.map(
+                                    (section: ShowcaseSection): ReactNode => (
+                                        <optgroup
+                                            label={`${group.label} · ${section.label}`}
+                                            key={`${group.id}-${section.id}`}
+                                        >
+                                            {section.entries.map(
+                                                (entry: ShowcaseEntry): ReactNode => (
+                                                    <option key={entry.id} value={entry.id}>
+                                                        {entry.label}
+                                                    </option>
+                                                ),
+                                            )}
+                                        </optgroup>
+                                    ),
+                                ),
+                        )}
                     </select>
                 </label>
 
-                <nav className="showcase-sidebar__nav" aria-label="Component documentation">
+                <div className="showcase-sidebar__scroll">
+                    <Scrollbar
+                        className="showcase-sidebar__scrollbar"
+                        orientation="vertical"
+                        autoHide
+                    >
+                        <nav className="showcase-sidebar__nav" aria-label="Component documentation">
                     {showcaseGroups.map((group: ShowcaseGroup): ReactNode => (
                         <div className="showcase-sidebar__group" key={group.id}>
                             <p className="showcase-sidebar__title">{group.label}</p>
-                            <ul className="showcase-sidebar__list">
-                                {group.entries.map((entry: ShowcaseEntry): ReactNode => {
-                                    const isActive: boolean = entry.id === activeId;
+                            {group.sections.map((section: ShowcaseSection): ReactNode => (
+                                <div className="showcase-sidebar__section" key={section.id}>
+                                    <p className="showcase-sidebar__section-title">
+                                        {section.label}
+                                    </p>
+                                    <ul className="showcase-sidebar__list">
+                                        {section.entries.map((entry: ShowcaseEntry): ReactNode => {
+                                            const isActive: boolean = entry.id === activeId;
 
-                                    return (
-                                        <li key={entry.id}>
-                                            <a
-                                                className={
-                                                    isActive
-                                                        ? "showcase-sidebar__link showcase-sidebar__link--active"
-                                                        : "showcase-sidebar__link"
-                                                }
-                                                href={`#${entry.id}`}
-                                                aria-current={isActive ? "page" : (void 0)}
-                                                onClick={(event: MouseEvent<HTMLAnchorElement>): void =>
-                                                    handleLinkClick(event, entry.id)
-                                                }
-                                            >
-                                                {entry.label}
-                                            </a>
-                                        </li>
-                                    );
-                                })}
-                            </ul>
+                                            return (
+                                                <li key={entry.id}>
+                                                    <a
+                                                        ref={
+                                                            isActive
+                                                                ? activeLinkRef
+                                                                : null
+                                                        }
+                                                        className={
+                                                            isActive
+                                                                ? "showcase-sidebar__link showcase-sidebar__link--active"
+                                                                : "showcase-sidebar__link"
+                                                        }
+                                                        href={`#${entry.id}`}
+                                                        aria-current={
+                                                            isActive ? "page" : (void 0)
+                                                        }
+                                                        onClick={(
+                                                            event: MouseEvent<HTMLAnchorElement>,
+                                                        ): void =>
+                                                            handleLinkClick(event, entry.id)
+                                                        }
+                                                    >
+                                                        {entry.label}
+                                                    </a>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </div>
+                            ))}
                         </div>
                     ))}
-                </nav>
+                        </nav>
+                    </Scrollbar>
+                </div>
 
                 <div className="showcase-sidebar__footer">
+                    <Text variant="body-sm" tone="muted">
+                        {`${componentEntries.length} component entries`}
+                    </Text>
                     <Text variant="body-sm" tone="muted">
                         Material · Roboto
                     </Text>

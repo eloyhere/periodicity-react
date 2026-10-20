@@ -4,7 +4,9 @@ import {
     type CSSProperties,
     type Dispatch,
     type FC,
+    type HTMLAttributes,
     type ReactNode,
+    type Ref,
     type SetStateAction,
 } from "react";
 import type { ListAdapter, ListEntry } from "../../layout/list/adapter";
@@ -14,6 +16,7 @@ import Avatar from "../thumb/Avatar";
 import Button from "../button/Button";
 import Icon from "../icon/Icon";
 import Mention, { type MentionItem, type MentionSearch } from "../mention/Mention";
+import Spinner from "../progress/Spinner";
 import cx from "../foundation/cx";
 import Surface from "../surface/Surface";
 import "./Comment.css";
@@ -39,7 +42,7 @@ export interface CommentData {
 /**
  * Render slots for individual comments and the thread shell.
  * Type: interface.
- * Fields: avatar, header, content, actions, composer, empty.
+ * Fields: avatar, header, content, actions, composer, empty, loading.
  * @example
  * <CommentThread slots={{ actions: (comment) => <Badge>Edited</Badge> }} />
  */
@@ -54,35 +57,48 @@ export interface CommentSlots {
         cancel: () => void,
     ) => ReactNode;
     empty?: ReactNode;
+    loading?: ReactNode;
 }
 
 /**
  * Props for the threaded comment component.
  * Type: interface.
- * Fields: comments, adapter, expandedKeys, defaultExpandedKeys, onExpandedChange,
- * onReply, onReference, mentionSearch, mentionSuggestions, onMention, currentUser,
- * maxDepth, empty, header, footer, slots, className.
+ * Fields: comments, adapter, expandedKeys, defaultExpandedKeys, onExpandedChange, replyingTo,
+ * onReplyingToChange, onReply, onReplyStart, onReplyCancel, onReference, onResolve, onDelete,
+ * mentionSearch, mentionSuggestions, onMention, currentUser, maxDepth, empty, loading,
+ * loadingLabel, disabled, header, footer, slots, className, ref, plus native div attributes
+ * and events.
  * @example
  * <CommentThread comments={comments} onReply={(parent, body) => reply(parent, body)} />
  */
-export interface CommentThreadProps {
+export interface CommentThreadProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
     comments?: readonly CommentData[];
     adapter?: TreeAdapter<CommentData>;
     expandedKeys?: ReadonlySet<string>;
     defaultExpandedKeys?: ReadonlySet<string>;
     onExpandedChange?: (keys: ReadonlySet<string>) => void;
+    replyingTo?: string | null;
+    onReplyingToChange?: (key: string | null) => void;
     onReply?: (parent: CommentData, body: string) => void;
+    onReplyStart?: (comment: CommentData) => void;
+    onReplyCancel?: (comment: CommentData | null) => void;
     onReference?: (from: CommentData, target: CommentData) => void;
+    onResolve?: (comment: CommentData, resolved: boolean) => void;
+    onDelete?: (comment: CommentData) => void;
     mentionSearch?: MentionSearch;
     mentionSuggestions?: readonly MentionItem[];
     onMention?: (parent: CommentData, item: MentionItem) => void;
     currentUser?: string;
     maxDepth?: number;
     empty?: ReactNode;
+    loading?: boolean;
+    loadingLabel?: string;
+    disabled?: boolean;
     header?: ReactNode;
     footer?: ReactNode;
     slots?: CommentSlots;
     className?: string;
+    ref?: Ref<HTMLDivElement>;
 }
 
 /**
@@ -118,9 +134,9 @@ const expandableKeys: (tree: TreeAdapter<CommentData>) => ReadonlySet<string> = 
 };
 
 /**
- * Renders a Material threaded comment tree with reference links.
+ * Renders a Material threaded comment tree with reference links and reply actions.
  * Type: function component.
- * @param props - Comment data or adapter, expansion, reply, and reference handlers.
+ * @param props - Comment data or adapter, expansion, reply, resolve, and reference handlers.
  * @example
  * <CommentThread comments={comments} onReply={(parent, body) => addReply(parent, body)} />
  * @returns A threaded comment list.
@@ -131,18 +147,31 @@ const CommentThread: FC<CommentThreadProps> = ({
     expandedKeys,
     defaultExpandedKeys,
     onExpandedChange,
+    replyingTo: controlledReplyingTo,
+    onReplyingToChange,
     onReply,
+    onReplyStart,
+    onReplyCancel,
     onReference,
+    onResolve,
+    onDelete,
     mentionSearch,
     mentionSuggestions,
     onMention,
     currentUser = "",
     maxDepth = 6,
     empty = "No comments yet",
+    loading = false,
+    loadingLabel = "Loading comments",
+    disabled = false,
     header,
     footer,
     slots,
     className = "",
+    role,
+    "aria-label": ariaLabel,
+    ref,
+    ...rest
 }: CommentThreadProps) => {
     const tree: TreeAdapter<CommentData> = useMemo((): TreeAdapter<CommentData> => {
         if (adapter !== (void 0)) {
@@ -161,10 +190,12 @@ const CommentThread: FC<CommentThreadProps> = ({
         (): ReadonlySet<string> => defaultExpandedKeys ?? expandableKeys(tree),
     );
     const expanded: ReadonlySet<string> = expandedKeys ?? internalExpanded;
-    const [replyingTo, setReplyingTo]: [
+    const [internalReplyingTo, setInternalReplyingTo]: [
         string | null,
         Dispatch<SetStateAction<string | null>>,
     ] = useState<string | null>(null);
+    const replyingTo: string | null =
+        controlledReplyingTo === (void 0) ? internalReplyingTo : controlledReplyingTo;
     const [draft, setDraft]: [string, Dispatch<SetStateAction<string>>] = useState<string>("");
 
     const visible: ListAdapter<CommentData> = useMemo(
@@ -192,10 +223,48 @@ const CommentThread: FC<CommentThreadProps> = ({
         setExpanded(next);
     };
 
+    const changeReplyingTo: (next: string | null) => void = (next: string | null): void => {
+        if (controlledReplyingTo === (void 0)) {
+            setInternalReplyingTo(next);
+        }
+
+        onReplyingToChange?.(next);
+    };
+
+    const cancelReply: (comment: CommentData | null) => void = (
+        comment: CommentData | null,
+    ): void => {
+        changeReplyingTo(null);
+        setDraft("");
+        onReplyCancel?.(comment);
+    };
+
+    const toggleReply: (comment: CommentData, isReplying: boolean) => void = (
+        comment: CommentData,
+        isReplying: boolean,
+    ): void => {
+        if (disabled) {
+            return;
+        }
+
+        if (isReplying) {
+            cancelReply(comment);
+            return;
+        }
+
+        changeReplyingTo(comment.id);
+        setDraft("");
+        onReplyStart?.(comment);
+    };
+
     const applyReply: (parent: CommentData, body: string) => void = (
         parent: CommentData,
         body: string,
     ): void => {
+        if (disabled) {
+            return;
+        }
+
         const text: string = body.trim();
 
         if (text.length === 0) {
@@ -204,7 +273,7 @@ const CommentThread: FC<CommentThreadProps> = ({
 
         onReply?.(parent, text);
         setDraft("");
-        setReplyingTo(null);
+        changeReplyingTo(null);
         setExpanded(new Set<string>([...expanded, parent.id]));
     };
 
@@ -212,214 +281,280 @@ const CommentThread: FC<CommentThreadProps> = ({
         applyReply(parent, draft);
     };
 
-    const cancelReply: () => void = (): void => {
-        setReplyingTo(null);
-        setDraft("");
-    };
-
     const rows: readonly ListEntry<CommentData>[] = visible
         .getRange(0, visible.size)
         .filter((entry: ListEntry<CommentData>): boolean => entry.level <= maxDepth);
 
     return (
-        <div className={cx("comment-thread", className)}>
+        <div
+            {...rest}
+            ref={ref}
+            className={cx("comment-thread", className)}
+            role={role ?? "feed"}
+            aria-label={ariaLabel ?? "Comments"}
+            aria-busy={loading ? "true" : (void 0)}
+            aria-disabled={disabled ? "true" : (void 0)}
+        >
             {header === (void 0) ? null : <div className="comment-thread__header">{header}</div>}
 
-            {rows.length === 0 ? (
+            {loading ? (
+                <div className="comment-thread__state">
+                    {slots?.loading ?? <Spinner size="sm" label={loadingLabel} />}
+                </div>
+            ) : rows.length === 0 ? (
                 <div className="comment-thread__empty">{slots?.empty ?? empty}</div>
             ) : null}
 
-            {rows.map((entry: ListEntry<CommentData>): ReactNode => {
-                const parentKey: string | null = tree.getParentKey(entry.key);
-                const parent: CommentData | null =
-                    parentKey === null ? null : tree.getItem(parentKey);
-                const hasChildren: boolean = tree.isExpandable(entry.key);
-                const isExpanded: boolean = expanded.has(entry.key);
-                const isReplying: boolean = replyingTo === entry.key;
-                const references: readonly string[] = entry.item.references ?? [];
+            {loading
+                ? null
+                : rows.map((entry: ListEntry<CommentData>): ReactNode => {
+                      const parentKey: string | null = tree.getParentKey(entry.key);
+                      const parent: CommentData | null =
+                          parentKey === null ? null : tree.getItem(parentKey);
+                      const hasChildren: boolean = tree.isExpandable(entry.key);
+                      const isExpanded: boolean = expanded.has(entry.key);
+                      const isReplying: boolean = replyingTo === entry.key;
+                      const references: readonly string[] = entry.item.references ?? [];
 
-                return (
-                    <article
-                        key={entry.key}
-                        id={`comment-${entry.key}`}
-                        className={cx(
-                            "comment",
-                            entry.level > 0 && "comment--reply",
-                            entry.item.resolved && "comment--resolved",
-                        )}
-                        style={{ "--comment-depth": entry.level } as CSSProperties}
-                        tabIndex={-1}
-                        aria-label={`Comment by ${entry.item.author}`}
-                    >
-                        <div className="comment__rail" aria-hidden="true">
-                            {slots?.avatar === (void 0) ? (
-                                <Avatar name={entry.item.author} src={entry.item.avatar} size="sm" />
-                            ) : (
-                                slots.avatar(entry.item)
-                            )}
-                        </div>
+                      return (
+                          <article
+                              key={entry.key}
+                              id={`comment-${entry.key}`}
+                              data-comment-id={entry.key}
+                              className={cx(
+                                  "comment",
+                                  entry.level > 0 && "comment--reply",
+                                  entry.item.resolved && "comment--resolved",
+                              )}
+                              style={{ "--comment-depth": entry.level } as CSSProperties}
+                              tabIndex={-1}
+                              aria-label={`Comment by ${entry.item.author}`}
+                          >
+                              <div className="comment__rail" aria-hidden="true">
+                                  {slots?.avatar === (void 0) ? (
+                                      <Avatar
+                                          name={entry.item.author}
+                                          src={entry.item.avatar}
+                                          size="sm"
+                                      />
+                                  ) : (
+                                      slots.avatar(entry.item)
+                                  )}
+                              </div>
 
-                        <Surface className="comment__body" elevation={0} shape="sm">
-                            {slots?.header === (void 0) ? (
-                                <header className="comment__header">
-                                    <span className="comment__author">{entry.item.author}</span>
-                                    {entry.item.author === currentUser ? (
-                                        <span className="comment__you">You</span>
-                                    ) : null}
-                                    {entry.item.timestamp === (void 0) ? null : (
-                                        <time className="comment__time">{entry.item.timestamp}</time>
-                                    )}
-                                    {entry.item.resolved ? (
-                                        <span className="comment__resolved">
-                                            <Icon name="Check" size={13} />
-                                            Resolved
-                                        </span>
-                                    ) : null}
-                                </header>
-                            ) : (
-                                slots.header(entry.item)
-                            )}
+                              <Surface className="comment__body" elevation={0} shape="sm">
+                                  {slots?.header === (void 0) ? (
+                                      <header className="comment__header">
+                                          <span className="comment__author">
+                                              {entry.item.author}
+                                          </span>
+                                          {entry.item.author === currentUser ? (
+                                              <span className="comment__you">You</span>
+                                          ) : null}
+                                          {entry.item.timestamp === (void 0) ? null : (
+                                              <time className="comment__time">
+                                                  {entry.item.timestamp}
+                                              </time>
+                                          )}
+                                          {entry.item.resolved ? (
+                                              <span className="comment__resolved">
+                                                  <Icon name="Check" size={13} />
+                                                  Resolved
+                                              </span>
+                                          ) : null}
+                                      </header>
+                                  ) : (
+                                      slots.header(entry.item)
+                                  )}
 
-                            {parent === null ? null : (
-                                <button
-                                    type="button"
-                                    className="comment__parent"
-                                    onClick={(): void => {
-                                        const target: HTMLElement | null = document.getElementById(
-                                            `comment-${parent.id}`,
-                                        );
-                                        target?.scrollIntoView({ behavior: "smooth", block: "center" });
-                                        target?.focus({ preventScroll: true });
-                                    }}
-                                >
-                                    Replying to {parent.author}
-                                </button>
-                            )}
+                                  {parent === null ? null : (
+                                      <button
+                                          type="button"
+                                          className="comment__parent"
+                                          onClick={(): void => {
+                                              const target: HTMLElement | null =
+                                                  document.getElementById(`comment-${parent.id}`);
+                                              target?.scrollIntoView({
+                                                  behavior: "smooth",
+                                                  block: "center",
+                                              });
+                                              target?.focus({ preventScroll: true });
+                                          }}
+                                      >
+                                          Replying to {parent.author}
+                                      </button>
+                                  )}
 
-                            {slots?.content === (void 0) ? (
-                                <div className="comment__content text">{entry.item.content}</div>
-                            ) : (
-                                slots.content(entry.item)
-                            )}
+                                  {slots?.content === (void 0) ? (
+                                      <div className="comment__content text">
+                                          {entry.item.content}
+                                      </div>
+                                  ) : (
+                                      slots.content(entry.item)
+                                  )}
 
-                            {references.length === 0 ? null : (
-                                <div className="comment__references">
-                                    <span className="comment__references-label">In reference to</span>
-                                    {references.map((reference: string): ReactNode => {
-                                        const target: CommentData | null =
-                                            tree.indexOf(reference) === -1
-                                                ? null
-                                                : tree.getItem(reference);
+                                  {references.length === 0 ? null : (
+                                      <div className="comment__references">
+                                          <span className="comment__references-label">
+                                              In reference to
+                                          </span>
+                                          {references.map((reference: string): ReactNode => {
+                                              const target: CommentData | null =
+                                                  tree.indexOf(reference) === -1
+                                                      ? null
+                                                      : tree.getItem(reference);
 
-                                        if (target === null) {
-                                            return null;
-                                        }
+                                              if (target === null) {
+                                                  return null;
+                                              }
 
-                                        return (
-                                            <button
-                                                key={reference}
-                                                type="button"
-                                                className="comment__reference"
-                                                onClick={(): void => {
-                                                    onReference?.(entry.item, target);
-                                                    const node: HTMLElement | null =
-                                                        document.getElementById(
-                                                            `comment-${reference}`,
-                                                        );
-                                                    node?.scrollIntoView({
-                                                        behavior: "smooth",
-                                                        block: "center",
-                                                    });
-                                                    node?.focus({ preventScroll: true });
-                                                }}
-                                            >
-                                                {target.author}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            )}
+                                              return (
+                                                  <button
+                                                      key={reference}
+                                                      type="button"
+                                                      className="comment__reference"
+                                                      onClick={(): void => {
+                                                          onReference?.(entry.item, target);
+                                                          const node: HTMLElement | null =
+                                                              document.getElementById(
+                                                                  `comment-${reference}`,
+                                                              );
+                                                          node?.scrollIntoView({
+                                                              behavior: "smooth",
+                                                              block: "center",
+                                                          });
+                                                          node?.focus({ preventScroll: true });
+                                                      }}
+                                                  >
+                                                      {target.author}
+                                                  </button>
+                                              );
+                                          })}
+                                      </div>
+                                  )}
 
-                            <footer className="comment__actions">
-                                {hasChildren ? (
-                                    <button
-                                        type="button"
-                                        className="comment__action"
-                                        aria-expanded={isExpanded}
-                                        onClick={(): void => toggle(entry.key)}
-                                    >
-                                        <Icon
-                                            name={isExpanded ? "ChevronUp" : "ChevronDown"}
-                                            size={14}
-                                        />
-                                        {isExpanded ? "Hide" : "Show"} {tree.getChildren(entry.key).length}
-                                    </button>
-                                ) : null}
-                                {onReply === (void 0) ? null : (
-                                    <button
-                                        type="button"
-                                        className="comment__action"
-                                        onClick={(): void => {
-                                            setReplyingTo(isReplying ? null : entry.key);
-                                            setDraft("");
-                                        }}
-                                    >
-                                        Reply
-                                    </button>
-                                )}
-                                {slots?.actions?.(entry.item)}
-                            </footer>
+                                  <footer className="comment__actions">
+                                      {hasChildren ? (
+                                          <button
+                                              type="button"
+                                              className="comment__action"
+                                              aria-expanded={isExpanded}
+                                              onClick={(): void => toggle(entry.key)}
+                                          >
+                                              <Icon
+                                                  name={isExpanded ? "ChevronUp" : "ChevronDown"}
+                                                  size={14}
+                                              />
+                                              {isExpanded ? "Hide" : "Show"}{" "}
+                                              {tree.getChildren(entry.key).length}
+                                          </button>
+                                      ) : null}
+                                      {onReply === (void 0) ? null : (
+                                          <button
+                                              type="button"
+                                              className="comment__action"
+                                              disabled={disabled}
+                                              onClick={(): void =>
+                                                  toggleReply(entry.item, isReplying)
+                                              }
+                                          >
+                                              Reply
+                                          </button>
+                                      )}
+                                      {onResolve === (void 0) ? null : (
+                                          <button
+                                              type="button"
+                                              className="comment__action"
+                                              aria-pressed={entry.item.resolved === true}
+                                              disabled={disabled}
+                                              onClick={(): void =>
+                                                  onResolve(entry.item, entry.item.resolved !== true)
+                                              }
+                                          >
+                                              <Icon
+                                                  name={
+                                                      entry.item.resolved === true
+                                                          ? "Refresh"
+                                                          : "Check"
+                                                  }
+                                                  size={14}
+                                              />
+                                              {entry.item.resolved === true ? "Reopen" : "Resolve"}
+                                          </button>
+                                      )}
+                                      {onDelete === (void 0) ? null : (
+                                          <button
+                                              type="button"
+                                              className="comment__action comment__action--danger"
+                                              disabled={disabled}
+                                              onClick={(): void => onDelete(entry.item)}
+                                          >
+                                              Delete
+                                          </button>
+                                      )}
+                                      {slots?.actions?.(entry.item)}
+                                  </footer>
 
-                            {isReplying ? (
-                                <div className="comment__composer">
-                                    {slots?.composer === (void 0) ? (
-                                        <>
-                                            <Mention
-                                                multiline
-                                                rows={2}
-                                                label={`Reply to ${entry.item.author}`}
-                                                value={draft}
-                                                placeholder={`Reply to ${entry.item.author}`}
-                                                onChange={setDraft}
-                                                onSearch={mentionSearch}
-                                                suggestions={mentionSuggestions}
-                                                onMention={(item: MentionItem): void =>
-                                                    onMention?.(entry.item, item)
-                                                }
-                                            />
-                                            <div className="comment__composer-actions">
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={cancelReply}
-                                                >
-                                                    Cancel
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    onClick={(): void => submitReply(entry.item)}
-                                                >
-                                                    Reply
-                                                </Button>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        slots.composer(
-                                            entry.item,
-                                            (body: string): void => applyReply(entry.item, body),
-                                            cancelReply,
-                                        )
-                                    )}
-                                </div>
-                            ) : null}
-                        </Surface>
+                                  {isReplying ? (
+                                      <div className="comment__composer">
+                                          {slots?.composer === (void 0) ? (
+                                              <>
+                                                  <Mention
+                                                      multiline
+                                                      rows={2}
+                                                      label={`Reply to ${entry.item.author}`}
+                                                      value={draft}
+                                                      placeholder={`Reply to ${entry.item.author}`}
+                                                      disabled={disabled}
+                                                      onChange={setDraft}
+                                                      onSearch={mentionSearch}
+                                                      suggestions={mentionSuggestions}
+                                                      onMention={(item: MentionItem): void =>
+                                                          onMention?.(entry.item, item)
+                                                      }
+                                                  />
+                                                  <div className="comment__composer-actions">
+                                                      <Button
+                                                          size="sm"
+                                                          variant="ghost"
+                                                          onClick={(): void =>
+                                                              cancelReply(entry.item)
+                                                          }
+                                                      >
+                                                          Cancel
+                                                      </Button>
+                                                      <Button
+                                                          size="sm"
+                                                          disabled={
+                                                              disabled ||
+                                                              draft.trim().length === 0
+                                                          }
+                                                          onClick={(): void =>
+                                                              submitReply(entry.item)
+                                                          }
+                                                      >
+                                                          Reply
+                                                      </Button>
+                                                  </div>
+                                              </>
+                                          ) : (
+                                              slots.composer(
+                                                  entry.item,
+                                                  (body: string): void =>
+                                                      applyReply(entry.item, body),
+                                                  (): void => cancelReply(entry.item),
+                                              )
+                                          )}
+                                      </div>
+                                  ) : null}
+                              </Surface>
 
-                        {entry.level >= maxDepth && hasChildren ? (
-                            <span className="comment__limit">Maximum depth reached</span>
-                        ) : null}
-                    </article>
-                );
-            })}
+                              {entry.level >= maxDepth && hasChildren ? (
+                                  <span className="comment__limit">Maximum depth reached</span>
+                              ) : null}
+                          </article>
+                      );
+                  })}
 
             {footer === (void 0) ? null : <div className="comment-thread__footer">{footer}</div>}
         </div>

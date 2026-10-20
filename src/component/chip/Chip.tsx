@@ -1,5 +1,14 @@
-import type { FC, KeyboardEvent, KeyboardEventHandler, ReactNode } from "react";
+import type {
+    FC,
+    HTMLAttributes,
+    KeyboardEvent,
+    KeyboardEventHandler,
+    MouseEvent as ReactMouseEvent,
+    ReactNode,
+    Ref,
+} from "react";
 import cx from "../foundation/cx";
+import useControllableState from "../foundation/useControllableState";
 import Icon, { type IconName } from "../icon/Icon";
 import Surface from "../surface/Surface";
 import "./Chip.css";
@@ -16,25 +25,34 @@ export type ChipVariant = "assist" | "filter" | "input";
 /**
  * Props for the Chip component.
  * Type: interface.
- * Fields: label, variant, selected, onClick, onRemove, icon, avatar, disabled, className.
+ * Extends the native `span` attributes, so `id`, `style`, `title`, `aria-*`, `data-*`, `tabIndex`, and
+ * pointer, mouse, keyboard, and focus handlers are forwarded to the chip surface.
+ * Fields: label, variant, selected, defaultSelected, onSelectedChange, onClick, onRemove, removeLabel,
+ * icon, avatar, disabled, className. `onRemove` receives the originating mouse event when the remove
+ * button is pressed and no event when the chip is removed with Delete or Backspace.
  * @example
  * <Chip label="Deep work" variant="filter" selected onClick={toggle} onRemove={remove} />
  */
-export interface ChipProps {
+export interface ChipProps extends Omit<HTMLAttributes<HTMLSpanElement>, "children" | "className" | "onClick"> {
     label: string;
     variant?: ChipVariant;
     selected?: boolean;
-    onClick?: () => void;
-    onRemove?: () => void;
+    defaultSelected?: boolean;
+    onSelectedChange?: (selected: boolean) => void;
+    onClick?: (event: ReactMouseEvent<HTMLButtonElement>) => void;
+    onRemove?: (event?: ReactMouseEvent<HTMLButtonElement>) => void;
+    removeLabel?: string;
     icon?: IconName;
     avatar?: ReactNode;
     disabled?: boolean;
     className?: string;
+    ref?: Ref<HTMLDivElement>;
 }
 
 /**
  * Renders an assist, filter, or input chip on a pill Surface.
- * @param props - Label, variant, selection, activation and removal handlers, leading visual, and disabled state.
+ * @param props - Label, variant, selection, activation and removal handlers, leading visual, disabled
+ * state, and native span attributes.
  * @example
  * <Chip label="Focus" variant="filter" selected onClick={handleToggle} />
  * @returns A chip element.
@@ -42,20 +60,32 @@ export interface ChipProps {
 const Chip: FC<ChipProps> = ({
     label,
     variant = "assist",
-    selected = false,
+    selected,
+    defaultSelected = false,
+    onSelectedChange,
     onClick,
     onRemove,
+    removeLabel,
     icon,
     avatar,
     disabled = false,
     className = "",
+    ref,
+    ...rest
 }: ChipProps) => {
     const isFilter: boolean = variant === "filter";
-    const isActivatable: boolean = onClick !== (void 0);
+    const [isSelected, setSelected]: readonly [boolean, (next: boolean) => void] =
+        useControllableState<boolean>({
+            value: selected,
+            defaultValue: defaultSelected,
+            onChange: onSelectedChange,
+        });
+    const isTogglable: boolean = isFilter && (onSelectedChange !== (void 0) || defaultSelected);
+    const isActivatable: boolean = onClick !== (void 0) || isTogglable;
     const leading: ReactNode =
         avatar ??
         (icon === (void 0) ? null : <Icon className="chip__icon" name={icon} size={15} aria-hidden="true" />);
-    const removeLabel: string = `Remove ${label}`;
+    const resolvedRemoveLabel: string = removeLabel ?? `Remove ${label}`;
 
     const handleKeyDown: KeyboardEventHandler<HTMLButtonElement> = (
         event: KeyboardEvent<HTMLButtonElement>,
@@ -72,20 +102,33 @@ const Chip: FC<ChipProps> = ({
         onRemove();
     };
 
+    const handleClick: (event: ReactMouseEvent<HTMLButtonElement>) => void = (
+        event: ReactMouseEvent<HTMLButtonElement>,
+    ): void => {
+        onClick?.(event);
+
+        if (event.defaultPrevented || !isTogglable) {
+            return;
+        }
+
+        setSelected(!isSelected);
+    };
+
     const content: ReactNode = (
         <>
             {leading}
             <span className="chip__label">{label}</span>
-            {isFilter && selected ? <Icon className="chip__check" name="Check" size={14} aria-hidden="true" /> : null}
+            {isFilter && isSelected ? <Icon className="chip__check" name="Check" size={14} aria-hidden="true" /> : null}
         </>
     );
 
     return (
         <Surface
+            ref={ref}
             className={cx(
                 "chip",
                 `chip--${variant}`,
-                selected && "chip--selected",
+                isSelected && "chip--selected",
                 disabled && "chip--disabled",
                 className,
             )}
@@ -93,14 +136,15 @@ const Chip: FC<ChipProps> = ({
             stateLayer={!disabled}
             disabled={disabled}
             ripple={isActivatable ? { layer: "foreground", trigger: ["hover", "click"] } : false}
+            {...rest}
         >
             {isActivatable ? (
                 <button
                     type="button"
                     className="chip__main"
-                    aria-pressed={isFilter ? selected : (void 0)}
+                    aria-pressed={isFilter ? isSelected : (void 0)}
                     disabled={disabled}
-                    onClick={onClick}
+                    onClick={handleClick}
                     onKeyDown={handleKeyDown}
                 >
                     {content}
@@ -114,7 +158,7 @@ const Chip: FC<ChipProps> = ({
                 <button
                     type="button"
                     className="chip__remove"
-                    aria-label={removeLabel}
+                    aria-label={resolvedRemoveLabel}
                     disabled={disabled}
                     onClick={onRemove}
                 >

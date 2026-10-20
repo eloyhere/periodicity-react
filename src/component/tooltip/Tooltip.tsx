@@ -5,9 +5,7 @@ import {
     useId,
     useLayoutEffect,
     useRef,
-    useState,
     type CSSProperties,
-    type Dispatch,
     type FC,
     type FocusEventHandler,
     type HTMLAttributes,
@@ -18,13 +16,14 @@ import {
     type Ref,
     type RefCallback,
     type RefObject,
-    type SetStateAction,
 } from "react";
 import Portal from "../foundation/Portal";
+import cx from "../foundation/cx";
 import useAnchoredPosition, {
     type AnchoredPositionResult,
     type Placement,
 } from "../foundation/useAnchoredPosition";
+import useControllableState from "../foundation/useControllableState";
 import useMergedRef from "../foundation/useMergedRef";
 import Surface from "../surface/Surface";
 import "./Tooltip.css";
@@ -46,26 +45,41 @@ type TooltipChildProps = { ref?: Ref<HTMLElement> } & Pick<HTMLAttributes<HTMLEl
  * @param content - Tooltip body; keep it short and non-interactive.
  * @param children - Single trigger element that accepts a ref and ARIA attributes.
  * @param placement - Preferred side and alignment; may flip to fit the viewport.
+ * @param offset - Distance in pixels between trigger and tooltip.
  * @param delay - Hover delay in milliseconds; focus shows immediately.
  * @param disabled - Suppresses the tooltip without changing the trigger.
  * @param arrow - Renders a small arrow pointing at the trigger.
+ * @param open - Controlled visibility; omit to let hover and focus drive the tooltip.
+ * @param defaultOpen - Initial visibility when uncontrolled; defaults to `false`.
+ * @param onOpenChange - Called with the requested visibility.
+ * @param closeOnEscape - Whether Escape hides a visible tooltip; defaults to `true`.
+ * @param ref - Ref for the native trigger wrapper.
+ * Native span attributes (id, style, aria-*, data-*, tabIndex, and events) are forwarded to the
+ * trigger wrapper.
  * @example
  * <Tooltip content="Keyboard shortcut">
  *     <Button>Open</Button>
  * </Tooltip>
  */
-export interface TooltipProps {
+export interface TooltipProps extends Omit<HTMLAttributes<HTMLSpanElement>, "content"> {
     content: ReactNode;
     children: ReactElement;
     placement?: Placement;
+    offset?: number;
     delay?: number;
     disabled?: boolean;
     arrow?: boolean;
+    open?: boolean;
+    defaultOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    closeOnEscape?: boolean;
+    /** Ref for the native trigger wrapper. */
+    ref?: Ref<HTMLSpanElement>;
 }
 
 /**
  * Shows a Portal-rendered description on hover or focus and hides it on leave, blur, or Escape.
- * @param props - Content, trigger, placement, delay, and disabled state.
+ * @param props - Content, trigger, placement, delay, visibility, and disabled state.
  * @example
  * <Tooltip content="Duplicate the current card" placement="top">
  *     <Button icon="Plus" aria-label="Duplicate" />
@@ -76,11 +90,30 @@ const Tooltip: FC<TooltipProps> = ({
     content,
     children,
     placement = "top",
+    offset = 8,
     delay = 450,
     disabled = false,
     arrow = true,
+    open: openProp,
+    defaultOpen = false,
+    onOpenChange,
+    closeOnEscape = true,
+    ref,
+    className = "",
+    onPointerEnter,
+    onPointerLeave,
+    onFocus,
+    onBlur,
+    ...rest
 }: TooltipProps) => {
-    const [open, setOpen]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false);
+    const [open, setOpen]: readonly [
+        boolean,
+        (next: boolean | ((previous: boolean) => boolean)) => void,
+    ] = useControllableState<boolean>({
+        value: openProp,
+        defaultValue: defaultOpen,
+        onChange: onOpenChange,
+    });
     const triggerRef: RefObject<HTMLElement | null> = useRef<HTMLElement>(null);
     const floatingRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
     const showTimerRef: MutableRefObject<number | null> = useRef<number | null>(null);
@@ -90,7 +123,7 @@ const Tooltip: FC<TooltipProps> = ({
     const { style, placement: resolvedPlacement, update }: AnchoredPositionResult = useAnchoredPosition(
         triggerRef,
         floatingRef,
-        { placement, offset: 8 },
+        { placement, offset },
     );
     const child: ReactElement<TooltipChildProps> = children as ReactElement<TooltipChildProps>;
     const childProps: TooltipChildProps = child.props;
@@ -106,50 +139,60 @@ const Tooltip: FC<TooltipProps> = ({
         }
     }, []);
 
-    const handlePointerEnter: PointerEventHandler<HTMLSpanElement> = (): void => {
-        if (disabled) {
-            return;
+    const handlePointerEnter: PointerEventHandler<HTMLSpanElement> = (
+        event: Parameters<PointerEventHandler<HTMLSpanElement>>[0],
+    ): void => {
+        if (!disabled) {
+            clearShowTimer();
+
+            if (delay <= 0) {
+                setOpen(true);
+            } else {
+                showTimerRef.current = window.setTimeout((): void => {
+                    showTimerRef.current = null;
+                    setOpen(true);
+                }, delay);
+            }
         }
 
-        clearShowTimer();
-
-        if (delay <= 0) {
-            setOpen(true);
-            return;
-        }
-
-        showTimerRef.current = window.setTimeout((): void => {
-            showTimerRef.current = null;
-            setOpen(true);
-        }, delay);
+        onPointerEnter?.(event);
     };
 
-    const handlePointerLeave: PointerEventHandler<HTMLSpanElement> = (): void => {
+    const handlePointerLeave: PointerEventHandler<HTMLSpanElement> = (
+        event: Parameters<PointerEventHandler<HTMLSpanElement>>[0],
+    ): void => {
         clearShowTimer();
 
         if (!focusedRef.current) {
             setOpen(false);
         }
+
+        onPointerLeave?.(event);
     };
 
-    const handleFocus: FocusEventHandler<HTMLSpanElement> = (): void => {
-        if (disabled) {
-            return;
+    const handleFocus: FocusEventHandler<HTMLSpanElement> = (
+        event: Parameters<FocusEventHandler<HTMLSpanElement>>[0],
+    ): void => {
+        if (!disabled) {
+            focusedRef.current = true;
+            clearShowTimer();
+            setOpen(true);
         }
 
-        focusedRef.current = true;
-        clearShowTimer();
-        setOpen(true);
+        onFocus?.(event);
     };
 
-    const handleBlur: FocusEventHandler<HTMLSpanElement> = (): void => {
+    const handleBlur: FocusEventHandler<HTMLSpanElement> = (
+        event: Parameters<FocusEventHandler<HTMLSpanElement>>[0],
+    ): void => {
         focusedRef.current = false;
         clearShowTimer();
         setOpen(false);
+        onBlur?.(event);
     };
 
     useEffect((): (() => void) | void => {
-        if (!visible) {
+        if (!visible || !closeOnEscape) {
             return;
         }
 
@@ -164,7 +207,7 @@ const Tooltip: FC<TooltipProps> = ({
         return (): void => {
             document.removeEventListener("keydown", handleKeyDown);
         };
-    }, [visible]);
+    }, [closeOnEscape, setOpen, visible]);
 
     useLayoutEffect((): void => {
         if (visible) {
@@ -202,7 +245,9 @@ const Tooltip: FC<TooltipProps> = ({
 
     return (
         <span
-            className="tooltip__trigger"
+            {...rest}
+            ref={ref}
+            className={cx("tooltip__trigger", className)}
             onPointerEnter={handlePointerEnter}
             onPointerLeave={handlePointerLeave}
             onFocus={handleFocus}

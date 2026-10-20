@@ -1,4 +1,4 @@
-import type { AriaAttributes, FC, ReactNode } from "react";
+import type { FC, HTMLAttributes, ReactNode, Ref } from "react";
 import cx from "../foundation/cx";
 import "./Badge.css";
 
@@ -14,6 +14,8 @@ export type BadgeTone = "neutral" | "lime" | "accent" | "mint" | "violet" | "amb
 /**
  * Props for the Badge component.
  * Type: interface.
+ * Extends the native `span` attributes, so `id`, `style`, `title`, `aria-*`, `data-*`, `tabIndex`, and
+ * pointer, mouse, keyboard, and focus handlers are forwarded to the rendered element.
  * Fields: children, className, tone, dot, count, max, aria-label.
  * @example
  * <Badge tone="mint">On track</Badge>
@@ -22,18 +24,19 @@ export type BadgeTone = "neutral" | "lime" | "accent" | "mint" | "violet" | "amb
  * @example
  * <Badge count={128} max={99} aria-label="128 messages" />
  */
-export interface BadgeProps extends Pick<AriaAttributes, "aria-label"> {
+export interface BadgeProps extends Omit<HTMLAttributes<HTMLSpanElement>, "children" | "className"> {
     children?: ReactNode;
     className?: string;
     tone?: BadgeTone;
     dot?: boolean;
     count?: number;
     max?: number;
+    ref?: Ref<HTMLSpanElement>;
 }
 
 /**
  * Renders a label, dot, or capped count badge.
- * @param props - Content, tone, dot mode, count, cap, accessible label, and class name.
+ * @param props - Content, tone, dot mode, count, cap, accessible label, class name, and native span attributes.
  * @example
  * <Badge count={5} tone="accent" />
  * @returns A badge element.
@@ -46,6 +49,8 @@ const Badge: FC<BadgeProps> = ({
     count,
     max,
     "aria-label": ariaLabel,
+    ref,
+    ...rest
 }: BadgeProps) => {
     const baseClass: string = cx("badge", `badge--${tone}`, className);
     const hasLabel: boolean = ariaLabel !== (void 0) && ariaLabel.length > 0;
@@ -53,10 +58,12 @@ const Badge: FC<BadgeProps> = ({
     if (dot) {
         return (
             <span
+                ref={ref}
                 className={cx(baseClass, "badge--dot")}
                 role={hasLabel ? "img" : (void 0)}
                 aria-label={hasLabel ? ariaLabel : (void 0)}
                 aria-hidden={hasLabel ? (void 0) : true}
+                {...rest}
             />
         );
     }
@@ -66,9 +73,11 @@ const Badge: FC<BadgeProps> = ({
 
         return (
             <span
+                ref={ref}
                 className={cx(baseClass, "badge--count")}
                 role={hasLabel ? "img" : (void 0)}
                 aria-label={hasLabel ? ariaLabel : (void 0)}
+                {...rest}
             >
                 {display}
             </span>
@@ -77,9 +86,11 @@ const Badge: FC<BadgeProps> = ({
 
     return (
         <span
+            ref={ref}
             className={baseClass}
             role={hasLabel ? "img" : (void 0)}
             aria-label={hasLabel ? ariaLabel : (void 0)}
+            {...rest}
         >
             {children}
         </span>

@@ -5,48 +5,68 @@ import {
     useState,
     type CSSProperties,
     type ChangeEvent,
+    type HTMLAttributes,
     type KeyboardEvent as ReactKeyboardEvent,
     type MouseEvent as ReactMouseEvent,
     type MutableRefObject,
     type ReactNode,
+    type Ref,
+    type UIEvent,
 } from "react";
 import Avatar from "../../../component/thumb/Avatar";
 import Icon from "../../../component/icon/Icon";
 import Surface from "../../../component/surface/Surface";
+import Spinner from "../../../component/progress/Spinner";
 import cx from "../../../component/foundation/cx";
 import useVirtualWindow, { type VirtualWindow } from "../../../component/foundation/useVirtualWindow";
 import type { ListEntry } from "../../list/adapter";
 import type { ContactAction, ContactAdapter, ContactItem, ContactPresence } from "../adapter";
 import { createContactAdapter } from "../adapter";
 import ContactContextMenu from "../ContactContextMenu";
+import { focusListOption } from "../keyboard";
 import "../Contact.css";
 
 /**
  * Props for the virtual contact list.
  * Type: interface.
- * Fields: contacts, adapter, value, defaultValue, onSelect, onContactAction,
- * title, searchable, height, itemHeight, empty, className.
+ * Fields: contacts, adapter, value, defaultValue, onValueChange, onSelect, onContactAction,
+ * onContactMenuOpenChange, title, titleText, searchable, searchPlaceholder, searchLabel,
+ * onSearchChange, listLabel, height, itemHeight, loading, loadingLabel, disabled, empty,
+ * emptySearch, className, ref, plus native section attributes and events.
  * @example
  * <VirtualContact contacts={contacts} height={320} itemHeight={60} />
  */
-export interface VirtualContactProps {
+export interface VirtualContactProps
+    extends Omit<HTMLAttributes<HTMLElement>, "children" | "onSelect" | "title"> {
     contacts?: readonly ContactItem[];
     adapter?: ContactAdapter;
     value?: string;
     defaultValue?: string;
+    onValueChange?: (value: string, contact: ContactItem) => void;
     onSelect?: (contact: ContactItem) => void;
     onContactAction?: (action: ContactAction, contact: ContactItem) => void;
+    onContactMenuOpenChange?: (open: boolean, contact: ContactItem) => void;
     title?: ReactNode;
+    titleText?: string;
     searchable?: boolean;
+    searchPlaceholder?: string;
+    searchLabel?: string;
+    onSearchChange?: (query: string) => void;
+    listLabel?: string;
     height?: number;
     itemHeight?: number;
+    loading?: boolean;
+    loadingLabel?: string;
+    disabled?: boolean;
     empty?: ReactNode;
+    emptySearch?: ReactNode;
     className?: string;
+    ref?: Ref<HTMLElement>;
 }
 
 /**
- * Renders a fixed-row virtual contact list.
- * @param props - Contacts or adapter, selection, search, and window sizing.
+ * Renders a fixed-row virtual contact list with search and selection.
+ * @param props - Contacts or adapter, selection, search, loading, and window sizing.
  * @example
  * <VirtualContact contacts={contacts} height={320} />
  * @returns A virtualised contact listbox.
@@ -56,14 +76,30 @@ const VirtualContact: (props: VirtualContactProps) => ReactNode = ({
     adapter,
     value,
     defaultValue = "",
+    onValueChange,
     onSelect,
     onContactAction,
+    onContactMenuOpenChange,
     title = "Contacts",
+    titleText,
     searchable = true,
+    searchPlaceholder = "Search contacts",
+    searchLabel = "Search contacts",
+    onSearchChange,
+    listLabel = "Contact list",
     height = 320,
     itemHeight = 76,
+    loading = false,
+    loadingLabel = "Loading contacts",
+    disabled = false,
     empty = "No contacts",
+    emptySearch,
     className = "",
+    "aria-label": ariaLabel,
+    onKeyDown,
+    onScroll,
+    ref,
+    ...rest
 }: VirtualContactProps): ReactNode => {
     const source: ContactAdapter = useMemo(
         (): ContactAdapter => adapter ?? createContactAdapter(contacts),
@@ -87,13 +123,14 @@ const VirtualContact: (props: VirtualContactProps) => ReactNode = ({
         attachViewport,
         start,
         end,
-        onScroll,
+        onScroll: onWindowScroll,
         scrollToIndex,
     }: VirtualWindow = useVirtualWindow({
         count: rows.length,
         itemHeight,
         fallbackHeight: height,
         overscan: 2,
+        resetKey: loading,
     });
     const previousQueryRef: MutableRefObject<string> = useRef<string>(normalized);
     const visible: readonly ContactItem[] = rows.slice(start, end);
@@ -109,8 +146,16 @@ const VirtualContact: (props: VirtualContactProps) => ReactNode = ({
     }, [normalized, scrollToIndex]);
 
     const choose: (contact: ContactItem) => void = (contact: ContactItem): void => {
-        if (value === (void 0)) {
-            setInternalValue(contact.id);
+        if (disabled || contact.disabled === true) {
+            return;
+        }
+
+        if (selected !== contact.id) {
+            if (value === (void 0)) {
+                setInternalValue(contact.id);
+            }
+
+            onValueChange?.(contact.id, contact);
         }
 
         onSelect?.(contact);
@@ -120,7 +165,19 @@ const VirtualContact: (props: VirtualContactProps) => ReactNode = ({
         action: ContactAction,
         contact: ContactItem,
     ): void => {
+        if (disabled || contact.disabled === true) {
+            return;
+        }
+
         onContactAction?.(action, contact);
+    };
+
+    const handleSearch: (event: ChangeEvent<HTMLInputElement>) => void = (
+        event: ChangeEvent<HTMLInputElement>,
+    ): void => {
+        const next: string = event.target.value;
+        setQuery(next);
+        onSearchChange?.(next);
     };
 
     const handleKeyDown: (
@@ -133,8 +190,32 @@ const VirtualContact: (props: VirtualContactProps) => ReactNode = ({
         }
     };
 
+    const handleListKeyDown: (event: ReactKeyboardEvent<HTMLDivElement>) => void = (
+        event: ReactKeyboardEvent<HTMLDivElement>,
+    ): void => {
+        if (!disabled && focusListOption(event.currentTarget, event.key)) {
+            event.preventDefault();
+        }
+
+        onKeyDown?.(event);
+    };
+
+    const handleViewportScroll: (event: UIEvent<HTMLDivElement>) => void = (
+        event: UIEvent<HTMLDivElement>,
+    ): void => {
+        onWindowScroll(event);
+        onScroll?.(event);
+    };
+
     return (
-        <section className={cx("contact", "contact--virtual", className)} aria-label="Contacts">
+        <section
+            {...rest}
+            ref={ref}
+            className={cx("contact", "contact--virtual", className)}
+            aria-label={ariaLabel ?? "Contacts"}
+            aria-busy={loading ? "true" : (void 0)}
+            title={titleText}
+        >
             {title === (void 0) ? null : <h3 className="contact__title">{title}</h3>}
             {searchable ? (
                 <label className="contact__search">
@@ -143,10 +224,10 @@ const VirtualContact: (props: VirtualContactProps) => ReactNode = ({
                         className="contact__search-input"
                         type="search"
                         value={query}
-                        placeholder="Search contacts"
-                        onChange={(event: ChangeEvent<HTMLInputElement>): void => {
-                            setQuery(event.target.value);
-                        }}
+                        placeholder={searchPlaceholder}
+                        aria-label={searchLabel}
+                        disabled={disabled}
+                        onChange={handleSearch}
                     />
                 </label>
             ) : null}
@@ -154,15 +235,25 @@ const VirtualContact: (props: VirtualContactProps) => ReactNode = ({
                 ref={attachViewport}
                 className="contact__list"
                 role="listbox"
-                aria-label="Contact list"
+                aria-label={listLabel}
+                aria-busy={loading ? "true" : (void 0)}
+                aria-disabled={disabled ? "true" : (void 0)}
                 style={{ height }}
-                onScroll={onScroll}
+                onKeyDown={handleListKeyDown}
+                onScroll={handleViewportScroll}
             >
-                {rows.length === 0 ? (
-                    <div className="contact__empty">{empty}</div>
+                {loading ? (
+                    <div className="contact__state">
+                        <Spinner size="sm" label={loadingLabel} />
+                    </div>
+                ) : rows.length === 0 ? (
+                    <div className="contact__empty">
+                        {normalized.length > 0 ? (emptySearch ?? empty) : empty}
+                    </div>
                 ) : (
                     <div className="contact__spacer" style={spacerStyle}>
                         {visible.map((contact: ContactItem, index: number): ReactNode => {
+                            const contactDisabled: boolean = disabled || contact.disabled === true;
                             const rowStyle: CSSProperties = {
                                 top: (start + index) * itemHeight,
                                 height: itemHeight,
@@ -173,16 +264,24 @@ const VirtualContact: (props: VirtualContactProps) => ReactNode = ({
                                     key={contact.id}
                                     contact={contact}
                                     onAction={act}
+                                    disabled={contactDisabled}
+                                    onOpenChange={(open: boolean): void =>
+                                        onContactMenuOpenChange?.(open, contact)
+                                    }
                                 >
                                     <Surface
                                         className={cx(
                                             "contact__row",
                                             selected === contact.id && "contact__row--selected",
+                                            contactDisabled && "contact__row--disabled",
                                         )}
                                         style={rowStyle}
                                         role="option"
                                         aria-selected={selected === contact.id}
-                                        tabIndex={0}
+                                        aria-disabled={contactDisabled ? "true" : (void 0)}
+                                        tabIndex={contactDisabled ? -1 : 0}
+                                        data-contact-id={contact.id}
+                                        disabled={contactDisabled}
                                         ripple={{
                                             layer: "foreground",
                                             trigger: ["hover", "click"],
@@ -190,6 +289,10 @@ const VirtualContact: (props: VirtualContactProps) => ReactNode = ({
                                         onClick={(
                                             event: ReactMouseEvent<HTMLDivElement>,
                                         ): void => {
+                                            if (contactDisabled) {
+                                                return;
+                                            }
+
                                             event.currentTarget.focus({ preventScroll: true });
                                             choose(contact);
                                         }}

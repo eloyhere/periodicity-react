@@ -1,4 +1,4 @@
-import { useId, type FC, type ReactNode } from "react";
+import { useId, type FC, type FieldsetHTMLAttributes, type ReactNode, type Ref } from "react";
 import cx from "../../foundation/cx";
 import useControllableState from "../../foundation/useControllableState";
 import useField, { type FieldState } from "../../foundation/useField";
@@ -17,14 +17,30 @@ export type RadioOrientation = "horizontal" | "vertical";
 /**
  * Props for the RadioGroup.
  * Type: interface.
- * Fields: value, defaultValue, onValueChange, label, hint, error, disabled, orientation, children, className.
+ * Native fieldset attributes are forwarded to the `<fieldset>`; `className` and `style` apply to that element.
+ * Fields: value, defaultValue, onValueChange, label, hint, error, disabled, orientation, name, children,
+ * className, id, ref, and native fieldset attributes.
+ * @param value - Controlled selected option value.
+ * @param defaultValue - Initial selected value when uncontrolled.
+ * @param onValueChange - Called with the next selected option value.
+ * @param label - Visible legend text.
+ * @param hint - Supporting text shown below the group.
+ * @param error - Validation message; replaces the hint and marks the group invalid.
+ * @param disabled - Disables every option natively.
+ * @param orientation - Arrangement of the options.
+ * @param name - Form field name shared by the native radios; generated when omitted.
+ * @param children - Radio options belonging to the group.
+ * @param className - Extra classes for the fieldset.
+ * @param id - Id for the fieldset; generated when omitted.
+ * @param ref - Ref to the underlying fieldset element.
  * @example
  * <RadioGroup label="Cadence" defaultValue="daily">
  *     <Radio value="daily" label="Daily" />
  *     <Radio value="weekly" label="Weekly" />
  * </RadioGroup>
  */
-export interface RadioGroupProps {
+export interface RadioGroupProps
+    extends Omit<FieldsetHTMLAttributes<HTMLFieldSetElement>, "children" | "className" | "disabled"> {
     value?: string;
     defaultValue?: string;
     onValueChange?: (value: string) => void;
@@ -33,8 +49,11 @@ export interface RadioGroupProps {
     error?: string;
     disabled?: boolean;
     orientation?: RadioOrientation;
+    name?: string;
     children: ReactNode;
     className?: string;
+    id?: string;
+    ref?: Ref<HTMLFieldSetElement>;
 }
 
 /**
@@ -56,12 +75,18 @@ const RadioGroup: FC<RadioGroupProps> = ({
     error,
     disabled = false,
     orientation = "vertical",
+    name,
     children,
     className = "",
+    style,
+    id,
+    ref,
+    ...rest
 }: RadioGroupProps) => {
-    const field: FieldState = useField({ hint, error });
-    const groupName: string = useId();
-    const legendId: string = `${groupName}-legend`;
+    const field: FieldState = useField({ id, hint, error });
+    const generatedName: string = useId();
+    const groupName: string = name ?? generatedName;
+    const legendId: string = `${field.controlId}-legend`;
     const hasLabel: boolean = label !== (void 0) && label.length > 0;
     const hasHint: boolean = hint !== (void 0) && hint.length > 0;
     const describedBy: string = field.invalid ? field.errorId : hasHint ? field.hintId : "";
@@ -85,10 +110,14 @@ const RadioGroup: FC<RadioGroupProps> = ({
 
     return (
         <fieldset
+            {...rest}
+            ref={ref}
+            id={field.controlId}
             className={cx("radio-group", `radio-group--${orientation}`, className)}
+            style={style}
+            disabled={disabled}
             data-invalid={field.invalid ? "true" : "false"}
             data-disabled={disabled ? "true" : "false"}
-            disabled={disabled}
         >
             {hasLabel ? (
                 <legend className="radio-group__legend" id={legendId}>

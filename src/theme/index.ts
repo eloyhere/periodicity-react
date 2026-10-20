@@ -1,6 +1,10 @@
 export { default as Theme } from "./Theme";
-export type { ThemeProps } from "./Theme";
-export { useTheme } from "./ThemeContext";
+export type { ThemeProps, ThemeStyle } from "./Theme";
+export {
+    DefaultThemeContext,
+    ThemeContext,
+    useTheme,
+} from "./ThemeContext";
 export type {
     ResolvedThemeMode,
     ThemeContextValue,
