@@ -12,7 +12,8 @@ import {
 } from "react";
 import Button from "../component/button/Button";
 import Text from "../component/text/Text";
-import { useInternational, type InternationalContextValue } from "../international";
+import { useInternational, type InternationalContextValue, type LocaleCode } from "../international";
+import { localizeDemoCopy } from "./demoCopy";
 import { demoAnchor } from "./anchors";
 import { ShowcaseFocusContext } from "./focus";
 import "./Demo.css";
@@ -150,14 +151,17 @@ export const CodeBlock: FC<CodeBlockProps> = ({
  * <DemoGroup label="Variants"><Button variant="outline">Outline</Button></DemoGroup>
  * @returns A labelled demo row.
  */
-export const DemoGroup: FC<DemoGroupProps> = ({ label, children }: DemoGroupProps) => (
-    <div className="demo__group">
-        <Text variant="label" tone="muted">
-            {label}
-        </Text>
-        <div className="demo__group-row">{children}</div>
-    </div>
-);
+export const DemoGroup: FC<DemoGroupProps> = ({ label, children }: DemoGroupProps) => {
+    const { locale }: InternationalContextValue = useInternational();
+    return (
+        <div className="demo__group">
+            <Text variant="label" tone="muted">
+                {localizeDemoCopy(label, locale as LocaleCode)}
+            </Text>
+            <div className="demo__group-row">{children}</div>
+        </div>
+    );
+};
 
 /**
  * Renders one documentation demo: a live preview followed by its copyable source.
@@ -179,6 +183,10 @@ const Demo: FC<DemoProps> = ({
     layout = "stack",
     children,
 }: DemoProps) => {
+    const { locale }: InternationalContextValue = useInternational();
+    const resolvedTitle: string = localizeDemoCopy(title, locale as LocaleCode);
+    const resolvedDescription: string | undefined =
+        description === (void 0) ? (void 0) : localizeDemoCopy(description, locale as LocaleCode);
     const titleId: string = useId();
     const focusedAnchor: string = useContext(ShowcaseFocusContext);
     const anchorId: string = demoAnchor(title);
@@ -191,16 +199,16 @@ const Demo: FC<DemoProps> = ({
         <section className={className} id={anchorId} aria-labelledby={titleId}>
             <header className="demo__header">
                 <Text as="h2" id={titleId} variant="h4">
-                    {title}
+                    {resolvedTitle}
                 </Text>
                 {description === (void 0) ? null : (
                     <Text className="demo__description" variant="body-sm" tone="muted">
-                        {description}
+                        {resolvedDescription}
                     </Text>
                 )}
             </header>
             <div className={previewClassName}>{children}</div>
-            <CodeBlock code={code} label={title} />
+            <CodeBlock code={code} label={resolvedTitle} />
         </section>
     );
 };
