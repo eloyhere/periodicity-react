@@ -12,7 +12,7 @@
 
 ### 亮点
 
-- 124 个带 `Periodicity` 前缀的 React 组件，覆盖表单、选择器、集合、浮层、导航、消息、文件工具、主题、国际化和动效。
+- 130 个带 `Periodicity` 前缀的 React 组件，覆盖表单、选择器、集合、浮层、导航、消息、文件工具、主题、国际化和动效。
 - 可发布的 ES Module、TypeScript 声明文件和独立 `styles.css`。
 - 全组件范围支持原生属性、事件、ARIA、`data-*` 和 `ref` 透传。
 - 支持受控/非受控状态，以及 disabled、read-only、loading、empty 等完整状态和语义化回调。
@@ -22,6 +22,7 @@
 
 - 所有公共组件提供 `Periodicity` 前缀导出，包括布局和 Provider；不带前缀的名称保留为兼容别名。
 - `PeriodicityForm`、`PeriodicityFormField`、`PeriodicityFormActions`：封装原生 `<form>`，保留原生校验、提交和重置行为，并为原生控件自动生成 `label htmlFor`、`aria-describedby` 和 `aria-invalid` 关联。
+- `PeriodicityCoordinator`、`PeriodicityAppBar`、`PeriodicityCollapse`、`PeriodicityToolbar`：协调滚动与折叠布局，Coordinator 只有 `collapse`、`header`、`main` 三个插槽；`collapse` 收缩到 0，AppBar header 固定，`main` 滚动。
 - `PeriodicityCalendar`：支持 locale 的月历网格，使用 roving tabindex、ISO 日期值、范围限制、Intl 星期/月份标签和方向键/Home/End/PageUp/PageDown 选择。
 - 18 套全局主题预设：`accessible`、`default`、`dark`、`milk`、`space-gray`、`gray`、`light-gray`、`sky-blue`、`pale-blue`、`deep-blue`、`orange`、`yellow`、`lemon`、`red`、`rose`、`green`、`deep-green`、`light-green`，通过 `theme`/`defaultTheme`/`setTheme` 切换。
 - 12 个内置 locale 和常用设计系统文案：`en-GB`、`en-US`、`zh-CN`、`zh-SG`、`zh-HK`、`zh-TW`、`ja-JP`、`ko-KR`、`es-ES`、`es-MX`、`pt-PT`、`pt-BR`，并提供 `localeOptions`、`builtInMessages`、`resolveLocaleMessages` 和方向信息。
@@ -52,6 +53,8 @@
 - Drag 排序增加跟随指针的 Ghost，保留六像素激活阈值和原有排序回调。
 
 ### 修复
+
+- Dropdown 与 Select 的选项列表改用 `Scrollbar`，显示可见轨道、稳定 gutter，并增加底部内边距，最后一项可以完整滚入视图；Dropdown 面板不再触发 Surface Ripple。
 
 - 编辑器选区颜色不再遮挡文字；单行、首行和末行选区均可正常显示。
 - 移除补全后，编辑器内容闪烁和补全窗口错位问题一并消失。

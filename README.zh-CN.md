@@ -2,12 +2,13 @@
 
 面向产品界面、管理后台和数据密集型应用的 Material 风格 React 组件库。
 
-`periodicity-react` 提供 124 个带 `Periodicity` 前缀的组件，覆盖表单、选择器、浮层、导航、集合视图、消息会话、文件工具，以及把它们连接起来的设计系统 Provider。API 以 TypeScript 为先、以 Flex 布局为基础，并尽量贴近浏览器原生行为：在合理的地方透传原生属性、事件、ARIA 和 `ref`。
+`periodicity-react` 提供 130 个带 `Periodicity` 前缀的组件，覆盖表单、选择器、浮层、导航、集合视图、消息会话、文件工具，以及把它们连接起来的设计系统 Provider。API 以 TypeScript 为先、以 Flex 布局为基础，并尽量贴近浏览器原生行为：在合理的地方透传原生属性、事件、ARIA 和 `ref`。
 
 - **npm：** [`periodicity-react`](https://www.npmjs.com/package/periodicity-react)
 - **版本：** `0.1.0`
 - **源码：** [github.com/eloyhere/periodicity-react](https://github.com/eloyhere/periodicity-react)
 - **要求：** React 19、React DOM 19、现代浏览器
+- **许可证：** Apache 2.0
 
 ## 目录
 
@@ -69,6 +70,17 @@ export function SignIn() {
 }
 ```
 
+### 链接与锚点
+
+```tsx
+import { Anchor, Link } from "periodicity-react";
+
+<Link href="https://example.com" external>文档</Link>
+<Anchor href="#installation" active>安装</Anchor>;
+```
+
+`Link` 封装单个原生 anchor，提供 tone、下划线、外链、禁用和焦点处理。`Anchor` 增加当前区块标记和 `onNavigate` 回调，用于页内导航。两者都保留原生 `href`、`target`、`rel`、键盘和右键菜单行为。
+
 ## 表单
 
 `PeriodicityForm` 封装原生 `<form>`，保留浏览器原生校验、提交、重置、method、action 和 autocomplete 行为。
@@ -113,6 +125,17 @@ import { Table } from "periodicity-react";
 ```
 
 新代码应使用带前缀的名称，以明确组件边界并避免与宿主应用组件重名。
+
+### 链接与锚点
+
+```tsx
+import { Anchor, Link } from "periodicity-react";
+
+<Link href="https://example.com" external>文档</Link>
+<Anchor href="#installation" active>安装</Anchor>;
+```
+
+`Link` 封装单个原生 anchor，提供 tone、下划线、外链、禁用和焦点处理。`Anchor` 增加当前区块标记和 `onNavigate` 回调，用于页内导航。两者都保留原生 `href`、`target`、`rel`、键盘和右键菜单行为。
 
 ## 表单与选择器
 
@@ -255,8 +278,39 @@ import {
 - `PeriodicityConstraintLayout` 与 `PeriodicityConstraint`
 - `PeriodicityWaterfallLayout`
 - `PeriodicityDrawerLayout`
+- `PeriodicityCoordinator`
+- `PeriodicityAppBar`
+- `PeriodicityCollapse`
+- `PeriodicityToolbar`
 - `PeriodicityScrollbar`
 - `PeriodicityDrag`
+
+`PeriodicityCoordinator` 有三个插槽：`collapse`、`header` 和 `main`。`collapse` 从 `collapseHeight` 开始，随着 `main` 滚动收缩到 0 高度；`header` 是固定 AppBar；`main` 是滚动主内容。
+
+```tsx
+<PeriodicityCoordinator
+    height={520}
+    collapseHeight={200}
+    collapse={<HeroImage />}
+    header={
+        <PeriodicityAppBar expandedHeight={64} collapsedHeight={64} scrollBehaviour="none" liftOnScroll={false}>
+            <PeriodicityToolbar
+                title="Field notes"
+                subtitle="Autumn expedition"
+                navigationIcon="←"
+                actions={
+                    <PeriodicityButton size="sm" variant="outline">
+                        Share
+                    </PeriodicityButton>
+                }
+            />
+        </PeriodicityAppBar>
+    }
+    main={<Notes />}
+/>
+```
+
+`PeriodicityCollapse` 仍可用于旧式 AppBar 内部的 Hero 组合。
 
 `PeriodicityDrag` 对单一插槽容器的直接子元素排序，并在拖动时显示跟随指针的 Ghost。
 

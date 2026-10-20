@@ -1,0 +1,76 @@
+.link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.25em;
+    border-radius: var(--radius-xs);
+    color: var(--color-primary);
+    font: inherit;
+    text-decoration-color: color-mix(in srgb, currentColor 42%, transparent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    transition:
+        color 150ms var(--ease-standard),
+        text-decoration-color 150ms var(--ease-standard);
+}
+
+.link--default {
+    color: var(--color-primary);
+}
+
+.link--muted {
+    color: var(--color-on-surface-variant);
+}
+
+.link--accent {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.link--inherit {
+    color: inherit;
+}
+
+.link--underline-always {
+    text-decoration-line: underline;
+}
+
+.link--underline-hover {
+    text-decoration-line: none;
+}
+
+.link--underline-hover:hover {
+    text-decoration-line: underline;
+}
+
+.link--underline-none {
+    text-decoration-line: none;
+}
+
+.link:hover {
+    color: var(--color-primary);
+    text-decoration-color: currentColor;
+}
+
+.link:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
+.link--disabled,
+.link[aria-disabled="true"] {
+    color: var(--color-on-surface-variant);
+    cursor: not-allowed;
+    opacity: var(--state-disabled-opacity);
+    pointer-events: none;
+    text-decoration-line: none;
+}
+
+@media (forced-colors: active) {
+    .link {
+        color: LinkText;
+    }
+
+    .link:visited {
+        color: VisitedText;
+    }
+}

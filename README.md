@@ -2,7 +2,7 @@
 
 A Material-inspired React component library for product interfaces, admin tools, and data-heavy applications.
 
-`periodicity-react` brings together 124 prefixed components: form controls, overlays, navigation, collections,
+`periodicity-react` brings together 130 prefixed components: form controls, overlays, navigation, collections,
 messaging, file tooling, and the design-system providers that connect them. The API is TypeScript-first, flex-first,
 and deliberately close to the browser: native attributes, events, ARIA, and refs pass through wherever they make
 sense.
@@ -11,6 +11,7 @@ sense.
 - **Version:** `0.1.0`
 - **Source:** [github.com/eloyhere/periodicity-react](https://github.com/eloyhere/periodicity-react)
 - **Requirements:** React 19, React DOM 19, and a modern browser
+- **License:** Apache 2.0
 
 ## Contents
 
@@ -73,6 +74,19 @@ export function SignIn() {
 }
 ```
 
+### Links and anchors
+
+```tsx
+import { Anchor, Link } from "periodicity-react";
+
+<Link href="https://example.com" external>Documentation</Link>
+<Anchor href="#installation" active>Installation</Anchor>;
+```
+
+`Link` renders one native anchor with tone, underline, external, disabled, and focus handling. `Anchor` adds an
+active section marker and an `onNavigate` callback for in-page navigation. Both preserve native `href`, `target`,
+`rel`, keyboard behaviour, and context-menu behaviour.
+
 ## Forms
 
 `PeriodicityForm` wraps the native `<form>` element, so browser validation, submission, reset, method, action, and
@@ -120,6 +134,19 @@ import { Table } from "periodicity-react";
 
 New code should use the prefixed names. They make component boundaries explicit and avoid collisions with host
 application components.
+
+### Links and anchors
+
+```tsx
+import { Anchor, Link } from "periodicity-react";
+
+<Link href="https://example.com" external>Documentation</Link>
+<Anchor href="#installation" active>Installation</Anchor>;
+```
+
+`Link` renders one native anchor with tone, underline, external, disabled, and focus handling. `Anchor` adds an
+active section marker and an `onNavigate` callback for in-page navigation. Both preserve native `href`, `target`,
+`rel`, keyboard behaviour, and context-menu behaviour.
 
 ## Forms and pickers
 
@@ -279,8 +306,40 @@ Layout is flex-first and does not use CSS Grid. Structural components include:
 - `PeriodicityConstraintLayout` and `PeriodicityConstraint`
 - `PeriodicityWaterfallLayout`
 - `PeriodicityDrawerLayout`
+- `PeriodicityCoordinator`
+- `PeriodicityAppBar`
+- `PeriodicityCollapse`
+- `PeriodicityToolbar`
 - `PeriodicityScrollbar`
 - `PeriodicityDrag`
+
+`PeriodicityCoordinator` has exactly three slots: `collapse`, `header`, and `main`. The `collapse` slot shrinks
+from `collapseHeight` to zero as `main` scrolls; `header` is the fixed app bar; `main` is the scroll viewport.
+
+```tsx
+<PeriodicityCoordinator
+    height={520}
+    collapseHeight={200}
+    collapse={<HeroImage />}
+    header={
+        <PeriodicityAppBar expandedHeight={64} collapsedHeight={64} scrollBehaviour="none" liftOnScroll={false}>
+            <PeriodicityToolbar
+                title="Field notes"
+                subtitle="Autumn expedition"
+                navigationIcon="←"
+                actions={
+                    <PeriodicityButton size="sm" variant="outline">
+                        Share
+                    </PeriodicityButton>
+                }
+            />
+        </PeriodicityAppBar>
+    }
+    main={<Notes />}
+/>
+```
+
+`PeriodicityCollapse` remains available for an AppBar-owned hero when the older AppBar composition is preferred.
 
 `PeriodicityDrag` reorders the direct children of a single slotted container and renders a pointer-following drag
 ghost while sorting.

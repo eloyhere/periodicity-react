@@ -13,7 +13,7 @@ The first public npm release of `periodicity-react`.
 
 ### Highlights
 
-- 124 prefixed React components covering forms, pickers, collections, overlays, navigation, messaging, file tools,
+- 130 prefixed React components covering forms, pickers, collections, overlays, navigation, messaging, file tools,
   theming, internationalisation, and motion.
 - A publishable ES module build with TypeScript declarations and an extracted `styles.css`.
 - Native attribute, event, ARIA, data-attribute, and ref pass-through across the component surface.
@@ -27,6 +27,9 @@ The first public npm release of `periodicity-react`.
 - `PeriodicityForm`, `PeriodicityFormField`, and `PeriodicityFormActions`: a native `<form>` wrapper with native
   validation/submission/reset behaviour, generated `label htmlFor` binding, `aria-describedby`, and `aria-invalid`
   wiring for native controls.
+- `PeriodicityCoordinator`, `PeriodicityAppBar`, `PeriodicityCollapse`, and `PeriodicityToolbar`: a coordinated
+  collapsing-hero app bar with exactly two Coordinator slots (`header` and `main`), a pinned toolbar, and
+  scroll-driven progress.
 - `PeriodicityCalendar`: locale-aware month grid with roving tabindex, ISO date values, range limits, Intl
   weekday/month labels, and arrow/Home/End/PageUp/PageDown selection.
 - 18 global theme presets: `accessible`, `default`, `dark`, `milk`, `space-gray`, `gray`, `light-gray`,
@@ -76,6 +79,10 @@ The first public npm release of `periodicity-react`.
   and reorder callbacks.
 
 ### Fixed
+
+- Dropdown and Select now render their option list through `Scrollbar`, with a visible track, stable gutter, and
+  extra bottom padding so the final item can scroll fully into view. Dropdown panels no longer spawn a surface
+  ripple.
 
 - Editor selection colours no longer hide selected glyphs; native selection painting covers single-line, first-line,
   and last-line selections.

@@ -731,6 +731,30 @@ export const uiComponentSections: readonly ComponentSection[] = [
             demo: "Form",
             description: "Flex action row for submit and cancel controls.",
         },
+        {
+            name: "Coordinator",
+            family: "layout",
+            demo: "Coordinator and app bar",
+            description: "Scroll host that coordinates a collapsing app bar with its content.",
+        },
+        {
+            name: "AppBar",
+            family: "layout",
+            demo: "Coordinator and app bar",
+            description: "Collapsing top app bar driven by the coordinator scroll offset.",
+        },
+        {
+            name: "Collapse",
+            family: "layout",
+            demo: "Coordinator and app bar",
+            description: "Hero content that fades and scales behind a pinned toolbar.",
+        },
+        {
+            name: "Toolbar",
+            family: "layout",
+            demo: "Coordinator and app bar",
+            description: "Material toolbar with navigation, title, subtitle, and actions.",
+        },
     ]),
     createSection("data", "Data display", [
         {
@@ -920,6 +944,18 @@ export const uiComponentSections: readonly ComponentSection[] = [
             family: "primitives",
             demo: "Visually hidden",
             description: "Content that stays available to assistive technology only.",
+        },
+        {
+            name: "Link",
+            family: "primitives",
+            demo: "Links and anchors",
+            description: "Native anchor with tone, underline, external, disabled, and focus states.",
+        },
+        {
+            name: "Anchor",
+            family: "primitives",
+            demo: "Links and anchors",
+            description: "In-page section anchor with an active indicator and navigation callback.",
         },
     ]),
 ];

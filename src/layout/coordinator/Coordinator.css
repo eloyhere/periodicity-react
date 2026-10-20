@@ -1,0 +1,258 @@
+.coordinator {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-container-lowest);
+    color: var(--text);
+}
+
+.coordinator__collapse {
+    flex: none;
+    overflow: hidden;
+    transition: height 80ms linear;
+}
+
+.coordinator__header {
+    position: relative;
+    flex: none;
+    z-index: 2;
+}
+
+.coordinator__scrollbar {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.coordinator__viewport {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    outline: none;
+}
+
+.coordinator__viewport:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+}
+
+.app-bar {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    transition:
+        height 80ms linear,
+        box-shadow 160ms ease;
+}
+
+.app-bar--lifted {
+    box-shadow: var(--elevation-2);
+}
+
+.app-bar--collapsed {
+    box-shadow: var(--elevation-1);
+}
+
+.collapse {
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 0;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.collapse__hero {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    transform-origin: center top;
+    transition:
+        opacity 80ms linear,
+        transform 80ms linear;
+}
+
+.collapse__hero > img,
+.collapse__hero > video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.collapse__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--color-primary) 8%, transparent) 0%,
+        color-mix(in srgb, var(--color-primary) 62%, transparent) 100%
+    );
+    pointer-events: none;
+}
+
+.collapse__content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    margin-top: auto;
+    padding: 0 16px 8px;
+}
+
+.collapse__expanded-title {
+    position: absolute;
+    right: 20px;
+    bottom: calc(56px + 18px);
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    color: var(--color-on-primary);
+    font-size: clamp(24px, 4vw, 36px);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    pointer-events: none;
+    transition:
+        opacity 80ms linear,
+        transform 80ms linear;
+}
+
+.collapse__subtitle {
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    opacity: 0.8;
+}
+
+.collapse__pinned {
+    flex: none;
+    min-width: 0;
+}
+
+.toolbar {
+    display: flex;
+    flex: none;
+    align-items: center;
+    min-height: 56px;
+    padding: 0 8px;
+    gap: 4px;
+    background: transparent;
+    color: inherit;
+}
+
+.toolbar .toolbar__navigation {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+}
+
+.toolbar .toolbar__navigation .button__control {
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    color: inherit;
+}
+
+.toolbar .toolbar__navigation .button__label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+    font-size: 18px;
+    line-height: 1;
+}
+
+.toolbar .toolbar__navigation:hover {
+    background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.toolbar__navigation:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+.toolbar__titles {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    padding: 0 4px;
+    line-height: 1.2;
+}
+
+.toolbar__title {
+    overflow: hidden;
+    font-size: 18px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.toolbar__subtitle {
+    overflow: hidden;
+    margin-top: 2px;
+    font-size: 11px;
+    opacity: 0.8;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.toolbar__content {
+    display: flex;
+    flex: 0 1 auto;
+    align-items: center;
+    min-width: 0;
+    gap: 4px;
+}
+
+.toolbar__actions {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app-bar,
+    .collapse__hero,
+    .collapse__expanded-title {
+        transition: none;
+    }
+}
+
+@media (forced-colors: active) {
+    .coordinator,
+    .app-bar {
+        border: 1px solid CanvasText;
+    }
+
+    .toolbar__navigation:focus-visible,
+    .coordinator__viewport:focus-visible {
+        outline: 3px solid CanvasText;
+    }
+}

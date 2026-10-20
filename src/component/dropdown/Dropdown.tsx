@@ -28,6 +28,7 @@ import useMergedRef from "../foundation/useMergedRef";
 import { useAnchoredPosition, type AnchoredPositionResult, type Placement } from "../foundation/useAnchoredPosition";
 import Portal from "../foundation/Portal";
 import Surface from "../surface/Surface";
+import Scrollbar from "../scrollbar/Scrollbar";
 import "./Dropdown.css";
 
 /**
@@ -603,6 +604,7 @@ export const Dropdown: FC<DropdownProps> = ({
                         tone="neutral"
                         elevation={3}
                         shape="md"
+                        ripple={false}
                         tabIndex={-1}
                         role={role}
                         aria-label={ariaLabel}
@@ -611,7 +613,14 @@ export const Dropdown: FC<DropdownProps> = ({
                         {header === (void 0) ? null : (
                             <div className="dropdown__header">{header}</div>
                         )}
-                        <div className="dropdown__body">
+                        <Scrollbar
+                            className="dropdown__scroll"
+                            viewportClassName="dropdown__body"
+                            autoHide={false}
+                            orientation="vertical"
+                            viewportProps={{ tabIndex: -1 }}
+                            scrollbarLabel="Options"
+                        >
                             {isEmpty ? (
                                 <div className="dropdown__empty">{empty ?? "No options"}</div>
                             ) : (
@@ -619,7 +628,7 @@ export const Dropdown: FC<DropdownProps> = ({
                                     {children}
                                 </DropdownContext.Provider>
                             )}
-                        </div>
+                        </Scrollbar>
                         {footer === (void 0) ? null : (
                             <div className="dropdown__footer">{footer}</div>
                         )}

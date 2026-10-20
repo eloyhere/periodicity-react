@@ -2,12 +2,15 @@ import {
     useState,
     type Dispatch,
     type FC,
+    type MouseEvent,
     type SetStateAction,
 } from "react";
 import { Inline, Stack } from "../../../arrange/layout";
 import {
+    Anchor,
     Backdrop,
     Button,
+    Link,
     Portal,
     StateLayer,
     Surface,
@@ -54,6 +57,13 @@ const stateLayerCode: string = `<div className="showcase__state-demo">
 const visuallyHiddenCode: string = `<Button variant="outline" icon="Search">
     <VisuallyHidden>Search rituals</VisuallyHidden>
 </Button>`;
+
+const linksCode: string = `<Link href="#primitives">In-page link</Link>
+<Link href="https://example.com" external>External link</Link>
+<Link href="#disabled" disabled>Disabled link</Link>
+
+<Anchor href="#primitives" active>Active section</Anchor>
+<Anchor href="#primitives">Another section</Anchor>`;
 
 /**
  * Documents the low-level visual primitives that larger components build on.
@@ -130,6 +140,46 @@ const PrimitivesPage: FC = () => {
                         <Text variant="body-sm">Active</Text>
                         <StateLayer active />
                     </div>
+                </DemoGroup>
+            </Demo>
+
+            <Demo
+                title="Links and anchors"
+                description="Native anchors with focus, tone, external-link, and active-section semantics."
+                code={linksCode}
+            >
+                <DemoGroup label="Link and Anchor">
+                    <Inline gap="md" align="center" wrap>
+                        <Link
+                            href="#primitives"
+                            onClick={(event: MouseEvent<HTMLAnchorElement>): void =>
+                                event.preventDefault()
+                            }
+                        >
+                            In-page link
+                        </Link>
+                        <Link href="https://example.com" external>
+                            External link
+                        </Link>
+                        <Link href="#disabled" disabled>
+                            Disabled link
+                        </Link>
+                        <Anchor href="#primitives" active>
+                            Active section
+                        </Anchor>
+                        <Anchor
+                            href="#primitives"
+                            onNavigate={(
+                                href: string,
+                                event: MouseEvent<HTMLAnchorElement>,
+                            ): void => {
+                                void href;
+                                event.preventDefault();
+                            }}
+                        >
+                            Another section
+                        </Anchor>
+                    </Inline>
                 </DemoGroup>
             </Demo>
 

@@ -11,6 +11,7 @@ import {
 } from "react";
 import { Columns, Inline, Stack } from "../../../arrange/layout";
 import {
+    AppBar,
     Badge,
     Button,
     Checkbox,
@@ -18,6 +19,7 @@ import {
     CheckTree,
     Constraint,
     ConstraintLayout,
+    Coordinator,
     DrawerLayout,
     Drag,
     Form,
@@ -35,6 +37,7 @@ import {
     Surface,
     Switch,
     Table,
+    Toolbar,
     Tree,
     VirtualList,
     VirtualTree,
@@ -149,6 +152,27 @@ const formCode: string = `<Form onSubmit={(event) => {
         <Button type="submit">Subscribe</Button>
     </FormActions>
 </Form>`;
+
+const coordinatorCode: string = `<Coordinator
+    height={460}
+    collapseHeight={180}
+    collapse={<div className="hero-image" />}
+    header={
+        <AppBar expandedHeight={64} collapsedHeight={64} scrollBehaviour="none" liftOnScroll={false}>
+            <Toolbar
+                title="Field notes"
+                subtitle="Autumn expedition"
+                navigationIcon="←"
+                actions={<Button size="sm" variant="outline" style={{ color: "inherit", borderColor: "currentColor" }}>Share</Button>}
+            />
+        </AppBar>
+    }
+    main={
+        <div className="content">
+            {notes.map((note) => <article key={note.id}>{note.text}</article>)}
+        </div>
+    }
+/>`;
 
 const virtualTableCode: string = `<Table    columns={tableColumns}
     rows={virtualTeamRows}
@@ -1013,6 +1037,83 @@ const LayoutPage: FC = () => {
                         <Button type="submit">Subscribe</Button>
                     </FormActions>
                 </Form>
+            </Demo>
+
+            <Demo
+                title="Coordinator and app bar"
+                description="A collapsing hero app bar coordinated with its scroll viewport, plus a pinned toolbar."
+                code={coordinatorCode}
+            >
+                <Coordinator
+                    height={460}
+                    collapseHeight={180}
+                    collapse={
+                        <div
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                                background:
+                                    "linear-gradient(135deg, #0d47a1 0%, #1976d2 48%, #4fc3f7 100%)",
+                            }}
+                        />
+                    }
+                    header={
+                        <AppBar
+                            expandedHeight={64}
+                            collapsedHeight={64}
+                            scrollBehaviour="none"
+                            liftOnScroll={false}
+                        >
+                            <Toolbar
+                                title="Field notes"
+                                subtitle="Autumn expedition"
+                                navigationIcon="←"
+                                onNavigationClick={(): void => {
+                                    toast.show({ title: "Back" });
+                                }}
+                                actions={
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        style={{
+                                            color: "inherit",
+                                            borderColor: "currentColor",
+                                        }}
+                                        onClick={(): void => {
+                                            toast.show({ title: "Shared field notes" });
+                                        }}
+                                    >
+                                        Share
+                                    </Button>
+                                }
+                            />
+                        </AppBar>
+                    }
+                    main={
+                        <Stack gap="sm">
+                        {Array.from({ length: 12 }, (value: unknown, index: number): ReactNode => {
+                            void value;
+
+                            return (
+                            <Surface
+                                key={index}
+                                className="showcase__surface"
+                                elevation={1}
+                                shape="sm"
+                            >
+                                <Stack gap="xs">
+                                    <Text variant="label">{`Note ${index + 1}`}</Text>
+                                    <Text variant="body-sm" tone="muted">
+                                        Scroll this viewport to collapse the hero and lift the
+                                        pinned toolbar.
+                                    </Text>
+                                </Stack>
+                            </Surface>
+                            );
+                        })}
+                        </Stack>
+                    }
+                />
             </Demo>
         </>
     );

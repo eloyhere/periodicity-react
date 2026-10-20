@@ -1,6 +1,5 @@
 import {
     useState,
-    type ChangeEvent,
     type Dispatch,
     type FC,
     type ReactNode,
@@ -12,6 +11,7 @@ import {
     Animated,
     Button,
     International,
+    Select,
     Surface,
     Text,
     Theme,
@@ -33,19 +33,28 @@ import type {
 } from "../../../component";
 import Demo, { DemoGroup } from "../../Demo";
 
+const themeOptions: readonly { value: ThemePresetId; label: string }[] = themePresets.map(
+    (preset: ThemePreset): { value: ThemePresetId; label: string } => ({
+        value: preset.id,
+        label: `${preset.label.zh} · ${preset.label.en}`,
+    }),
+);
+
+const localeSelectOptions: readonly { value: LocaleCode; label: string }[] = localeOptions.map(
+    (option: LocaleOption): { value: LocaleCode; label: string } => ({
+        value: option.code,
+        label: `${option.nativeLabel} · ${option.label}`,
+    }),
+);
+
 const themeCode: string = `const [theme, setTheme] = useState<ThemePresetId>("milk");
 
-<select
-    aria-label="Theme preset"
+<Select
+    label="Theme preset"
+    options={themeOptions}
     value={theme}
-    onChange={(event) => setTheme(event.target.value as ThemePresetId)}
->
-    {themePresets.map((preset) => (
-        <option key={preset.id} value={preset.id}>
-            {preset.label.zh} · {preset.label.en}
-        </option>
-    ))}
-</select>
+    onChange={(value) => setTheme(value as ThemePresetId)}
+/>
 
 <Theme theme={theme} density="compact" radius="rounded" tokens={accentTokens}>
     <Surface elevation={1} shape="sm">
@@ -58,17 +67,12 @@ const themeCode: string = `const [theme, setTheme] = useState<ThemePresetId>("mi
 
 const internationalCode: string = `const [locale, setLocale] = useState<LocaleCode>("en-GB");
 
-<select
-    aria-label="Locale"
+<Select
+    label="Locale"
+    options={localeOptions}
     value={locale}
-    onChange={(event) => setLocale(event.target.value as LocaleCode)}
->
-    {localeOptions.map((option) => (
-        <option key={option.code} value={option.code}>
-            {option.nativeLabel} · {option.label}
-        </option>
-    ))}
-</select>
+    onChange={(value) => setLocale(value as LocaleCode)}
+/>
 
 <International locale={locale} fallbackLocale="en-GB">
     <LocaleSample />
@@ -215,19 +219,14 @@ const ProvidersPage: FC = () => {
                 code={themeCode}
             >
                 <DemoGroup label="Theme preset">
-                    <select
-                        aria-label="Theme preset"
+                    <Select
+                        label="Theme preset"
+                        options={themeOptions}
                         value={themePreset}
-                        onChange={(event: ChangeEvent<HTMLSelectElement>): void =>
-                            setThemePreset(event.target.value as ThemePresetId)
+                        onChange={(value: string): void =>
+                            setThemePreset(value as ThemePresetId)
                         }
-                    >
-                        {themePresets.map((preset: ThemePreset) => (
-                            <option key={preset.id} value={preset.id}>
-                                {`${preset.label.zh} · ${preset.label.en}`}
-                            </option>
-                        ))}
-                    </select>
+                    />
                 </DemoGroup>
                 <Theme theme={themePreset} density="compact" radius="rounded" tokens={accentTokens}>
                     <Surface className="showcase__surface" elevation={1} shape="sm">
@@ -251,19 +250,12 @@ const ProvidersPage: FC = () => {
                 code={internationalCode}
             >
                 <DemoGroup label="Locale">
-                    <select
-                        aria-label="Locale"
+                    <Select
+                        label="Locale"
+                        options={localeSelectOptions}
                         value={locale}
-                        onChange={(event: ChangeEvent<HTMLSelectElement>): void =>
-                            setLocale(event.target.value as LocaleCode)
-                        }
-                    >
-                        {localeOptions.map((option: LocaleOption) => (
-                            <option key={option.code} value={option.code}>
-                                {`${option.nativeLabel} · ${option.label}`}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(value: string): void => setLocale(value as LocaleCode)}
+                    />
                 </DemoGroup>
                 <International locale={locale} fallbackLocale="en-GB">
                     <Surface className="showcase__surface" elevation={1} shape="sm">

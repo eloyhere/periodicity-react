@@ -1,0 +1,47 @@
+.anchor {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0 var(--space-2);
+    border-radius: var(--radius-xs);
+    color: var(--color-on-surface-variant);
+    font-size: var(--type-body-sm);
+    text-decoration: none;
+    gap: var(--space-2);
+}
+
+.anchor__marker {
+    display: block;
+    flex: none;
+    width: 3px;
+    height: 14px;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    transition: background-color 150ms var(--ease-standard);
+}
+
+.anchor:hover {
+    background: var(--color-surface-container-high);
+    color: var(--color-on-surface);
+}
+
+.anchor--active {
+    background: var(--color-primary-container);
+    color: var(--color-on-primary-container);
+    font-weight: 600;
+}
+
+.anchor--active .anchor__marker {
+    background: var(--color-primary);
+}
+
+.anchor:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
+@media (forced-colors: active) {
+    .anchor--active {
+        outline: 2px solid Highlight;
+    }
+}

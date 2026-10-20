@@ -2,6 +2,7 @@
     "name": "periodicity-react",
     "version": "0.1.0",
     "description": "Material-inspired React components, layouts, data views, and design-system providers.",
+    "license": "Apache-2.0",
     "type": "module",
     "main": "./dist/periodicity-react.js",
     "module": "./dist/periodicity-react.js",

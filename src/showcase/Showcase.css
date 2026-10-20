@@ -39,6 +39,118 @@
     outline: none;
 }
 
+.showcase-theme {
+    min-height: 100vh;
+    background: var(--colourBackground);
+    color: var(--color-on-surface);
+}
+
+.showcase-coordinator {
+    height: 100vh;
+}
+
+.showcase-filters {
+    padding: var(--space-2) clamp(16px, 3vw, 28px);
+    border-bottom: 1px solid var(--color-outline-variant);
+    background: var(--color-surface-container);
+}
+
+.showcase-filter {
+    flex: 0 0 220px;
+    width: 220px;
+    min-width: 0;
+}
+
+.showcase-filter--inputs {
+    flex-basis: 248px;
+    width: 248px;
+}
+
+.showcase-filter--data,
+.showcase-filter--layout {
+    flex-basis: 200px;
+    width: 200px;
+}
+
+.showcase-filter--auxiliary {
+    flex-basis: 216px;
+    width: 216px;
+}
+
+.showcase-filter .select-field {
+    width: 100%;
+}
+
+.showcase-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding-top: var(--space-2);
+}
+
+.showcase-toolbar-actions .select-field {
+    width: 188px;
+}
+
+.showcase-page__footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-outline-variant);
+}
+
+.showcase-about {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    line-height: 1.6;
+}
+
+.showcase-about p {
+    margin: 0;
+}
+
+.showcase-about h3 {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.showcase-about ul {
+    margin: 0;
+    padding-left: 1.2rem;
+}
+
+.showcase-about__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+}
+
+@media (max-width: 960px) {
+    .showcase-filters {
+        padding-inline: var(--space-3);
+    }
+
+    .showcase-filter {
+        flex: 1 1 180px;
+        width: auto;
+    }
+
+    .showcase-toolbar-actions .select-field {
+        width: 150px;
+    }
+}
+
+@media (max-width: 720px) {
+    .showcase-toolbar-actions {
+        gap: var(--space-1);
+    }
+
+    .showcase-toolbar-actions .select-field {
+        width: 128px;
+    }
+}
+
 .showcase-shell {
     display: flex;
     width: 100%;
