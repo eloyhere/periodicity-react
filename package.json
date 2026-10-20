@@ -1,11 +1,55 @@
 {
     "name": "periodicity-react",
-    "private": true,
-    "version": "0.0.0",
+    "version": "0.1.0",
+    "description": "Material-inspired React components, layouts, data views, and design-system providers.",
     "type": "module",
+    "main": "./dist/periodicity-react.js",
+    "module": "./dist/periodicity-react.js",
+    "types": "./dist/types/library.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/types/library.d.ts",
+            "import": "./dist/periodicity-react.js"
+        },
+        "./styles.css": "./dist/periodicity-react.css",
+        "./package.json": "./package.json"
+    },
+    "files": [
+        "dist",
+        "README.md",
+        "README.zh-CN.md",
+        "CHANGELOG.md",
+        "CHANGELOG.zh-CN.md"
+    ],
+    "sideEffects": [
+        "**/*.css"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/eloyhere/periodicity-react.git"
+    },
+    "homepage": "https://github.com/eloyhere/periodicity-react#readme",
+    "bugs": {
+        "url": "https://github.com/eloyhere/periodicity-react/issues"
+    },
+    "keywords": [
+        "react",
+        "material",
+        "design-system",
+        "components",
+        "typescript"
+    ],
+    "engines": {
+        "node": ">=20"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "scripts": {
         "dev": "vite",
-        "build": "tsc -b && vite build",
+        "build": "npm run build:lib",
+        "build:app": "tsc -b && vite build",
+        "build:lib": "vite build --config vite.lib.config.ts && tsc -p tsconfig.lib.json",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "format": "prettier --write .",
@@ -24,9 +68,11 @@
         "@codemirror/search": "^6.7.2",
         "@codemirror/state": "^6.7.6",
         "@codemirror/view": "^6.43.15",
-        "codemirror": "^6.0.2",
-        "react": "^19.3.1",
-        "react-dom": "^19.3.1"
+        "codemirror": "^6.0.2"
+    },
+    "peerDependencies": {
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0"
     },
     "devDependencies": {
         "@babel/core": "^7.29.7",
@@ -45,6 +91,8 @@
         "eslint-plugin-react-refresh": "^0.5.7",
         "globals": "^17.13.0",
         "prettier": "^3.9.10",
+        "react": "^19.3.1",
+        "react-dom": "^19.3.1",
         "typescript": "~6.0.3",
         "typescript-eslint": "^8.71.2",
         "vite": "^8.3.4"

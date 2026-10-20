@@ -1,82 +1,67 @@
 # 更新日志
 
-本文件记录 Periodicity React 的重要变更。英文文档遵循 Keep a Changelog 的组织方式，并使用英式英语。
+本文件记录 Periodicity React 的重要变更。格式参考 Keep a Changelog。
 
-## [未发布]
+## [Unreleased]
+
+暂无变更。
+
+## [0.1.0] - 2026-10-20
+
+`periodicity-react` 首个 npm 公开版本。
+
+### 亮点
+
+- 120 个带 `Periodicity` 前缀的 React 组件，覆盖表单、选择器、集合、浮层、导航、消息、文件工具、主题、国际化和动效。
+- 可发布的 ES Module、TypeScript 声明文件和独立 `styles.css`。
+- 全组件范围支持原生属性、事件、ARIA、`data-*` 和 `ref` 透传。
+- 支持受控/非受控状态，以及 disabled、read-only、loading、empty 等完整状态和语义化回调。
+- 以 Flex 为基础的布局组件，不使用 CSS Grid。
 
 ### 新增
 
-- 五向 `DrawerLayout`：支持 `left`、`top`、`centre`、`right`、`bottom` 五个插槽，互斥打开、推入动画、
-  遮罩、外部指针拦截、开关回调以及命令式句柄。`center` 作为 `centre` 的兼容别名保留。
-- 适配器驱动的 `List`，包含单选、多选、复选和固定行高虚拟版本：`SelectList`、`MultipleList`、
-  `CheckList`、`VirtualList`。
-- 适配器驱动的 `Tree`，包含展开、选择、复选子树联动和固定行高虚拟化：`SelectTree`、`CheckTree`、
-  `VirtualTree`。
-- 语义化 Material `Table`：支持适配器或数组输入、行选择、全选、indeterminate、吸顶表头、紧凑密度、
-  斑马纹、悬浮、加载、空状态、标题、行点击，并通过 `virtual`、`height`、`rowHeight` 提供固定行高虚拟化。
-- `Select` 与 `Combobox` 通过 `virtual`、`listHeight`、`itemHeight` 支持固定行高虚拟选项窗口，包含键盘导航
-  与活动行滚动。
-- `Transfer` 通过 `virtual`、`listHeight`、`itemHeight` 支持固定行高虚拟窗格。
-- `Select` 拆分到 `src/component/input/select`，包含 `adapter`、`normal`、`virtual` 三个模块，并由
-  `SelectAdapter` 与 `createSelectAdapter` 驱动。
-- `Mention` 输入组件：通过 `onSearch` 由调用方控制异步建议加载，支持 AbortSignal、键盘选择和插入
-  `@显示名称`。
-- `CommentThread` 回复编辑器内嵌 `Mention`，新增 `mentionSearch`、`mentionSuggestions` 与 `onMention`。
-- `NumberPicker`：Android 风格的居中数字滚轮，支持边界、步长、格式化、加减按钮与键盘。
-- `Contact`：拆分为 `adapter`、`normal`、`virtual` 模块，支持联系人搜索、在线状态与选中。
-- `MessageList`：拆分为 `adapter`、`normal`、`virtual` 模块，支持自己/对方气泡、时间、送达状态与自动滚动。
-- `Chat`：拆分为 `adapter`、`normal`、`virtual` 模块，组合联系人、消息记录、输入框与发送回调。
-- `ProjectManager`：文件树节点、程序包与参考文献依赖、架构分层、预览、编辑器、导入、导出，以及 JSON 项目
-  导入/导出。
-- `StructureNode` 与 `parseStructure`：支持 HTML 标签树、Markdown 章节/段落/句子、源码类/方法/函数/属性/
-  注释，以及 TeX 章节。
-- 按扩展名渲染的 `renderFile`：安全 HTML、Markdown/TXT 文章 HTML，以及使用 `Queue`、`Stack`、`OrderedMap`
-  生成的语法高亮代码。
-- 标准 `ListOption`（`index`、`label`、`value`）与 `TreeOption`（`depth`、`index`、`label`、`value`）节点，
-  并为 List/Tree 增加 `slots.item` 自定义渲染。
-- `Timeline`：垂直事件时间线，支持色调标记、item slot 与连接线。
-- 支持 JavaScript/TypeScript、Python、C/C++、Rust、TeX、Markdown 与参考文献文件的导入/导出解析。
-- 新增 `Language = "Literature"` 的书籍/文章支持：标题识别为导出，参考文献条目识别为依赖。
-- `ElementLoading`：绑定到指定元素或 CSS 选择器的加载遮罩，会跟随元素尺寸与滚动变化。
-- `FullscreenLoading`：基于原生 `<dialog>` 与 `showModal()` 的全屏加载层，带模糊遮罩和不确定进度。
-- `Rate` 评分组件：支持半星、重复点击清零、只读、禁用、键盘、尺寸与校验文案。
-- `DateTimePicker` 自定义面板：年份和月份可直接输入，提供日期网格、小时/分钟输入以及 Clear/Apply。
-- `Snackbar`：支持受控显示、色调、操作按钮、关闭按钮与自动隐藏。
-- 列表与树适配器契约：`src/layout/list/adapter`、`src/layout/tree/adapter`。
-- `src/layout/list`、`src/layout/tree` 与 `src/layout/index.ts` 的公共入口。
+- 所有公共组件提供 `Periodicity` 前缀导出，包括布局和 Provider；不带前缀的名称保留为兼容别名。
+- 表单控件：Button、TextInput、TextArea、Email、Telephone、Number、CompleteInput、Checkbox、RadioGroup、Range、Switch、Select、Combobox、Mention、Transfer。
+- 选择器：Colour、Time、DateTime、Number、Cycle、Variant。
+- 集合：List、Tree、Table、Select、Combobox、Transfer 的普通版和虚拟化版本，支持 Adapter 数据源和固定行高虚拟化。
+- 浮层：Dialog、Confirm/Message/Input Dialog、Drawer、DrawerLayout、ContextMenu、Dropdown、Popover、Tooltip、Snackbar、Toast、Alert、Banner、Backdrop、全屏/局部 Loading。
+- 导航：NavigationView、Tabs、TabPanel、Pager、Menu 系列、Stepper、Scrollbar、Drag。
+- 消息：Contact、ContactContextMenu、MessageList、MessageContextMenu、Chat、CommentThread。
+- 文件工具：Markdown/HTML 预览、代码结构预览、CodeMirror 编辑器和项目管理器。
+- 设计系统 Provider：Theme、International、Animation、Animated。
+- 展示组件：Badge、Chip、Card、Tag、Avatar、AvatarGroup、Breadcrumbs、Accordion、Divider、EmptyState、Pagination、Progress、CircularProgress、ProgressRing、Spinner、Rate、Skeleton、Surface、Text、Thumb、Timeline。
+- 组件 API 补齐原生属性、事件、`ref`、`aria-*`、`data-*`，并组合调用方与内部事件处理器。
+- 值、选择、展开、打开状态和 Provider 配置支持受控/非受控模式。
+- 浮层和集合补充关闭原因、焦点恢复、Escape 处理、加载标签、空状态和禁用状态。
+- 新的 SVG 图表 favicon，用于开发服务器和静态预览。
 
 ### 变更
 
-- `ProjectManager` 不再保留固定的中间目录栏。项目树移入文件页与架构页，架构页同时展示所选文件的解析结构。
-- 文学项目与代码项目使用同一套项目模型，没有特殊的文学模式或独立展示分类。
-- `Select` 从 `src/component/picker/select` 迁移到 `src/component/input/select`，拆分为 `adapter`、
-  `normal`、`virtual` 模块，旧 picker 目录已移除。
-- 数据组件统一从重构后的 `layout/list/adapter` 与 `layout/tree/adapter` 导入适配器。
-- `List` 与 `Tree` 的虚拟行严格遵循固定的 `itemHeight`，并移除了基础 `min-height` 的覆盖。
-- `TimePicker` 现在点击整个输入框都会打开原生选择器，不再只响应右侧图标。
-- `Rate`、`Table` 与布局数据组件已加入组件展示页。
+- package 元信息更新为 `periodicity-react@0.1.0`，使用 React 19 peer dependencies，配置公开 npm 发布、ES Module、声明入口和 `periodicity-react/styles.css`。
+- 库入口导出完整组件 barrel，库构建将样式提取为 `dist/periodicity-react.css`。
+- 展示站侧边栏改用库内 `Scrollbar`，不再使用浏览器原生滚动条样式。
+- Mention 浮动标签改为与 TextField 一致的显式 focused/filled/floating 状态，包括 Outline 缺口和延迟 Placeholder。
+- Drag 排序增加跟随指针的 Ghost，保留六像素激活阈值和原有排序回调。
 
 ### 修复
 
-- Tree 行点击现在会展开/收起，不再只响应箭头图标。
-- 消息气泡复用 `ContextMenu` 的 slot，支持右键与 500ms 长按菜单：复制、转发、收藏、多选、引用、删除；
-  自己的消息额外提供撤回。
-- Pager 与 Navigation、Tabs 之间不再来回闪烁：路由变化增加防抖，滚动更新延迟 80ms，程序化滚动保留目标锁，
-  由 `route` 驱动的切换不再回写 `onRouteChange`。
-- Navigation 与 Tabs 的选项切换在通知 `onValueChange` 前增加 80ms 防抖，避免受控值与页面导航互相反馈。
-- 消息气泡改为使用 `Surface` ripple；已读消息显示双勾，已发送消息保留单勾。
+- 编辑器选区颜色不再遮挡文字；单行、首行和末行选区均可正常显示。
+- 移除补全后，编辑器内容闪烁和补全窗口错位问题一并消失。
+- Table 非受控选择状态现在从 `defaultSelectedKeys` 正确初始化。
+- List 行内 Checkbox 触发的键盘事件不再导致重复切换。
+- 若干原本会覆盖调用方回调的事件处理器改为组合调用。
 
-- `Columns` 使用父级独立的 gap 变量，避免子元素继承的 gap 破坏等宽列并导致整列换行。
-- Checkbox 错误态显示完整的四边红色边框，不再出现被裁切的 L 形。
-- TextInput、Select、Checkbox、Switch 的禁用态保留可见边界，不再随整个控件一起淡出。
-- Dropdown 面板增加打开与关闭动画，关闭时保留一段存在时间以完成退出动画。
-- Combobox 加载图标持续旋转，移除了 reduced-motion 禁用规则和不可靠的时长计算。
-- Snackbar 与 Toast 的操作/关闭按钮不再在深色表面上绘制浅色悬浮底板或深色 ripple。
-- 按钮文字不再因行高与 overflow 设置而裁切字母下伸部。
-- Select 各变体的最小高度已统一，standard 变体不再带额外上边距。
+### 移除
 
-### 已知缺口
+- 代码补全、N-gram 补全和自定义补全浮层。补全交由 LSP 或专用编辑器扩展处理。
+- 未使用的 `@codemirror/autocomplete` 直接依赖。
 
-- `CommentThread` 使用树适配器，但还没有虚拟树或复选树版本。
-- `Deque.size()` 返回 `bigint`，而 Map、Set、Tree 使用 `number`，该 API 尚不一致。
-- 目前没有正式自动化测试套件；验证依赖 TypeScript、ESLint、生产构建以及针对性的运行时冒烟检查。
+### 兼容性
+
+- 需要 React 19 和 React DOM 19。
+- 不带前缀的组件名继续作为别名可用，但新代码应使用 `Periodicity` 前缀。
+- 集合 Adapter、虚拟化配置和现有受控 API 保持源码兼容。
+- Markdown 和 HTML 渲染由 Preview 组件负责；CodeMirror 仍然只是编辑器，不是渲染器。
+
+[Unreleased]: https://github.com/eloyhere/periodicity-react/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/eloyhere/periodicity-react/releases/tag/v0.1.0

@@ -1,78 +1,61 @@
 # Periodicity React
 
-一套 Material 风格的 React 组件库与设计系统展示项目，核心包括五向抽屉布局、以 Flex 为基础的排版体系、
-适配器驱动的数据组件，以及一组可选的数据结构工具。
+面向产品界面、管理后台和数据密集型应用的 Material 风格 React 组件库。
 
-> **状态：** 本仓库目前是 Periodicity 设计系统的源码，尚未发布到 npm，也没有正式的包入口。
-> 请直接从仓库中引用源码。
+`periodicity-react` 提供 120 个带 `Periodicity` 前缀的组件，覆盖表单、选择器、浮层、导航、集合视图、消息会话、文件工具，以及把它们连接起来的设计系统 Provider。API 以 TypeScript 为先、以 Flex 布局为基础，并尽量贴近浏览器原生行为：在合理的地方透传原生属性、事件、ARIA 和 `ref`。
+
+- **npm：** [`periodicity-react`](https://www.npmjs.com/package/periodicity-react)
+- **版本：** `0.1.0`
+- **源码：** [github.com/eloyhere/periodicity-react](https://github.com/eloyhere/periodicity-react)
+- **要求：** React 19、React DOM 19、现代浏览器
 
 ## 目录
 
-- [环境要求](#环境要求)
+- [安装](#安装)
 - [快速开始](#快速开始)
-- [在项目中使用](#在项目中使用)
-- [布局](#布局)
-- [组件](#组件)
-- [数据组件与适配器](#数据组件与适配器)
-- [Contact、MessageList 与 Chat](#contactmessagelist-与-chat)
-- [项目管理器](#项目管理器)
-- [加载](#加载)
+- [组件命名](#组件命名)
+- [表单与选择器](#表单与选择器)
+- [集合与数据](#集合与数据)
+- [浮层与反馈](#浮层与反馈)
+- [导航与布局](#导航与布局)
+- [消息与联系人](#消息与联系人)
+- [文件与预览](#文件与预览)
 - [主题](#主题)
-- [动效与 ripple](#动效与-ripple)
-- [数据结构](#数据结构)
-- [无障碍](#无障碍)
-- [项目结构](#项目结构)
-- [代码约定](#代码约定)
+- [国际化](#国际化)
+- [动效](#动效)
+- [可访问性](#可访问性)
+- [开发](#开发)
 - [验证](#验证)
 - [更新日志](#更新日志)
 
-## 环境要求
+## 安装
 
-- Node.js 20 或更高版本
-- npm 10 或更高版本
-- 支持原生 `<dialog>`、CSS 自定义属性和 `input.showPicker()` 的现代浏览器
+```bash
+npm install periodicity-react
+```
 
-项目使用 React 19、TypeScript 6、Vite 8，并启用 React Compiler。
+`react` 和 `react-dom` 是 peer dependencies。宿主应用需要安装 React 19。
+
+在应用入口引入一次组件样式：
+
+```tsx
+import "periodicity-react/styles.css";
+```
+
+包内提供 ES Module、TypeScript 声明文件和提取后的样式表，适用于 Vite、Next.js、webpack 等构建工具。
 
 ## 快速开始
 
-```bash
-npm install
-npm run dev
-```
-
-开发服务器会打开组件展示页。仪表盘示例位于 `#dashboard`。
-
-```bash
-npm run build       # 类型检查与生产构建
-npm run lint        # ESLint，包括 React hooks 与编译器规则
-npm run format      # 使用 Prettier 处理非 TypeScript 资源
-npm run preview     # 预览生产构建
-```
-
-## 在项目中使用
-
-每个组件都有 `Periodicity` 前缀的公共导出，例如 `PeriodicityButton`、`PeriodicityTable`、`PeriodicityDialog`。不带前缀的名称继续作为兼容别名保留。从源码统一入口导入组件：
-
-```tsx
-import { PeriodicityButton, PeriodicityTextInput } from "./component";
-import { Stack } from "./arrange/layout";
-import "./index.css";
-```
-
-`src/index.css` 会加载 Material 调色板和基础 token。组件自身也会导入各自的样式，因此直接使用源码时，
-只需要在应用入口引入一次全局样式。
-
 ```tsx
 import { useState } from "react";
-import { PeriodicityButton, PeriodicityTextInput } from "./component";
-import { Stack } from "./arrange/layout";
+import { PeriodicityButton, PeriodicityTextInput } from "periodicity-react";
+import "periodicity-react/styles.css";
 
-export const SignIn = () => {
+export function SignIn() {
     const [email, setEmail] = useState("");
 
     return (
-        <Stack gap="md">
+        <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 360 }}>
             <PeriodicityTextInput
                 label="邮箱"
                 type="email"
@@ -80,465 +63,220 @@ export const SignIn = () => {
                 onChange={(event) => setEmail(event.target.value)}
             />
             <PeriodicityButton onClick={() => console.log(email)}>继续</PeriodicityButton>
-        </Stack>
+        </div>
     );
-};
-```
-
-## 布局
-
-`src/layout` 提供结构性布局组件。所有布局以 Flex 为基础，不使用 CSS Grid。
-
-| 组件                              | 用途                                       |
-| --------------------------------- | ------------------------------------------ |
-| `Stack` / `Inline` / `Columns`    | 垂直、水平、等宽多列排列                   |
-| `LinearLayout`                    | 方向、重力、对齐、间距、换行与权重         |
-| `GridLayout`                      | 基于 Flex 的响应式卡片列                   |
-| `WaterfallLayout`                 | 轮询分配的瀑布流列                         |
-| `ConstraintLayout` / `Constraint` | 锚点定位与偏移                             |
-| `DrawerLayout`                    | 五向推入布局                               |
-| `Drawer`                          | 模态侧边抽屉                               |
-| `Tabs` / `TabPanel`               | 标签导航与面板                             |
-| `Menu` / `MenuItem`               | 弹出式或内联菜单                           |
-| `NavigationView`                  | 侧边栏、窄栏与底部导航                     |
-| `Pager` / `PagerPage`             | 可滑动、滚动吸附的分页                     |
-| `Table`                           | 语义化数据表格                             |
-| `List`                            | 适配器驱动的列表与虚拟列表                 |
-| `Tree`                            | 适配器驱动的可展开树与虚拟树               |
-| `Contact`                         | 适配器驱动、带在线状态的联系人列表         |
-| `MessageList`                     | 适配器驱动的聊天消息列表                   |
-| `Chat`                            | 联系人、消息记录与输入框组合的聊天布局     |
-| `ProjectManager`                  | 文件树、依赖图、预览、编辑器与项目导入导出 |
-
-### DrawerLayout
-
-`DrawerLayout` 包含五个插槽：`left`、`top`、`centre`、`right`、`bottom`，同一时间只允许一侧打开。
-打开一侧会把 `centre` 推开，而不是覆盖它。`center` 仍作为 `centre` 的兼容别名保留。
-
-```tsx
-import { DrawerLayout } from "./component";
-
-<DrawerLayout
-    left={<Navigation />}
-    top={<SearchBar />}
-    centre={<MainPage />}
-    right={<Inspector />}
-    bottom={<StatusBar />}
-    leftOpen={leftOpen}
-    topOpen={topOpen}
-    bottomOpen={bottomOpen}
-    rightOpen={rightOpen}
-    onLeftOpenChange={setLeftOpen}
-    onTopOpenChange={setTopOpen}
-    onBottomOpenChange={setBottomOpen}
-    onRightOpenChange={setRightOpen}
-    topHeight={112}
-    bottomHeight={88}
-/>;
-```
-
-五个方向都有宽度或高度动画，当前打开的一侧由遮罩和外部指针拦截保护。通过 ref 暴露的命令式方法包括：
-`open`、`close`、`toggle`、`openLeft`、`openTop`、`closeBottom`、`isOpen`。
-
-## 组件
-
-组件统一入口包含以下分组。
-
-### 操作与状态
-
-`Button`、`Badge`、`Chip`、`Avatar`、`AvatarGroup`、`Alert`、`Banner`、`EmptyState`、`Progress`、
-`CircularProgress`、`Spinner`、`ProgressRing`、`Skeleton`、`Timeline`。
-
-### 输入
-
-`TextInput`、`TextArea`、`NumberInput`、`Mention`、`CompleteInput`、`EmailInput`、`TelephoneInput`、`Checkbox`、
-`Radio`、`RadioGroup`、`Switch`、`Range`、`Rate`。
-
-### Timeline
-
-`Timeline` 以垂直时间线渲染事件，支持色调标记和 item slot：
-
-```tsx
-<Timeline
-    items={[
-        { id: "draft", title: "Draft saved", time: "09:30", tone: "accent" },
-        { id: "review", title: "Review started", time: "10:15" },
-    ]}
-/>
-```
-
-文本输入支持 outline、fill、standard 三种外观，以及尺寸、标签、提示、错误信息、前后图标和禁用状态。
-
-### 选择器
-
-`Select`、`VirtualSelect`、`Combobox`、`TimePicker`、`DateTimePicker`、`NumberPicker`、`ColourPicker`、
-`VariantPicker`。
-
-`TimePicker` 点击输入框任意位置都会打开原生时间选择器，不再只响应时钟图标。
-`DateTimePicker` 使用自定义面板，年份和月份可直接输入，同时提供日期网格、小时和分钟输入。
-`Select` 位于 `input/select`，拆分为 `normal` 与 `virtual` 两个入口，并共享 `SelectAdapter`；
-`VirtualSelect` 用于窗口化超长选项列表。`NumberPicker` 是 Android 风格的居中数字滚轮，带加减按钮与键盘支持。
-
-```tsx
-<DateTimePicker label="开始时间" value={startsAt} onChange={setStartsAt} />
-```
-
-### Mention
-
-`Mention` 在输入 `@` 时打开建议列表。加载行为完全由调用方控制：`onSearch` 接收当前查询和 `AbortSignal`，
-可以同步或异步返回建议。
-
-```tsx
-<Mention
-    label="回复"
-    value={draft}
-    onChange={setDraft}
-    onSearch={async (query, { signal }) => {
-        const response = await fetch(`/api/people?q=${encodeURIComponent(query)}`, { signal });
-        return response.json();
-    }}
-    onMention={(person) => console.log(person)}
-/>
-```
-
-`CommentThread` 已在回复编辑器中内嵌 `Mention`。通过 `mentionSearch`、`mentionSuggestions` 和 `onMention`
-控制每个评论父级的加载与选中回调。
-
-### 表面与展开内容
-
-`Surface`、`Card`、`Accordion`、`Divider`、`CommentThread`、`Transfer`。
-
-### 浮层与反馈
-
-`Dialog`、`ConfirmDialog`、`MessageDialog`、`InputDialog`、`Drawer`、`Dropdown`、`Popover`、`Tooltip`、
-`Menu`、`Snackbar`、`ToastProvider`、`useToast`、`Pagination`、`Breadcrumbs`、`Stepper`。
-
-`Surface` 提供色调背景、阴影、形状、键盘处理和跟随指针的 ripple。嵌套 `Surface` 会阻止 ripple 事件冒泡，
-因此卡片中的按钮不会让整张卡片一起出现水波纹。
-
-## 数据组件与适配器
-
-数据组件通过一层轻量适配器，让数组、虚拟窗口和未来的数据源共享同一套接口。
-
-- `ListAdapter<T>` 与 `createListAdapter(items, options)` 位于
-  [`src/layout/list/adapter`](src/layout/list/adapter/index.ts)。
-- `TreeAdapter<T>` 与 `createTreeAdapter(roots, options)` 位于
-  [`src/layout/tree/adapter`](src/layout/tree/adapter/index.ts)。
-
-### List
-
-```tsx
-import { List, createListAdapter } from "./component";
-
-const adapter = createListAdapter(people, {
-    getKey: (person) => person.id,
-});
-
-<List
-    adapter={adapter}
-    selectionMode="multiple"
-    defaultSelectedKeys={["mira"]}
-    onSelectionChange={(keys, items) => console.log(keys, items)}
-/>;
-```
-
-可用预设：
-
-- `List`：默认不选择
-- `SelectList`：单选
-- `MultipleList`：多选
-- `CheckList`：带复选框的多选
-- `VirtualList`：固定行高虚拟窗口
-
-标准列表节点为 `{ index, label, value }`：
-
-```tsx
-import { List, type ListOption } from "./component";
-
-const options: ListOption<string>[] = [
-    { index: 0, label: "Morning pages", value: "morning" },
-    { index: 1, label: "Deep work", value: "deep-work" },
-];
-
-<List
-    items={options}
-    getKey={(option) => option.value}
-    slots={{ item: (option) => <strong>{option.label}</strong> }}
-/>;
-```
-
-`slots.item` 会收到节点和 `{ index, selected, disabled }`。简单自定义仍可使用 `renderItem`。
-
-### Tree
-
-```tsx
-import { CheckTree } from "./component";
-
-<CheckTree
-    items={nodes}
-    getKey={(node) => node.id}
-    getChildren={(node) => node.children ?? []}
-    defaultExpandedKeys={new Set(["practice"])}
-    defaultCheckedKeys={["breath"]}
-/>;
-```
-
-可用预设：
-
-- `Tree`：可展开树，可选择
-- `SelectTree`：单选
-- `CheckTree`：复选，并支持子树联动
-- `VirtualTree`：固定行高虚拟窗口
-
-标准树节点在列表节点基础上增加 `depth`：
-
-```tsx
-import { Tree, type TreeOption } from "./component";
-
-const nodes: TreeOption<string>[] = [
-    {
-        depth: 0,
-        index: 0,
-        label: "Practice",
-        value: "practice",
-        children: [{ depth: 1, index: 0, label: "Breathwork", value: "breath" }],
-    },
-];
-
-<Tree items={nodes} slots={{ item: (node, state) => <span>{node.label}</span> }} />;
-```
-
-`slots.item` 会收到 `{ index, level, expanded, selected, checked }`。节点提供 `depth` 时，树会用它计算缩进和
-`aria-level`。
-
-### Table
-
-```tsx
-import { Table, type TableColumn } from "./component";
-
-interface Person {
-    id: string;
-    name: string;
-    role: string;
 }
+```
 
-const columns: TableColumn<Person>[] = [
-    { id: "name", header: "姓名", cell: (person) => person.name },
-    { id: "role", header: "角色", cell: (person) => person.role },
-];
+## 组件命名
 
-<Table
-    columns={columns}
+每个公共组件都提供 `Periodicity` 前缀：
+
+```tsx
+import { PeriodicityButton, PeriodicityDialog, PeriodicityTable, PeriodicityTextInput } from "periodicity-react";
+```
+
+不带前缀的名称作为兼容别名保留，下面两种写法指向同一个组件：
+
+```tsx
+import { PeriodicityTable } from "periodicity-react";
+import { Table } from "periodicity-react";
+```
+
+新代码应使用带前缀的名称，以明确组件边界并避免与宿主应用组件重名。
+
+## 表单与选择器
+
+表单组件支持原生 input 属性，并透传事件、`ref`、`aria-*` 和 `data-*` 属性。
+
+```tsx
+import {
+    PeriodicityCheckbox,
+    PeriodicityNumberInput,
+    PeriodicityRange,
+    PeriodicitySelect,
+    PeriodicitySwitch,
+    PeriodicityTextArea,
+} from "periodicity-react";
+
+<PeriodicityTextArea label="备注" rows={4} maxLength={500} />
+<PeriodicityCheckbox label="订阅" defaultChecked />
+<PeriodicitySwitch label="启用" defaultChecked onChange={() => {}} />
+<PeriodicityRange label="音量" min={0} max={100} defaultValue={60} onChange={() => {}} />
+<PeriodicityNumberInput label="数量" min={1} max={99} defaultValue={1} />
+<PeriodicitySelect label="团队" options={teams} onChange={(value) => console.log(value)} />
+```
+
+选择器组件包括：
+
+- `PeriodicityColourPicker`
+- `PeriodicityTimePicker`
+- `PeriodicityDateTimePicker`
+- `PeriodicityNumberPicker`
+- `PeriodicityCyclePicker`
+- `PeriodicityVariantPicker`
+
+大部分表单和选择器支持受控/非受控值、`disabled`、适当的 `readOnly`，以及调用方与内部事件处理器的组合。`PeriodicityMention` 提供异步建议列表和 Token 化 Chip；加载器由调用方提供。
+
+## 集合与数据
+
+集合可以使用普通数组或 Adapter，并支持可选的固定行高虚拟化。
+
+```tsx
+import { PeriodicityList, PeriodicityTable, PeriodicityTree } from "periodicity-react";
+
+<PeriodicityList
+    items={people}
+    getKey={(person) => person.id}
+    selectionMode="single"
+    renderItem={(person) => `${person.firstName} ${person.lastName}`}
+/>
+
+<PeriodicityTable
+    columns={[
+        { id: "name", header: "姓名", cell: (person) => person.name },
+        { id: "role", header: "角色", cell: (person) => person.role },
+    ]}
     rows={people}
     rowKey={(person) => person.id}
-    selectedKeys={selected}
-    onSelectionChange={setSelected}
-    density="compact"
-    striped
-/>;
-```
-
-`Table` 也可以用 `adapter` 代替 `rows`。它支持行选择、全选、indeterminate 状态、吸顶表头、紧凑密度、
-斑马纹、悬浮、加载、空状态、标题和行点击。设置 `virtual`、`height`、`rowHeight` 可以在保留语义化表格结构的
-同时窗口化大数据集。
-
-### Transfer 与评论
-
-`Transfer` 内部使用列表适配器，支持多选；通过 `virtual`、`listHeight`、`itemHeight` 可启用固定行高虚拟窗格。
-`CommentThread` 使用树适配器管理嵌套回复。
-
-### Contact、MessageList 与 Chat
-
-消息界面拆分为三个适配器驱动的组件。每个组件都按 `adapter`、`normal`、`virtual` 模块组织。
-
-```tsx
-import { Chat, Contact, MessageList, VirtualChat } from "./component";
-
-<Contact contacts={contacts} defaultValue="mira" />
-
-<MessageList messages={messages} currentUser="You" />
-
-<Chat
-    contacts={contacts}
-    messages={messages}
-    defaultValue="mira"
-    currentUser="You"
-    onSend={(body, contact) => send(body, contact)}
+    caption="团队成员"
 />
 
-<VirtualChat contacts={contacts} messages={messages} />
+<PeriodicityTree
+    items={nodes}
+    getKey={(node) => node.id}
+    renderItem={(node) => node.label}
+/>
 ```
 
-- `Contact`：搜索联系人、在线状态圆点、选中状态。
-- `MessageList`：自己/对方消息气泡、时间、送达状态、自动滚动。气泡使用 `Surface` ripple；已读消息显示双勾，
-  已发送消息显示单勾。
-- 消息支持右键与长按，通过共享 `ContextMenu` 的 slot 展示复制、转发、收藏、多选、引用、删除；自己的消息额外
-  提供撤回。
-- `Chat`：联系人列表、消息记录、输入框组合布局。
-- `VirtualContact`、`VirtualMessageList`、`VirtualChat`：固定行高窗口版本。
-- `createContactAdapter`、`createMessageAdapter`、`createChatAdapter`：构建对应适配器。
+集合组件包括 `List`、`Tree`、`Table`、`Select`、`Combobox`、`Transfer` 和 `WaterfallLayout`。使用 `virtual`、`height` 和 `itemHeight` / `rowHeight` 开启固定行虚拟化。选择、展开、加载、空状态和禁用状态在各集合中保持一致。
 
-### 项目管理器
-
-`ProjectManager` 是通用项目工作区。它持有一个 `Pager` 和一个 `NavigationView`，提供七个视图：
-文件、预览、编辑、架构、依赖、导入、导出。项目文件树放在文件页与架构页内部，不再占用固定的中间目录栏，
-从而把空间留给当前视图。
+## 浮层与反馈
 
 ```tsx
-import { ProjectManager } from "./component";
+import {
+    PeriodicityAlert,
+    PeriodicityDialog,
+    PeriodicityToastProvider,
+} from "periodicity-react";
 
-<ProjectManager
-    project={project}
-    dependencies={dependencies}
-    onFileChange={(file, content) => saveFile(file, content)}
-    onProjectImport={(imported) => loadProject(imported)}
-    onProjectExport={(exported) => downloadProject(exported)}
-/>;
+<PeriodicityAlert tone="success" title="已保存">
+    你的修改已经更新。
+</PeriodicityAlert>
+
+<PeriodicityDialog open={open} title="删除项目" onClose={() => setOpen(false)}>
+    此操作无法撤销。
+</PeriodicityDialog>
+
+<PeriodicityToastProvider>
+    <App />
+</PeriodicityToastProvider>
 ```
 
-文件对象是以 `FileNode` 表示的树，包含 `id`、`path`、`kind`、可选 `content`、语言、扩展名与子节点。
-`parseImports` 与 `parseExports` 支持 JavaScript/TypeScript、Python、C/C++、Rust、TeX、Markdown 与
-参考文献文件。
+浮层组件覆盖 Dialog、Confirm/Message/Input Dialog、Drawer 与 DrawerLayout、ContextMenu、Dropdown、Popover、Tooltip、Snackbar、Toast、Alert、Banner、Backdrop，以及全屏/局部 Loading。支持受控/非受控打开状态、关闭原因、Escape 处理、焦点恢复和原生面板属性。
 
-架构页把项目节点树与所选文件的结构大纲放在一起：
+## 导航与布局
 
-- HTML 解析为标签树，属性作为子节点。
-- Markdown 与散文解析为章节、段落与句子。
-- TypeScript 等代码解析为类、方法、函数、属性、常量、类型、接口与注释。
-- TeX 解析为章节结构。
+导航组件：
 
-预览通过 `renderFile` 按扩展名渲染：
+- `PeriodicityNavigationView`
+- `PeriodicityTabs` 与 `PeriodicityTabPanel`
+- `PeriodicityPager`
+- `PeriodicityMenu`、`PeriodicityMenuItem`、`PeriodicityMenuGroup`、`PeriodicityMenuSeparator`
+- `PeriodicityStepper`
 
-- HTML 经 `DOMParser` 解析，移除脚本、表单、危险标签、事件属性和不安全 URL，再作为安全标记渲染。
-- Markdown 转换为标题、列表、引用、段落和行内格式。
-- TXT 按文章分析，转换为段落与换行。
-- 源码文件转换为带关键字、字符串、注释、数字和函数调用高亮的代码。
+布局以 Flex 为基础，不使用 CSS Grid。结构组件包括：
 
-结构解析使用 [`src/layout/file/structure.ts`](src/layout/file/structure.ts) 中的 `StructureNode` 与
-`parseStructure`，渲染逻辑位于 [`src/layout/file/render.ts`](src/layout/file/render.ts)。
+- `PeriodicityGridLayout`
+- `PeriodicityLinearLayout` 与 `PeriodicityLinearLayoutItem`
+- `PeriodicityConstraintLayout` 与 `PeriodicityConstraint`
+- `PeriodicityWaterfallLayout`
+- `PeriodicityDrawerLayout`
+- `PeriodicityScrollbar`
+- `PeriodicityDrag`
 
-`dependencies` 表示项目级依赖，而不仅是内部文件边：
+`PeriodicityDrag` 对单一插槽容器的直接子元素排序，并在拖动时显示跟随指针的 Ghost。
 
-- `package.json`、`requirements.txt`、`Cargo.toml` 或显式数据中的程序包依赖；
-- `.bib` 文件或 `ProjectDependency` 条目中的参考文献；
-- 相对导入解析出的内部文件边。
-
-`Language = "Literature"` 表示书籍、文章等文学作品。Markdown 标题与 TeX 章节会识别为导出，`.bib`
-条目与引用会识别为参考文献。工具栏支持 JSON 项目导入与导出。
-
-`Pager` 使用切换闸门：路由变化与滚动停稳都带防抖，程序化滚动保留目标锁，由路由驱动的切换不会回写控制器。
-`NavigationView` 与 `Tabs` 的选项回调也加了防抖，避免受控值与页面导航互相触发。
-
-## 加载
-
-提供两种加载组件：
+## 消息与联系人
 
 ```tsx
-import { ElementLoading, FullscreenLoading } from "./component";
-
-<ElementLoading loading={saving} target={panelRef} label="正在保存" />
-<FullscreenLoading open={preparing} label="正在准备工作区" description="正在加载你的日程。" />
+import {
+    PeriodicityChat,
+    PeriodicityCommentThread,
+    PeriodicityContact,
+    PeriodicityMessageList,
+} from "periodicity-react";
 ```
 
-- `ElementLoading`：测量指定元素或 CSS 选择器，在其上方挂载固定定位的遮罩和不限循环的圆形进度。
-  会跟随元素尺寸变化与页面滚动。
-- `FullscreenLoading`：使用原生 `<dialog>` 与 `showModal()`，全屏模糊遮罩，并显示不确定进度。
-  加载期间会主动阻止 `Escape` 关闭。
+`PeriodicityContact` 支持搜索、虚拟化、选择和联系人菜单。`PeriodicityMessageList` 支持消息选择、复制、引用、转发、删除、撤回、重试和消息菜单。`PeriodicityChat` 组合联系人列表、会话、输入框和消息操作。`PeriodicityCommentThread` 支持回复、Mention、引用、解决和删除。
+
+## 文件与预览
+
+```tsx
+import { PeriodicityEditor, PeriodicityPreview, PeriodicityProjectManager } from "periodicity-react";
+```
+
+- `PeriodicityPreview` 将 Markdown 和 HTML 渲染为 HTML，将文章文件渲染为文章，并将代码文件显示为函数、类、方法、属性、变量、类型和接口的结构树。
+- `PeriodicityEditor` 封装 CodeMirror 6，提供语法高亮、行号、历史、搜索、括号匹配、折叠、只读、换行和 Tab 宽度控制。
+- `PeriodicityProjectManager` 组合项目树、预览/编辑模式、导入导出，以及文件保存/修改回调。
+
+编辑器不包含代码补全。需要补全时，请接入 LSP 或专用编辑器扩展。
 
 ## 主题
 
-默认采用 Material 浅色调色板，通过 Android 风格的自定义属性暴露：
-
-```css
-:root {
-    --colourPrimary: #1976d2;
-    --colourPrimaryDark: #0d47a1;
-    --colourAccent: #dc004e;
-    --colourTextPrimary: rgba(0, 0, 0, 0.87);
-    --colourTextSecond: rgba(0, 0, 0, 0.6);
-    --colourTextDisabled: rgba(0, 0, 0, 0.38);
-    --colourBackground: #fafafa;
-    --colourSurface: #ffffff;
-    --colourDivider: rgba(0, 0, 0, 0.12);
-}
-```
-
-可在 `:root` 或某个容器上覆盖这些变量，实现局部换肤。间距、字体、圆角、阴影和动效等基础 token 位于
-[`src/component/foundation/tokens.css`](src/component/foundation/tokens.css)。
-
-## 动效与 ripple
-
-`Surface` 默认同时启用 hover 与点击 ripple。ripple 从指针位置扩散，并根据表面亮度自动选择对比色；
-键盘激活时使用居中的 ripple。
+使用 `PeriodicityTheme` 包裹应用：
 
 ```tsx
-<Surface ripple={{ layer: "foreground", trigger: ["hover", "click"] }} elevation={2} shape="md">
-    内容
-</Surface>
+import { PeriodicityTheme } from "periodicity-react";
+
+<PeriodicityTheme mode="dark">
+    <App />
+</PeriodicityTheme>;
 ```
 
-下拉层有淡入淡出与位移动画，抽屉有推入尺寸动画。当前环境会有意保留这些动效，即使操作系统请求减少动效。
+`mode` 支持 `"light"`、`"dark"` 和 `"system"`。Provider 支持受控/非受控模式、密度、圆角、设计 Token 和原生元素属性。嵌套 Provider 会继承未指定的值。
 
-## 数据结构
-
-`src/structure` 提供一组可选的数据结构工具：
-
-- 线性结构：`Deque`、`Queue`、`Stack`
-- 映射：`OrderedMap`、`UnorderedMap`、`OrderedSkipMap`、`ConcurrentUnorderedSkipMap`、
-  `ConcurrentOrderedMap`、`ConcurrentUnorderedMap`
-- 集合：`OrderedSet`、`UnorderedSet`、`OrderedSkipSet`、`ConcurrentUnorderedSkipSet`、
-  `ConcurrentOrderedSet`、`ConcurrentUnorderedSet`
-- 树：`BinarySearchTree`、`RedBlackTree`、`BPlusTree`、`BalanceTree`、`LinearTree`、`SkipTree`、
-  `Trie`、`Heap`、`SegmentTree`
-- 辅助：各节点实现、`Mutex`、`Optional`、同步/异步 Stream、哈希与最近最少使用容器
+## 国际化
 
 ```tsx
-import { Optional, OrderedMap, RedBlackTree } from "./structure";
+import { PeriodicityInternational } from "periodicity-react";
 
-const map = new OrderedMap<string, number>();
-map.set("focus", 25);
-
-const tree = new RedBlackTree<number, string>();
-tree.set(1, "one");
-
-const value = Optional.ofNullable(map.get("focus")).orElse(0);
+<PeriodicityInternational locale="zh-CN">
+    <App />
+</PeriodicityInternational>;
 ```
 
-## 无障碍
+Provider 支持 locale 继承、回退 locale、消息表、插值和原生 `lang` 覆盖。`PeriodicityAnimation` 与 `PeriodicityAnimated` 提供动效配置、减少动态效果处理和元素多态包装。
 
-交互组件提供语义角色和标签。List 使用 `listbox` / `option`，Tree 使用 `tree` / `treeitem`，Table 使用原生
-表格语义，Drawer 使用带标签的侧边区域，全屏加载使用带 `aria-busy` 的对话框。选择和展开状态会同步到 ARIA
-属性。使用数据组件时请始终提供有意义的 `label`、`ariaLabel` 或可见标题。
+## 动效
 
-## 项目结构
+动效通过 `PeriodicityAnimation` 和 `PeriodicityAnimated` 显式启用，并尊重系统的 `prefers-reduced-motion` 设置。交互 Surface 共享 Ripple 层，关闭动效时 Ripple 也会停止。
 
-| 路径                         | 内容                                        |
-| ---------------------------- | ------------------------------------------- |
-| `src/component`              | 组件、输入、选择器、浮层与反馈              |
-| `src/component/input/select` | 普通/虚拟 Select 入口与共享选择适配器       |
-| `src/layout`                 | 布局原语与数据组件                          |
-| `src/layout/contact`         | 联系人适配器、普通列表与虚拟列表            |
-| `src/layout/message`         | 消息适配器、普通消息记录与虚拟消息记录      |
-| `src/layout/chat`            | 聊天适配器与普通/虚拟聊天布局               |
-| `src/layout/file`            | 项目管理器、文件节点、依赖图、导入/导出解析 |
-| `src/layout/list/adapter`    | 列表适配器接口                              |
-| `src/layout/tree/adapter`    | 树适配器接口                                |
-| `src/structure`              | 数据结构工具                                |
-| `src/showcase`               | 组件展示与文档示例                          |
-| `src/arrange`                | `Stack`、`Inline`、`Columns`                |
+## 可访问性
 
-## 代码约定
+- 默认提供语义化角色和标签，并可通过原生 `aria-*` 属性覆盖。
+- Dialog、Drawer、Menu、Dropdown、Listbox、Tree 和 Table 实现了键盘交互。
+- 浮层支持焦点恢复和 Escape 关闭。
+- 选区颜色经过限制，选中文字保持可读。
+- 动效和 Ripple 尊重“减少动态效果”偏好。
 
-- 注释和文档使用英式英语。
-- 公共 API 使用明确的 TypeScript 类型和 JSDoc。
-- 标识符使用 camelCase，不使用前导下划线。
-- 按项目风格使用 `(void 0)` 代替 `undefined`。
-- 布局使用 Flexbox，不使用 CSS Grid。
-- 源文件使用 CRLF 换行，目标行宽 120 列。
+当组件封装原生控件时，优先使用原生属性和事件，而不是手工重复 ARIA。
+
+## 开发
+
+```bash
+npm install
+npm run dev          # 组件展示站
+npm run build:lib    # 可发布的 ES Module、CSS 和声明文件
+npm run build:app    # 静态展示站构建
+npm run lint
+npm run format:check
+npm run preview      # 预览静态展示站
+```
+
+`npm run build` 等价于 `npm run build:lib`。库构建输出 `dist/periodicity-react.js`、`dist/periodicity-react.css`，声明文件位于 `dist/types`。
 
 ## 验证
-
-当前基线通过：
 
 ```bash
 npx tsc -p tsconfig.app.json --noEmit
@@ -548,4 +286,4 @@ npm run build
 
 ## 更新日志
 
-英文更新日志见 [CHANGELOG.md](CHANGELOG.md)，简体中文更新日志见 [CHANGELOG.zh-CN.md](CHANGELOG.zh-CN.md)。
+见 [CHANGELOG.zh-CN.md](CHANGELOG.zh-CN.md)。
