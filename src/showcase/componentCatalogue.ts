@@ -311,6 +311,12 @@ export const uiComponentSections: readonly ComponentSection[] = [
             demo: "Pickers",
             description: "Radio-style chips for picking a variant swatch by name.",
         },
+        {
+            name: "Calendar",
+            family: "pickers",
+            demo: "Calendar",
+            description: "Month grid with keyboard navigation, range limits, locale-aware labels, and native selection.",
+        },
     ]),
     createSection("display", "Display", [
         {
@@ -684,7 +690,7 @@ export const uiComponentSections: readonly ComponentSection[] = [
             description: "Scroll-snapped horizontal pager with imperative navigation.",
         },
         {
-            name: "PagerPage",
+            name: "Page",
             family: "layout",
             demo: "Pager",
             description: "One route-aware page inside a Pager.",

@@ -84,9 +84,8 @@
 }
 
 .date-time-picker__weekdays,
-.date-time-picker__days {
+.date-time-picker__week {
     display: flex;
-    flex-wrap: wrap;
     width: 100%;
 }
 
@@ -100,7 +99,19 @@
 }
 
 .date-time-picker__days {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
     gap: 2px 0;
+}
+
+.date-time-picker__days:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.date-time-picker__week {
+    flex: 0 0 auto;
 }
 
 .date-time-picker__blank {
@@ -125,9 +136,18 @@
     background: var(--color-surface-container);
 }
 
+.date-time-picker__day:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
+}
+
 .date-time-picker__day--selected {
     background: var(--color-primary);
     color: var(--color-on-primary);
+}
+
+.date-time-picker__day--selected:focus-visible {
+    outline-color: var(--color-on-primary);
 }
 
 .date-time-picker__time {

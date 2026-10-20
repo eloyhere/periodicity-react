@@ -1,2 +1,2 @@
-export { default as Pager, PagerPage } from "./Pager";
-export type { PagerHandle, PagerPageProps, PagerProps, PagerScrollOptions } from "./Pager";
+export { default as Pager, Page } from "./Pager";
+export type { PageProps, PagerHandle, PagerProps, PagerScrollOptions } from "./Pager";

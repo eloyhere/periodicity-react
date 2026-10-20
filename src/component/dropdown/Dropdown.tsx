@@ -3,11 +3,14 @@ import {
     useCallback,
     useContext,
     useEffect,
+    useId,
+    useLayoutEffect,
     useRef,
     useState,
     type ButtonHTMLAttributes,
     type Context,
     type FC,
+    type FocusEventHandler,
     type HTMLAttributes,
     type KeyboardEventHandler,
     type MouseEventHandler,
@@ -21,16 +24,25 @@ import Icon, { type IconName } from "../icon/Icon";
 import cx from "../foundation/cx";
 import { useControllableState } from "../foundation/useControllableState";
 import { useDismiss } from "../foundation/useDismiss";
+import useMergedRef from "../foundation/useMergedRef";
 import { useAnchoredPosition, type AnchoredPositionResult, type Placement } from "../foundation/useAnchoredPosition";
 import Portal from "../foundation/Portal";
 import Surface from "../surface/Surface";
 import "./Dropdown.css";
 
+/**
+ * Props the dropdown passes to its trigger render prop.
+ * Type: interface.
+ * Fields: ref, onClick, aria-expanded, aria-haspopup, aria-controls, disabled.
+ * @example
+ * <Dropdown trigger={(slot: DropdownTriggerProps) => <button {...slot}>Open</button>} />
+ */
 export interface DropdownTriggerProps {
     ref: RefCallback<HTMLElement>;
     onClick: () => void;
     "aria-expanded": boolean;
     "aria-haspopup": "listbox" | "menu" | "dialog";
+    "aria-controls"?: string;
     disabled: boolean;
 }
 
@@ -76,10 +88,178 @@ export interface DropdownProps {
     onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
 }
 
+/**
+ * Snapshot of the ARIA attributes the dropdown owns on an external anchor.
+ * Type: interface.
+ * Fields: expanded, controls.
+ * @example
+ * const snapshot: AnchorAriaSnapshot = { expanded: null, controls: null };
+ */
+interface AnchorAriaSnapshot {
+    expanded: string | null;
+    controls: string | null;
+}
+
+const TriggerSelector: string = [
+    "button",
+    "[role='button']",
+    "a[href]",
+    "summary",
+    "select",
+    "[role='combobox']",
+    "[role='menuitem']",
+    "[role='tab']",
+].join(",");
+
+const FocusableSelector: string = [
+    "a[href]",
+    "button:not([disabled])",
+    "input:not([disabled])",
+    "select:not([disabled])",
+    "textarea:not([disabled])",
+    "summary",
+    "[contenteditable='true']",
+    "[tabindex]:not([tabindex='-1'])",
+].join(",");
+
+/**
+ * Reports whether an anchor natively supports the disclosure ARIA attributes.
+ * @param anchor - Element held by `anchorRef`.
+ * @example
+ * const supported = isTriggerLike(button);
+ * @returns Whether the dropdown may mirror `aria-expanded` and `aria-controls` onto it.
+ */
+const isTriggerLike: (anchor: HTMLElement) => boolean = (anchor: HTMLElement): boolean =>
+    anchor.matches(TriggerSelector);
+
+/**
+ * Resolves the element that should carry the disclosure ARIA attributes.
+ * A wrapper anchor is accepted only when it contains a single trigger-like element, so the
+ * dropdown never guesses between several controls.
+ * @param anchor - Element held by `anchorRef`.
+ * @example
+ * const target = resolveAriaTarget(wrapper);
+ * @returns The trigger element, or null when the anchor is not a usable trigger.
+ */
+const resolveAriaTarget: (anchor: HTMLElement) => HTMLElement | null = (
+    anchor: HTMLElement,
+): HTMLElement | null => {
+    if (isTriggerLike(anchor)) {
+        return anchor;
+    }
+
+    const candidates: HTMLElement[] = Array.from(anchor.querySelectorAll<HTMLElement>(TriggerSelector));
+
+    return candidates.length === 1 ? candidates[0] : null;
+};
+
+/**
+ * Reports whether an element can receive focus and is visibly rendered.
+ * @param node - Candidate focus target.
+ * @example
+ * const usable = isVisibleFocusable(button);
+ * @returns Whether the element belongs in the Tab sequence.
+ */
+const isVisibleFocusable: (node: HTMLElement) => boolean = (node: HTMLElement): boolean =>
+    node.getClientRects().length > 0 &&
+    !node.hasAttribute("inert") &&
+    node.closest("[inert]") === null &&
+    !(node instanceof HTMLInputElement && node.type === "hidden");
+
+/**
+ * Collects the visible focusable descendants of an element.
+ * @param container - Container element.
+ * @example
+ * const items = getFocusableItems(anchor);
+ * @returns Focusable elements in document order.
+ */
+const getFocusableItems: (container: HTMLElement) => HTMLElement[] = (
+    container: HTMLElement,
+): HTMLElement[] =>
+    Array.from(container.querySelectorAll<HTMLElement>(FocusableSelector)).filter(
+        (node: HTMLElement): boolean => isVisibleFocusable(node),
+    );
+
+/**
+ * Focuses an anchor directly, or the first focusable element inside a wrapper anchor.
+ * @param anchor - Element held by `anchorRef`.
+ * @example
+ * focusAnchor(triggerRef.current);
+ * @returns Nothing.
+ */
+const focusAnchor: (anchor: HTMLElement | null) => void = (anchor: HTMLElement | null): void => {
+    if (anchor === null) {
+        return;
+    }
+
+    if (anchor.tabIndex >= 0 || anchor.isContentEditable) {
+        anchor.focus({ preventScroll: true });
+        return;
+    }
+
+    const target: HTMLElement | void = getFocusableItems(anchor)[0];
+
+    if (target !== (void 0)) {
+        target.focus({ preventScroll: true });
+        return;
+    }
+
+    anchor.focus({ preventScroll: true });
+};
+
+/**
+ * Captures the ARIA attributes the dropdown is about to change.
+ * @param anchor - External trigger element.
+ * @example
+ * const snapshot = captureAnchorAria(button);
+ * @returns The previous attribute values.
+ */
+const captureAnchorAria: (anchor: HTMLElement) => AnchorAriaSnapshot = (
+    anchor: HTMLElement,
+): AnchorAriaSnapshot => ({
+    expanded: anchor.getAttribute("aria-expanded"),
+    controls: anchor.getAttribute("aria-controls"),
+});
+
+/**
+ * Restores the ARIA attributes captured before the dropdown bound to the trigger.
+ * @param anchor - External trigger element.
+ * @param snapshot - Previous attribute values.
+ * @example
+ * restoreAnchorAria(button, snapshot);
+ * @returns Nothing.
+ */
+const restoreAnchorAria: (anchor: HTMLElement, snapshot: AnchorAriaSnapshot) => void = (
+    anchor: HTMLElement,
+    snapshot: AnchorAriaSnapshot,
+): void => {
+    if (snapshot.expanded === null) {
+        anchor.removeAttribute("aria-expanded");
+    } else {
+        anchor.setAttribute("aria-expanded", snapshot.expanded);
+    }
+
+    if (snapshot.controls === null) {
+        anchor.removeAttribute("aria-controls");
+    } else {
+        anchor.setAttribute("aria-controls", snapshot.controls);
+    }
+};
+
+/**
+ * Values shared by the dropdown panel and its rows.
+ * Type: interface.
+ * Fields: close, closeOnSelect, getTabIndex, registerItem, role, setActive.
+ * @example
+ * const value: DropdownContextValue = { close, getTabIndex, registerItem, setActive, role, closeOnSelect };
+ */
 interface DropdownContextValue {
     close: () => void;
     closeOnSelect: boolean;
+    getTabIndex: (id: string) => 0 | -1;
+    registerItem: (id: string, node: HTMLButtonElement | null) => void;
     role: DropdownRole;
+    setActive: (id: string) => void;
 }
 
 const DropdownContext: Context<DropdownContextValue | null> =
@@ -87,6 +267,10 @@ const DropdownContext: Context<DropdownContextValue | null> =
 
 /**
  * Anchored dropdown with trigger, header, footer, empty, and item slots.
+ * The panel owns a stable id, the trigger exposes `aria-expanded`, `aria-haspopup`, and
+ * `aria-controls`, and rows share a single roving tab stop moved by the arrow keys, Home, and End.
+ * Escape and Tab close the panel and return focus to the trigger; an interactive external
+ * `anchorRef` target receives the same disclosure attributes when it does not define them itself.
  * Type: function component.
  * @param props - Trigger slot, anchor, open state, slots, item behaviour, and close rules.
  * @example
@@ -133,6 +317,15 @@ export const Dropdown: FC<DropdownProps> = ({
         });
     const [present, setPresent]: [boolean, (next: boolean) => void] = useState<boolean>(open);
     const [closing, setClosing]: [boolean, (next: boolean) => void] = useState<boolean>(false);
+    const [itemIds, setItemIds]: [
+        readonly string[],
+        (next: (current: readonly string[]) => readonly string[]) => void,
+    ] = useState<readonly string[]>([]);
+    const [activeItemId, setActiveItemId]: [string | null, (next: string | null) => void] =
+        useState<string | null>(null);
+    const panelId: string = useId();
+    const anchorNodeRef: RefObject<HTMLElement | null> = useRef<HTMLElement | null>(null);
+    const anchorSnapshotRef: MutableRefObject<AnchorAriaSnapshot | null> = useRef<AnchorAriaSnapshot | null>(null);
 
     const requestClose: (reason: DropdownCloseReason) => void = useCallback(
         (reason: DropdownCloseReason): void => {
@@ -140,6 +333,7 @@ export const Dropdown: FC<DropdownProps> = ({
                 shouldRestoreFocusRef.current = true;
             }
 
+            setActiveItemId(null);
             setOpen(false);
             onClose?.(reason);
         },
@@ -176,11 +370,31 @@ export const Dropdown: FC<DropdownProps> = ({
         offset,
         matchWidth,
     });
+    const registerItem: (id: string, node: HTMLButtonElement | null) => void = useCallback(
+        (id: string, node: HTMLButtonElement | null): void => {
+            setItemIds((current: readonly string[]): readonly string[] => {
+                if (node === null) {
+                    return current.includes(id)
+                        ? current.filter((itemId: string): boolean => itemId !== id)
+                        : current;
+                }
+
+                return current.includes(id) ? current : [...current, id];
+            });
+        },
+        [],
+    );
+    const resolvedActiveId: string | null =
+        activeItemId !== null && itemIds.includes(activeItemId) ? activeItemId : (itemIds[0] ?? null);
+    const getTabIndex: (id: string) => 0 | -1 = useCallback(
+        (id: string): 0 | -1 => (id === resolvedActiveId ? 0 : -1),
+        [resolvedActiveId],
+    );
 
     useEffect((): void => {
         if (wasOpenRef.current && !open) {
             if (restoreFocus && shouldRestoreFocusRef.current) {
-                resolvedAnchorRef.current?.focus({ preventScroll: true });
+                focusAnchor(resolvedAnchorRef.current);
             }
 
             shouldRestoreFocusRef.current = false;
@@ -188,6 +402,54 @@ export const Dropdown: FC<DropdownProps> = ({
 
         wasOpenRef.current = open;
     }, [open, resolvedAnchorRef, restoreFocus]);
+
+    useLayoutEffect((): void => {
+        if (anchorRef === (void 0)) {
+            return;
+        }
+
+        const anchor: HTMLElement | null = anchorRef.current;
+        const target: HTMLElement | null = anchor === null ? null : resolveAriaTarget(anchor);
+
+        if (target === null) {
+            return;
+        }
+
+        const previousTarget: HTMLElement | null = anchorNodeRef.current;
+
+        if (previousTarget !== null && previousTarget !== target && anchorSnapshotRef.current !== null) {
+            restoreAnchorAria(previousTarget, anchorSnapshotRef.current);
+            anchorSnapshotRef.current = null;
+        }
+
+        if (anchorSnapshotRef.current === null) {
+            anchorSnapshotRef.current = captureAnchorAria(target);
+        }
+
+        anchorNodeRef.current = target;
+        target.setAttribute("aria-expanded", open ? "true" : "false");
+
+        if (open) {
+            if (!target.hasAttribute("aria-controls")) {
+                target.setAttribute("aria-controls", panelId);
+            }
+
+            return;
+        }
+
+        if (target.getAttribute("aria-controls") === panelId) {
+            target.removeAttribute("aria-controls");
+        }
+    }, [anchorRef, open, panelId]);
+
+    useEffect((): (() => void) => (): void => {
+        const anchor: HTMLElement | null = anchorNodeRef.current;
+        const snapshot: AnchorAriaSnapshot | null = anchorSnapshotRef.current;
+
+        if (anchor !== null && snapshot !== null) {
+            restoreAnchorAria(anchor, snapshot);
+        }
+    }, []);
 
     useDismiss({
         enabled: open,
@@ -202,7 +464,7 @@ export const Dropdown: FC<DropdownProps> = ({
         }
 
         const handleKeyDown: (event: KeyboardEvent) => void = (event: KeyboardEvent): void => {
-            if (event.key === "Escape") {
+            if (!event.defaultPrevented && event.key === "Escape") {
                 event.stopPropagation();
                 requestClose("escape");
             }
@@ -216,10 +478,10 @@ export const Dropdown: FC<DropdownProps> = ({
     }, [closeOnEscape, open, requestClose]);
 
     useEffect((): void => {
-        if (open && autoFocus && panelRef.current !== null) {
+        if (open && present && autoFocus && panelRef.current !== null) {
             panelRef.current.focus({ preventScroll: true });
         }
-    }, [open, autoFocus]);
+    }, [open, present, autoFocus]);
 
     const focusItem: (direction: 1 | -1 | "first" | "last") => void = (
         direction: 1 | -1 | "first" | "last",
@@ -259,6 +521,11 @@ export const Dropdown: FC<DropdownProps> = ({
     const handlePanelKeyDown: KeyboardEventHandler<HTMLDivElement> = (
         event: Parameters<KeyboardEventHandler<HTMLDivElement>>[0],
     ): void => {
+        if (event.defaultPrevented) {
+            onKeyDown?.(event);
+            return;
+        }
+
         if (event.key === "ArrowDown") {
             event.preventDefault();
             focusItem(1);
@@ -272,6 +539,7 @@ export const Dropdown: FC<DropdownProps> = ({
             event.preventDefault();
             focusItem("last");
         } else if (event.key === "Tab") {
+            event.preventDefault();
             requestClose("tab");
         }
 
@@ -304,13 +572,17 @@ export const Dropdown: FC<DropdownProps> = ({
                   onClick: handleTriggerClick,
                   "aria-expanded": open,
                   "aria-haspopup": role,
+                  "aria-controls": open ? panelId : (void 0),
                   disabled,
               });
 
     const contextValue: DropdownContextValue = {
         close: (): void => requestClose("select"),
         closeOnSelect,
+        getTabIndex,
+        registerItem,
         role,
+        setActive: setActiveItemId,
     };
 
     return (
@@ -320,6 +592,7 @@ export const Dropdown: FC<DropdownProps> = ({
                 <Portal>
                     <Surface
                         ref={panelRef}
+                        id={panelId}
                         className={cx(
                             "dropdown__panel",
                             closing && "dropdown__panel--closing",
@@ -397,10 +670,15 @@ export const DropdownItem: FC<DropdownItemProps> = ({
     role,
     className = "",
     ref,
+    id,
+    tabIndex,
     onClick,
+    onFocus,
     ...rest
 }: DropdownItemProps) => {
+    const itemId: string = useId();
     const context: DropdownContextValue | null = useContext(DropdownContext);
+    const registerItem: ((id: string, node: HTMLButtonElement | null) => void) | void = context?.registerItem;
     const itemRole: string =
         role ??
         (context === null || context.role === "dialog"
@@ -408,6 +686,21 @@ export const DropdownItem: FC<DropdownItemProps> = ({
             : context.role === "listbox"
               ? "option"
               : "menuitem");
+    const handleRef: RefCallback<HTMLButtonElement> = useCallback(
+        (node: HTMLButtonElement | null): void => {
+            registerItem?.(itemId, node);
+        },
+        [itemId, registerItem],
+    );
+    const mergedRef: RefCallback<HTMLButtonElement> = useMergedRef<HTMLButtonElement>(handleRef, ref);
+    const rovingTabIndex: 0 | -1 = context === null ? 0 : context.getTabIndex(itemId);
+
+    const handleFocus: FocusEventHandler<HTMLButtonElement> = (
+        event: Parameters<FocusEventHandler<HTMLButtonElement>>[0],
+    ): void => {
+        context?.setActive(itemId);
+        onFocus?.(event);
+    };
 
     const handleClick: MouseEventHandler<HTMLButtonElement> = (
         event: Parameters<MouseEventHandler<HTMLButtonElement>>[0],
@@ -436,14 +729,17 @@ export const DropdownItem: FC<DropdownItemProps> = ({
         >
             <button
                 {...rest}
-                ref={ref}
+                ref={mergedRef}
+                id={id ?? itemId}
                 type="button"
                 className="dropdown__item-control"
                 role={itemRole}
                 aria-selected={context !== null && context.role === "listbox" ? selected : (void 0)}
                 aria-checked={context !== null && context.role === "menu" ? selected : (void 0)}
                 disabled={disabled}
+                tabIndex={tabIndex ?? rovingTabIndex}
                 onClick={handleClick}
+                onFocus={handleFocus}
             >
                 {icon === (void 0) ? null : (
                     <span className="dropdown__item-icon" aria-hidden="true">

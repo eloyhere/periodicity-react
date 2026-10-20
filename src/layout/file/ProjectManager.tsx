@@ -16,7 +16,7 @@ import Text from "../../component/text/Text";
 import cx from "../../component/foundation/cx";
 import Tree from "../tree/Tree";
 import NavigationView, { type NavigationItem } from "../navigation/NavigationView";
-import Pager, { PagerPage } from "../pager/Pager";
+import Pager, { Page } from "../pager/Pager";
 import type { Project, FileNode, ProjectMode } from "./project";
 import {
     directoryKeys,
@@ -619,7 +619,7 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                 />
             </aside>
 
-            <main className="project-manager__main">
+            <section className="project-manager__main" aria-label="Project workspace">
                 <header className="project-manager__toolbar">
                     <div className="project-manager__identity">
                         <span className="project-manager__eyebrow">{project.name}</span>
@@ -665,7 +665,7 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                         }}
                         ariaLabel="Project views"
                     >
-                        <PagerPage route="files">
+                        <Page route="files">
                             <section className="project-manager__page">
                                 {renderPageTitle(
                                     "Project files",
@@ -736,9 +736,9 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                                     </div>
                                 </div>
                             </section>
-                        </PagerPage>
+                        </Page>
 
-                        <PagerPage route="preview">
+                        <Page route="preview">
                             <section className="project-manager__page">
                                 {renderPageTitle(
                                     "Preview",
@@ -750,9 +750,9 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                                     <Preview key={selected.id} file={selected} />
                                 )}
                             </section>
-                        </PagerPage>
+                        </Page>
 
-                        <PagerPage route="edit">
+                        <Page route="edit">
                             <section className="project-manager__page">
                                 {renderPageTitle(
                                     "Edit",
@@ -771,9 +771,9 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                                     />
                                 )}
                             </section>
-                        </PagerPage>
+                        </Page>
 
-                        <PagerPage route="architecture">
+                        <Page route="architecture">
                             <section className="project-manager__page">
                                 {renderPageTitle(
                                     "Architecture",
@@ -813,9 +813,9 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                                     </div>
                                 </div>
                             </section>
-                        </PagerPage>
+                        </Page>
 
-                        <PagerPage route="dependencies">
+                        <Page route="dependencies">
                             <section className="project-manager__page">
                                 {renderPageTitle(
                                     "Dependencies",
@@ -882,9 +882,9 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                                     </div>
                                 </div>
                             </section>
-                        </PagerPage>
+                        </Page>
 
-                        <PagerPage route="imports">
+                        <Page route="imports">
                             <section className="project-manager__page">
                                 {renderPageTitle(
                                     "Imports",
@@ -930,9 +930,9 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                                     </ul>
                                 )}
                             </section>
-                        </PagerPage>
+                        </Page>
 
-                        <PagerPage route="exports">
+                        <Page route="exports">
                             <section className="project-manager__page">
                                 {renderPageTitle(
                                     "Exports",
@@ -958,10 +958,10 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                                     </ul>
                                 )}
                             </section>
-                        </PagerPage>
+                        </Page>
                     </Pager>
                 </div>
-            </main>
+            </section>
         </div>
     );
 };

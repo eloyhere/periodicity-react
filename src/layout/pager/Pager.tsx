@@ -53,9 +53,9 @@ export interface PagerHandle {
  * Type: interface.
  * Fields: route, label, children, className.
  * @example
- * <PagerPage route="today">...</PagerPage>
+ * <Page route="today">...</Page>
  */
-export interface PagerPageProps {
+export interface PageProps {
     route: string;
     label?: string;
     children: ReactNode;
@@ -66,10 +66,10 @@ export interface PagerPageProps {
  * Declares a route for a pager child. The Pager reads `route` and renders the content.
  * @param props - Route metadata and content.
  * @example
- * <PagerPage route="week">Week</PagerPage>
+ * <Page route="week">Week</Page>
  * @returns The page content.
  */
-export const PagerPage: FC<PagerPageProps> = ({ children }: PagerPageProps) => <>{children}</>;
+export const Page: FC<PageProps> = ({ children }: PageProps) => <>{children}</>;
 
 /**
  * Props for the horizontal pager.
@@ -127,7 +127,7 @@ const Pager: FC<PagerProps> = ({
     const scrollTimerRef: RefObject<number | null> = useRef<number | null>(null);
     const pages: ReactNode[] = Children.toArray(children);
     const routes: string[] = pages.map((page: ReactNode, index: number): string => {
-        if (isValidElement<PagerPageProps>(page) && typeof page.props.route === "string") {
+        if (isValidElement<PageProps>(page) && typeof page.props.route === "string") {
             return page.props.route;
         }
 
@@ -387,7 +387,7 @@ const Pager: FC<PagerProps> = ({
             onPointerDown={handlePointerDown}
         >
             {pages.map((page: ReactNode, index: number): ReactNode => {
-                const pageProps: PagerPageProps | null = isValidElement<PagerPageProps>(page)
+                const pageProps: PageProps | null = isValidElement<PageProps>(page)
                     ? page.props
                     : null;
 

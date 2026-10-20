@@ -1,8 +1,11 @@
 import {
     useEffect,
+    useRef,
     useState,
     type Dispatch,
     type FC,
+    type MouseEvent,
+    type RefObject,
     type SetStateAction,
 } from "react";
 import { ToastProvider } from "../component";
@@ -108,6 +111,25 @@ const Showcase: FC = () => {
     const section: ShowcaseSection = findSection(entry.id);
     const demoLabel: string = entry.demoTitle ?? entry.title;
     const Page: FC = entry.page;
+    const mainRef: RefObject<HTMLElement | null> = useRef<HTMLElement | null>(null);
+    const pageTitleRef: RefObject<HTMLElement | null> = useRef<HTMLElement | null>(null);
+    const previousEntryIdRef: RefObject<string> = useRef<string>(entry.id);
+
+    /**
+     * Moves focus to the main landmark without changing the hash.
+     * The hash drives the showcase route, so following `#main-content` natively
+     * would be read as an unknown entry; handling the click keeps the reader on
+     * the current page while still skipping the sidebar.
+     * @param event - The skip link click event.
+     * @example
+     * <a href="#main-content" onClick={handleSkipToContent}>Skip to content</a>
+     */
+    const handleSkipToContent: (event: MouseEvent<HTMLAnchorElement>) => void = (
+        event: MouseEvent<HTMLAnchorElement>,
+    ): void => {
+        event.preventDefault();
+        mainRef.current?.focus();
+    };
 
     useEffect((): void => {
         document.title = `${entry.title} · Periodicity`;
@@ -131,17 +153,44 @@ const Showcase: FC = () => {
         target.scrollIntoView({ block: "start", behavior: "auto" });
     }, [entry.anchor, entry.id]);
 
+    useEffect((): void => {
+        if (previousEntryIdRef.current === entry.id) {
+            return;
+        }
+
+        previousEntryIdRef.current = entry.id;
+        // The hash change has already scrolled the new page; focusing with
+        // preventScroll avoids a second jump while still announcing the title.
+        pageTitleRef.current?.focus({ preventScroll: true });
+    }, [entry.id]);
+
     return (
         <ToastProvider>
+            <a className="skip-link" href="#main-content" onClick={handleSkipToContent}>
+                Skip to content
+            </a>
             <div className="showcase-shell">
                 <ShowcaseNav activeId={entry.id} onNavigate={navigate} />
-                <main className="showcase-main">
+                <main
+                    className="showcase-main"
+                    id="main-content"
+                    ref={mainRef}
+                    tabIndex={-1}
+                    aria-labelledby="showcase-page-title"
+                >
                     <article className="showcase-page" key={entry.id}>
                         <header className="showcase-page__header">
                             <Text className="showcase-page__eyebrow" variant="label" tone="accent">
                                 {`${group.label} · ${section.label}`}
                             </Text>
-                            <Text as="h1" className="showcase-page__title" variant="h1">
+                            <Text
+                                as="h1"
+                                className="showcase-page__title"
+                                id="showcase-page-title"
+                                ref={pageTitleRef}
+                                tabIndex={-1}
+                                variant="h1"
+                            >
                                 {entry.title}
                             </Text>
                             <Text className="showcase-page__lead" variant="body" tone="muted">

@@ -29,6 +29,11 @@
     cursor: grabbing;
 }
 
+.drag [data-drag-child]:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-primary);
+    outline-offset: var(--focus-ring-offset);
+}
+
 .drag--disabled [data-drag-child] {
     cursor: default;
     touch-action: auto;

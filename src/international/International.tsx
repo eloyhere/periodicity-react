@@ -11,12 +11,18 @@ import {
     type SetStateAction,
 } from "react";
 import cx from "../component/foundation/cx";
+import { resolveLocaleMessages, type BuiltInMessages } from "./builtInMessages";
 import {
     InternationalContext,
     type InternationalContextValue,
 } from "./InternationalContext";
 import {
-    resolveMessages,
+    defaultLocale as DefaultLocale,
+    resolveLocaleDirection,
+    type LocaleDirection,
+    type LocaleTag,
+} from "./locales";
+import {
     translateMessage,
     type MessageDictionary,
     type MessageVariables,
@@ -28,17 +34,18 @@ import "./International.css";
  * Props for the scoped International provider.
  * Type: interface.
  * @param children - Subtree that receives the scoped locale and helpers.
- * @param locale - Controlled locale tag such as `en-GB`; omit to inherit the nearest provider.
- * @param defaultLocale - Initial locale when the provider is uncontrolled.
+ * @param locale - Controlled locale tag such as `en-GB` or a custom BCP 47 tag; omit to inherit the nearest provider.
+ * @param defaultLocale - Initial built-in or custom locale when the provider is uncontrolled.
  * @param onLocaleChange - Called whenever a descendant requests a new locale.
- * @param messages - Controlled message dictionary, either flat or keyed by locale tag; omit to inherit the nearest
- * provider.
- * @param defaultMessages - Initial message dictionary when the provider is uncontrolled.
+ * @param messages - Caller dictionary, flat or keyed by locale tag, or a built-in dictionary; built-ins are merged
+ * underneath it and caller values always win.
+ * @param defaultMessages - Initial caller dictionary when the provider is uncontrolled.
  * @param onMessagesChange - Called whenever a descendant requests a new message dictionary.
- * @param fallbackLocale - Controlled locale consulted when a key is missing.
+ * @param fallbackLocale - Controlled locale consulted when a key is missing; the built-in chain ends at `en-GB`.
  * @param defaultFallbackLocale - Initial fallback locale when the provider is uncontrolled.
  * @param onFallbackLocaleChange - Called whenever a descendant requests a new fallback locale.
  * @param lang - Native language tag override for the wrapper; defaults to the active locale.
+ * @param dir - Text direction override for the wrapper; defaults to the resolved locale direction.
  * @param className - Additional class name for the layout-transparent wrapper.
  * @param ref - Reference to the wrapper element.
  * @example
@@ -53,20 +60,20 @@ import "./International.css";
  *     <App />
  * </International>
  * @example
- * <International locale="en-GB" messages={{ greeting: "Hello {name}" }}>
- *     <Greeting />
+ * <International locale="zh-CN" messages={{ save: "存檔" }}>
+ *     <App />
  * </International>
  */
 export interface InternationalProps extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "lang"> {
     children?: ReactNode;
-    locale?: string;
-    defaultLocale?: string;
+    locale?: LocaleTag;
+    defaultLocale?: LocaleTag;
     onLocaleChange?: (locale: string) => void;
-    messages?: MessageDictionary;
-    defaultMessages?: MessageDictionary;
+    messages?: MessageDictionary | BuiltInMessages;
+    defaultMessages?: MessageDictionary | BuiltInMessages;
     onMessagesChange?: (messages: MessageDictionary) => void;
-    fallbackLocale?: string;
-    defaultFallbackLocale?: string;
+    fallbackLocale?: LocaleTag;
+    defaultFallbackLocale?: LocaleTag;
     onFallbackLocaleChange?: (locale: string) => void;
     lang?: string;
     className?: string;
@@ -82,7 +89,7 @@ export interface InternationalProps extends Omit<HTMLAttributes<HTMLDivElement>,
  * <International locale="en-GB" messages={{ greeting: "Hello {name}" }}>
  *     <Greeting name="Ada" />
  * </International>
- * @returns A language-tagged wrapper with a provider for `useInternational`.
+ * @returns A language- and direction-tagged wrapper with a provider for `useInternational`.
  */
 const International: FC<InternationalProps> = ({
     children,
@@ -96,6 +103,7 @@ const International: FC<InternationalProps> = ({
     defaultFallbackLocale,
     onFallbackLocaleChange,
     lang,
+    dir,
     className = "",
     ref,
     ...rest
@@ -113,9 +121,14 @@ const International: FC<InternationalProps> = ({
     ] = useState<string | null>(defaultFallbackLocale ?? null);
     const activeLocale: string = locale ?? internalLocale ?? parent.locale;
     const activeMessages: MessageDictionary = messages ?? internalMessages ?? parent.messages;
-    const activeFallbackLocale: string | void = fallbackLocale ?? internalFallbackLocale ?? parent.fallbackLocale;
+    const activeFallbackLocale: string =
+        fallbackLocale ?? internalFallbackLocale ?? parent.fallbackLocale ?? DefaultLocale;
+    const activeDirection: LocaleDirection = useMemo<LocaleDirection>(
+        () => resolveLocaleDirection(activeLocale),
+        [activeLocale],
+    );
     const dictionaries: ResolvedMessages = useMemo<ResolvedMessages>(
-        () => resolveMessages(activeMessages, activeLocale, activeFallbackLocale),
+        () => resolveLocaleMessages(activeLocale, activeMessages, activeFallbackLocale),
         [activeFallbackLocale, activeLocale, activeMessages],
     );
 
@@ -178,6 +191,8 @@ const International: FC<InternationalProps> = ({
         () => ({
             locale: activeLocale,
             fallbackLocale: activeFallbackLocale,
+            direction: activeDirection,
+            dir: activeDirection,
             messages: activeMessages,
             setLocale,
             setMessages,
@@ -187,6 +202,7 @@ const International: FC<InternationalProps> = ({
             formatDate,
         }),
         [
+            activeDirection,
             activeFallbackLocale,
             activeLocale,
             activeMessages,
@@ -206,8 +222,10 @@ const International: FC<InternationalProps> = ({
                 ref={ref}
                 className={cx("international", className)}
                 lang={lang ?? activeLocale}
+                dir={dir ?? activeDirection}
                 data-locale={activeLocale}
                 data-fallback-locale={activeFallbackLocale}
+                data-direction={activeDirection}
             >
                 {children}
             </div>

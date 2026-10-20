@@ -137,10 +137,11 @@
     display: flex;
     align-items: center;
     min-height: 32px;
-    padding: 0 var(--space-2);
+    padding: 6px var(--space-2);
     border-radius: var(--radius-xs);
     color: var(--colourTextSecond);
     font-size: 13px;
+    line-height: 1.4;
     text-decoration: none;
 }
 
@@ -153,6 +154,18 @@
     background: var(--colourPrimaryContainer);
     color: var(--colourPrimary);
     font-weight: 500;
+}
+
+.showcase-sidebar__link:focus-visible,
+.showcase-sidebar__brand:focus-visible,
+.showcase-sidebar__back:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+.showcase-sidebar__select select:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: 1px;
 }
 
 .showcase-sidebar__footer {

@@ -1,4 +1,5 @@
 import {
+    useId,
     useMemo,
     useState,
     type HTMLAttributes,
@@ -23,7 +24,9 @@ import "./Table.css";
 /**
  * One table column definition.
  * Type: interface.
- * Fields: id, header, cell, align, width.
+ * Fields: id, header, cell, align, width, rowHeader.
+ * Set `rowHeader` on a column whose cells identify the row, so its body cells render as
+ * `<th scope="row">` instead of `<td>`.
  * @example
  * const column: TableColumn<Person> = { id: "name", header: "Name", cell: (person) => person.name };
  */
@@ -33,6 +36,7 @@ export interface TableColumn<Row> {
     cell: (row: Row, index: number) => ReactNode;
     align?: "start" | "center" | "end";
     width?: number | string;
+    rowHeader?: boolean;
 }
 
 /**
@@ -43,7 +47,9 @@ export interface TableColumn<Row> {
  * onRowDoubleClick, loading, loadingLabel, empty, virtual, height, rowHeight, viewportRef,
  * ref, and native `div` attributes.
  * Native `id`, `className`, `style`, `title`, `tabIndex`, `role`, `aria-*`, `data-*`, pointer,
- * mouse, keyboard, and focus handlers are forwarded to the table wrapper.
+ * mouse, keyboard, and focus handlers are forwarded to the table wrapper. `aria-label` and
+ * `aria-labelledby` name the `<table>` element itself; when neither is supplied, the caption
+ * becomes the accessible name. Sorting is not implemented, so no `aria-sort` is emitted.
  * @example
  * <Table columns={columns} rows={people} caption="Team" aria-label="Team members" />
  */
@@ -110,9 +116,12 @@ const Table: <Row>(props: TableProps<Row>) => ReactElement = <Row,>({
     className = "",
     style,
     ref,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledBy,
     onScroll,
     ...rest
 }: TableProps<Row>): ReactElement => {
+    const captionId: string = useId();
     const list: ListAdapter<Row> = useMemo((): ListAdapter<Row> => {
         if (adapter !== (void 0)) {
             return adapter;
@@ -166,6 +175,10 @@ const Table: <Row>(props: TableProps<Row>) => ReactElement = <Row,>({
         entries.every((entry: ListEntry<Row>): boolean => selected.has(entry.key));
     const someSelected: boolean =
         !allSelected && entries.some((entry: ListEntry<Row>): boolean => selected.has(entry.key));
+    const tableLabelledBy: string | undefined =
+        ariaLabel === (void 0) && ariaLabelledBy === (void 0) && caption !== (void 0)
+            ? captionId
+            : ariaLabelledBy;
 
     const setSelection: (next: ReadonlySet<string>) => void = (next: ReadonlySet<string>): void => {
         if (selectedKeys === (void 0)) {
@@ -227,11 +240,18 @@ const Table: <Row>(props: TableProps<Row>) => ReactElement = <Row,>({
                 <table
                     className="table__element"
                     aria-busy={loading ? "true" : (void 0)}
+                    aria-colcount={virtual ? columnCount : (void 0)}
                     aria-rowcount={virtual ? entries.length + 1 : (void 0)}
+                    aria-label={ariaLabel}
+                    aria-labelledby={tableLabelledBy}
                 >
-                    {caption === (void 0) ? null : <caption className="table__caption">{caption}</caption>}
+                    {caption === (void 0) ? null : (
+                        <caption className="table__caption" id={captionId}>
+                            {caption}
+                        </caption>
+                    )}
                     <thead>
-                        <tr>
+                        <tr aria-rowindex={virtual ? 1 : (void 0)}>
                             {selectable ? (
                                 <th className="table__selection" scope="col">
                                     <Checkbox
@@ -298,6 +318,7 @@ const Table: <Row>(props: TableProps<Row>) => ReactElement = <Row,>({
                                                 rowDisabled && "table__row--disabled",
                                             )}
                                             aria-selected={selectable ? isSelected : (void 0)}
+                                            aria-disabled={rowDisabled ? "true" : (void 0)}
                                             aria-rowindex={virtual ? entry.index + 2 : (void 0)}
                                             tabIndex={
                                                 !rowDisabled && onRowClick !== (void 0)
@@ -353,21 +374,32 @@ const Table: <Row>(props: TableProps<Row>) => ReactElement = <Row,>({
                                                             }
                                                             label={
                                                                 <span className="visually-hidden">
-                                                                    Select row {entry.index + 1}
+                                                                    Select row {entry.index + 1} of{" "}
+                                                                    {entries.length}
                                                                 </span>
                                                             }
                                                         />
                                                     </span>
                                                 </td>
                                             ) : null}
-                                            {columns.map((column: TableColumn<Row>): ReactNode => (
-                                                <td
-                                                    key={column.id}
-                                                    className={`table__cell table__cell--${column.align ?? "start"}`}
-                                                >
-                                                    {column.cell(entry.item, entry.index)}
-                                                </td>
-                                            ))}
+                                            {columns.map((column: TableColumn<Row>): ReactNode => {
+                                                const cell: ReactNode = column.cell(
+                                                    entry.item,
+                                                    entry.index,
+                                                );
+                                                const cellClass: string =
+                                                    `table__cell table__cell--${column.align ?? "start"}`;
+
+                                                return column.rowHeader === true ? (
+                                                    <th key={column.id} scope="row" className={cellClass}>
+                                                        {cell}
+                                                    </th>
+                                                ) : (
+                                                    <td key={column.id} className={cellClass}>
+                                                        {cell}
+                                                    </td>
+                                                );
+                                            })}
                                         </tr>
                                     );
                                 })}

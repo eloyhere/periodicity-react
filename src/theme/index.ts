@@ -14,3 +14,14 @@ export type {
     ThemeTokenName,
     ThemeTokens,
 } from "./ThemeContext";
+export {
+    DefaultThemePresetId,
+    getThemePreset,
+    themePresets,
+} from "./ThemePresets";
+export type {
+    ThemePreset,
+    ThemePresetId,
+    ThemePresetLabel,
+    ThemePresetMode,
+} from "./ThemePresets";

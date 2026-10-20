@@ -1,5 +1,6 @@
 import {
     useState,
+    type ChangeEvent,
     type Dispatch,
     type FC,
     type ReactNode,
@@ -15,58 +16,70 @@ import {
     Text,
     Theme,
     ToastProvider,
+    localeOptions,
+    themePresets,
     useInternational,
     useToast,
 } from "../../../component";
 import type {
     AnimationPreset,
     InternationalContextValue,
-    InternationalMessages,
-    MessageDictionary,
-    ThemeMode,
+    LocaleCode,
+    LocaleOption,
+    ThemePreset,
+    ThemePresetId,
     ThemeTokens,
     ToastApi,
 } from "../../../component";
 import Demo, { DemoGroup } from "../../Demo";
 
-const themeCode: string = `const [mode, setMode] = useState<ThemeMode>("light");
+const themeCode: string = `const [theme, setTheme] = useState<ThemePresetId>("milk");
 
-<Inline gap="sm">
-    <Button size="sm" onClick={() => setMode("light")}>Light</Button>
-    <Button size="sm" onClick={() => setMode("dark")}>Dark</Button>
-</Inline>
+<select
+    aria-label="Theme preset"
+    value={theme}
+    onChange={(event) => setTheme(event.target.value as ThemePresetId)}
+>
+    {themePresets.map((preset) => (
+        <option key={preset.id} value={preset.id}>
+            {preset.label.zh} · {preset.label.en}
+        </option>
+    ))}
+</select>
 
-<Theme mode={mode} density="compact" radius="rounded" tokens={accentTokens}>
+<Theme theme={theme} density="compact" radius="rounded" tokens={accentTokens}>
     <Surface elevation={1} shape="sm">
         <Text variant="h4">Scoped theme</Text>
         <Text variant="body-sm" tone="muted">
-            Mode, density, radius, and token overrides apply to this subtree only.
+            Theme preset, density, radius, and token overrides apply to this subtree only.
         </Text>
     </Surface>
 </Theme>`;
 
-const internationalCode: string = `const [locale, setLocale] = useState("en-GB");
+const internationalCode: string = `const [locale, setLocale] = useState<LocaleCode>("en-GB");
 
-const messages = {
-    "en-GB": { greeting: "Good morning, {name}", sessions: "{count} sessions booked" },
-    "fr-FR": { greeting: "Bonjour, {name}", sessions: "{count} séances réservées" },
-};
+<select
+    aria-label="Locale"
+    value={locale}
+    onChange={(event) => setLocale(event.target.value as LocaleCode)}
+>
+    {localeOptions.map((option) => (
+        <option key={option.code} value={option.code}>
+            {option.nativeLabel} · {option.label}
+        </option>
+    ))}
+</select>
 
-<Inline gap="sm">
-    <Button size="sm" onClick={() => setLocale("en-GB")}>English</Button>
-    <Button size="sm" onClick={() => setLocale("fr-FR")}>Français</Button>
-</Inline>
-
-<International locale={locale} fallbackLocale="en-GB" messages={messages}>
+<International locale={locale} fallbackLocale="en-GB">
     <LocaleSample />
 </International>
 
 const LocaleSample = () => {
-    const { locale, t, formatNumber } = useInternational();
+    const { locale, t, formatDate } = useInternational();
 
     return (
         <Text variant="body">
-            {locale}: {t("greeting", { name: "Mira" })} · {formatNumber(1234.5)}
+            {locale}: {t("save")} · {t("cancel")} · {formatDate(Date.now())}
         </Text>
     );
 };`;
@@ -129,29 +142,23 @@ const accentTokens: ThemeTokens = {
     "--colourOnPrimaryContainer": "#4a148c",
 };
 
-const localeEntries: ReadonlyArray<readonly [string, MessageDictionary]> = [
-    ["en-GB", { greeting: "Good morning, {name}", sessions: "{count} sessions booked" }],
-    ["fr-FR", { greeting: "Bonjour, {name}", sessions: "{count} séances réservées" }],
-];
-
-const localeMessages: InternationalMessages = Object.fromEntries(localeEntries);
-
 const animatedPresets: readonly AnimationPreset[] = ["fade", "slide-up", "scale-in"];
+const demoDate: Date = new Date(2026, 9, 20);
 
 /**
- * Reads the scoped locale so the internationalisation demo renders real copy.
+ * Reads the scoped locale so the internationalisation demo renders built-in copy.
  * @example
  * <LocaleSample />
- * @returns Two translated lines and a formatted number.
+ * @returns Translated actions and a formatted date.
  */
 const LocaleSample: FC = () => {
-    const { locale, t, formatNumber }: InternationalContextValue = useInternational();
+    const { locale, t, formatDate }: InternationalContextValue = useInternational();
 
     return (
         <Stack gap="xs">
-            <Text variant="body">{t("greeting", { name: "Mira" })}</Text>
+            <Text variant="body">{`${t("save")} · ${t("cancel")} · ${t("retry")}`}</Text>
             <Text variant="body-sm" tone="muted">
-                {`${locale} · ${t("sessions", { count: 12 })} · ${formatNumber(1234.5)}`}
+                {`${locale} · ${formatDate(demoDate)}`}
             </Text>
         </Stack>
     );
@@ -189,9 +196,12 @@ const ToastTrigger: FC = () => {
  * @returns Theme, International, Animation, Animated, and ToastProvider demos.
  */
 const ProvidersPage: FC = () => {
-    const [themeMode, setThemeMode]: [ThemeMode, Dispatch<SetStateAction<ThemeMode>>] =
-        useState<ThemeMode>("light");
-    const [locale, setLocale]: [string, Dispatch<SetStateAction<string>>] = useState<string>("en-GB");
+    const [themePreset, setThemePreset]: [
+        ThemePresetId,
+        Dispatch<SetStateAction<ThemePresetId>>,
+    ] = useState<ThemePresetId>("milk");
+    const [locale, setLocale]: [LocaleCode, Dispatch<SetStateAction<LocaleCode>>] =
+        useState<LocaleCode>("en-GB");
     const [animationKey, setAnimationKey]: [number, Dispatch<SetStateAction<number>>] =
         useState<number>(0);
     const [animatedKey, setAnimatedKey]: [number, Dispatch<SetStateAction<number>>] =
@@ -201,36 +211,33 @@ const ProvidersPage: FC = () => {
         <>
             <Demo
                 title="Theme provider"
-                description="Scoped mode, density, radius, and token overrides without touching the rest of the page."
+                description="Scoped theme preset, density, radius, and token overrides without touching the rest of the page."
                 code={themeCode}
             >
-                <DemoGroup label="Scoped theme">
-                    <Inline gap="sm">
-                        <Button
-                            size="sm"
-                            variant={themeMode === "light" ? "solid" : "outline"}
-                            onClick={(): void => setThemeMode("light")}
-                        >
-                            Light
-                        </Button>
-                        <Button
-                            size="sm"
-                            variant={themeMode === "dark" ? "solid" : "outline"}
-                            onClick={(): void => setThemeMode("dark")}
-                        >
-                            Dark
-                        </Button>
-                    </Inline>
+                <DemoGroup label="Theme preset">
+                    <select
+                        aria-label="Theme preset"
+                        value={themePreset}
+                        onChange={(event: ChangeEvent<HTMLSelectElement>): void =>
+                            setThemePreset(event.target.value as ThemePresetId)
+                        }
+                    >
+                        {themePresets.map((preset: ThemePreset) => (
+                            <option key={preset.id} value={preset.id}>
+                                {`${preset.label.zh} · ${preset.label.en}`}
+                            </option>
+                        ))}
+                    </select>
                 </DemoGroup>
-                <Theme mode={themeMode} density="compact" radius="rounded" tokens={accentTokens}>
+                <Theme theme={themePreset} density="compact" radius="rounded" tokens={accentTokens}>
                     <Surface className="showcase__surface" elevation={1} shape="sm">
                         <Stack gap="xs">
                             <Text variant="label" tone="accent">
-                                {`theme · ${themeMode}`}
+                                {`theme · ${themePreset}`}
                             </Text>
                             <Text variant="h4">Scoped theme</Text>
                             <Text variant="body-sm" tone="muted">
-                                Mode, density, radius, and token overrides apply to this subtree
+                                Preset, density, radius, and token overrides apply to this subtree
                                 only.
                             </Text>
                         </Stack>
@@ -240,28 +247,25 @@ const ProvidersPage: FC = () => {
 
             <Demo
                 title="International provider"
-                description="Locale, message lookup, placeholder substitution, and number formatting."
+                description="Locale, built-in messages, and locale-aware date formatting."
                 code={internationalCode}
             >
                 <DemoGroup label="Locale">
-                    <Inline gap="sm">
-                        <Button
-                            size="sm"
-                            variant={locale === "en-GB" ? "solid" : "outline"}
-                            onClick={(): void => setLocale("en-GB")}
-                        >
-                            English
-                        </Button>
-                        <Button
-                            size="sm"
-                            variant={locale === "fr-FR" ? "solid" : "outline"}
-                            onClick={(): void => setLocale("fr-FR")}
-                        >
-                            Français
-                        </Button>
-                    </Inline>
+                    <select
+                        aria-label="Locale"
+                        value={locale}
+                        onChange={(event: ChangeEvent<HTMLSelectElement>): void =>
+                            setLocale(event.target.value as LocaleCode)
+                        }
+                    >
+                        {localeOptions.map((option: LocaleOption) => (
+                            <option key={option.code} value={option.code}>
+                                {`${option.nativeLabel} · ${option.label}`}
+                            </option>
+                        ))}
+                    </select>
                 </DemoGroup>
-                <International locale={locale} fallbackLocale="en-GB" messages={localeMessages}>
+                <International locale={locale} fallbackLocale="en-GB">
                     <Surface className="showcase__surface" elevation={1} shape="sm">
                         <LocaleSample />
                     </Surface>

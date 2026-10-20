@@ -71,15 +71,16 @@ const FieldGroup: FC<FieldGroupProps> = ({
             {hasError || hasHint ? (
                 <div className="field__support">
                     <span className="field__messages">
+                        {hasHint ? (
+                            <span className="field__hint" id={hintId}>
+                                {hint}
+                            </span>
+                        ) : null}
                         {hasError ? (
                             <span className="field__error" id={errorId} aria-live="polite">
                                 {error}
                             </span>
-                        ) : (
-                            <span className="field__hint" id={hintId}>
-                                {hint}
-                            </span>
-                        )}
+                        ) : null}
                     </span>
                 </div>
             ) : null}

@@ -1,4 +1,5 @@
 import {
+    useEffect,
     useId,
     useRef,
     useState,
@@ -6,6 +7,7 @@ import {
     type ChangeEvent,
     type FC,
     type KeyboardEvent as ReactKeyboardEvent,
+    type MouseEvent as ReactMouseEvent,
     type ReactNode,
     type Ref,
     type RefCallback,
@@ -17,7 +19,6 @@ import Surface from "../../surface/Surface";
 import Button from "../../button/Button";
 import useControllableState from "../../foundation/useControllableState";
 import useMergedRef from "../../foundation/useMergedRef";
-import { composeEventHandlers } from "../shared/composeEventHandlers";
 import type { PickerDataAttributes } from "../shared/native";
 import PickerField from "../shared/PickerField";
 import "./DateTimePicker.css";
@@ -28,6 +29,19 @@ interface DateTimeParts {
     day: number;
     hour: number;
     minute: number;
+}
+
+/**
+ * A single calendar day used for focus navigation.
+ * Type: interface.
+ * Fields: year, month, day.
+ * @example
+ * const date: CalendarDate = { year: 2026, month: 10, day: 20 };
+ */
+interface CalendarDate {
+    year: number;
+    month: number;
+    day: number;
 }
 
 /**
@@ -74,6 +88,152 @@ const daysInMonth: (year: number, month: number) => number = (
     month: number,
 ): number => new Date(year, month, 0).getDate();
 
+const dayFormatter: Intl.DateTimeFormat = new Intl.DateTimeFormat("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+});
+
+/**
+ * Formats a calendar day as a full, spoken date.
+ * @param date - Calendar day to format.
+ * @example
+ * const label: string = formatDayLabel({ year: 2026, month: 10, day: 20 });
+ * @returns A label such as `Tuesday, 20 October 2026`.
+ */
+const formatDayLabel: (date: CalendarDate) => string = (date: CalendarDate): string =>
+    dayFormatter.format(new Date(date.year, date.month - 1, date.day));
+
+/**
+ * Serialises a calendar day as an ISO local date key.
+ * @param date - Calendar day to serialise.
+ * @example
+ * const key: string = toDateKey({ year: 2026, month: 10, day: 20 });
+ * @returns The `YYYY-MM-DD` key.
+ */
+const toDateKey: (date: CalendarDate) => string = (date: CalendarDate): string =>
+    `${date.year}-${pad(date.month)}-${pad(date.day)}`;
+
+/**
+ * Normalises a calendar day, clamping it to the supported year, month, and day bounds.
+ * @param date - Candidate calendar day.
+ * @example
+ * const date: CalendarDate = clampCalendarDate({ year: 2026, month: 13, day: 1 });
+ * @returns A valid calendar day within 1900-2100 and the target month length.
+ */
+const clampCalendarDate: (date: CalendarDate) => CalendarDate = (
+    date: CalendarDate,
+): CalendarDate => {
+    const year: number = Math.min(2100, Math.max(1900, date.year));
+    const month: number = Math.min(12, Math.max(1, date.month));
+    const day: number = Math.min(daysInMonth(year, month), Math.max(1, date.day));
+
+    return { year, month, day };
+};
+
+/**
+ * Tests whether two calendar days are the same date.
+ * @param left - First calendar day.
+ * @param right - Second calendar day.
+ * @example
+ * const equal: boolean = sameCalendarDate(left, right);
+ * @returns Whether the years, months, and days all match.
+ */
+const sameCalendarDate: (left: CalendarDate, right: CalendarDate) => boolean = (
+    left: CalendarDate,
+    right: CalendarDate,
+): boolean => left.year === right.year && left.month === right.month && left.day === right.day;
+
+/**
+ * Moves a calendar day by a number of days, crossing month and year boundaries.
+ * @param date - Starting calendar day.
+ * @param amount - Days to add; use a negative value to move backwards.
+ * @example
+ * const next: CalendarDate = shiftDays({ year: 2026, month: 10, day: 20 }, 7);
+ * @returns The shifted calendar day.
+ */
+const shiftDays: (date: CalendarDate, amount: number) => CalendarDate = (
+    date: CalendarDate,
+    amount: number,
+): CalendarDate => {
+    const shifted: Date = new Date(date.year, date.month - 1, date.day + amount);
+
+    return {
+        year: shifted.getFullYear(),
+        month: shifted.getMonth() + 1,
+        day: shifted.getDate(),
+    };
+};
+
+/**
+ * Moves a calendar day by a number of months, clamping the day to the target month.
+ * @param date - Starting calendar day.
+ * @param amount - Months to add; use a negative value to move backwards.
+ * @example
+ * const next: CalendarDate = shiftMonths({ year: 2026, month: 1, day: 31 }, 1);
+ * @returns The shifted calendar day, using the last valid day where required.
+ */
+const shiftMonths: (date: CalendarDate, amount: number) => CalendarDate = (
+    date: CalendarDate,
+    amount: number,
+): CalendarDate => {
+    const shifted: Date = new Date(date.year, date.month - 1 + amount, 1);
+    const year: number = shifted.getFullYear();
+    const month: number = shifted.getMonth() + 1;
+
+    return { year, month, day: Math.min(date.day, daysInMonth(year, month)) };
+};
+
+/**
+ * Finds the Sunday that starts the week containing a calendar day.
+ * @param date - Calendar day within the week.
+ * @example
+ * const start: CalendarDate = startOfWeek({ year: 2026, month: 10, day: 20 });
+ * @returns The first day of the week.
+ */
+const startOfWeek: (date: CalendarDate) => CalendarDate = (date: CalendarDate): CalendarDate => {
+    const weekday: number = new Date(date.year, date.month - 1, date.day).getDay();
+
+    return shiftDays(date, -weekday);
+};
+
+/**
+ * Finds the Saturday that ends the week containing a calendar day.
+ * @param date - Calendar day within the week.
+ * @example
+ * const end: CalendarDate = endOfWeek({ year: 2026, month: 10, day: 20 });
+ * @returns The last day of the week.
+ */
+const endOfWeek: (date: CalendarDate) => CalendarDate = (date: CalendarDate): CalendarDate => {
+    const weekday: number = new Date(date.year, date.month - 1, date.day).getDay();
+
+    return shiftDays(date, 6 - weekday);
+};
+
+/**
+ * Focuses the button for a calendar day, falling back to the grid when it is unavailable.
+ * @param grid - Calendar grid element.
+ * @param date - Calendar day to focus.
+ * @example
+ * focusDayInGrid(gridRef.current, date);
+ * @returns Nothing.
+ */
+const focusDayInGrid: (grid: HTMLDivElement | null, date: CalendarDate) => void = (
+    grid: HTMLDivElement | null,
+    date: CalendarDate,
+): void => {
+    const cell: HTMLButtonElement | null =
+        grid?.querySelector<HTMLButtonElement>(`[data-date="${toDateKey(date)}"]`) ?? null;
+
+    if (cell !== null && !cell.disabled) {
+        cell.focus({ preventScroll: true });
+        return;
+    }
+
+    grid?.focus({ preventScroll: true });
+};
+
 /**
  * Parses an ISO date-time, falling back to the current local time.
  * @param value - ISO local date-time.
@@ -110,8 +270,11 @@ const toValue: (parts: DateTimeParts) => string = (parts: DateTimeParts): string
     `${parts.year}-${pad(parts.month)}-${pad(parts.day)}T${pad(parts.hour)}:${pad(parts.minute)}`;
 
 /**
- * Renders a custom date-time picker whose year and month are editable inputs.
- * The value is controlled when `value` is supplied and uncontrolled otherwise.
+ * Renders a custom date-time picker with a keyboard-operable calendar grid and editable
+ * year, month, hour, and minute inputs.
+ * The calendar uses a roving tabindex: arrow keys move by day or week, Home and End move to
+ * the week bounds, PageUp and PageDown change month, and Enter or Space selects the focused
+ * day. The value is controlled when `value` is supplied and uncontrolled otherwise.
  * @param props - Value, label, support text, open state, and change handler.
  * @example
  * <DateTimePicker label="Starts at" value="2026-10-20T09:30" onChange={setValue} />
@@ -144,8 +307,14 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
     const panelId: string = `${inputId}-panel`;
     const hintId: string = `${inputId}-hint`;
     const errorId: string = `${inputId}-error`;
+    const yearId: string = `${inputId}-year`;
+    const monthId: string = `${inputId}-month`;
+    const hourId: string = `${inputId}-hour`;
+    const minuteId: string = `${inputId}-minute`;
     const anchorRef: RefObject<HTMLSpanElement | null> = useRef<HTMLSpanElement | null>(null);
     const triggerRef: RefObject<HTMLButtonElement | null> = useRef<HTMLButtonElement | null>(null);
+    const gridRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
+    const focusPendingRef: RefObject<boolean> = useRef<boolean>(false);
     const mergedTriggerRef: RefCallback<HTMLButtonElement> = useMergedRef(triggerRef, ref);
     const [open, setOpen]: [boolean, (next: boolean) => void] = useState<boolean>(false);
     const [selectedValue, setSelectedValue]: readonly [string, (next: string) => void] =
@@ -162,6 +331,21 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
         .filter((entry: string): boolean => entry.length > 0)
         .join(" ");
     const parts: DateTimeParts = parseDateTime(selectedValue);
+    const [activeDate, setActiveDate]: [CalendarDate, (next: CalendarDate) => void] =
+        useState<CalendarDate>({
+            year: parts.year,
+            month: parts.month,
+            day: parts.day,
+        });
+
+    useEffect((): void => {
+        if (!open || !focusPendingRef.current) {
+            return;
+        }
+
+        focusPendingRef.current = false;
+        focusDayInGrid(gridRef.current, activeDate);
+    }, [activeDate, open]);
 
     /**
      * Reports an open state change to the caller.
@@ -180,6 +364,17 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
     };
 
     /**
+     * Focuses the selected day, or today when nothing is selected, before the popup opens.
+     * @example
+     * prepareOpen();
+     * @returns Nothing.
+     */
+    const prepareOpen: () => void = (): void => {
+        focusPendingRef.current = true;
+        setActiveDate({ year: parts.year, month: parts.month, day: parts.day });
+    };
+
+    /**
      * Commits a partial date-time and reports the ISO local value.
      * @param next - Partial date-time to merge with the current value.
      * @example
@@ -193,16 +388,177 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
             return;
         }
 
-        const year: number = Math.min(2100, Math.max(1900, next.year ?? parts.year));
-        const month: number = Math.min(12, Math.max(1, next.month ?? parts.month));
-        const day: number = Math.min(
-            daysInMonth(year, month),
-            Math.max(1, next.day ?? parts.day),
-        );
+        const date: CalendarDate = clampCalendarDate({
+            year: next.year ?? parts.year,
+            month: next.month ?? parts.month,
+            day: next.day ?? parts.day,
+        });
         const hour: number = Math.min(23, Math.max(0, next.hour ?? parts.hour));
         const minute: number = Math.min(59, Math.max(0, next.minute ?? parts.minute));
 
-        setSelectedValue(toValue({ year, month, day, hour, minute }));
+        setSelectedValue(toValue({ ...date, hour, minute }));
+    };
+
+    /**
+     * Moves the roving tab stop and requests focus after the calendar re-renders.
+     * @param next - Calendar day that should receive focus.
+     * @example
+     * moveActiveDate({ year: 2026, month: 10, day: 21 });
+     * @returns Nothing.
+     */
+    const moveActiveDate: (next: CalendarDate) => void = (next: CalendarDate): void => {
+        const target: CalendarDate = clampCalendarDate(next);
+
+        if (sameCalendarDate(target, activeDate)) {
+            focusPendingRef.current = false;
+            focusDayInGrid(gridRef.current, activeDate);
+            return;
+        }
+
+        focusPendingRef.current = true;
+        setActiveDate(target);
+    };
+
+    /**
+     * Selects a calendar day while honouring disabled and read-only state.
+     * @param date - Calendar day to select.
+     * @example
+     * selectDay({ year: 2026, month: 10, day: 21 });
+     * @returns Nothing.
+     */
+    const selectDay: (date: CalendarDate) => void = (date: CalendarDate): void => {
+        if (disabled || readOnly) {
+            return;
+        }
+
+        setActiveDate(date);
+        commit({ year: date.year, month: date.month, day: date.day });
+    };
+
+    /**
+     * Keeps the roving tab stop in step with pointer or assistive focus.
+     * @param date - Calendar day that received focus.
+     * @example
+     * handleDayFocus({ year: 2026, month: 10, day: 21 });
+     * @returns Nothing.
+     */
+    const handleDayFocus: (date: CalendarDate) => void = (date: CalendarDate): void => {
+        if (sameCalendarDate(date, activeDate)) {
+            return;
+        }
+
+        setActiveDate(date);
+    };
+
+    /**
+     * Handles the calendar grid keyboard map.
+     * @param event - Keyboard event from a day cell.
+     * @example
+     * <div role="grid" onKeyDown={handleGridKeyDown} />
+     * @returns Nothing.
+     */
+    const handleGridKeyDown: (event: ReactKeyboardEvent<HTMLDivElement>) => void = (
+        event: ReactKeyboardEvent<HTMLDivElement>,
+    ): void => {
+        if (disabled || event.altKey || event.ctrlKey || event.metaKey) {
+            return;
+        }
+
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            selectDay(activeDate);
+            return;
+        }
+
+        let target: CalendarDate | void = (void 0);
+
+        switch (event.key) {
+            case "ArrowLeft":
+                target = shiftDays(activeDate, -1);
+                break;
+            case "ArrowRight":
+                target = shiftDays(activeDate, 1);
+                break;
+            case "ArrowUp":
+                target = shiftDays(activeDate, -7);
+                break;
+            case "ArrowDown":
+                target = shiftDays(activeDate, 7);
+                break;
+            case "Home":
+                target = startOfWeek(activeDate);
+                break;
+            case "End":
+                target = endOfWeek(activeDate);
+                break;
+            case "PageUp":
+                target = shiftMonths(activeDate, event.shiftKey ? -12 : -1);
+                break;
+            case "PageDown":
+                target = shiftMonths(activeDate, event.shiftKey ? 12 : 1);
+                break;
+            default:
+                break;
+        }
+
+        if (target === (void 0)) {
+            return;
+        }
+
+        event.preventDefault();
+        moveActiveDate(target);
+    };
+
+    /**
+     * Commits a year typed into the calendar header.
+     * @param event - Change event from the year input.
+     * @example
+     * <input onChange={handleYearChange} />
+     * @returns Nothing.
+     */
+    const handleYearChange: (event: ChangeEvent<HTMLInputElement>) => void = (
+        event: ChangeEvent<HTMLInputElement>,
+    ): void => {
+        const year: number = Number(event.target.value);
+
+        if (!Number.isFinite(year)) {
+            return;
+        }
+
+        const date: CalendarDate = clampCalendarDate({
+            year,
+            month: activeDate.month,
+            day: activeDate.day,
+        });
+
+        setActiveDate(date);
+        commit({ year: date.year, month: date.month, day: date.day });
+    };
+
+    /**
+     * Commits a month typed into the calendar header.
+     * @param event - Change event from the month input.
+     * @example
+     * <input onChange={handleMonthChange} />
+     * @returns Nothing.
+     */
+    const handleMonthChange: (event: ChangeEvent<HTMLInputElement>) => void = (
+        event: ChangeEvent<HTMLInputElement>,
+    ): void => {
+        const month: number = Number(event.target.value);
+
+        if (!Number.isFinite(month)) {
+            return;
+        }
+
+        const date: CalendarDate = clampCalendarDate({
+            year: activeDate.year,
+            month,
+            day: activeDate.day,
+        });
+
+        setActiveDate(date);
+        commit({ year: date.year, month: date.month, day: date.day });
     };
 
     /**
@@ -214,6 +570,10 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
     const handleTriggerClick: () => void = (): void => {
         if (disabled) {
             return;
+        }
+
+        if (!open) {
+            prepareOpen();
         }
 
         requestOpenChange(!open);
@@ -235,7 +595,13 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
 
         if (event.key === "ArrowDown" || event.key === "ArrowUp") {
             event.preventDefault();
-            requestOpenChange(true);
+
+            if (open) {
+                focusDayInGrid(gridRef.current, activeDate);
+            } else {
+                prepareOpen();
+                requestOpenChange(true);
+            }
         } else if (event.key === "Escape" && open) {
             event.preventDefault();
             requestOpenChange(false);
@@ -261,18 +627,28 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
         triggerRef.current?.focus({ preventScroll: true });
     };
 
-    const firstWeekday: number = new Date(parts.year, parts.month - 1, 1).getDay();
-    const dayCount: number = daysInMonth(parts.year, parts.month);
-    const cells: Array<number | null> = [
-        ...Array.from({ length: firstWeekday }, (): null => null),
-        ...Array.from(
-            { length: dayCount },
-            (value: unknown, index: number): number => {
-                void value;
-                return index + 1;
-            },
-        ),
-    ];
+    const firstWeekday: number = new Date(activeDate.year, activeDate.month - 1, 1).getDay();
+    const dayCount: number = daysInMonth(activeDate.year, activeDate.month);
+    const rowCount: number = Math.ceil((firstWeekday + dayCount) / 7);
+    const weeks: Array<Array<number | null>> = [];
+
+    for (let weekIndex: number = 0; weekIndex < rowCount; weekIndex += 1) {
+        const week: Array<number | null> = [];
+
+        for (let cellIndex: number = 0; cellIndex < 7; cellIndex += 1) {
+            const day: number = weekIndex * 7 + cellIndex - firstWeekday + 1;
+            week.push(day >= 1 && day <= dayCount ? day : null);
+        }
+
+        weeks.push(week);
+    }
+
+    const currentDate: Date = new Date();
+    const today: CalendarDate = {
+        year: currentDate.getFullYear(),
+        month: currentDate.getMonth() + 1,
+        day: currentDate.getDate(),
+    };
 
     const displayValue: string =
         selectedValue.length === 0
@@ -310,8 +686,20 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
                         aria-readonly={readOnly ? "true" : (void 0)}
                         aria-required={required ? "true" : (void 0)}
                         aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
-                        onClick={composeEventHandlers(onTriggerClick, handleTriggerClick)}
-                        onKeyDown={composeEventHandlers(onTriggerKeyDown, handleTriggerKeyDown)}
+                        onClick={(event: ReactMouseEvent<HTMLButtonElement>): void => {
+                            onTriggerClick?.(event);
+
+                            if (!event.defaultPrevented) {
+                                handleTriggerClick();
+                            }
+                        }}
+                        onKeyDown={(event: ReactKeyboardEvent<HTMLButtonElement>): void => {
+                            onTriggerKeyDown?.(event);
+
+                            if (!event.defaultPrevented) {
+                                handleTriggerKeyDown(event);
+                            }
+                        }}
                     >
                         <Icon name="Calendar" size={16} />
                         {displayValue}
@@ -335,30 +723,28 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
                     onKeyDown={handlePanelKeyDown}
                 >
                     <div className="date-time-picker__header">
-                        <label>
+                        <label htmlFor={yearId}>
                             Year
                             <input
+                                id={yearId}
                                 type="number"
                                 min={1900}
                                 max={2100}
-                                value={parts.year}
+                                value={activeDate.year}
                                 readOnly={readOnly}
-                                onChange={(event: ChangeEvent<HTMLInputElement>): void =>
-                                    commit({ year: Number(event.target.value) })
-                                }
+                                onChange={handleYearChange}
                             />
                         </label>
-                        <label>
+                        <label htmlFor={monthId}>
                             Month
                             <input
+                                id={monthId}
                                 type="number"
                                 min={1}
                                 max={12}
-                                value={parts.month}
+                                value={activeDate.month}
                                 readOnly={readOnly}
-                                onChange={(event: ChangeEvent<HTMLInputElement>): void =>
-                                    commit({ month: Number(event.target.value) })
-                                }
+                                onChange={handleMonthChange}
                             />
                         </label>
                     </div>
@@ -371,37 +757,86 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
                         )}
                     </div>
 
-                    <div className="date-time-picker__days" role="grid" aria-label="Days">
-                        {cells.map(
-                            (day: number | null, index: number): ReactNode =>
-                                day === null ? (
-                                    <span
-                                        key={`empty-${index}`}
-                                        className="date-time-picker__blank"
-                                    />
-                                ) : (
-                                    <button
-                                        key={day}
-                                        type="button"
-                                        className={
-                                            day === parts.day
-                                                ? "date-time-picker__day date-time-picker__day--selected"
-                                                : "date-time-picker__day"
-                                        }
-                                        aria-pressed={day === parts.day}
-                                        disabled={readOnly}
-                                        onClick={(): void => commit({ day })}
-                                    >
-                                        {day}
-                                    </button>
-                                ),
+                    <div
+                        ref={gridRef}
+                        className="date-time-picker__days"
+                        role="grid"
+                        aria-label="Days"
+                        aria-colcount={7}
+                        aria-rowcount={weeks.length}
+                        aria-readonly={readOnly ? "true" : (void 0)}
+                        tabIndex={-1}
+                        onKeyDown={handleGridKeyDown}
+                    >
+                        {weeks.map(
+                            (week: Array<number | null>, weekIndex: number): ReactNode => (
+                                <div
+                                    key={`week-${weekIndex}`}
+                                    className="date-time-picker__week"
+                                    role="row"
+                                >
+                                    {week.map(
+                                        (day: number | null, cellIndex: number): ReactNode => {
+                                            if (day === null) {
+                                                return (
+                                                    <span
+                                                        key={`blank-${weekIndex}-${cellIndex}`}
+                                                        className="date-time-picker__blank"
+                                                        role="gridcell"
+                                                        aria-disabled="true"
+                                                    />
+                                                );
+                                            }
+
+                                            const date: CalendarDate = {
+                                                year: activeDate.year,
+                                                month: activeDate.month,
+                                                day,
+                                            };
+                                            const isSelected: boolean =
+                                                date.year === parts.year &&
+                                                date.month === parts.month &&
+                                                date.day === parts.day;
+                                            const isActive: boolean = date.day === activeDate.day;
+                                            const isToday: boolean = sameCalendarDate(date, today);
+
+                                            return (
+                                                <button
+                                                    key={day}
+                                                    type="button"
+                                                    role="gridcell"
+                                                    className={
+                                                        isSelected
+                                                            ? "date-time-picker__day date-time-picker__day--selected"
+                                                            : "date-time-picker__day"
+                                                    }
+                                                    tabIndex={isActive ? 0 : -1}
+                                                    aria-selected={isSelected}
+                                                    aria-current={isToday ? "date" : (void 0)}
+                                                    aria-disabled={
+                                                        readOnly ? "true" : (void 0)
+                                                    }
+                                                    aria-label={formatDayLabel(date)}
+                                                    data-date={toDateKey(date)}
+                                                    disabled={readOnly}
+                                                    onClick={(): void => selectDay(date)}
+                                                    onFocus={(): void => handleDayFocus(date)}
+                                                >
+                                                    {day}
+                                                </button>
+                                            );
+                                        },
+                                    )}
+                                </div>
+                            ),
                         )}
                     </div>
 
                     <div className="date-time-picker__time">
-                        <label>
+                        <label htmlFor={hourId}>
                             Hour
                             <input
+                                id={hourId}
                                 type="number"
                                 min={0}
                                 max={23}
@@ -412,9 +847,10 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
                                 }
                             />
                         </label>
-                        <label>
+                        <label htmlFor={minuteId}>
                             Minute
                             <input
+                                id={minuteId}
                                 type="number"
                                 min={0}
                                 max={59}
@@ -440,6 +876,7 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
 
                                 setSelectedValue("");
                                 requestOpenChange(false);
+                                triggerRef.current?.focus({ preventScroll: true });
                             }}
                         >
                             Clear
@@ -449,6 +886,7 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
                             onClick={(): void => {
                                 commit({});
                                 requestOpenChange(false);
+                                triggerRef.current?.focus({ preventScroll: true });
                             }}
                         >
                             Apply

@@ -61,8 +61,8 @@
 
 :root .tooltip__bubble {
     border-radius: var(--radius-xs);
-    background: rgba(97, 97, 97, 0.92);
-    color: #ffffff;
+    background: var(--colourTooltipPaper);
+    color: var(--colourOnInverse);
     font-size: 12px;
 }
 
@@ -70,17 +70,17 @@
 :root .toast__surface {
     border: 0;
     border-radius: var(--radius-xs);
-    background: #323232;
-    color: #ffffff;
+    background: var(--colourInversePaper);
+    color: var(--colourOnInverse);
     box-shadow: var(--elevation-3);
 }
 
 :root .toast__title {
-    color: #ffffff;
+    color: var(--colourOnInverse);
 }
 
 :root .toast__description {
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--colourOnInverseMuted);
 }
 
 :root .toast__stripe {
@@ -158,27 +158,39 @@
 
 /* Snackbar text sits on a dark surface, so it cannot inherit the page text. */
 :root .toast .toast__title {
-    color: #ffffff;
+    color: var(--colourOnInverse);
 }
 
 :root .toast .toast__description {
-    color: rgba(255, 255, 255, 0.72);
+    color: var(--colourOnInverseMuted);
 }
 
 :root .toast[data-tone="neutral"] {
-    --toast-tone: #ffffff;
+    --toast-tone: var(--colourOnInverse);
+}
+
+:root .toast[data-tone="success"] {
+    --toast-tone: var(--colourSuccessOnInverse);
+}
+
+:root .toast[data-tone="warning"] {
+    --toast-tone: var(--colourWarningOnInverse);
+}
+
+:root .toast[data-tone="danger"] {
+    --toast-tone: var(--colourDangerOnInverse);
 }
 
 :root .toast__action .button__control {
-    color: #90caf9;
+    color: var(--colourInverseAction);
 }
 
 :root .toast__close .button__control {
-    color: rgba(255, 255, 255, 0.72);
+    color: var(--colourOnInverseMuted);
 }
 
 :root .toast__close .button__control:hover {
-    color: #ffffff;
+    color: var(--colourOnInverse);
 }
 
 /* Navigation drawer: plain Material paper, no tinted gradient. */
@@ -239,18 +251,304 @@
 :root .dialog__close:hover,
 :root .drawer__close:hover {
     border: 0;
-    background: rgba(0, 0, 0, 0.08);
+    background: var(--colourHoverWash);
     color: var(--colourTextPrimary);
 }
 
 :root .dialog__close:active,
 :root .drawer__close:active {
-    background: rgba(0, 0, 0, 0.12);
+    background: var(--colourActiveWash);
     color: var(--colourTextPrimary);
 }
 
 :root .dialog__close:focus-visible,
 :root .drawer__close:focus-visible {
-    outline: 2px solid var(--colourPrimary);
-    outline-offset: 2px;
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
+/* ==========================================================================
+   Focus visibility
+
+   Several controls paint their ring with box-shadow. A real outline is added
+   on the outer Surface root, because inner controls are clipped by
+   `.surface { overflow: hidden }`. The ring therefore survives both themes
+   and forced-colors mode without a local component change.
+   ========================================================================== */
+
+:root .button:has(.button__control:focus-visible),
+:root .switch:has(.switch__native:focus-visible),
+:root .range__surface:has(.range__native:focus-visible),
+:root .radio:has(.radio__native:focus-visible) .radio__indicator,
+:root .checkbox:has(.checkbox__native:focus-visible) .checkbox__touch,
+:root .select-field__surface:has(.select-field__trigger:focus-visible) {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
+/* ==========================================================================
+   prefers-contrast: more
+   ========================================================================== */
+
+@media (prefers-contrast: more) {
+    /* Selected surfaces gain an outline so the state is not carried by tint. */
+    :root .chip--selected,
+    :root .tabs__surface--selected,
+    :root .dropdown__item--selected,
+    :root .menu__item:has(.menu__item-control[data-selected="true"]) {
+        outline: 1px solid var(--color-primary);
+        outline-offset: -1px;
+    }
+
+    /* Inverse paper needs a full-strength edge against the page. */
+    :root .tooltip__bubble,
+    :root .toast__surface {
+        border: 1px solid currentColor;
+    }
+}
+
+/* ==========================================================================
+   Forced colours — shape, focus, and state without decorative colour
+
+   background-image, box-shadow, and author colours are dropped by the user
+   agent, so every rule below supplies a system-colour border, outline, or
+   non-colour state cue. No element opts out of the system palette.
+   ========================================================================== */
+
+@media (forced-colors: active) {
+    /* Focus: outline is the only channel forced-colors preserves. This is a
+       fallback (0,2,0); component focus rules of the same weight are later and
+       keep their own inset ring, which forced-colors still recolours. */
+    :root :focus-visible {
+        outline: 3px solid CanvasText;
+        outline-offset: 2px;
+        /* Component rings keep their own width/offset, but the colour must be
+           the system focus colour even where a component declares one. */
+        outline-color: CanvasText !important;
+    }
+
+    /* Inputs hide the native ring behind a shell; focus the shell instead. */
+    :root .text-field__surface:focus-within,
+    :root .text-area__surface:focus-within,
+    :root .combobox__surface:focus-within,
+    :root .number-field__surface:focus-within,
+    :root .field:has(.field__input) .field__control:focus-within,
+    :root .picker-field__control:focus-within {
+        outline: 3px solid CanvasText;
+        outline-offset: 2px;
+    }
+
+    /* These inputs have no local focus-visible reset, but the shell ring above
+       already marks focus; suppressing the inner ring avoids a double box. */
+    :root .text-field__input:focus-visible,
+    :root .picker-field__input:focus-visible {
+        outline: none;
+    }
+
+    /* Surface roots carry their own outline; children cannot be clipped. */
+    :root .button:has(.button__control:focus-visible),
+    :root .switch:has(.switch__native:focus-visible),
+    :root .range__surface:has(.range__native:focus-visible),
+    :root .radio:has(.radio__native:focus-visible) .radio__indicator,
+    :root .checkbox:has(.checkbox__native:focus-visible) .checkbox__touch,
+    :root .select-field__surface:has(.select-field__trigger:focus-visible) {
+        outline: 3px solid CanvasText;
+        outline-offset: 2px;
+    }
+
+    /* Shape must survive without shadow: controls keep a system border. */
+    :root button:not([class]),
+    :root .button,
+    :root .dialog__close,
+    :root .drawer__close {
+        border: 1px solid ButtonText;
+    }
+
+    :root :is(input, select, textarea):not(
+            .field__input,
+            .text-field__input,
+            .text-area__field,
+            .combobox__input,
+            .number-field__input,
+            .picker-field__input,
+            .colour-picker__input,
+            .checkbox__native,
+            .radio__native,
+            .switch__native,
+            .range__native
+        ) {
+        border: 1px solid FieldText;
+    }
+
+    :root .field__background,
+    :root .text-field .text-field__background,
+    :root .text-area .text-area__background,
+    :root .select-field .select-field__background,
+    :root .combobox .combobox__background,
+    :root .number-field .number-field__background,
+    :root .picker-field__control {
+        border: 1px solid FieldText;
+    }
+
+    /* Selected and current states get a non-colour outline. */
+    :root [aria-current="page"],
+    :root [aria-current="true"],
+    :root [aria-current="step"],
+    :root [aria-pressed="true"],
+    :root [aria-selected="true"],
+    :root [data-selected="true"],
+    :root .chip--selected,
+    :root .tabs__surface--selected,
+    :root .dropdown__item--selected {
+        outline: 2px solid Highlight;
+        outline-offset: -2px;
+    }
+
+    :root :is(button, [role="button"], [role="option"], [role="tab"]):active {
+        outline: 2px solid Highlight;
+        outline-offset: -2px;
+    }
+
+    :root .tabs--line .tabs__surface--selected .tabs__tab::after {
+        background: Highlight;
+    }
+
+    /* Checked states: fill and icon switch to Highlight/HighlightText. */
+    :root .checkbox--checked .checkbox__box,
+    :root .checkbox--mixed .checkbox__box {
+        border-color: Highlight;
+        background: Highlight;
+        color: HighlightText;
+    }
+
+    :root .checkbox--checked .checkbox__icon,
+    :root .checkbox--mixed .checkbox__icon {
+        color: HighlightText;
+    }
+
+    :root .radio--checked .radio__indicator-background {
+        border: 2px solid Highlight;
+        background: Canvas;
+    }
+
+    :root .radio--checked .radio__dot {
+        background: Highlight;
+    }
+
+    :root .switch--on .switch__track {
+        border: 2px solid Highlight;
+        background: Canvas;
+    }
+
+    :root .switch--on .switch__thumb {
+        border: 1px solid Highlight;
+        background: Highlight;
+    }
+
+    :root .switch:not(.switch--on) .switch__thumb {
+        border: 1px solid CanvasText;
+        background: CanvasText;
+    }
+
+    :root .range__track {
+        border: 1px solid CanvasText;
+        background: Canvas;
+    }
+
+    :root .range__fill {
+        background: Highlight;
+    }
+
+    :root .range__thumb {
+        border: 2px solid CanvasText;
+        background: Canvas;
+    }
+
+    /* Status tracks stay visible without their tinted background. */
+    :root .progress__track {
+        border: 1px solid CanvasText;
+        background: Canvas;
+    }
+
+    :root .progress__fill {
+        background: Highlight;
+    }
+
+    :root .progress__fill--indeterminate {
+        background-image: none;
+    }
+
+    /* Disabled controls keep GrayText and a dashed edge. */
+    :root :is(button, input, select, textarea):disabled,
+    :root [aria-disabled="true"],
+    :root [data-disabled="true"] {
+        color: GrayText;
+        border-color: GrayText;
+    }
+
+    :root .button:has(.button__control:disabled),
+    :root .chip--disabled,
+    :root .dropdown__item--disabled,
+    :root .dropdown__item--disabled .dropdown__item-control,
+    :root .menu__item[data-disabled="true"],
+    :root .tabs__surface--disabled .tabs__tab {
+        color: GrayText;
+    }
+
+    :root .text-field:has(.text-field__input:disabled) .text-field__background,
+    :root .text-area[data-disabled="true"] .text-area__background,
+    :root .select-field--disabled .select-field__background,
+    :root .combobox--disabled .combobox__background,
+    :root .number-field[data-disabled="true"] .number-field__background,
+    :root .field[data-disabled="true"] .field__background,
+    :root .picker-field--disabled .picker-field__control {
+        border-color: GrayText;
+        border-style: dashed;
+        background: Canvas;
+    }
+
+    :root .checkbox--disabled .checkbox__box,
+    :root .switch-field[data-disabled="true"] .switch__track {
+        border-color: GrayText;
+        background: Canvas;
+    }
+
+    :root .text-field:has(.text-field__input:disabled) .text-field__label,
+    :root .text-field:has(.text-field__input:disabled) .text-field__input,
+    :root .text-area[data-disabled="true"] .text-area__label,
+    :root .text-area[data-disabled="true"] .text-area__field,
+    :root .select-field--disabled .select-field__label,
+    :root .select-field--disabled .select-field__value,
+    :root .select-field--disabled .select-field__trigger,
+    :root .select-field--disabled .select-field__indicator,
+    :root .combobox--disabled .combobox__input,
+    :root .combobox--disabled .combobox__label,
+    :root .number-field[data-disabled="true"] .number-field__label,
+    :root .number-field[data-disabled="true"] .number-field__input,
+    :root .checkbox--disabled .checkbox__text,
+    :root .checkbox--disabled .checkbox__description,
+    :root .switch-field[data-disabled="true"] .switch-field__label,
+    :root .switch-field[data-disabled="true"] .switch-field__description,
+    :root .radio[data-disabled="true"] .radio__text,
+    :root .radio[data-disabled="true"] .radio__description,
+    :root .picker-field--disabled .picker-field__label,
+    :root .picker-field--disabled .picker-field__input {
+        color: GrayText;
+    }
+
+    /* Raised surfaces keep a real edge because their shadow is gone. */
+    :root .card,
+    :root .dialog__panel,
+    :root .drawer__panel,
+    :root .drawer__surface,
+    :root .dropdown__panel,
+    :root .menu,
+    :root .popover__surface,
+    :root .tooltip__bubble,
+    :root .toast__surface,
+    :root .alert,
+    :root .snackbar__surface {
+        border: 1px solid CanvasText;
+        box-shadow: none;
+    }
 }

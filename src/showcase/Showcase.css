@@ -2,6 +2,43 @@
    Showcase shell — persistent sidebar and per-entry documentation page
    ========================================================================== */
 
+/* First focusable element in the document; fixed so it never disturbs the
+   sidebar flex column and only becomes visible when it receives focus. */
+.skip-link {
+    position: fixed;
+    top: var(--space-3);
+    left: var(--space-3);
+    z-index: var(--z-tooltip);
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-sm);
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: var(--shadow-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transform: translateY(calc(-100% - var(--space-4)));
+    transition: transform 160ms var(--ease-standard);
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+    transform: translateY(0);
+}
+
+/* The skip target is a region, not a control; suppress the focus ring that
+   would otherwise frame the entire content column. */
+#main-content:focus,
+#main-content:focus-visible {
+    outline: none;
+}
+
 .showcase-shell {
     display: flex;
     width: 100%;
@@ -358,5 +395,11 @@
 
     .showcase__drawer-layout {
         height: 420px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .skip-link {
+        transition: none;
     }
 }

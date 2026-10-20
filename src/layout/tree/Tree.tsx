@@ -1,5 +1,8 @@
 import {
+    Fragment,
+    useEffect,
     useMemo,
+    useRef,
     useState,
     type CSSProperties,
     type HTMLAttributes,
@@ -8,6 +11,7 @@ import {
     type ReactNode,
     type Ref,
     type RefCallback,
+    type RefObject,
     type UIEvent,
     type UIEventHandler,
 } from "react";
@@ -75,6 +79,9 @@ export type TreeSelectionMode = "none" | "single" | "multiple";
  * ref, and native `div` attributes.
  * Native `id`, `className`, `style`, `title`, `tabIndex`, `role`, `aria-*`, `data-*`, pointer,
  * mouse, keyboard, and focus handlers are forwarded to the scrolling container.
+ * Items expose `role="treeitem"`, `aria-level`, `aria-expanded`, `aria-selected`, `aria-checked`,
+ * and `aria-disabled`; children are grouped under `role="group"`. A single roving tab stop and
+ * ArrowUp/ArrowDown/ArrowLeft/ArrowRight/Home/End/Enter/Space navigation are built in.
  * @example
  * <Tree items={nodes} checkable virtual height={320} aria-label="Outline" />
  */
@@ -182,12 +189,19 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
         selectedKeys === (void 0) ? internalSelected : new Set<string>(selectedKeys);
     const checked: ReadonlySet<string> =
         checkedKeys === (void 0) ? internalChecked : new Set<string>(checkedKeys);
+    const [activeKey, setActiveKey]: [string | null, (next: string | null) => void] =
+        useState<string | null>(null);
+    const rowRefs: RefObject<Map<string, HTMLDivElement>> = useRef<Map<string, HTMLDivElement>>(
+        new Map<string, HTMLDivElement>(),
+    );
+    const pendingFocusRef: RefObject<string | null> = useRef<string | null>(null);
     const visible: ListAdapter<Item> = tree.flatten(expanded);
     const {
         attachViewport,
         start: windowStart,
         end: windowEnd,
         onScroll: handleVirtualScroll,
+        scrollToIndex,
     }: VirtualWindow = useVirtualWindow({
         count: visible.size,
         itemHeight,
@@ -212,6 +226,137 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
         }
 
         onScroll?.(event);
+    };
+
+    const resolveDepth: (entry: ListEntry<Item>) => number = (entry: ListEntry<Item>): number =>
+        isTreeOption(entry.item) ? entry.item.depth : entry.level;
+    const resolveRowDisabled: (entry: ListEntry<Item>) => boolean = (entry: ListEntry<Item>): boolean =>
+        disabled || isDisabled?.(entry.item, resolveDepth(entry)) === true;
+    const visibleEntries: readonly ListEntry<Item>[] = visible.getRange(0, visible.size);
+    const firstEnabledKey: (candidates: readonly ListEntry<Item>[]) => string | null = (
+        candidates: readonly ListEntry<Item>[],
+    ): string | null => {
+        for (const candidate of candidates) {
+            if (!resolveRowDisabled(candidate)) {
+                return candidate.key;
+            }
+        }
+
+        return null;
+    };
+    const findEnabledKey: (from: number, step: 1 | -1) => string | null = (
+        from: number,
+        step: 1 | -1,
+    ): string | null => {
+        for (let index: number = from; index >= 0 && index < visible.size; index += step) {
+            const candidate: ListEntry<Item> = visible.getEntry(index);
+
+            if (!resolveRowDisabled(candidate)) {
+                return candidate.key;
+            }
+        }
+
+        return null;
+    };
+    const resolveVisibleActiveKey: () => string | null = (): string | null => {
+        if (activeKey === null) {
+            return null;
+        }
+
+        if (visible.indexOf(activeKey) !== -1) {
+            return activeKey;
+        }
+
+        if (tree.indexOf(activeKey) === -1) {
+            return null;
+        }
+
+        const path: readonly string[] = tree.getPath(activeKey);
+
+        for (let index: number = path.length - 1; index >= 0; index -= 1) {
+            if (visible.indexOf(path[index]) !== -1) {
+                return path[index];
+            }
+        }
+
+        return null;
+    };
+    const visibleActiveKey: string | null = resolveVisibleActiveKey();
+    const visibleActiveIndex: number = visibleActiveKey === null ? -1 : visible.indexOf(visibleActiveKey);
+    const normalizedActiveKey: string | null =
+        visibleActiveIndex !== -1 && !resolveRowDisabled(visible.getEntry(visibleActiveIndex))
+            ? visibleActiveKey
+            : firstEnabledKey(visibleEntries);
+    const renderedKeys: ReadonlySet<string> = new Set<string>(
+        entries.map((entry: ListEntry<Item>): string => entry.key),
+    );
+    const rovingKey: string | null =
+        normalizedActiveKey !== null && renderedKeys.has(normalizedActiveKey)
+            ? normalizedActiveKey
+            : firstEnabledKey(entries);
+    const childrenByParent: Map<string | null, ListEntry<Item>[]> = new Map<
+        string | null,
+        ListEntry<Item>[]
+    >();
+
+    for (const entry of entries) {
+        const parentKey: string | null =
+            entry.parentKey !== null && renderedKeys.has(entry.parentKey) ? entry.parentKey : null;
+        const siblings: ListEntry<Item>[] | undefined = childrenByParent.get(parentKey);
+
+        if (siblings === (void 0)) {
+            childrenByParent.set(parentKey, [entry]);
+        } else {
+            siblings.push(entry);
+        }
+    }
+
+    const rootEntries: readonly ListEntry<Item>[] = childrenByParent.get(null) ?? [];
+
+    useEffect((): void => {
+        const key: string | null = pendingFocusRef.current;
+
+        if (key === null) {
+            return;
+        }
+
+        if (visible.indexOf(key) === -1) {
+            pendingFocusRef.current = null;
+            return;
+        }
+
+        const node: HTMLDivElement | undefined = rowRefs.current.get(key);
+
+        if (node === (void 0)) {
+            return;
+        }
+
+        pendingFocusRef.current = null;
+        node.focus();
+    });
+
+    const focusKey: (key: string) => void = (key: string): void => {
+        const index: number = visible.indexOf(key);
+
+        if (index === -1 || resolveRowDisabled(visible.getEntry(index))) {
+            return;
+        }
+
+        setActiveKey(key);
+
+        const node: HTMLDivElement | undefined = rowRefs.current.get(key);
+
+        if (node !== (void 0)) {
+            pendingFocusRef.current = null;
+            node.focus();
+            return;
+        }
+
+        pendingFocusRef.current = key;
+
+        if (virtual) {
+            scrollToIndex(index, "nearest");
+        }
     };
 
     const setExpansion: (next: ReadonlySet<string>) => void = (next: ReadonlySet<string>): void => {
@@ -306,26 +451,102 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
         entry: ListEntry<Item>,
         rowDisabled: boolean,
     ): void => {
-        if (rowDisabled || (event.target as Element).closest(".checkbox") !== null) {
+        const fromCheckbox: boolean = (event.target as Element).closest(".checkbox") !== null;
+
+        if (rowDisabled) {
             return;
         }
 
-        if (event.key === "Enter" || event.key === " ") {
+        if (fromCheckbox && (event.key === "Enter" || event.key === " " || event.key === "Spacebar")) {
+            return;
+        }
+
+        if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
             event.preventDefault();
-            toggleSelection(entry.key);
+            setActiveKey(entry.key);
+
+            if (checkable && selectionMode === "none") {
+                toggleCheck(entry.key);
+            } else {
+                toggleSelection(entry.key);
+            }
+
             onItemClick?.(entry.item, entry.key);
             return;
         }
 
-        if (event.key === "ArrowRight" && tree.isExpandable(entry.key) && !expanded.has(entry.key)) {
+        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
             event.preventDefault();
-            toggleExpansion(entry.key);
+            const step: 1 | -1 = event.key === "ArrowDown" ? 1 : -1;
+            const nextKey: string | null = findEnabledKey(entry.index + step, step);
+
+            if (nextKey !== null) {
+                focusKey(nextKey);
+            }
+
             return;
         }
 
-        if (event.key === "ArrowLeft" && expanded.has(entry.key)) {
+        if (event.key === "Home" || event.key === "End") {
             event.preventDefault();
-            toggleExpansion(entry.key);
+            const from: number = event.key === "Home" ? 0 : visible.size - 1;
+            const step: 1 | -1 = event.key === "Home" ? 1 : -1;
+            const nextKey: string | null = findEnabledKey(from, step);
+
+            if (nextKey !== null) {
+                focusKey(nextKey);
+            }
+
+            return;
+        }
+
+        if (event.key === "ArrowRight") {
+            event.preventDefault();
+
+            if (!tree.isExpandable(entry.key)) {
+                return;
+            }
+
+            if (!expanded.has(entry.key)) {
+                toggleExpansion(entry.key);
+                return;
+            }
+
+            const firstChildKey: string | undefined = tree.getChildren(entry.key)[0];
+
+            if (firstChildKey !== (void 0)) {
+                focusKey(firstChildKey);
+            }
+
+            return;
+        }
+
+        if (event.key === "ArrowLeft") {
+            event.preventDefault();
+
+            if (tree.isExpandable(entry.key) && expanded.has(entry.key)) {
+                toggleExpansion(entry.key);
+                return;
+            }
+
+            let parentKey: string | null = entry.parentKey;
+
+            while (parentKey !== null) {
+                const parentIndex: number = visible.indexOf(parentKey);
+
+                if (parentIndex === -1) {
+                    return;
+                }
+
+                const parentEntry: ListEntry<Item> = visible.getEntry(parentIndex);
+
+                if (!resolveRowDisabled(parentEntry)) {
+                    focusKey(parentKey);
+                    return;
+                }
+
+                parentKey = parentEntry.parentKey;
+            }
         }
     };
 
@@ -342,6 +563,8 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
             return;
         }
 
+        setActiveKey(entry.key);
+
         if ((event.target as Element).closest(".tree__toggle, .checkbox") !== null) {
             return;
         }
@@ -354,6 +577,140 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
         onItemClick?.(entry.item, entry.key);
     };
 
+    const renderRow: (entry: ListEntry<Item>) => ReactNode = (entry: ListEntry<Item>): ReactNode => {
+        const expandable: boolean = tree.isExpandable(entry.key);
+        const isExpanded: boolean = expanded.has(entry.key);
+        const isSelected: boolean = selected.has(entry.key);
+        const isChecked: boolean = checked.has(entry.key);
+        const depth: number = resolveDepth(entry);
+        const rowDisabled: boolean = resolveRowDisabled(entry);
+        const siblingKeys: readonly string[] = virtual ? tree.getChildren(entry.parentKey) : [];
+        const positionInSet: number = virtual ? siblingKeys.indexOf(entry.key) + 1 : 0;
+        const rowStyle: CSSProperties = virtual
+            ? {
+                  top: entry.index * itemHeight,
+                  height: itemHeight,
+                  paddingLeft: `calc(${depth} * var(--space-4) + var(--space-2))`,
+              }
+            : {
+                  paddingLeft: `calc(${depth} * var(--space-4) + var(--space-2))`,
+              };
+
+        return (
+            <Surface
+                key={entry.key}
+                ref={(node: HTMLDivElement | null): void => {
+                    if (node === null) {
+                        rowRefs.current.delete(entry.key);
+                        return;
+                    }
+
+                    rowRefs.current.set(entry.key, node);
+                }}
+                className={cx(
+                    "tree__row",
+                    isSelected && "tree__row--selected",
+                    rowDisabled && "tree__row--disabled",
+                )}
+                style={rowStyle}
+                role="treeitem"
+                aria-selected={selectionMode === "none" ? (void 0) : isSelected}
+                aria-checked={checkable ? isChecked : (void 0)}
+                aria-expanded={expandable ? isExpanded : (void 0)}
+                aria-level={depth + 1}
+                aria-disabled={rowDisabled ? "true" : (void 0)}
+                aria-posinset={virtual && positionInSet > 0 ? positionInSet : (void 0)}
+                aria-setsize={virtual && siblingKeys.length > 0 ? siblingKeys.length : (void 0)}
+                tabIndex={!rowDisabled && entry.key === rovingKey ? 0 : -1}
+                disabled={rowDisabled}
+                ripple={{ layer: "foreground", trigger: ["hover", "click"] }}
+                onFocus={(): void => {
+                    setActiveKey(entry.key);
+                }}
+                onClick={(event: ReactMouseEvent<HTMLDivElement>): void => {
+                    handleRowClick(event, entry, rowDisabled);
+                }}
+                onKeyDown={(event: ReactKeyboardEvent<HTMLDivElement>): void => {
+                    handleRowKeyDown(event, entry, rowDisabled);
+                }}
+            >
+                <span
+                    className={
+                        expandable ? "tree__toggle" : "tree__toggle tree__toggle--empty"
+                    }
+                    onClick={(event: ReactMouseEvent<HTMLSpanElement>): void => {
+                        event.stopPropagation();
+
+                        if (expandable && !rowDisabled) {
+                            setActiveKey(entry.key);
+                            toggleExpansion(entry.key);
+                            rowRefs.current.get(entry.key)?.focus();
+                        }
+                    }}
+                    role="presentation"
+                >
+                    {expandable ? (
+                        <Icon name={isExpanded ? "ChevronDown" : "ChevronRight"} size={14} />
+                    ) : null}
+                </span>
+                {checkable ? (
+                    <span
+                        className="tree__check"
+                        onClick={(event: ReactMouseEvent<HTMLSpanElement>): void =>
+                            event.stopPropagation()
+                        }
+                        role="presentation"
+                    >
+                        <Checkbox
+                            size="sm"
+                            checked={isChecked}
+                            disabled={rowDisabled}
+                            onCheckedChange={(): void => {
+                                if (!rowDisabled) {
+                                    setActiveKey(entry.key);
+                                    toggleCheck(entry.key);
+                                }
+                            }}
+                            label={
+                                <span className="visually-hidden">
+                                    Check node {entry.index + 1} of {visible.size}
+                                </span>
+                            }
+                        />
+                    </span>
+                ) : null}
+                <span className="tree__content">
+                    {slots?.item !== (void 0)
+                        ? slots.item(entry.item, {
+                              index: entry.index,
+                              level: depth,
+                              expanded: isExpanded,
+                              selected: isSelected,
+                              checked: isChecked,
+                          })
+                        : renderItem !== (void 0)
+                          ? renderItem(entry.item, depth, isExpanded)
+                          : optionLabel(entry.item)}
+                </span>
+            </Surface>
+        );
+    };
+
+    const renderEntry: (entry: ListEntry<Item>) => ReactNode = (entry: ListEntry<Item>): ReactNode => {
+        const childEntries: readonly ListEntry<Item>[] = childrenByParent.get(entry.key) ?? [];
+
+        return (
+            <Fragment key={entry.key}>
+                {renderRow(entry)}
+                {childEntries.length === 0 ? null : (
+                    <div className="tree__group" role="group">
+                        {childEntries.map(renderEntry)}
+                    </div>
+                )}
+            </Fragment>
+        );
+    };
+
     return (
         <div
             {...rest}
@@ -363,7 +720,11 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
             style={virtual ? { ...style, height } : style}
             aria-busy={loading ? "true" : rest["aria-busy"]}
             aria-disabled={disabled ? "true" : rest["aria-disabled"]}
-            aria-multiselectable={selectionMode === "multiple" ? "true" : rest["aria-multiselectable"]}
+            aria-multiselectable={
+                selectionMode === "multiple" || checkable
+                    ? "true"
+                    : rest["aria-multiselectable"]
+            }
             data-disabled={disabled ? "true" : "false"}
             data-loading={loading ? "true" : "false"}
             onScroll={handleScroll}
@@ -377,115 +738,8 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
                     {empty}
                 </div>
             ) : (
-                <div className="tree__spacer" style={spacerStyle}>
-                    {entries.map((entry: ListEntry<Item>): ReactNode => {
-                        const expandable: boolean = tree.isExpandable(entry.key);
-                        const isExpanded: boolean = expanded.has(entry.key);
-                        const isSelected: boolean = selected.has(entry.key);
-                        const isChecked: boolean = checked.has(entry.key);
-                        const depth: number = isTreeOption(entry.item)
-                            ? entry.item.depth
-                            : entry.level;
-                        const rowDisabled: boolean = disabled || isDisabled?.(entry.item, depth) === true;
-                        const rowStyle: CSSProperties = virtual
-                            ? {
-                                  top: entry.index * itemHeight,
-                                  height: itemHeight,
-                                  paddingLeft: `calc(${depth} * var(--space-4) + var(--space-2))`,
-                              }
-                            : {
-                                  paddingLeft: `calc(${depth} * var(--space-4) + var(--space-2))`,
-                              };
-
-                        return (
-                            <Surface
-                                key={entry.key}
-                                className={cx(
-                                    "tree__row",
-                                    isSelected && "tree__row--selected",
-                                    rowDisabled && "tree__row--disabled",
-                                )}
-                                style={rowStyle}
-                                role="treeitem"
-                                aria-selected={isSelected}
-                                aria-expanded={expandable ? isExpanded : (void 0)}
-                                aria-level={depth + 1}
-                                aria-disabled={rowDisabled ? "true" : (void 0)}
-                                aria-posinset={virtual ? entry.index + 1 : (void 0)}
-                                aria-setsize={virtual ? visible.size : (void 0)}
-                                tabIndex={rowDisabled ? -1 : 0}
-                                disabled={rowDisabled}
-                                ripple={{ layer: "foreground", trigger: ["hover", "click"] }}
-                                onClick={(event: ReactMouseEvent<HTMLDivElement>): void => {
-                                    handleRowClick(event, entry, rowDisabled);
-                                }}
-                                onKeyDown={(event: ReactKeyboardEvent<HTMLDivElement>): void => {
-                                    handleRowKeyDown(event, entry, rowDisabled);
-                                }}
-                            >
-                                <span
-                                    className={
-                                        expandable
-                                            ? "tree__toggle"
-                                            : "tree__toggle tree__toggle--empty"
-                                    }
-                                    onClick={(event: ReactMouseEvent<HTMLSpanElement>): void => {
-                                        event.stopPropagation();
-
-                                        if (expandable && !rowDisabled) {
-                                            toggleExpansion(entry.key);
-                                        }
-                                    }}
-                                    role="presentation"
-                                >
-                                    {expandable ? (
-                                        <Icon
-                                            name={isExpanded ? "ChevronDown" : "ChevronRight"}
-                                            size={14}
-                                        />
-                                    ) : null}
-                                </span>
-                                {checkable ? (
-                                    <span
-                                        className="tree__check"
-                                        onClick={(event: ReactMouseEvent<HTMLSpanElement>): void =>
-                                            event.stopPropagation()
-                                        }
-                                        role="presentation"
-                                    >
-                                        <Checkbox
-                                            size="sm"
-                                            checked={isChecked}
-                                            disabled={rowDisabled}
-                                            onCheckedChange={(): void => {
-                                                if (!rowDisabled) {
-                                                    toggleCheck(entry.key);
-                                                }
-                                            }}
-                                            label={
-                                                <span className="visually-hidden">
-                                                    Check node {entry.index + 1}
-                                                </span>
-                                            }
-                                        />
-                                    </span>
-                                ) : null}
-                                <span className="tree__content">
-                                    {slots?.item !== (void 0)
-                                        ? slots.item(entry.item, {
-                                              index: entry.index,
-                                              level: depth,
-                                              expanded: isExpanded,
-                                              selected: isSelected,
-                                              checked: isChecked,
-                                          })
-                                        : renderItem !== (void 0)
-                                          ? renderItem(entry.item, depth, isExpanded)
-                                          : optionLabel(entry.item)}
-                                </span>
-                            </Surface>
-                        );
-                    })}
+                <div className="tree__spacer" style={spacerStyle} role="none">
+                    {rootEntries.map(renderEntry)}
                 </div>
             )}
         </div>

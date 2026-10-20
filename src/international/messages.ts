@@ -177,6 +177,45 @@ export const interpolateMessage: (template: string, variables?: MessageVariables
 };
 
 /**
+ * Merges a lower-priority dictionary with a caller-provided override.
+ * Nested groups are merged recursively, and every caller value wins over the base value.
+ * @param base - Lower-priority dictionary, usually a built-in locale dictionary.
+ * @param override - Higher-priority caller dictionary.
+ * @example
+ * const merged = mergeMessages({ save: "Save" }, { save: "Store" });
+ * @returns A merged dictionary, or whichever input is available when the other is absent.
+ */
+export const mergeMessages: (
+    base: MessageDictionary | void,
+    override: MessageDictionary | void,
+) => MessageDictionary = (
+    base: MessageDictionary | void,
+    override: MessageDictionary | void,
+): MessageDictionary => {
+    if (base === (void 0)) {
+        return override === (void 0) ? {} : override;
+    }
+
+    if (override === (void 0)) {
+        return base;
+    }
+
+    const merged: Record<string, string | MessageDictionary> = { ...base };
+
+    for (const key of Object.keys(override)) {
+        const baseValue: string | MessageDictionary | void = getOwnProperty(base, key);
+        const overrideValue: string | MessageDictionary = override[key];
+
+        merged[key] =
+            isMessageDictionary(baseValue) && isMessageDictionary(overrideValue)
+                ? mergeMessages(baseValue, overrideValue)
+                : overrideValue;
+    }
+
+    return merged;
+};
+
+/**
  * Resolves, interpolates, and falls back a translation.
  * Lookup order is active locale, fallback locale, then the key itself.
  * @param dictionaries - Resolved active and fallback dictionaries.

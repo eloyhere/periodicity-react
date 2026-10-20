@@ -1,3 +1,4 @@
+export * from "./calendar";
 export * from "./accordion";
 export * from "./alert";
 export * from "./badge";
@@ -173,7 +174,7 @@ export { default as PeriodicityConstraintLayout } from "../layout/constraint/Con
 export { Constraint as PeriodicityConstraint } from "../layout/constraint/ConstraintLayout";
 export { default as PeriodicityDrawerLayout } from "../layout/drawer/DrawerLayout";
 export { default as PeriodicityPager } from "../layout/pager/Pager";
-export { PagerPage as PeriodicityPagerPage } from "../layout/pager/Pager";
+export { Page as PeriodicityPage } from "../layout/pager/Pager";
 export { default as PeriodicityScrollbar } from "./scrollbar/Scrollbar";
 export { Scroll as PeriodicityScroll } from "./scrollbar/Scrollbar";
 export { default as PeriodicityDrag } from "./drag/Drag";
@@ -218,3 +219,10 @@ export type {
     FormActionsProps as PeriodicityFormActionsProps,
     FormFieldControlProps as PeriodicityFormFieldControlProps,
 } from "../layout/form";
+export { default as PeriodicityCalendar } from "./calendar/Calendar";
+export type {
+    CalendarDate as PeriodicityCalendarDate,
+    CalendarDayContext as PeriodicityCalendarDayContext,
+    CalendarProps as PeriodicityCalendarProps,
+    CalendarValue as PeriodicityCalendarValue,
+} from "./calendar/Calendar";

@@ -88,7 +88,36 @@ export interface DrawerProps extends Omit<HTMLAttributes<HTMLDivElement>, "title
 }
 
 /**
+ * Merges ARIA id lists without repeating an id.
+ * @param ids - Whitespace-separated id lists; absent values are passed as `(void 0)`.
+ * @example
+ * const labelledBy = joinIds(titleId, "drawer-heading");
+ * @returns A deduplicated id list.
+ */
+const joinIds: (...ids: readonly (string | void)[]) => string = (...ids: readonly (string | void)[]): string => {
+    const seen: Set<string> = new Set<string>();
+    const parts: string[] = [];
+
+    for (const value of ids) {
+        if (value === (void 0)) {
+            continue;
+        }
+
+        for (const part of value.split(/\s+/)) {
+            if (part.length > 0 && !seen.has(part)) {
+                seen.add(part);
+                parts.push(part);
+            }
+        }
+    }
+
+    return parts.join(" ");
+};
+
+/**
  * Renders an edge-anchored Surface panel with a scrim, focus trap, and scroll lock.
+ * The panel is a modal dialog labelled by its heading, the scrim is hidden from assistive
+ * technology, and the trap activates once the panel has mounted.
  * Native attributes and handlers are forwarded to the dialog panel.
  * @param props - Open state, copy, placement, size, dismissal rules, and native panel attributes.
  * @example
@@ -135,9 +164,9 @@ const Drawer: FC<DrawerProps> = ({
     const [visible, setVisible]: [boolean, (next: boolean) => void] = useState<boolean>(open);
     const [closing, setClosing]: [boolean, (next: boolean) => void] = useState<boolean>(false);
     const mergedRef: RefCallback<HTMLDivElement> = useMergedRef<HTMLDivElement>(panelRef, ref);
-    const labelledBy: string = ariaLabelledBy ?? (hasTitle ? titleId : "");
-    const label: string = ariaLabel ?? (hasTitle || labelledBy.length > 0 ? "" : "Drawer");
-    const describedBy: string = ariaDescribedBy ?? (hasDescription ? descriptionId : "");
+    const labelledBy: string = joinIds(hasTitle ? titleId : (void 0), ariaLabelledBy);
+    const label: string = ariaLabel ?? (labelledBy.length > 0 ? "" : "Drawer");
+    const describedBy: string = joinIds(hasDescription ? descriptionId : (void 0), ariaDescribedBy);
 
     const requestClose: (reason: DrawerCloseReason) => void = (reason: DrawerCloseReason): void => {
         setOpen(false);
@@ -170,7 +199,7 @@ const Drawer: FC<DrawerProps> = ({
     }, [open, visible]);
     /* eslint-enable react-hooks/set-state-in-effect */
 
-    useFocusTrap(panelRef, open && !closing, {
+    useFocusTrap(panelRef, open && visible && !closing, {
         onEscape: closeOnEscape ? (): void => requestClose("escape") : (void 0),
         returnFocus: restoreFocus,
     });

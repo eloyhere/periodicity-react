@@ -27,6 +27,11 @@
     display: none;
 }
 
+.scrollbar__viewport:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
 .scrollbar__content {
     min-width: 0;
 }
@@ -45,6 +50,12 @@
 }
 
 .scrollbar--auto-hide.scrollbar--visible .scrollbar__track {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Keyboard focus on the scroll target keeps the thumb visible. */
+.scrollbar--auto-hide:has([data-scrollbar-keyboard]:focus) .scrollbar__track {
     opacity: 1;
     pointer-events: auto;
 }
@@ -93,6 +104,11 @@
     cursor: grabbing;
 }
 
+.scrollbar__thumb:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
 .scrollbar__thumb:active {
     opacity: 0.8;
 }
@@ -118,4 +134,9 @@
 
 .scrollbar__slot > * {
     pointer-events: auto;
+}
+
+.scrollbar__slot:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: calc(var(--focus-ring-offset) * -1);
 }

@@ -138,8 +138,10 @@ svg {
     background: var(--accent);
 }
 
+/* Focus indicator: token-driven, never thinner than 2px. Components may
+   recolour the ring, but the width floor lives here. */
 :focus-visible {
-    outline: 2px solid var(--accent);
+    outline: var(--focus-ring-width, 2px) solid var(--focus-ring-color, currentColor);
     outline-offset: 3px;
 }
 
@@ -157,6 +159,46 @@ svg {
     border-radius: var(--radius-pill);
     background: var(--line-strong);
     background-clip: padding-box;
+}
+
+/* ==========================================================================
+   Forced colours (Windows high contrast)
+
+   The system palette owns colour in this mode, so these rules only keep
+   shape, focus, and selection perceivable once decorative shadows and
+   background images are dropped. No element opts out of the forced palette:
+   every control keeps a system-colour fallback.
+   ========================================================================== */
+
+@media (forced-colors: active) {
+    html,
+    body {
+        background: Canvas;
+        color: CanvasText;
+    }
+
+    ::selection {
+        color: HighlightText;
+        background: Highlight;
+    }
+
+    a {
+        color: LinkText;
+    }
+
+    a:visited {
+        color: VisitedText;
+    }
+
+    :focus-visible {
+        outline: 3px solid CanvasText;
+        outline-offset: 2px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-color: Canvas;
+        background: CanvasText;
+    }
 }
 
 

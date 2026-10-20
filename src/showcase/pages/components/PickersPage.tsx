@@ -5,6 +5,7 @@ import {
     type SetStateAction,
 } from "react";
 import {
+    Calendar,
     ColourPicker,
     CyclePicker,
     DateTimePicker,
@@ -53,8 +54,18 @@ const pickersCode: string = `<div className="showcase__field-grid">
     />
 </div>`;
 
+const calendarCode: string = `<Calendar
+    label="Delivery date"
+    value={calendarValue}
+    onChange={setCalendarValue}
+    min="2026-01-01"
+    max="2026-12-31"
+    locale="en-GB"
+    firstDayOfWeek={1}
+/>`;
+
 /**
- * Documents time, date-time, number, colour, and variant pickers.
+ * Documents time, date-time, number, colour, variant pickers, and the month calendar.
  * @example
  * <PickersPage />
  * @returns The Pickers entry.
@@ -72,13 +83,16 @@ const PickersPage: FC = () => {
         useState<string>("#1976d2");
     const [variantValue, setVariantValue]: [string, Dispatch<SetStateAction<string>>] =
         useState<string>("blue");
+    const [calendarValue, setCalendarValue]: [string, Dispatch<SetStateAction<string>>] =
+        useState<string>("2026-10-20");
 
     return (
-        <Demo
-            title="Pickers"
-            description="Time, date-time, number, colour, and variant selection, all keyboard reachable."
-            code={pickersCode}
-        >
+        <>
+            <Demo
+                title="Pickers"
+                description="Time, date-time, number, colour, and variant selection, all keyboard reachable."
+                code={pickersCode}
+            >
             <div className="showcase__field-grid">
                 <TimePicker
                     label="Start time"
@@ -122,6 +136,23 @@ const PickersPage: FC = () => {
                 />
             </div>
         </Demo>
+
+            <Demo
+                title="Calendar"
+                description="A locale-aware month grid with arrow, Home/End, PageUp/PageDown, and Enter selection."
+                code={calendarCode}
+            >
+                <Calendar
+                    label="Delivery date"
+                    value={calendarValue}
+                    onChange={setCalendarValue}
+                    min="2026-01-01"
+                    max="2026-12-31"
+                    locale="en-GB"
+                    firstDayOfWeek={1}
+                />
+            </Demo>
+        </>
     );
 };
 

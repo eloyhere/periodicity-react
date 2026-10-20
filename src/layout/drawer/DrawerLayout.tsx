@@ -484,9 +484,13 @@ const DrawerLayout: FC<DrawerLayoutProps> = ({
                     </aside>
                 )}
 
-                <main className="drawer-layout__centre" aria-label={centreLabel}>
+                <div
+                    className="drawer-layout__centre"
+                    role="region"
+                    aria-label={centreLabel}
+                >
                     {centreContent}
-                </main>
+                </div>
 
                 {bottom === (void 0) ? null : (
                     <aside

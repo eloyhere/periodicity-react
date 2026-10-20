@@ -27,6 +27,12 @@
     min-height: 0;
 }
 
+.tree__group {
+    display: block;
+    width: 100%;
+    min-width: 0;
+}
+
 .tree__row {
     display: flex;
     align-items: center;

@@ -78,7 +78,38 @@ export interface TooltipProps extends Omit<HTMLAttributes<HTMLSpanElement>, "con
 }
 
 /**
+ * Merges ARIA id lists without repeating an id.
+ * @param ids - Whitespace-separated id lists; absent values are passed as `(void 0)`.
+ * @example
+ * const describedBy = joinIds(tooltipId, "shortcut");
+ * @returns A deduplicated id list.
+ */
+const joinIds: (...ids: readonly (string | void)[]) => string = (...ids: readonly (string | void)[]): string => {
+    const seen: Set<string> = new Set<string>();
+    const parts: string[] = [];
+
+    for (const value of ids) {
+        if (value === (void 0)) {
+            continue;
+        }
+
+        for (const part of value.split(/\s+/)) {
+            if (part.length > 0 && !seen.has(part)) {
+                seen.add(part);
+                parts.push(part);
+            }
+        }
+    }
+
+    return parts.join(" ");
+};
+
+/**
  * Shows a Portal-rendered description on hover or focus and hides it on leave, blur, or Escape.
+ * The trigger is described by exactly one tooltip id at a time; ids already present on the
+ * trigger or passed to the Tooltip are merged without repetition. The tooltip never traps
+ * focus, never becomes the trigger's accessible name, and never falls back to the native
+ * `title` attribute as its only description.
  * @param props - Content, trigger, placement, delay, visibility, and disabled state.
  * @example
  * <Tooltip content="Duplicate the current card" placement="top">
@@ -100,6 +131,7 @@ const Tooltip: FC<TooltipProps> = ({
     closeOnEscape = true,
     ref,
     className = "",
+    "aria-describedby": ariaDescribedBy,
     onPointerEnter,
     onPointerLeave,
     onFocus,
@@ -128,9 +160,11 @@ const Tooltip: FC<TooltipProps> = ({
     const child: ReactElement<TooltipChildProps> = children as ReactElement<TooltipChildProps>;
     const childProps: TooltipChildProps = child.props;
     const mergedTriggerRef: RefCallback<HTMLElement> = useMergedRef<HTMLElement>(triggerRef, childProps.ref);
-    const describedBy: string = [visible ? tooltipId : "", childProps["aria-describedby"] ?? ""]
-        .filter((value: string): boolean => value.length > 0)
-        .join(" ");
+    const describedBy: string = joinIds(
+        visible ? tooltipId : (void 0),
+        ariaDescribedBy,
+        childProps["aria-describedby"],
+    );
 
     const clearShowTimer: () => void = useCallback((): void => {
         if (showTimerRef.current !== null) {

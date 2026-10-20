@@ -13,7 +13,7 @@ The first public npm release of `periodicity-react`.
 
 ### Highlights
 
-- 123 prefixed React components covering forms, pickers, collections, overlays, navigation, messaging, file tools,
+- 124 prefixed React components covering forms, pickers, collections, overlays, navigation, messaging, file tools,
   theming, internationalisation, and motion.
 - A publishable ES module build with TypeScript declarations and an extracted `styles.css`.
 - Native attribute, event, ARIA, data-attribute, and ref pass-through across the component surface.
@@ -27,6 +27,18 @@ The first public npm release of `periodicity-react`.
 - `PeriodicityForm`, `PeriodicityFormField`, and `PeriodicityFormActions`: a native `<form>` wrapper with native
   validation/submission/reset behaviour, generated `label htmlFor` binding, `aria-describedby`, and `aria-invalid`
   wiring for native controls.
+- `PeriodicityCalendar`: locale-aware month grid with roving tabindex, ISO date values, range limits, Intl
+  weekday/month labels, and arrow/Home/End/PageUp/PageDown selection.
+- 18 global theme presets: `accessible`, `default`, `dark`, `milk`, `space-gray`, `gray`, `light-gray`,
+  `sky-blue`, `pale-blue`, `deep-blue`, `orange`, `yellow`, `lemon`, `red`, `rose`, `green`, `deep-green`, and
+  `light-green`, controlled through `theme`/`defaultTheme`/`setTheme`.
+- 12 built-in locales with common design-system messages, `localeOptions`, `builtInMessages`,
+  `resolveLocaleMessages`, and locale direction: `en-GB`, `en-US`, `zh-CN`, `zh-SG`, `zh-HK`, `zh-TW`, `ja-JP`,
+  `ko-KR`, `es-ES`, `es-MX`, `pt-PT`, and `pt-BR`.
+- `Page` replaces `PagerPage` as the paged-route component.
+- Accessibility improvements: form `aria-errormessage`/`aria-required`/combined descriptions, keyboard drag
+  sorting, Scrollbar keyboard support, full calendar keyboard navigation, table/tree ARIA, overlay focus traps,
+  skip link/landmarks, and high-contrast/forced-colors styles.
 - Form controls: button, text input, text area, email, telephone, number, complete input, checkbox, radio group,
   range, switch, select, combobox, mention, and transfer.
 - Pickers: colour, time, date-time, number, cycle, and variant.
@@ -49,6 +61,9 @@ The first public npm release of `periodicity-react`.
 - A custom SVG chart favicon used by the development server and static preview.
 
 ### Changed
+
+- `PagerPage` was renamed to `Page`; `PeriodicityPagerPage` is now `PeriodicityPage`. Route-based Pager usage and the
+  showcase have been updated. This is a breaking rename for consumers that imported the old names.
 
 - Package metadata now targets `periodicity-react@0.1.0`, with React 19 peer dependencies, public npm publishing,
   ES module and declaration entry points, and `periodicity-react/styles.css`.

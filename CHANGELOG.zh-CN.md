@@ -12,7 +12,7 @@
 
 ### 亮点
 
-- 123 个带 `Periodicity` 前缀的 React 组件，覆盖表单、选择器、集合、浮层、导航、消息、文件工具、主题、国际化和动效。
+- 124 个带 `Periodicity` 前缀的 React 组件，覆盖表单、选择器、集合、浮层、导航、消息、文件工具、主题、国际化和动效。
 - 可发布的 ES Module、TypeScript 声明文件和独立 `styles.css`。
 - 全组件范围支持原生属性、事件、ARIA、`data-*` 和 `ref` 透传。
 - 支持受控/非受控状态，以及 disabled、read-only、loading、empty 等完整状态和语义化回调。
@@ -22,6 +22,11 @@
 
 - 所有公共组件提供 `Periodicity` 前缀导出，包括布局和 Provider；不带前缀的名称保留为兼容别名。
 - `PeriodicityForm`、`PeriodicityFormField`、`PeriodicityFormActions`：封装原生 `<form>`，保留原生校验、提交和重置行为，并为原生控件自动生成 `label htmlFor`、`aria-describedby` 和 `aria-invalid` 关联。
+- `PeriodicityCalendar`：支持 locale 的月历网格，使用 roving tabindex、ISO 日期值、范围限制、Intl 星期/月份标签和方向键/Home/End/PageUp/PageDown 选择。
+- 18 套全局主题预设：`accessible`、`default`、`dark`、`milk`、`space-gray`、`gray`、`light-gray`、`sky-blue`、`pale-blue`、`deep-blue`、`orange`、`yellow`、`lemon`、`red`、`rose`、`green`、`deep-green`、`light-green`，通过 `theme`/`defaultTheme`/`setTheme` 切换。
+- 12 个内置 locale 和常用设计系统文案：`en-GB`、`en-US`、`zh-CN`、`zh-SG`、`zh-HK`、`zh-TW`、`ja-JP`、`ko-KR`、`es-ES`、`es-MX`、`pt-PT`、`pt-BR`，并提供 `localeOptions`、`builtInMessages`、`resolveLocaleMessages` 和方向信息。
+- `Page` 取代 `PagerPage` 作为分页路由组件。
+- 无障碍改进：表单 `aria-errormessage`/`aria-required`/组合描述、Drag 键盘排序、Scrollbar 键盘支持、完整日历键盘导航、Table/Tree ARIA、浮层焦点陷阱、skip link/landmarks，以及高对比度/强制颜色样式。
 - 表单控件：Button、TextInput、TextArea、Email、Telephone、Number、CompleteInput、Checkbox、RadioGroup、Range、Switch、Select、Combobox、Mention、Transfer。
 - 选择器：Colour、Time、DateTime、Number、Cycle、Variant。
 - 集合：List、Tree、Table、Select、Combobox、Transfer 的普通版和虚拟化版本，支持 Adapter 数据源和固定行高虚拟化。
@@ -37,6 +42,8 @@
 - 新的 SVG 图表 favicon，用于开发服务器和静态预览。
 
 ### 变更
+
+- `PagerPage` 重命名为 `Page`，`PeriodicityPagerPage` 改为 `PeriodicityPage`。Pager 路由用法和展示页已同步更新；这是旧导出名消费者的破坏性变更。
 
 - package 元信息更新为 `periodicity-react@0.1.0`，使用 React 19 peer dependencies，配置公开 npm 发布、ES Module、声明入口和 `periodicity-react/styles.css`。
 - 库入口导出完整组件 barrel，库构建将样式提取为 `dist/periodicity-react.css`。

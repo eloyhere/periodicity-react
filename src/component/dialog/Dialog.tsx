@@ -109,7 +109,64 @@ const FocusableSelector: string = [
 ].join(",");
 
 /**
- * Picks the first element to focus when the dialog opens.
+ * Reports whether an element can receive focus and is visibly rendered.
+ * @param node - Candidate focus target.
+ * @example
+ * const usable = isVisibleFocusable(button);
+ * @returns Whether the element belongs in the Tab sequence.
+ */
+const isVisibleFocusable: (node: HTMLElement) => boolean = (node: HTMLElement): boolean =>
+    node.getClientRects().length > 0 &&
+    !node.hasAttribute("inert") &&
+    node.closest("[inert]") === null &&
+    !(node instanceof HTMLInputElement && node.type === "hidden");
+
+/**
+ * Collects the visible focusable descendants of a dialog.
+ * @param container - Dialog element.
+ * @example
+ * const items = getFocusableItems(dialog);
+ * @returns Focusable elements in document order.
+ */
+const getFocusableItems: (container: HTMLElement) => HTMLElement[] = (
+    container: HTMLElement,
+): HTMLElement[] =>
+    Array.from(container.querySelectorAll<HTMLElement>(FocusableSelector)).filter(
+        (node: HTMLElement): boolean => isVisibleFocusable(node),
+    );
+
+/**
+ * Merges ARIA id lists without repeating an id.
+ * @param ids - Whitespace-separated id lists; absent values are passed as `(void 0)`.
+ * @example
+ * const describedBy = joinIds("title", "hint title");
+ * @returns A deduplicated id list.
+ */
+const joinIds: (...ids: readonly (string | void)[]) => string = (...ids: readonly (string | void)[]): string => {
+    const seen: Set<string> = new Set<string>();
+    const parts: string[] = [];
+
+    for (const value of ids) {
+        if (value === (void 0)) {
+            continue;
+        }
+
+        for (const part of value.split(/\s+/)) {
+            if (part.length > 0 && !seen.has(part)) {
+                seen.add(part);
+                parts.push(part);
+            }
+        }
+    }
+
+    return parts.join(" ");
+};
+
+/**
+ * Picks the element to focus when the dialog opens.
+ * The order is the explicit `data-autofocus` target, the native `autofocus` target, an element
+ * React has already focused inside the dialog, the first visible focusable control, the heading,
+ * and finally the panel.
  * @param dialog - Open dialog element.
  * @param title - Dialog heading, already made programmatically focusable.
  * @param panel - Dialog panel used as the last resort.
@@ -126,16 +183,38 @@ const getInitialFocus: (
     title: HTMLElement | null,
     panel: HTMLElement | null,
 ): HTMLElement | null => {
-    const autofocus: HTMLElement | null = dialog.querySelector<HTMLElement>("[data-autofocus]");
+    const autofocus: HTMLElement | void = Array.from(
+        dialog.querySelectorAll<HTMLElement>("[data-autofocus]"),
+    ).find(
+        (node: HTMLElement): boolean =>
+            node.getAttribute("data-autofocus") !== "false" && isVisibleFocusable(node),
+    );
 
-    if (autofocus !== null) {
+    if (autofocus !== (void 0)) {
         return autofocus;
     }
 
-    const focusable: HTMLElement[] = Array.from(dialog.querySelectorAll<HTMLElement>(FocusableSelector));
-    const control: HTMLElement | void = focusable.find(
-        (node: HTMLElement): boolean => node.getClientRects().length > 0,
-    );
+    const nativeAutofocus: HTMLElement | void = Array.from(
+        dialog.querySelectorAll<HTMLElement>("[autofocus]"),
+    ).find((node: HTMLElement): boolean => isVisibleFocusable(node));
+
+    if (nativeAutofocus !== (void 0)) {
+        return nativeAutofocus;
+    }
+
+    const active: Element | null = document.activeElement;
+
+    if (
+        active instanceof HTMLElement &&
+        active !== dialog &&
+        dialog.contains(active) &&
+        isVisibleFocusable(active)
+    ) {
+        return active;
+    }
+
+    const focusable: HTMLElement[] = getFocusableItems(dialog);
+    const control: HTMLElement | void = focusable[0];
 
     if (control !== (void 0)) {
         return control;
@@ -176,6 +255,9 @@ const restoreFocus: (previousActive: RefObject<HTMLElement | null>, restore: boo
 
 /**
  * Renders a native modal dialog with managed focus, dismiss and scroll locking.
+ * The dialog is labelled by its heading, described by its description, and exposes `aria-modal`.
+ * `Tab` and `Shift+Tab` wrap inside the dialog, and the native `::backdrop` stays out of the
+ * accessibility tree because it is a presentational pseudo-element.
  * The `open` state may be controlled or uncontrolled; `onClose` reports the reason
  * (`backdrop`, `close-button`, `escape`, or `native`).
  * @param props - Open state, labels, heading level, dismissal rules, native dialog attributes, and content.
@@ -220,7 +302,7 @@ const Dialog: FC<DialogProps> = ({
     const pointerDownOutsideRef: RefObject<boolean> = useRef<boolean>(false);
     const titleId: string = useId();
     const descriptionId: string = useId();
-    const hasDescription: boolean = description !== (void 0) && description !== null;
+    const hasDescription: boolean = description !== (void 0) && description !== null && description !== "";
     const hasBody: boolean = children !== null && children !== (void 0) && children !== false;
     const headingTag: "h2" | "h3" | "h4" = headingLevel === 3 ? "h3" : headingLevel === 4 ? "h4" : "h2";
     const [open, setOpen]: readonly [
@@ -232,12 +314,8 @@ const Dialog: FC<DialogProps> = ({
         onChange: onOpenChange,
     });
     const mergedRef: RefCallback<HTMLDialogElement> = useMergedRef<HTMLDialogElement>(dialogRef, ref);
-    const labelledBy: string = [titleId, ariaLabelledBy ?? ""]
-        .filter((value: string): boolean => value.length > 0)
-        .join(" ");
-    const describedBy: string = [hasDescription ? descriptionId : "", ariaDescribedBy ?? ""]
-        .filter((value: string): boolean => value.length > 0)
-        .join(" ");
+    const labelledBy: string = joinIds(titleId, ariaLabelledBy);
+    const describedBy: string = joinIds(hasDescription ? descriptionId : (void 0), ariaDescribedBy);
 
     const requestClose: (reason: DialogCloseReason) => void = (reason: DialogCloseReason): void => {
         setOpen(false);
@@ -268,7 +346,68 @@ const Dialog: FC<DialogProps> = ({
             );
             focusTarget?.focus({ preventScroll: true });
 
+            const handleTabKeyDown: (event: KeyboardEvent) => void = (event: KeyboardEvent): void => {
+                if (event.key !== "Tab" || event.defaultPrevented || !dialog.open) {
+                    return;
+                }
+
+                const active: Element | null = document.activeElement;
+                const owningDialog: Element | null =
+                    active instanceof Element ? active.closest("dialog[open]") : null;
+
+                if (owningDialog !== null && owningDialog !== dialog) {
+                    return;
+                }
+
+                const focusable: HTMLElement[] = getFocusableItems(dialog);
+
+                if (focusable.length === 0) {
+                    event.preventDefault();
+                    (titleRef.current ?? panelRef.current ?? dialog).focus({ preventScroll: true });
+                    return;
+                }
+
+                const first: HTMLElement = focusable[0];
+                const last: HTMLElement = focusable[focusable.length - 1];
+
+                if (!(active instanceof HTMLElement) || !dialog.contains(active)) {
+                    event.preventDefault();
+                    (event.shiftKey ? last : first).focus({ preventScroll: true });
+                    return;
+                }
+
+                if (active === dialog) {
+                    event.preventDefault();
+                    (event.shiftKey ? last : first).focus({ preventScroll: true });
+                    return;
+                }
+
+                if (focusable.indexOf(active) === -1) {
+                    event.preventDefault();
+                    (event.shiftKey ? last : first).focus({ preventScroll: true });
+                    return;
+                }
+
+                if (event.shiftKey) {
+                    if (active === first) {
+                        event.preventDefault();
+                        last.focus({ preventScroll: true });
+                    }
+
+                    return;
+                }
+
+                if (active === last) {
+                    event.preventDefault();
+                    first.focus({ preventScroll: true });
+                }
+            };
+
+            document.addEventListener("keydown", handleTabKeyDown);
+
             return (): void => {
+                document.removeEventListener("keydown", handleTabKeyDown);
+
                 if (dialog.open) {
                     syncingCloseRef.current = true;
                     dialog.close();

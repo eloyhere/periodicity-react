@@ -29,7 +29,7 @@ import {
     List,
     NavigationView,
     Pager,
-    PagerPage,
+    Page,
     Scroll,
     Scrollbar,
     Surface,
@@ -246,24 +246,24 @@ const pagerCode: string = `<Pager
     onRouteChange={(route) => toast.show({ title: \`Pager route: \${route}\` })}
     ariaLabel="Layout pager"
 >
-    <PagerPage route="one">
+    <Page route="one">
         <Surface className="showcase__page" elevation={1} shape="sm">
             <Text variant="h4">Page one</Text>
             <Text variant="body-sm" tone="muted">Swipe or use the arrow keys.</Text>
         </Surface>
-    </PagerPage>
-    <PagerPage route="two">
+    </Page>
+    <Page route="two">
         <Surface className="showcase__page" elevation={1} shape="sm">
             <Text variant="h4">Page two</Text>
             <Text variant="body-sm" tone="muted">Scroll-snapped page.</Text>
         </Surface>
-    </PagerPage>
-    <PagerPage route="three">
+    </Page>
+    <Page route="three">
         <Surface className="showcase__page" elevation={1} shape="sm">
             <Text variant="h4">Page three</Text>
             <Text variant="body-sm" tone="muted">Last page.</Text>
         </Surface>
-    </PagerPage>
+    </Page>
 </Pager>`;
 
 const drawerLayoutCode: string = `<DrawerLayout
@@ -661,30 +661,30 @@ const LayoutPage: FC = () => {
                         }}
                         ariaLabel="Layout pager"
                     >
-                        <PagerPage route="one">
+                        <Page route="one">
                             <Surface className="showcase__page" elevation={1} shape="sm">
                                 <Text variant="h4">Page one</Text>
                                 <Text variant="body-sm" tone="muted">
                                     Swipe or use the arrow keys.
                                 </Text>
                             </Surface>
-                        </PagerPage>
-                        <PagerPage route="two">
+                        </Page>
+                        <Page route="two">
                             <Surface className="showcase__page" elevation={1} shape="sm">
                                 <Text variant="h4">Page two</Text>
                                 <Text variant="body-sm" tone="muted">
                                     Scroll-snapped page.
                                 </Text>
                             </Surface>
-                        </PagerPage>
-                        <PagerPage route="three">
+                        </Page>
+                        <Page route="three">
                             <Surface className="showcase__page" elevation={1} shape="sm">
                                 <Text variant="h4">Page three</Text>
                                 <Text variant="body-sm" tone="muted">
                                     Last page.
                                 </Text>
                             </Surface>
-                        </PagerPage>
+                        </Page>
                     </Pager>
                 </Stack>
             </Demo>

@@ -1,12 +1,15 @@
 import {
     useEffect,
+    useRef,
     useState,
     type ChangeEvent,
     type CSSProperties,
     type Dispatch,
     type FC,
     type FormEvent,
+    type MouseEvent,
     type ReactNode,
+    type RefObject,
     type SetStateAction,
 } from "react";
 import { Columns, Inline, Stack } from "./arrange/layout";
@@ -94,6 +97,7 @@ const App: FC = () => {
         remaining: FocusTotal,
         running: false,
     });
+    const mainRef: RefObject<HTMLElement | null> = useRef<HTMLElement | null>(null);
 
     const completedCount: number = rituals.filter((ritual: Ritual): boolean => ritual.done).length;
     const openCount: number = rituals.length - completedCount;
@@ -123,6 +127,10 @@ const App: FC = () => {
             // The theme still applies for this session when storage is blocked.
         }
     }, [theme]);
+
+    useEffect((): void => {
+        document.title = "Overview · Periodicity";
+    }, []);
 
     useEffect((): (() => void) | void => {
         if (!focus.running) {
@@ -236,8 +244,26 @@ const App: FC = () => {
         setAnnouncement(`${title} was added to your rituals.`);
     };
 
+    /**
+     * Moves focus to the dashboard main landmark without leaving the screen.
+     * The dashboard is also addressable by hash, so following `#main-content`
+     * natively would look like a different route after a reload.
+     * @param event - The skip link click event.
+     * @example
+     * <a href="#main-content" onClick={handleSkipToContent}>Skip to content</a>
+     */
+    const handleSkipToContent: (event: MouseEvent<HTMLAnchorElement>) => void = (
+        event: MouseEvent<HTMLAnchorElement>,
+    ): void => {
+        event.preventDefault();
+        mainRef.current?.focus();
+    };
+
     return (
         <>
+            <a className="skip-link" href="#main-content" onClick={handleSkipToContent}>
+                Skip to content
+            </a>
             <Inline className="app-shell" gap="xl" align="stretch">
                 <aside className="sidebar" aria-label="Workspace">
                     <Stack className="sidebar__inner" gap="lg">
@@ -274,7 +300,7 @@ const App: FC = () => {
                                             key={item.id}
                                             type="button"
                                             className={`nav__item ${isActive ? "is-active" : ""}`.trim()}
-                                            aria-current={isActive ? "page" : "false"}
+                                            aria-current={isActive ? "page" : (void 0)}
                                             onClick={(): void => setActiveNav(item.id)}
                                         >
                                             <Icon name={item.icon} size={17} />
@@ -334,9 +360,15 @@ const App: FC = () => {
                     </Stack>
                 </aside>
 
-                <main className="main">
+                <main
+                    className="main"
+                    id="main-content"
+                    ref={mainRef}
+                    tabIndex={-1}
+                    aria-labelledby="app-page-title"
+                >
                     <Stack className="main__stack" gap="lg">
-                        <Inline className="topbar" justify="between" align="center" gap="md" wrap>
+                        <header className="topbar">
                             <nav className="crumbs" aria-label="Breadcrumb">
                                 <ol className="crumbs__list">
                                     <li className="crumbs__item">Personal</li>
@@ -371,7 +403,7 @@ const App: FC = () => {
                                     MC
                                 </span>
                             </Inline>
-                        </Inline>
+                        </header>
 
                         <Surface
                             className="hero"
@@ -390,7 +422,7 @@ const App: FC = () => {
                                         <span className="hero__pulse" aria-hidden="true" />
                                         Cycle 04 · Day {CycleDay}
                                     </p>
-                                    <h1 className="hero__title">
+                                    <h1 className="hero__title" id="app-page-title">
                                         Keep the rhythm, <em>not the rush.</em>
                                     </h1>
                                     <p className="hero__lede">
@@ -612,13 +644,13 @@ const App: FC = () => {
                             </Card>
                         </Inline>
 
-                        <Inline className="footer-strip" justify="between" align="center" gap="md" wrap>
+                        <footer className="footer-strip">
                             <p className="footer-strip__quote">Small loops, repeated with care.</p>
                             <p className="footer-strip__status">
                                 <span className="footer-strip__pulse" aria-hidden="true" />
                                 All systems quiet
                             </p>
-                        </Inline>
+                        </footer>
                     </Stack>
                 </main>
             </Inline>

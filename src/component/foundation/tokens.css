@@ -79,6 +79,11 @@
     --state-disabled-opacity: 0.45;
     --state-disabled-container-opacity: 0.12;
 
+    /* Icon-button hover/press washes. Dark surfaces need a light wash, so the
+       pair is tokenised instead of hard-coding black in both themes. */
+    --colourHoverWash: rgba(0, 0, 0, 0.08);
+    --colourActiveWash: rgba(0, 0, 0, 0.12);
+
     /* ------------------------------------------------------------------
        Elevation — border + inner highlight instead of stacked shadows
        ------------------------------------------------------------------ */
@@ -157,6 +162,20 @@
     --color-inverse-on-surface: var(--bg);
     --color-scrim: var(--scrim);
     --color-shadow: rgba(0, 0, 0, 0.45);
+
+    /* Inverse paper (snackbars, tooltips) is dark in every theme, so its text
+       colours cannot be derived from the page palette. Declared once here. */
+    --colourInversePaper: #323232;
+    --colourTooltipPaper: rgba(97, 97, 97, 0.92);
+    --colourOnInverse: #ffffff;
+    --colourOnInverseMuted: rgba(255, 255, 255, 0.72);
+    --colourInverseAction: #90caf9;
+
+    /* Status hues sit on the dark inverse paper, so they must be the light
+       variants; the page-level status tokens would fail 3:1 there. */
+    --colourSuccessOnInverse: #a5d6a7;
+    --colourWarningOnInverse: #ffd54f;
+    --colourDangerOnInverse: #ffdad6;
 
     /* ------------------------------------------------------------------
        British-spelled aliases — the public naming used by new components
@@ -298,4 +317,107 @@
     --colourDivider: rgba(0, 0, 0, 0.12);
     --colourControlHighlight: rgba(0, 0, 0, 0.12);
     --colourScrim: rgba(0, 0, 0, 0.32);
+}
+
+/* Themed surfaces need a light hover/press wash; black would disappear. */
+:root .periodicity-theme[data-theme="dark"] {
+    --colourHoverWash: rgba(255, 255, 255, 0.08);
+    --colourActiveWash: rgba(255, 255, 255, 0.12);
+}
+
+/* ==========================================================================
+   prefers-contrast: more
+
+   The shared tokens get stronger text, borders, focus, disabled, and status
+   colours; components inherit the change without local overrides. Normal mode
+   is untouched because every declaration lives inside the media query. The
+   scoped-theme selectors carry :root so they outrank the palette blocks in
+   Theme.css regardless of stylesheet order.
+   ========================================================================== */
+
+@media (prefers-contrast: more) {
+    /* html:root outranks the :root palette in index.css: @import content is
+       placed before the importing sheet, so an equal-specificity :root rule
+       here would lose to the base palette. */
+    html:root,
+    :root .periodicity-theme[data-theme="light"] {
+        --colourTextPrimary: #000000;
+        --colourTextSecond: #1f1f1f;
+        --colourTextDisabled: rgba(0, 0, 0, 0.55);
+        --colourDivider: rgba(0, 0, 0, 0.45);
+        --colourControlHighlight: rgba(0, 0, 0, 0.24);
+        --colourHoverWash: rgba(0, 0, 0, 0.14);
+        --colourActiveWash: rgba(0, 0, 0, 0.22);
+        --colourPrimary: #0d47a1;
+        --colourPrimaryDark: #002171;
+        --colourPrimaryLight: #1565c0;
+        --colourError: #8c1d18;
+        --colourWarning: #8a4b00;
+        --mint: #1b5e20;
+        --violet: #6a1b9a;
+        --amber: #8a4b00;
+        --accent-soft: rgba(13, 71, 161, 0.14);
+        --mint-soft: rgba(27, 94, 32, 0.16);
+        --violet-soft: rgba(106, 27, 154, 0.16);
+        --amber-soft: rgba(138, 75, 0, 0.18);
+        --danger-soft: rgba(140, 29, 24, 0.18);
+        --focus-ring-color: var(--colourPrimaryDark);
+        --focus-ring-width: 3px;
+        --state-disabled-opacity: 0.62;
+        --colourOnInverseMuted: #ffffff;
+        --colourInverseAction: #ffffff;
+        --colourTooltipPaper: #000000;
+    }
+
+    :root .periodicity-theme[data-theme="dark"] {
+        --colourTextPrimary: #ffffff;
+        --colourTextSecond: rgba(255, 255, 255, 0.86);
+        --colourTextDisabled: rgba(255, 255, 255, 0.62);
+        --colourDivider: rgba(255, 255, 255, 0.45);
+        --colourControlHighlight: rgba(255, 255, 255, 0.26);
+        --colourHoverWash: rgba(255, 255, 255, 0.16);
+        --colourActiveWash: rgba(255, 255, 255, 0.24);
+        --colourPrimary: #bbdefb;
+        --colourPrimaryDark: #e3f2fd;
+        --colourPrimaryLight: #90caf9;
+        --colourOnPrimary: #06131a;
+        --colourError: #ffdad6;
+        --colourWarning: #ffd54f;
+        --mint: #a5d6a7;
+        --violet: #e1bee7;
+        --amber: #ffd54f;
+        --accent-soft: rgba(187, 222, 251, 0.2);
+        --mint-soft: rgba(165, 214, 167, 0.2);
+        --violet-soft: rgba(225, 190, 231, 0.2);
+        --amber-soft: rgba(255, 213, 79, 0.2);
+        --danger-soft: rgba(255, 218, 214, 0.24);
+        --focus-ring-color: #ffffff;
+        --focus-ring-width: 3px;
+        --state-disabled-opacity: 0.66;
+        --colourOnInverseMuted: #ffffff;
+        --colourInverseAction: #ffffff;
+        --colourTooltipPaper: #000000;
+    }
+}
+
+/* ==========================================================================
+   Forced colours
+
+   System colours replace the palette, so the elevation tokens are emptied:
+   shadows are decorative and must never be the only boundary. The rules that
+   supply real borders live in material-components.css. No element opts out of
+   the system palette.
+   ========================================================================== */
+
+@media (forced-colors: active) {
+    html:root,
+    :root .periodicity-theme[data-theme] {
+        --elevation-1: none;
+        --elevation-2: none;
+        --elevation-3: none;
+        --shadow-sm: none;
+        --shadow-lg: none;
+        --focus-ring-color: CanvasText;
+        --focus-ring-width: 3px;
+    }
 }

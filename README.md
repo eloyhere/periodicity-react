@@ -2,7 +2,7 @@
 
 A Material-inspired React component library for product interfaces, admin tools, and data-heavy applications.
 
-`periodicity-react` brings together 123 prefixed components: form controls, overlays, navigation, collections,
+`periodicity-react` brings together 124 prefixed components: form controls, overlays, navigation, collections,
 messaging, file tooling, and the design-system providers that connect them. The API is TypeScript-first, flex-first,
 and deliberately close to the browser: native attributes, events, ARIA, and refs pass through wherever they make
 sense.
@@ -151,6 +151,50 @@ Available picker components:
 - `PeriodicityNumberPicker`
 - `PeriodicityCyclePicker`
 - `PeriodicityVariantPicker`
+- `PeriodicityCalendar`
+
+### Colour picker
+
+`PeriodicityColourPicker` combines a native colour input, a visible hex value, and a row of preset swatches. The
+native input keeps the platform picker and keyboard behaviour; the label, hint, error, disabled, and read-only states
+come from the shared picker field.
+
+```tsx
+import { PeriodicityColourPicker } from "periodicity-react";
+
+<PeriodicityColourPicker
+    label="Brand colour"
+    defaultValue="#1976d2"
+    showValue
+    onChange={(value) => console.log(value)}
+/>;
+```
+
+The value is a CSS hex colour. `value` makes it controlled; `defaultValue` keeps it uncontrolled. Preset swatches
+use `aria-pressed` and become inert when `readOnly` or `disabled` is set.
+
+### Calendar
+
+`PeriodicityCalendar` is a locale-aware month grid with a single roving tab stop. Values use ISO `YYYY-MM-DD`
+strings; `value` makes the selection controlled and `defaultValue` keeps it uncontrolled.
+
+```tsx
+import { PeriodicityCalendar } from "periodicity-react";
+
+<PeriodicityCalendar
+    label="Delivery date"
+    value={date}
+    onChange={setDate}
+    min="2026-01-01"
+    max="2026-12-31"
+    locale="en-GB"
+    firstDayOfWeek={1}
+/>;
+```
+
+Keyboard: arrows move by day or week, Home/End move to the week bounds, PageUp/PageDown change month,
+Shift+PageUp/PageDown change year, and Enter or Space selects. `showAdjacentDays`, `weekdayLabels`, `monthLabels`,
+`renderDay`, `disabled`, and `readOnly` cover the common customisations.
 
 Most form and picker components support controlled and uncontrolled values, `disabled`, `readOnly` where relevant,
 and caller-composed native handlers. `PeriodicityMention` adds an asynchronous suggestion list and tokenised chips;
@@ -275,18 +319,44 @@ completion is required.
 
 ## Theming
 
-Wrap the application in `PeriodicityTheme`:
+Wrap the application in `PeriodicityTheme` and select a global preset with `theme`:
 
 ```tsx
 import { PeriodicityTheme } from "periodicity-react";
 
-<PeriodicityTheme mode="dark">
+<PeriodicityTheme theme="milk">
     <App />
 </PeriodicityTheme>;
 ```
 
-`mode` accepts `"light"`, `"dark"`, or `"system"`. The provider supports controlled and uncontrolled modes, density,
-radius, design tokens, and native element attributes. Nested providers inherit unspecified values.
+`theme` is controlled; `defaultTheme` is the uncontrolled equivalent, and `onThemeChange` observes changes.
+`useTheme().setTheme(id)` switches the preset at runtime. A bare `<Theme>` keeps the existing system-mode behaviour.
+An explicit `mode` prop overrides the preset's light/dark mode; explicit `tokens` override preset tokens.
+
+| Preset        | Chinese  | English       | Mode  |
+| ------------- | -------- | ------------- | ----- |
+| `accessible`  | 高对比度 | High contrast | light |
+| `default`     | 默认     | Default       | light |
+| `dark`        | 夜间     | Dark          | dark  |
+| `milk`        | 牛奶白   | Milk white    | light |
+| `space-gray`  | 深空灰   | Space grey    | dark  |
+| `gray`        | 灰色     | Grey          | dark  |
+| `light-gray`  | 浅灰色   | Light grey    | light |
+| `sky-blue`    | 天蓝色   | Sky blue      | light |
+| `pale-blue`   | 淡蓝色   | Pale blue     | light |
+| `deep-blue`   | 深蓝色   | Deep blue     | dark  |
+| `orange`      | 橙色     | Orange        | light |
+| `yellow`      | 黄色     | Yellow        | light |
+| `lemon`       | 柠檬黄   | Lemon yellow  | light |
+| `red`         | 红色     | Red           | light |
+| `rose`        | 玫瑰红   | Rose red      | light |
+| `green`       | 绿色     | Green         | light |
+| `deep-green`  | 深绿色   | Deep green    | dark  |
+| `light-green` | 浅绿色   | Light green   | light |
+
+`themePresets`, `getThemePreset(id)`, and the `ThemePresetId` type are exported. The accessibility preset raises
+text, border, focus, and disabled contrast; the `prefers-contrast` and `forced-colors` media queries provide an
+additional system-level layer.
 
 ## Internationalisation
 
@@ -298,9 +368,31 @@ import { PeriodicityInternational } from "periodicity-react";
 </PeriodicityInternational>;
 ```
 
-The provider supports locale inheritance, fallback locales, message maps, interpolation, and a native `lang`
-override. `PeriodicityAnimation` and `PeriodicityAnimated` provide motion configuration, reduced-motion handling,
-and element-polymorphic animation wrappers.
+Built-in locales, in order:
+
+| Locale  | Language             |
+| ------- | -------------------- |
+| `en-GB` | British English      |
+| `en-US` | American English     |
+| `zh-CN` | 中国大陆简体中文     |
+| `zh-SG` | 新加坡简体中文       |
+| `zh-HK` | 香港繁体中文         |
+| `zh-TW` | 台湾繁体中文         |
+| `ja-JP` | 日本語               |
+| `ko-KR` | 한국어               |
+| `es-ES` | Español (España)     |
+| `es-MX` | Español (México)     |
+| `pt-PT` | Português (Portugal) |
+| `pt-BR` | Português (Brasil)   |
+
+`localeOptions`, `builtInMessages`, `resolveLocaleMessages`, and `useInternational()` are exported. The built-in
+dictionaries cover common actions, states, navigation, selection, and relative-date terms; caller messages deep-merge
+over them, missing keys fall back to `en-GB`, and custom locale tags remain accepted. `t("save")` resolves a
+message, `formatNumber` and `formatDate` follow the active locale, and `dir` is `rtl` for right-to-left custom tags.
+Components with visible labels also accept label props for product-specific copy.
+
+`PeriodicityAnimation` and `PeriodicityAnimated` provide motion configuration, reduced-motion handling, and
+element-polymorphic animation wrappers.
 
 ## Motion
 
@@ -315,8 +407,83 @@ disabled.
 - Focus restoration and escape handling are supported by overlays.
 - Selection colours are scoped so selected text remains readable.
 - Reduced-motion preferences are respected by the animation and ripple layers.
+- `PeriodicityDrag` supports Alt+ArrowUp/Alt+ArrowDown keyboard sorting with live-region announcements.
+- `PeriodicityScrollbar` supports Arrow, Page, Home/End, and Space keyboard scrolling with scrollbar ARIA.
+- `PeriodicityCalendar` and `PeriodicityDateTimePicker` expose full calendar-grid keyboard navigation and roving focus.
+- Table and Tree expose row headers, sort-neutral headers, tree levels, checked/selected states, and virtual set positions.
+- A skip link, landmark structure, reduced-motion handling, forced-colors support, and `prefers-contrast` styles are built in.
 
 If a component wraps a native control, prefer its native props and events over duplicating ARIA by hand.
+
+## Additional components
+
+The following components are part of the public API. Use the showcase for live examples and the exported prop types for the full API.
+
+| Component              | Purpose                                                                          |
+| ---------------------- | -------------------------------------------------------------------------------- |
+| `EmailInput`           | Email field with a mail keyboard hint and shared email sanitising rules.         |
+| `TelephoneInput`       | Telephone field with a tel keyboard hint and shared number sanitising rules.     |
+| `CompleteInput`        | Free-text field that suggests matching options while the caller keeps the value. |
+| `VirtualSelect`        | Windowed select for long option lists, rendering only the visible rows.          |
+| `Radio`                | Single radio option designed to sit inside a RadioGroup.                         |
+| `RadioGroup`           | Grouped single-choice control with a fieldset label and orientation.             |
+| `Field`                | Label, hint, error, and counter chrome that wraps any native control.            |
+| `FieldGroup`           | Fieldset wrapper that groups related choices under one legend and hint.          |
+| `Card`                 | Editorial surface with eyebrow, media, footer, tone, and interactivity.          |
+| `Surface`              | The layered Material surface: background, component, and foreground.             |
+| `StateLayer`           | Hover, press, and focus tint painted above a surface background.                 |
+| `Badge`                | Compact status label or count bubble with semantic tones.                        |
+| `Tag`                  | Small removable label for categories, states, and filters.                       |
+| `TabLayout`            | Compatibility alias for `Tabs`, retained for existing imports.                   |
+| `Chip`                 | Assist, filter, and input chips with icons and removal.                          |
+| `Avatar`               | Identity mark with initials or image, size, tone, and presence.                  |
+| `AvatarGroup`          | Overlapping avatar stack with an overflow count.                                 |
+| `Divider`              | Thin rule with optional inset and label variants.                                |
+| `Timeline`             | Chronological record with item states, icons, and tones.                         |
+| `Rate`                 | Star rating with half values, read-only mode, and small or large sizes.          |
+| `EmptyState`           | Centred empty message with icon, description, and action slots.                  |
+| `Banner`               | Page-level announcement with an action and a dismissible state.                  |
+| `Progress`             | Linear determinate or indeterminate progress with tone and size.                 |
+| `CircularProgress`     | Circular determinate or indeterminate progress with a label.                     |
+| `ProgressRing`         | Compact circular gauge for a single bounded value.                               |
+| `Spinner`              | Small rotating busy indicator in three sizes.                                    |
+| `Skeleton`             | Placeholder shapes for text, rectangles, and circles while loading.              |
+| `ElementLoading`       | Overlay that binds a spinner to one referenced element.                          |
+| `FullscreenLoading`    | Native-dialog loader that covers the viewport and accepts a duration.            |
+| `useLoad`              | Imperative loader service with element, delay, and promise overloads.            |
+| `ConfirmDialog`        | Confirmation modal with tone, confirm label, and an async-safe close.            |
+| `MessageDialog`        | Announcement modal with one action and a close callback.                         |
+| `InputDialog`          | Single-line input modal with validation and submit handling.                     |
+| `Snackbar`             | Transient bottom message with an optional action.                                |
+| `Backdrop`             | Full-screen scrim with neutral or accent tone and optional blur.                 |
+| `Dropdown`             | Anchored dropdown panel with header, footer, empty, and item slots.              |
+| `DropdownItem`         | One selectable row inside a dropdown, with icon and shortcut.                    |
+| `DropdownGroup`        | Labelled group of related dropdown items.                                        |
+| `DropdownSeparator`    | Rule between dropdown groups.                                                    |
+| `ContextMenu`          | Right-click and long-press menu with a heading and empty slot.                   |
+| `ContextMenuGroup`     | Labelled group inside a context menu.                                            |
+| `ContextMenuItem`      | One action row inside a context menu, with icon and danger tone.                 |
+| `ContextMenuSeparator` | Rule between context-menu groups.                                                |
+| `Popover`              | Anchored dismissible panel for a small amount of content.                        |
+| `Tooltip`              | Hover and focus hint positioned on any side of its child.                        |
+| `Accordion`            | Expandable panels in single, multiple, or contained mode.                        |
+| `Breadcrumbs`          | Trail of route links with truncation for long paths.                             |
+| `Pagination`           | Page controls with previous, next, and a bounded page count.                     |
+| `NormalList`           | List preset without selection.                                                   |
+| `MultipleList`         | List preset with toggleable multi-selection.                                     |
+| `SelectList`           | List preset with one active row.                                                 |
+| `CheckList`            | Checkable list with a checkbox per row.                                          |
+| `VirtualList`          | Windowed list for long collections, rendering only visible rows.                 |
+| `CheckTree`            | Tree preset with a checkbox per node.                                            |
+| `SelectTree`           | Tree preset with single-node selection.                                          |
+| `VirtualTree`          | Windowed tree for large hierarchies.                                             |
+| `VirtualContact`       | Windowed contact list for long rosters.                                          |
+| `VirtualMessageList`   | Windowed message transcript for long conversations.                              |
+| `VirtualChat`          | Windowed conversation layout for long threads.                                   |
+| `ContactContextMenu`   | Contact row wrapped in the shared context menu.                                  |
+| `MessageContextMenu`   | Message row wrapped in the shared context menu.                                  |
+| `Portal`               | Renders children into document body or a supplied container.                     |
+| `VisuallyHidden`       | Content that stays available to assistive technology only.                       |
 
 ## Development
 

@@ -22,6 +22,7 @@ import {
     type ThemeRadius,
     type ThemeTokens,
 } from "./ThemeContext";
+import { getThemePreset, type ThemePreset, type ThemePresetId } from "./ThemePresets";
 import "./Theme.css";
 
 const SystemPreferenceQuery: string = "(prefers-color-scheme: dark)";
@@ -43,10 +44,13 @@ export type ThemeStyle = CSSProperties & {
  * Props for the scoped Theme provider.
  * Type: interface.
  * @param children - Subtree that receives the scoped tokens and context.
- * @param mode - Controlled preference: `light`, `dark`, or `system`.
+ * @param theme - Controlled preset applied to the subtree.
+ * @param defaultTheme - Initial preset when the provider is uncontrolled.
+ * @param onThemeChange - Called whenever a descendant selects a preset.
+ * @param mode - Controlled preference: `light`, `dark`, or `system`. Wins over the preset mode.
  * @param defaultMode - Initial preference when the provider is uncontrolled.
  * @param onModeChange - Called whenever a descendant requests a new preference.
- * @param tokens - Controlled CSS custom property overrides applied on the wrapper.
+ * @param tokens - Controlled CSS custom property overrides; always wins over preset tokens.
  * @param defaultTokens - Initial token overrides when the provider is uncontrolled.
  * @param onTokensChange - Called whenever a descendant requests token overrides.
  * @param density - Controlled control density for the subtree.
@@ -59,7 +63,11 @@ export type ThemeStyle = CSSProperties & {
  * @param style - Native styles and CSS custom properties applied on the wrapper.
  * @param ref - Reference to the wrapper element.
  * @example
- * <Theme mode="dark" density="compact" tokens={{ "--accent": "#f48fb1" }}>
+ * <Theme theme="space-gray" density="compact">
+ *     <App />
+ * </Theme>
+ * @example
+ * <Theme theme="milk" mode="dark" tokens={{ "--accent": "#f48fb1" }}>
  *     <App />
  * </Theme>
  * @example
@@ -69,6 +77,9 @@ export type ThemeStyle = CSSProperties & {
  */
 export interface ThemeProps extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "style"> {
     children?: ReactNode;
+    theme?: ThemePresetId;
+    defaultTheme?: ThemePresetId;
+    onThemeChange?: (theme: ThemePresetId) => void;
     mode?: ThemeMode;
     defaultMode?: ThemeMode;
     onModeChange?: (mode: ThemeMode) => void;
@@ -101,18 +112,21 @@ const readSystemPreference: () => ResolvedThemeMode = (): ResolvedThemeMode => {
 };
 
 /**
- * Provides scoped theme tokens, density, shape, and appearance to descendants.
+ * Provides scoped theme presets, tokens, density, shape, and appearance to descendants.
  * Type: function component.
- * @param props - Children, controlled or uncontrolled mode, tokens, density, radius, callbacks, and native
- * div attributes or events.
+ * @param props - Children, controlled or uncontrolled preset, mode, tokens, density, radius, callbacks, and
+ * native div attributes or events.
  * @example
- * <Theme mode="dark" radius="rounded" onModeChange={(mode: ThemeMode): void => setMode(mode)}>
+ * <Theme theme="sky-blue" density="compact" onThemeChange={(id: ThemePresetId): void => setThemeId(id)}>
  *     <Panel />
  * </Theme>
  * @returns A themed wrapper with a provider for `useTheme`.
  */
 const Theme: FC<ThemeProps> = ({
     children,
+    theme,
+    defaultTheme,
+    onThemeChange,
     mode,
     defaultMode,
     onModeChange,
@@ -131,6 +145,10 @@ const Theme: FC<ThemeProps> = ({
     ...rest
 }: ThemeProps) => {
     const parent: ThemeContextValue = useContext(ThemeContext);
+    const [internalTheme, setInternalTheme]: [
+        ThemePresetId | null,
+        Dispatch<SetStateAction<ThemePresetId | null>>,
+    ] = useState<ThemePresetId | null>(defaultTheme ?? null);
     const [internalMode, setInternalMode]: [ThemeMode | null, Dispatch<SetStateAction<ThemeMode | null>>] =
         useState<ThemeMode | null>(defaultMode ?? null);
     const [internalDensity, setInternalDensity]: [
@@ -149,7 +167,12 @@ const Theme: FC<ThemeProps> = ({
         ResolvedThemeMode,
         Dispatch<SetStateAction<ResolvedThemeMode>>,
     ] = useState<ResolvedThemeMode>(readSystemPreference);
-    const currentMode: ThemeMode = mode ?? internalMode ?? parent.mode;
+    const themeId: ThemePresetId = theme ?? internalTheme ?? parent.theme;
+    const presetRequested: boolean = theme !== (void 0) || internalTheme !== null;
+    const preset: ThemePreset = getThemePreset(themeId);
+    const presetTokens: ThemeTokens = presetRequested ? preset.tokens : emptyTokens;
+    const presetMode: ThemeMode | null = presetRequested ? preset.mode : null;
+    const currentMode: ThemeMode = mode ?? internalMode ?? presetMode ?? parent.mode;
     const resolvedMode: ResolvedThemeMode = currentMode === "system" ? systemMode : currentMode;
     const resolvedDensity: ThemeDensity = density ?? internalDensity ?? parent.density;
     const resolvedRadius: ThemeRadius = radius ?? internalRadius ?? parent.radius;
@@ -172,8 +195,25 @@ const Theme: FC<ThemeProps> = ({
     }, []);
 
     const effectiveTokens: ThemeTokens = useMemo<ThemeTokens>(
-        () => ({ ...parent.tokens, ...(internalTokens ?? emptyTokens), ...(tokens ?? emptyTokens) }),
-        [internalTokens, parent.tokens, tokens],
+        () => ({
+            ...parent.tokens,
+            ...presetTokens,
+            ...(internalTokens ?? emptyTokens),
+            ...(tokens ?? emptyTokens),
+        }),
+        [internalTokens, parent.tokens, presetTokens, tokens],
+    );
+
+    const setTheme: (theme: ThemePresetId) => void = useCallback(
+        (next: ThemePresetId): void => {
+            if (theme === (void 0)) {
+                setInternalTheme(next);
+                setInternalMode(null);
+            }
+
+            onThemeChange?.(next);
+        },
+        [onThemeChange, theme],
     );
 
     const setMode: (mode: ThemeMode) => void = useCallback(
@@ -228,11 +268,13 @@ const Theme: FC<ThemeProps> = ({
 
     const contextValue: ThemeContextValue = useMemo<ThemeContextValue>(
         () => ({
+            theme: themeId,
             mode: currentMode,
             resolvedMode,
             density: resolvedDensity,
             radius: resolvedRadius,
             tokens: effectiveTokens,
+            setTheme,
             setMode,
             setDensity,
             setRadius,
@@ -247,10 +289,14 @@ const Theme: FC<ThemeProps> = ({
             setDensity,
             setMode,
             setRadius,
+            setTheme,
             setTokens,
+            themeId,
         ],
     );
 
+    // `data-theme` keeps the resolved mode used by the shared palette CSS; `data-preset` exposes the preset
+    // for debugging without invalidating the light/dark rules in tokens.css.
     return (
         <ThemeContext.Provider value={contextValue}>
             <div
@@ -258,6 +304,7 @@ const Theme: FC<ThemeProps> = ({
                 ref={ref}
                 className={cx("periodicity-theme", className)}
                 data-theme={resolvedMode}
+                data-preset={themeId}
                 data-mode={currentMode}
                 data-density={resolvedDensity}
                 data-radius={resolvedRadius}
