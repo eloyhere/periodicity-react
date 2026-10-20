@@ -26,6 +26,7 @@ import Surface from "../surface/Surface";
 import cx from "../foundation/cx";
 import useControllableState from "../foundation/useControllableState";
 import useVirtualWindow, { type VirtualWindow } from "../foundation/useVirtualWindow";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./Transfer.css";
 
 /**
@@ -216,6 +217,7 @@ const Transfer: FC<TransferProps> = ({
     ref,
     ...rest
 }: TransferProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const [selectedKeys, setSelectedKeys]: readonly [
         readonly string[],
         (next: readonly string[] | ((previous: readonly string[]) => readonly string[])) => void,
@@ -407,7 +409,7 @@ const Transfer: FC<TransferProps> = ({
                             className="transfer__search-input"
                             type="search"
                             value={query}
-                            placeholder="Search"
+                            placeholder={t("search")}
                             disabled={disabled || loading}
                             onChange={(event: ChangeEvent<HTMLInputElement>): void =>
                                 setQuery(event.target.value)

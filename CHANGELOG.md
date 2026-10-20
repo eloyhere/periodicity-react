@@ -81,6 +81,10 @@ The first public npm release of `periodicity-react`.
 - Theme option labels now use the active locale instead of always showing Chinese · English, and component page titles show the API name plus its localized name (for example `Tag 标签`).
 - Additional visible and accessible defaults now resolve through `t()`: breadcrumb expander, comment empty/loading states, context-menu and text-action labels, number stepper controls, time/date-time placeholders, hour/minute labels, comment loading, and toolbar back label.
 
+- Documentation group/section labels and page descriptions now resolve per locale; en-US copy applies American spelling, and non-English descriptions use localized fallbacks instead of English catalogue copy.
+- Localized component names are appended to the API name (`Tag 标签`, `Tag タグ`, `Tag Etiqueta`), and the component pickers use the same labels.
+- The toolbar Select surfaces now declare their own background, so Surface ripple contrast is measured against the field rather than the blue AppBar.
+
 ### Changed
 
 - `PagerPage` was renamed to `Page`; `PeriodicityPagerPage` is now `PeriodicityPage`. Route-based Pager usage and the

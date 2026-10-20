@@ -50,6 +50,7 @@ import {
 import { shellMessages, type ShellMessageKey, type ShellMessages } from "./shellMessages";
 import { themeNames } from "./themeMessages";
 import { localizeComponentName } from "./componentNames";
+import { fallbackDescription, showcaseLabel, toUsEnglish } from "./showcaseLabels";
 import "./Foundations.css";
 import "./Showcase.css";
 
@@ -113,34 +114,6 @@ const showcaseCategories: readonly ShowcaseCategory[] = [
         ],
     },
 ];
-
-const sectionLabelsZh: Readonly<Record<string, string>> = {
-    Actions: "操作",
-    Inputs: "输入",
-    Selection: "选择",
-    Pickers: "选择器",
-    Display: "展示",
-    Feedback: "反馈",
-    Overlays: "浮层",
-    Menus: "菜单",
-    Navigation: "导航",
-    Layout: "布局",
-    ["Data display"]: "数据展示",
-    Messaging: "消息",
-    Files: "文件",
-    Providers: "Provider",
-    Primitives: "基础组件",
-};
-
-const groupLabelsZh: Readonly<Record<string, string>> = {
-    foundations: "基础",
-    components: "组件",
-    families: "组件族",
-};
-
-
-
-
 
 /**
  * Reads the raw hash without letting a malformed escape stop the shell.
@@ -227,7 +200,6 @@ const Showcase: FC = () => {
     const entry: ShowcaseEntry = findEntry(activeId);
     const group: ShowcaseGroup = findGroup(entry.id);
     const section: ShowcaseSection = findSection(entry.id);
-    const demoLabel: string = entry.demoTitle ?? entry.title;
     const Page: FC = entry.page;
     const mainRef: RefObject<HTMLElement | null> = useRef<HTMLElement | null>(null);
     const pageTitleRef: RefObject<HTMLElement | null> = useRef<HTMLElement | null>(null);
@@ -240,6 +212,14 @@ const Showcase: FC = () => {
     const [locale, setLocale]: [LocaleCode, Dispatch<SetStateAction<LocaleCode>>] =
         useState<LocaleCode>("en-GB");
     const shell: ShellMessages = shellMessages[locale] ?? shellMessages["en-GB"];
+    const localizedTitle: string = localizeComponentName(entry.title, locale);
+    const localizedDescription: string =
+        locale === "en-GB"
+            ? entry.description
+            : locale === "en-US"
+              ? toUsEnglish(entry.description)
+              : fallbackDescription(entry.title, localizedTitle, locale);
+    const demoLabel: string = locale.startsWith("en") ? (entry.demoTitle ?? entry.title) : localizedTitle;
     const isChinese: boolean = locale.startsWith("zh");
     const localizedThemeOptions: readonly ShowcaseOption[] = themePresets.map(
         (preset: ThemePreset): ShowcaseOption => ({
@@ -274,8 +254,8 @@ const Showcase: FC = () => {
     };
 
     useEffect((): void => {
-        document.title = `${entry.title} · Periodicity`;
-    }, [entry.title]);
+        document.title = `${localizedTitle} · Periodicity`;
+    }, [localizedTitle]);
 
     useEffect((): void => {
         const anchor: string | void = entry.anchor;
@@ -411,11 +391,7 @@ const Showcase: FC = () => {
                                     variant="label"
                                     tone="accent"
                                 >
-                                    {`${isChinese ? (groupLabelsZh[group.id] ?? group.label) : group.label} · ${
-                                        isChinese
-                                            ? (sectionLabelsZh[section.label] ?? section.label)
-                                            : section.label
-                                    }`}
+                                    {`${showcaseLabel(group.label, locale)} · ${showcaseLabel(section.label, locale)}`}
                                 </Text>
                                 <Text
                                     as="h1"
@@ -425,10 +401,10 @@ const Showcase: FC = () => {
                                     tabIndex={-1}
                                     variant="h1"
                                 >
-                                    {localizeComponentName(entry.title, locale)}
+                                    {localizedTitle}
                                 </Text>
                                 <Text className="showcase-page__lead" variant="body" tone="muted">
-                                    {entry.description}
+                                    {localizedDescription}
                                 </Text>
                             </header>
                             {entry.anchor === (void 0) ? null : (

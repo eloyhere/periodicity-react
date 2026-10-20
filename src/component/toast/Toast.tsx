@@ -26,6 +26,7 @@ import {
     type ToastOptions,
     type ToastTone,
 } from "./ToastContext";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./Toast.css";
 
 /**
@@ -110,6 +111,7 @@ const ToastToneIcons: Record<ToastTone, IconName> = {
  * @returns A status-role toast slot.
  */
 const ToastItem: FC<ToastItemProps> = ({ toast, onDismiss }: ToastItemProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const tone: ToastTone = toast.options.tone ?? "neutral";
     const action: ToastAction | void = toast.options.action;
 
@@ -182,7 +184,7 @@ const ToastItem: FC<ToastItemProps> = ({ toast, onDismiss }: ToastItemProps) => 
                             variant="quiet"
                             size="sm"
                             icon="Close"
-                            aria-label="Dismiss notification"
+                            aria-label={t("dismiss")}
                             onClick={handleDismiss}
                         />
                     </div>
@@ -205,12 +207,14 @@ const ToastProvider: FC<ToastProviderProps> = ({
     children,
     max = 3,
     duration = 4000,
-    regionLabel = "Notifications",
+    regionLabel,
     className = "",
     ref,
     "aria-label": ariaLabel,
     ...rest
 }: ToastProviderProps) => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedRegionLabel: string = regionLabel ?? t("notifications");
     const [queue, setQueue]: [ToastQueueState, Dispatch<SetStateAction<ToastQueueState>>] =
         useState<ToastQueueState>({ active: [], queued: [] });
     const timersRef: MutableRefObject<Record<string, number>> = useRef<Record<string, number>>({});
@@ -353,7 +357,7 @@ const ToastProvider: FC<ToastProviderProps> = ({
                         ref={ref}
                         className={cx("toast-region", className)}
                         role="region"
-                        aria-label={ariaLabel ?? regionLabel}
+                        aria-label={ariaLabel ?? resolvedRegionLabel}
                     >
                         {queue.active.map(
                             (toast: ToastRecord): ReactNode => (

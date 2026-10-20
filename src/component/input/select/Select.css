@@ -19,6 +19,7 @@
 
 .select-field__surface {
     border-radius: var(--radius-sm);
+    background: var(--select-bg);
 }
 
 .select-field__surface > .surface__component {

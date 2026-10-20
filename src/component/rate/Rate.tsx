@@ -14,6 +14,7 @@ import {
 import Icon from "../icon/Icon";
 import cx from "../foundation/cx";
 import useControllableState from "../foundation/useControllableState";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./Rate.css";
 
 /**
@@ -78,7 +79,7 @@ const Rate: FC<RateProps> = ({
     readOnly = false,
     disabled = false,
     size = "md",
-    label = "Rating",
+    label,
     hint,
     error,
     className = "",
@@ -87,6 +88,8 @@ const Rate: FC<RateProps> = ({
     onPointerLeave,
     ...rest
 }: RateProps) => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedLabel: string = label ?? t("rating");
     const generatedId: string = useId();
     const labelId: string = `${generatedId}-label`;
     const hintId: string = `${generatedId}-hint`;
@@ -208,7 +211,7 @@ const Rate: FC<RateProps> = ({
             {...rest}
         >
             <span className="rate-field__label" id={labelId}>
-                {label}
+                {resolvedLabel}
             </span>
             <div
                 className="rate-field__stars"

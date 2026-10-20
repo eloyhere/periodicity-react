@@ -12,6 +12,7 @@ import {
 import Dropdown, { DropdownItem } from "../../dropdown/Dropdown";
 import useControllableState from "../../foundation/useControllableState";
 import TextInput, { type TextInputProps } from "../text/TextInput";
+import { useInternational, type InternationalContextValue } from "../../../international";
 import "./CompleteInput.css";
 
 /**
@@ -110,6 +111,7 @@ const CompleteInput: FC<CompleteInputProps> = ({
     ref,
     ...rest
 }: CompleteInputProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const anchorRef: RefObject<HTMLSpanElement | null> = useRef<HTMLSpanElement | null>(null);
     const controlled: boolean = value !== (void 0);
     const [uncontrolledValue, setUncontrolledValue]: [string, (next: string) => void] = useState<string>(
@@ -195,7 +197,7 @@ const CompleteInput: FC<CompleteInputProps> = ({
                 role="listbox"
                 ariaLabel={`${label} suggestions`}
                 isEmpty={visible.length === 0}
-                empty="No suggestions"
+                empty={t("noResults")}
             >
                 {visible.map((option: CompleteOption): ReactNode => (
                     <DropdownItem
