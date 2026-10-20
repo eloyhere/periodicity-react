@@ -1,0 +1,377 @@
+.drawer {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    pointer-events: none;
+}
+
+.drawer .drawer__backdrop {
+    z-index: 0;
+    animation: drawer-backdrop-in var(--duration-medium) var(--ease-standard);
+}
+
+.drawer__panel {
+    position: fixed;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 100vw;
+    max-height: 100dvh;
+    pointer-events: auto;
+    animation-duration: var(--duration-slow);
+    animation-timing-function: var(--ease-decelerate);
+    animation-fill-mode: both;
+}
+
+.drawer__panel[data-size="sm"] {
+    --drawer-side-size: calc(var(--space-10) * 5);
+    --drawer-top-size: calc(var(--space-10) * 4);
+    --drawer-bottom-size: calc(var(--space-10) * 4);
+}
+
+.drawer__panel[data-size="md"] {
+    --drawer-side-size: calc(var(--space-10) * 6);
+    --drawer-top-size: calc(var(--space-10) * 5);
+    --drawer-bottom-size: calc(var(--space-10) * 5);
+}
+
+.drawer__panel[data-size="lg"] {
+    --drawer-side-size: calc(var(--space-10) * 8);
+    --drawer-top-size: calc(var(--space-10) * 7);
+    --drawer-bottom-size: calc(var(--space-10) * 7);
+}
+
+.drawer__panel[data-placement="left"],
+.drawer__panel[data-placement="right"] {
+    top: 0;
+    bottom: 0;
+    width: min(100vw, var(--drawer-side-size));
+}
+
+.drawer__panel[data-placement="left"] {
+    left: 0;
+    animation-name: drawer-enter-left;
+}
+
+.drawer__panel[data-placement="right"] {
+    right: 0;
+    animation-name: drawer-enter-right;
+}
+
+/* The top sheet spans the viewport and hugs its content up to the size tier;
+   past that the drawer body scrolls inside the capped panel. */
+.drawer__panel[data-placement="top"] {
+    --drawer-top-max-height: min(100dvh, var(--drawer-top-size));
+
+    top: 0;
+    right: 0;
+    left: 0;
+    height: auto;
+    max-height: var(--drawer-top-max-height);
+    animation-name: drawer-enter-top;
+}
+
+.drawer__panel[data-placement="bottom"] {
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: min(100dvh, var(--drawer-bottom-size));
+    animation-name: drawer-enter-bottom;
+}
+
+.drawer__surface {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    border: 1px solid var(--color-outline);
+    background:
+        radial-gradient(circle at 88% -10%, var(--color-primary-container), transparent 38%),
+        linear-gradient(160deg, var(--color-surface-container), var(--color-surface-container-low) 66%);
+    box-shadow: var(--shadow-lg);
+    color: var(--color-on-surface);
+    --ripple-color: var(--color-primary-container);
+}
+
+.drawer__panel[data-placement="left"] .drawer__surface {
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.drawer__panel[data-placement="right"] .drawer__surface {
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.drawer__panel[data-placement="top"] .drawer__surface {
+    height: auto;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+.drawer__panel[data-placement="bottom"] .drawer__surface {
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.drawer__content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+/* Leave room for the surface border so the capped content never clips it. */
+.drawer__panel[data-placement="top"] .drawer__content {
+    height: auto;
+    max-height: calc(var(--drawer-top-max-height) - 2px);
+}
+
+.drawer__header {
+    display: flex;
+    flex: none;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-5) var(--space-6);
+    border-bottom: 1px solid var(--color-outline-variant);
+}
+
+.drawer__heading {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    gap: var(--space-2);
+}
+
+.drawer__title {
+    color: var(--color-on-surface);
+    font-family: var(--font-display);
+    font-size: var(--type-h3);
+    font-weight: var(--weight-medium);
+    letter-spacing: var(--tracking-tight);
+    line-height: var(--leading-tight);
+    text-wrap: balance;
+}
+
+.drawer__description {
+    color: var(--text-soft);
+    font-size: var(--type-body-sm);
+    line-height: var(--leading-normal);
+}
+
+.drawer__close {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--touch-target);
+    height: var(--touch-target);
+    margin-left: auto;
+    padding: 0 0 1px;
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-container-lowest);
+    color: var(--color-on-surface-variant);
+    font-size: var(--type-h4);
+    line-height: 1;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition:
+        color var(--duration-fast) var(--ease-standard),
+        border-color var(--duration-fast) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard);
+}
+
+.drawer__close:hover {
+    border-color: var(--color-primary);
+    background: var(--color-primary-container);
+    color: var(--color-on-primary-container);
+}
+
+.drawer__close:active {
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+.drawer__close:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
+.drawer__body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    padding: var(--space-6);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    color: var(--text-soft);
+    font-size: var(--type-body);
+    line-height: var(--leading-relaxed);
+    gap: var(--space-4);
+}
+
+.drawer__footer {
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-6) var(--space-5);
+    border-top: 1px solid var(--color-outline-variant);
+    background: var(--color-surface-container-lowest);
+}
+
+@keyframes drawer-enter-left {
+    from {
+        opacity: 0.6;
+        transform: translateX(-100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes drawer-enter-right {
+    from {
+        opacity: 0.6;
+        transform: translateX(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes drawer-enter-top {
+    from {
+        opacity: 0.6;
+        transform: translateY(-100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes drawer-enter-bottom {
+    from {
+        opacity: 0.6;
+        transform: translateY(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes drawer-backdrop-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 560px) {
+    .drawer__panel[data-placement="left"],
+    .drawer__panel[data-placement="right"] {
+        width: 100vw;
+    }
+
+    .drawer__panel[data-placement="bottom"] {
+        height: min(calc(100dvh - var(--space-9)), 100dvh);
+    }
+
+    .drawer__header,
+    .drawer__body,
+    .drawer__footer {
+        padding-right: var(--space-5);
+        padding-left: var(--space-5);
+    }
+}
+
+
+/* Closing keeps the drawer mounted for one exit animation beat. */
+.drawer[data-state="closing"] .drawer__backdrop {
+    animation: drawer-backdrop-out var(--duration-medium) var(--ease-accelerate) forwards;
+}
+
+.drawer[data-state="closing"] .drawer__panel {
+    animation-duration: var(--duration-medium);
+    animation-timing-function: var(--ease-accelerate);
+    animation-fill-mode: forwards;
+}
+
+.drawer[data-state="closing"] .drawer__panel[data-placement="left"] {
+    animation-name: drawer-exit-left;
+}
+
+.drawer[data-state="closing"] .drawer__panel[data-placement="right"] {
+    animation-name: drawer-exit-right;
+}
+
+.drawer[data-state="closing"] .drawer__panel[data-placement="top"] {
+    animation-name: drawer-exit-top;
+}
+
+.drawer[data-state="closing"] .drawer__panel[data-placement="bottom"] {
+    animation-name: drawer-exit-bottom;
+}
+
+@keyframes drawer-exit-left {
+    to {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+}
+
+@keyframes drawer-exit-right {
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+@keyframes drawer-exit-top {
+    to {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+}
+
+@keyframes drawer-exit-bottom {
+    to {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+}
+
+@keyframes drawer-backdrop-out {
+    to {
+        opacity: 0;
+    }
+}
+
+/* Selection policy: drawer copy (headings, descriptions, Text body content, and
+   nested labels) is overlay chrome, not document text. Matching every
+   descendant outranks the shared .text rule through specificity alone.
+   Fields opt back into native selection for editing. */
+.drawer,
+.drawer .drawer__panel,
+.drawer .drawer__panel * {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.drawer .drawer__panel :is(input, textarea, select, [contenteditable="true"]),
+.drawer .drawer__panel [contenteditable="true"] * {
+    user-select: text;
+    -webkit-user-select: text;
+}

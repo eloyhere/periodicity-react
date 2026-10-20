@@ -1,0 +1,269 @@
+/* ==========================================================================
+   Theme — scoped theme configuration
+   The wrapper re-declares the semantic alias graph declared on :root. A var()
+   reference inside a custom property is substituted when that property is
+   computed, so aliases inherited from :root would otherwise keep the root
+   palette. Re-declaring them here makes every scoped palette change visible
+   to descendants while keeping the existing token names untouched.
+   ========================================================================== */
+
+.periodicity-theme[data-theme] {
+    /* Semantic aliases — mirror of src/index.css :root. */
+    --bg: var(--colourBackground);
+    --bg-deep: var(--colourSurfaceDark);
+    --panel: var(--colourSurface);
+    --panel-strong: var(--colourSurfaceDark);
+    --panel-muted: var(--colourBackground);
+    --text: var(--colourTextPrimary);
+    --text-soft: var(--colourTextSecond);
+    --muted: var(--colourTextSecond);
+    --faint: var(--colourTextDisabled);
+    --line: var(--colourDivider);
+    --line-strong: var(--colourDivider);
+    --accent: var(--colourPrimary);
+    --accent-strong: var(--colourPrimaryDark);
+    --accent-ink: var(--colourOnPrimary);
+    --danger: var(--colourError);
+    --focus-ring-color: var(--accent);
+
+    /* Material colour roles — mirror of src/component/foundation/tokens.css. */
+    --color-primary: var(--accent);
+    --color-on-primary: var(--accent-ink);
+    --color-primary-container: var(--accent-soft);
+    --color-on-primary-container: var(--accent-strong);
+    --color-secondary: var(--mint);
+    --color-on-secondary: var(--bg);
+    --color-secondary-container: var(--mint-soft);
+    --color-on-secondary-container: var(--text);
+    --color-tertiary: var(--violet);
+    --color-on-tertiary: var(--bg);
+    --color-tertiary-container: var(--violet-soft);
+    --color-on-tertiary-container: var(--text);
+    --color-error: var(--danger);
+    --color-on-error: var(--bg);
+    --color-error-container: var(--danger-soft);
+    --color-on-error-container: var(--text);
+    --color-warning: var(--amber);
+    --color-on-warning: var(--bg);
+    --color-warning-container: var(--amber-soft);
+    --color-surface: var(--panel);
+    --color-on-surface: var(--text);
+    --color-on-surface-variant: var(--muted);
+    --color-surface-container-lowest: var(--panel-muted);
+    --color-surface-container-low: var(--panel);
+    --color-surface-container: var(--panel-strong);
+    --color-surface-container-high: var(--panel-strong);
+    --color-surface-container-highest: var(--panel-strong);
+    --color-outline: var(--line-strong);
+    --color-outline-variant: var(--line);
+    --color-inverse-surface: var(--text);
+    --color-inverse-on-surface: var(--bg);
+    --color-scrim: var(--scrim);
+
+    /* British-spelled aliases that are not replaced by the palette block. */
+    --colourOnAccent: var(--color-on-primary);
+    --colourAccentContainer: var(--color-primary-container);
+    --colourOnAccentContainer: var(--color-on-primary-container);
+    --colourOnSecondary: var(--color-on-secondary);
+    --colourSecondaryContainer: var(--color-secondary-container);
+    --colourOnTertiary: var(--color-on-tertiary);
+    --colourTertiaryContainer: var(--color-tertiary-container);
+    --colourOnError: var(--color-on-error);
+    --colourErrorContainer: var(--color-error-container);
+    --colourOnWarning: var(--color-on-warning);
+    --colourWarningContainer: var(--color-warning-container);
+    --colourOnSurface: var(--color-on-surface);
+    --colourOnSurfaceVariant: var(--color-on-surface-variant);
+    --colourSurfaceContainerLowest: var(--color-surface-container-lowest);
+    --colourSurfaceContainerLow: var(--color-surface-container-low);
+    --colourSurfaceContainer: var(--color-surface-container);
+    --colourSurfaceContainerHigh: var(--color-surface-container-high);
+    --colourSurfaceContainerHighest: var(--color-surface-container-highest);
+    --colourOutline: var(--color-outline);
+    --colourOutlineVariant: var(--color-outline-variant);
+    --colourInverseSurface: var(--color-inverse-surface);
+    --colourInverseOnSurface: var(--color-inverse-on-surface);
+    --colourShadow: var(--color-shadow);
+
+    color: var(--text);
+    background-color: var(--bg);
+}
+
+/* ==========================================================================
+   Light theme — mirrors the Material light palette in src/index.css.
+   ========================================================================== */
+
+.periodicity-theme[data-theme="light"] {
+    color-scheme: light;
+
+    --colourBackground: #fafafa;
+    --colourSurface: #ffffff;
+    --colourSurfaceDark: #f5f5f5;
+    --colourTextPrimary: rgba(0, 0, 0, 0.87);
+    --colourTextSecond: rgba(0, 0, 0, 0.6);
+    --colourTextDisabled: rgba(0, 0, 0, 0.38);
+    --colourDivider: rgba(0, 0, 0, 0.12);
+    --colourControlHighlight: rgba(0, 0, 0, 0.12);
+    --colourScrim: rgba(0, 0, 0, 0.32);
+
+    --colourPrimary: #1976d2;
+    --colourPrimaryDark: #0d47a1;
+    --colourPrimaryLight: #4791db;
+    --colourOnPrimary: #ffffff;
+    --colourPrimaryContainer: #e3f2fd;
+    --colourOnPrimaryContainer: #0d47a1;
+    --colourAccent: #dc004e;
+    --colourAccentDark: #9a0036;
+    --colourAccentLight: #ff5c8d;
+    --colourSecondary: #00897b;
+    --colourTertiary: #7b1fa2;
+    --colourError: #b3261e;
+    --colourWarning: #ed6c02;
+
+    --accent-soft: rgba(25, 118, 210, 0.12);
+    --mint: #2e7d32;
+    --mint-soft: rgba(46, 125, 50, 0.12);
+    --violet: #9c27b0;
+    --violet-soft: rgba(156, 39, 176, 0.12);
+    --amber: #ed6c02;
+    --amber-soft: rgba(237, 108, 2, 0.12);
+    --danger-soft: rgba(211, 47, 47, 0.12);
+
+    --scrim: rgba(3, 6, 4, 0.72);
+    --color-shadow: rgba(0, 0, 0, 0.45);
+
+    --shadow-sm:
+        0 2px 1px -1px rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14),
+        0 1px 3px 0 rgba(0, 0, 0, 0.12);
+    --shadow-lg:
+        0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14),
+        0 3px 14px 2px rgba(0, 0, 0, 0.12);
+    --elevation-1:
+        0 2px 1px -1px rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14),
+        0 1px 3px 0 rgba(0, 0, 0, 0.12);
+    --elevation-2:
+        0 3px 3px -2px rgba(0, 0, 0, 0.2), 0 3px 4px 0 rgba(0, 0, 0, 0.14),
+        0 1px 8px 0 rgba(0, 0, 0, 0.12);
+    --elevation-3:
+        0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14),
+        0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+/* ==========================================================================
+   Dark theme — tuned Material dark palette with the same token names.
+   ========================================================================== */
+
+.periodicity-theme[data-theme="dark"] {
+    color-scheme: dark;
+
+    --colourBackground: #121212;
+    --colourSurface: #1e1e1e;
+    --colourSurfaceDark: #272727;
+    --colourTextPrimary: rgba(255, 255, 255, 0.87);
+    --colourTextSecond: rgba(255, 255, 255, 0.6);
+    --colourTextDisabled: rgba(255, 255, 255, 0.38);
+    --colourDivider: rgba(255, 255, 255, 0.14);
+    --colourControlHighlight: rgba(255, 255, 255, 0.12);
+    --colourScrim: rgba(0, 0, 0, 0.52);
+
+    --colourPrimary: #90caf9;
+    --colourPrimaryDark: #bbdefb;
+    --colourPrimaryLight: #64b5f6;
+    --colourOnPrimary: #102027;
+    --colourPrimaryContainer: #1e3a5f;
+    --colourOnPrimaryContainer: #d6ecff;
+    --colourAccent: #f48fb1;
+    --colourAccentDark: #ffc1d9;
+    --colourAccentLight: #f06292;
+    --colourSecondary: #80cbc4;
+    --colourTertiary: #ce93d8;
+    --colourError: #f2b8b5;
+    --colourWarning: #ffcc80;
+
+    --accent-soft: rgba(144, 202, 249, 0.16);
+    --mint: #81c784;
+    --mint-soft: rgba(129, 199, 132, 0.16);
+    --violet: #ce93d8;
+    --violet-soft: rgba(206, 147, 216, 0.16);
+    --amber: #ffb74d;
+    --amber-soft: rgba(255, 183, 77, 0.16);
+    --danger-soft: rgba(242, 184, 181, 0.16);
+
+    --scrim: rgba(0, 0, 0, 0.6);
+    --color-shadow: rgba(0, 0, 0, 0.6);
+
+    --shadow-sm:
+        0 2px 1px -1px rgba(0, 0, 0, 0.5), 0 1px 1px 0 rgba(0, 0, 0, 0.4),
+        0 1px 3px 0 rgba(0, 0, 0, 0.35);
+    --shadow-lg:
+        0 5px 5px -3px rgba(0, 0, 0, 0.52), 0 8px 10px 1px rgba(0, 0, 0, 0.42),
+        0 3px 14px 2px rgba(0, 0, 0, 0.36);
+    --elevation-1:
+        0 2px 1px -1px rgba(0, 0, 0, 0.5), 0 1px 1px 0 rgba(0, 0, 0, 0.4),
+        0 1px 3px 0 rgba(0, 0, 0, 0.35);
+    --elevation-2:
+        0 3px 3px -2px rgba(0, 0, 0, 0.52), 0 3px 4px 0 rgba(0, 0, 0, 0.42),
+        0 1px 8px 0 rgba(0, 0, 0, 0.36);
+    --elevation-3:
+        0 5px 5px -3px rgba(0, 0, 0, 0.56), 0 8px 10px 1px rgba(0, 0, 0, 0.46),
+        0 3px 14px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* ==========================================================================
+   Density — maps onto the existing control tokens.
+   ========================================================================== */
+
+.periodicity-theme[data-density="compact"] {
+    --control-sm: 28px;
+    --control-md: 36px;
+    --control-lg: 44px;
+    --control-inline-sm: 8px;
+    --control-inline-md: 12px;
+    --control-inline-lg: 16px;
+}
+
+.periodicity-theme[data-density="regular"] {
+    --control-sm: 32px;
+    --control-md: 42px;
+    --control-lg: 52px;
+    --control-inline-sm: 12px;
+    --control-inline-md: 16px;
+    --control-inline-lg: 22px;
+}
+
+.periodicity-theme[data-density="comfortable"] {
+    --control-sm: 36px;
+    --control-md: 46px;
+    --control-lg: 56px;
+    --control-inline-sm: 16px;
+    --control-inline-md: 20px;
+    --control-inline-lg: 26px;
+}
+
+/* ==========================================================================
+   Radius — maps onto the field, control, and surface radius tokens.
+   ========================================================================== */
+
+.periodicity-theme[data-radius="sharp"] {
+    --radius-field: 2px;
+    --radius-control: 4px;
+    --radius-surface: 4px;
+}
+
+.periodicity-theme[data-radius="default"] {
+    --radius-field: var(--radius-sm);
+    --radius-control: 12px;
+    --radius-surface: var(--radius-md);
+}
+
+.periodicity-theme[data-radius="rounded"] {
+    --radius-field: var(--radius-md);
+    --radius-control: 16px;
+    --radius-surface: var(--radius-lg);
+}
+
+.periodicity-theme[data-radius="pill"] {
+    --radius-field: var(--radius-pill);
+    --radius-control: var(--radius-pill);
+    --radius-surface: var(--radius-pill);
+}

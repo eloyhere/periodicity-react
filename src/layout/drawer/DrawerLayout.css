@@ -1,0 +1,128 @@
+/* ==========================================================================
+   Drawer layout — push left / centre / right regions
+   ========================================================================== */
+
+.drawer-layout {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    background: var(--colourBackground);
+    color: var(--colourTextPrimary);
+}
+
+.drawer-layout__pane {
+    flex: none;
+    min-width: 0;
+    height: 100%;
+    overflow: hidden;
+    background: var(--colourSurface);
+    transition: width 240ms var(--ease-decelerate);
+    will-change: width;
+}
+
+.drawer-layout__pane--left {
+    border-right: 1px solid var(--colourDivider);
+}
+
+.drawer-layout__pane--right {
+    border-left: 1px solid var(--colourDivider);
+}
+
+.drawer-layout__panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    transition: transform 240ms var(--ease-decelerate);
+    will-change: transform;
+}
+
+.drawer-layout__pane--left[data-open="false"] .drawer-layout__panel {
+    transform: translateX(-100%);
+}
+
+.drawer-layout__pane--right[data-open="false"] .drawer-layout__panel {
+    transform: translateX(100%);
+}
+
+.drawer-layout__center {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    overflow: auto;
+    background: var(--colourBackground);
+}
+
+
+/* Invisible event shield outside the open pane. */
+.drawer-layout__scrim {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 2;
+    background: transparent;
+    cursor: default;
+}
+
+/* Five-region layout: side panes surround a vertical top/centre/bottom body. */
+.drawer-layout__body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+}
+
+.drawer-layout__centre {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    overflow: auto;
+    background: var(--colourBackground);
+}
+
+.drawer-layout__pane--top,
+.drawer-layout__pane--bottom {
+    width: 100%;
+    min-width: 0;
+}
+
+.drawer-layout__pane--top {
+    border-right: 0;
+    border-bottom: 1px solid var(--colourDivider);
+    border-left: 0;
+}
+
+.drawer-layout__pane--bottom {
+    border-top: 1px solid var(--colourDivider);
+    border-right: 0;
+    border-left: 0;
+}
+
+.drawer-layout__pane--top .drawer-layout__panel,
+.drawer-layout__pane--bottom .drawer-layout__panel {
+    width: 100%;
+}
+
+.drawer-layout__pane--top[data-open="false"] .drawer-layout__panel {
+    transform: translateY(-100%);
+}
+
+.drawer-layout__pane--bottom[data-open="false"] .drawer-layout__panel {
+    transform: translateY(100%);
+}
+
+.drawer-layout__pane {
+    transition:
+        width 240ms var(--ease-decelerate),
+        height 240ms var(--ease-decelerate);
+}

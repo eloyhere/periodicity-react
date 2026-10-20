@@ -1,0 +1,56 @@
+.spinner {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--space-6);
+    height: var(--space-6);
+    color: var(--color-primary);
+    vertical-align: middle;
+}
+
+.spinner--sm {
+    width: var(--space-4);
+    height: var(--space-4);
+}
+
+.spinner--md {
+    width: var(--space-6);
+    height: var(--space-6);
+}
+
+.spinner--lg {
+    width: var(--space-7);
+    height: var(--space-7);
+}
+
+.spinner__svg {
+    width: 100%;
+    height: 100%;
+    animation: spinner-rotate calc(var(--duration-slow) * 2) linear infinite;
+}
+
+.spinner__track {
+    fill: none;
+    stroke: var(--color-outline);
+    stroke-width: var(--focus-ring-width);
+}
+
+.spinner__arc {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: var(--focus-ring-width);
+    stroke-linecap: round;
+}
+
+@keyframes spinner-rotate {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .spinner__svg {
+        animation: none;
+    }
+}

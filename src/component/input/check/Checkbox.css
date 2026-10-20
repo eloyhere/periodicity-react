@@ -1,0 +1,251 @@
+/* ==========================================================================
+   Checkbox — Material 18dp box, 40dp circular state layer, 2dp outline
+   ========================================================================== */
+
+.checkbox {
+    --checkbox-box: 18px;
+    --checkbox-gap: var(--space-3);
+
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.checkbox--sm {
+    --checkbox-box: 16px;
+    --checkbox-gap: var(--space-2);
+}
+
+.checkbox--lg {
+    --checkbox-box: 20px;
+}
+
+.checkbox__label {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--checkbox-gap);
+    min-height: var(--touch-target);
+    padding: var(--space-1) 0;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.checkbox__touch {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin: -8px 0 -8px -8px;
+    border-radius: 50%;
+}
+
+.checkbox__native {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.checkbox__box {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--checkbox-box);
+    height: var(--checkbox-box);
+    border: 2px solid var(--color-outline);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--color-on-primary);
+    transition:
+        background-color var(--duration-fast) var(--ease-standard),
+        border-color var(--duration-fast) var(--ease-standard);
+}
+
+.checkbox__icon {
+    position: absolute;
+    color: var(--color-on-primary);
+    opacity: 0;
+    transform: scale(0.5);
+    transition:
+        opacity var(--duration-fast) var(--ease-standard),
+        transform var(--duration-medium) var(--ease-spring);
+}
+
+.checkbox--checked .checkbox__box,
+.checkbox--mixed .checkbox__box {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+}
+
+.checkbox--checked .checkbox__icon--check,
+.checkbox--mixed .checkbox__icon--mixed {
+    opacity: 1;
+    transform: scale(1);
+    animation: checkbox-confirm var(--duration-medium) var(--ease-spring);
+}
+
+.checkbox__touch:hover .checkbox__box {
+    border-color: var(--color-primary);
+}
+
+.checkbox--checked .checkbox__touch:hover .checkbox__box,
+.checkbox--mixed .checkbox__touch:hover .checkbox__box {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+}
+
+.checkbox__touch {
+    --ripple-color: var(--color-primary-container);
+    --state-layer-color: var(--color-primary);
+}
+
+.checkbox__native:focus-visible ~ .checkbox__copy .checkbox__text {
+    text-decoration: underline;
+    text-decoration-color: var(--color-primary);
+    text-underline-offset: 3px;
+}
+
+.checkbox__label:has(.checkbox__native:focus-visible) .checkbox__box {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+}
+
+.checkbox__copy {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: var(--space-1);
+    padding-top: 3px;
+}
+
+.checkbox__text {
+    color: var(--color-on-surface);
+    font-family: var(--font-sans);
+    font-size: var(--type-body);
+    line-height: var(--leading-normal);
+}
+
+.checkbox--sm .checkbox__text {
+    font-size: var(--type-body-sm);
+}
+
+.checkbox--lg .checkbox__text {
+    font-size: var(--type-body-lg);
+}
+
+.checkbox__required {
+    margin-left: var(--space-1);
+    color: var(--color-error);
+}
+
+.checkbox__description {
+    color: var(--color-on-surface-variant);
+    font-size: var(--type-body-sm);
+    line-height: var(--leading-normal);
+}
+
+.checkbox__error {
+    margin: var(--space-1) 0 0 32px;
+    color: var(--color-error);
+    font-size: var(--type-body-sm);
+    line-height: var(--leading-normal);
+}
+
+.checkbox[data-invalid="true"] .checkbox__box {
+    border-color: var(--color-error);
+}
+
+.checkbox[data-invalid="true"].checkbox--checked .checkbox__box,
+.checkbox[data-invalid="true"].checkbox--mixed .checkbox__box {
+    border-color: var(--color-error);
+    background: var(--color-error);
+}
+
+.checkbox[data-invalid="true"] .checkbox__icon {
+    color: var(--color-on-error);
+}
+
+.checkbox--disabled {
+    opacity: var(--state-disabled-opacity);
+}
+
+.checkbox--disabled .checkbox__label {
+    cursor: not-allowed;
+}
+
+@keyframes checkbox-confirm {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    65% {
+        opacity: 1;
+        transform: scale(1.12);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (hover: none) {
+    .checkbox__touch:hover .checkbox__box {
+        border-color: var(--color-outline);
+    }
+
+    .checkbox--checked .checkbox__touch:hover .checkbox__box,
+    .checkbox--mixed .checkbox__touch:hover .checkbox__box {
+        border-color: var(--color-primary);
+    }
+}
+
+
+/* Keep ripple and state layer inside the painted box, not the touch halo. */
+.checkbox__touch {
+    width: var(--checkbox-box);
+    height: var(--checkbox-box);
+    margin: 0;
+    border-radius: 2px;
+}
+
+.checkbox__label {
+    align-items: center;
+}
+
+.checkbox__copy {
+    padding-top: 0;
+}
+
+/* Disabled checkbox keeps its outline and label contrast. */
+.checkbox--disabled {
+    opacity: 1;
+}
+
+.checkbox--disabled .checkbox__box {
+    border-color: var(--color-outline-variant);
+    background: var(--color-surface-container);
+}
+
+.checkbox--disabled .checkbox__text,
+.checkbox--disabled .checkbox__description {
+    color: var(--faint);
+}
+
+.checkbox__touch > .surface__component {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}

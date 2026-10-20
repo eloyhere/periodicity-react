@@ -1,0 +1,228 @@
+.tag {
+    --tag-background: var(--color-surface-container);
+    --tag-border: var(--color-outline-variant);
+    --tag-color: var(--color-on-surface-variant);
+    --tag-outline: var(--color-outline);
+    --tag-height: var(--control-sm);
+    --tag-inline: var(--control-inline-sm);
+    --tag-gap: var(--space-1);
+    --tag-font-size: var(--type-label);
+    --tag-remove-size: var(--space-5);
+
+    position: relative;
+    display: inline-flex;
+    align-items: stretch;
+    max-width: 100%;
+    border: 1px solid var(--tag-border);
+    border-radius: var(--radius-pill);
+    background: var(--tag-background);
+    color: var(--tag-color);
+    font-family: var(--font-sans);
+    vertical-align: middle;
+    user-select: none;
+    -webkit-user-select: none;
+    transition:
+        border-color var(--duration-fast) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard);
+}
+
+button.tag {
+    padding: 0;
+    border: 1px solid var(--tag-border);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.tag--sm {
+    --tag-height: var(--space-6);
+    --tag-inline: var(--space-2);
+    --tag-font-size: var(--type-label-sm);
+}
+
+.tag--md {
+    --tag-height: var(--control-sm);
+    --tag-inline: var(--control-inline-sm);
+    --tag-font-size: var(--type-label);
+}
+
+.tag__main {
+    display: inline-flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: var(--tag-gap);
+    min-width: 0;
+    min-height: var(--tag-height);
+    padding: 0 var(--tag-inline);
+    border: 0;
+    border-radius: inherit;
+    background: transparent;
+    color: inherit;
+    font-family: var(--font-sans);
+    font-size: var(--tag-font-size);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-snug);
+    text-align: start;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+button.tag__main {
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.tag--removable .tag__main {
+    padding-inline-end: var(--space-1);
+}
+
+.tag__icon {
+    flex: none;
+}
+
+.tag__label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.tag__remove {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    align-self: center;
+    align-items: center;
+    justify-content: center;
+    width: var(--tag-remove-size);
+    height: var(--tag-remove-size);
+    margin-inline-end: var(--space-1);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.tag__remove::before {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: currentColor;
+    content: "";
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.tag__remove::after {
+    position: absolute;
+    inset: calc((var(--tag-remove-size) - var(--touch-target)) / 2);
+    content: "";
+}
+
+.tag__remove:hover::before,
+.tag__remove:focus-visible::before {
+    opacity: var(--state-hover-opacity);
+}
+
+.tag__remove:active::before {
+    opacity: var(--state-press-opacity);
+}
+
+.tag__remove:disabled::before {
+    opacity: 0;
+}
+
+.tag:focus-visible,
+.tag__main:focus-visible,
+.tag__remove:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+.tag--interactive {
+    cursor: pointer;
+}
+
+.tag--interactive:hover {
+    border-color: var(--tag-outline);
+}
+
+.tag--interactive:active {
+    border-color: var(--tag-color);
+}
+
+.tag--outlined {
+    border-color: var(--tag-outline);
+    background: transparent;
+}
+
+.tag--neutral {
+    --tag-background: var(--color-surface-container);
+    --tag-border: var(--color-outline-variant);
+    --tag-color: var(--color-on-surface-variant);
+    --tag-outline: var(--color-outline);
+}
+
+.tag--primary {
+    --tag-background: var(--color-primary-container);
+    --tag-border: var(--color-primary-container);
+    --tag-color: var(--color-primary);
+    --tag-outline: var(--color-primary);
+}
+
+.tag--success {
+    --tag-background: var(--color-secondary-container);
+    --tag-border: var(--color-secondary-container);
+    --tag-color: var(--color-secondary);
+    --tag-outline: var(--color-secondary);
+}
+
+.tag--warning {
+    --tag-background: var(--color-warning-container);
+    --tag-border: var(--color-warning-container);
+    --tag-color: var(--color-warning);
+    --tag-outline: var(--color-warning);
+}
+
+.tag--danger {
+    --tag-background: var(--color-error-container);
+    --tag-border: var(--color-error-container);
+    --tag-color: var(--color-error);
+    --tag-outline: var(--color-error);
+}
+
+.tag--disabled {
+    opacity: var(--state-disabled-opacity);
+}
+
+.tag--disabled,
+.tag--disabled .tag__main,
+.tag--disabled .tag__remove {
+    cursor: not-allowed;
+}
+
+@media (pointer: coarse) {
+    .tag--interactive .tag__main {
+        min-height: var(--touch-target);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tag,
+    .tag__remove::before {
+        transition: none;
+    }
+}

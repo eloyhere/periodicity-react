@@ -1,0 +1,361 @@
+/* ==========================================================================
+   Mention — Material text field (outline / fill / standard) with atomic tokens
+   ========================================================================== */
+
+.mention {
+    --mention-token-height: 22px;
+    --mention-token-font: var(--type-label-sm);
+
+    position: relative;
+    width: 100%;
+    min-width: 0;
+}
+
+.mention--sm {
+    --mention-token-height: 20px;
+    --mention-token-font: var(--type-label-sm);
+}
+
+.mention--lg {
+    --mention-token-height: 24px;
+    --mention-token-font: var(--type-label);
+}
+
+/* ---- editable surface --------------------------------------------------- */
+
+.mention__editor {
+    --mention-editor-height: calc(var(--text-field-height) - 2px);
+
+    display: block;
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: var(--mention-editor-height);
+    padding: calc((var(--mention-editor-height) - 1.45em) / 2) 0;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: var(--type-body);
+    line-height: 1.45;
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: auto;
+    overflow-y: hidden;
+    outline: none;
+    caret-color: var(--color-primary);
+    cursor: text;
+    scrollbar-width: none;
+}
+
+.mention__editor::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.text-field--fill .mention__editor,
+.text-field--standard .mention__editor {
+    --mention-editor-height: calc(var(--text-field-height) - 18px);
+}
+
+.text-field--sm .mention__editor {
+    font-size: var(--type-body-sm);
+}
+
+.text-field--lg .mention__editor {
+    font-size: var(--type-body-lg);
+}
+
+.mention--multiline .mention__editor {
+    height: auto;
+    min-height: calc(1.5em * var(--mention-rows, 2) + 20px);
+    padding: 9px 0;
+    line-height: var(--leading-normal);
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.mention__editor:empty::before {
+    content: attr(data-placeholder);
+    color: var(--faint);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+/* The resting label doubles as the placeholder, as in TextInput. */
+.mention:not(.mention--has-label) .mention__editor:empty::before {
+    opacity: 1;
+}
+
+/* Show the placeholder only after the label has floated out of the way. */
+.mention--has-label .mention__editor:focus:empty::before {
+    opacity: 1;
+    transition-delay: var(--duration-medium);
+}
+
+/* ---- floating label, matching TextInput exactly ------------------------- */
+
+/* These values duplicate TextInput.css so the mention field keeps the same
+   top/left/font-size/transform transition when it is focused or filled. */
+
+.mention .text-field__label {
+    transform-origin: left center;
+    transition:
+        top var(--duration-medium) var(--ease-decelerate),
+        left var(--duration-medium) var(--ease-decelerate),
+        padding var(--duration-medium) var(--ease-decelerate),
+        background-color var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard),
+        font-size var(--duration-medium) var(--ease-decelerate),
+        transform var(--duration-medium) var(--ease-decelerate);
+}
+
+.mention.text-field--outline:focus-within .text-field__label,
+.mention.mention--focused.text-field--outline .text-field__label,
+.mention.mention--filled.text-field--outline .text-field__label {
+    top: 0;
+    left: calc(var(--text-field-pad-inline) - 4px);
+    padding: 0 5px;
+    background: var(--color-surface);
+    color: var(--color-primary);
+    font-size: 12px;
+    transform: translateY(-50%);
+}
+
+.mention.text-field--fill:focus-within .text-field__label,
+.mention.mention--focused.text-field--fill .text-field__label,
+.mention.mention--filled.text-field--fill .text-field__label {
+    top: 6px;
+    left: var(--text-field-pad-inline);
+    padding: 0;
+    background: transparent;
+    color: var(--color-primary);
+    font-size: 12px;
+    transform: none;
+}
+
+.mention.text-field--standard:focus-within .text-field__label,
+.mention.mention--focused.text-field--standard .text-field__label,
+.mention.mention--filled.text-field--standard .text-field__label {
+    top: 2px;
+    left: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--color-primary);
+    font-size: 12px;
+    transform: none;
+}
+
+.mention.text-field--invalid.mention--filled .text-field__label {
+    color: var(--color-error);
+}
+
+.mention.mention--disabled.mention--filled .text-field__label {
+    color: var(--faint);
+}
+
+/* ---- mention token ------------------------------------------------------ */
+
+.mention__token {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    height: var(--mention-token-height);
+    margin: 0 2px;
+    padding: 0 2px 0 3px;
+    border-radius: var(--radius-pill);
+    background: var(--color-primary-container);
+    color: var(--color-on-primary-container);
+    font-family: var(--font-sans);
+    font-size: var(--mention-token-font);
+    font-weight: var(--weight-medium);
+    line-height: 1;
+    vertical-align: middle;
+    white-space: nowrap;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.mention__token-avatar {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: calc(var(--mention-token-height) - 6px);
+    height: calc(var(--mention-token-height) - 6px);
+    margin-right: 4px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    font-size: 10px;
+    font-weight: var(--weight-semibold);
+}
+
+.mention__token-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mention__token-remove {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    margin-left: 3px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+    font-size: 0;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+        background-color var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard);
+}
+
+.mention__token-remove::before {
+    content: "×";
+    font-size: 13px;
+    line-height: 1;
+}
+
+/* Expand the hit area without changing the visual circle. */
+.mention__token-remove::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+}
+
+.mention__token-remove:hover {
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+.mention__token-remove:active {
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    opacity: 0.85;
+}
+
+.mention__token-remove:focus-visible {
+    outline: 2px solid var(--focus-ring-color);
+    outline-offset: 1px;
+}
+
+.mention__token-remove:disabled {
+    cursor: not-allowed;
+    opacity: var(--state-disabled-opacity);
+}
+
+/* ---- states ------------------------------------------------------------- */
+
+.mention--disabled .mention__editor {
+    color: var(--faint);
+    cursor: not-allowed;
+}
+
+.mention--disabled .text-field__label {
+    color: var(--faint);
+}
+
+.mention--disabled .text-field__background {
+    border-color: var(--color-outline-variant);
+    background: var(--color-surface-container);
+}
+
+.mention--disabled.text-field--fill .text-field__background {
+    border-bottom-color: var(--color-outline-variant);
+    background: var(--color-surface-container);
+}
+
+.mention--disabled .mention__token {
+    opacity: var(--state-disabled-opacity);
+}
+
+/* ---- suggestion list ---------------------------------------------------- */
+
+.mention__list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    padding: 4px;
+    gap: 1px;
+}
+
+.mention__option {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    gap: var(--space-2);
+}
+
+.mention__avatar {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--color-primary-container);
+    color: var(--color-on-primary-container);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.mention__copy {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 1px;
+}
+
+.mention__name {
+    overflow: hidden;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mention__description {
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mention__loading {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+/* ---- reduced motion ----------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .mention .text-field__label,
+    .mention .text-field__background,
+    .mention .text-field__edge,
+    .mention__editor:empty::before,
+    .mention__token-remove {
+        transition: none;
+    }
+}

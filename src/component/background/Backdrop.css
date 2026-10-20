@@ -1,0 +1,32 @@
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-overlay);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    background: var(--scrim);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-medium) var(--ease-standard);
+}
+
+.backdrop--blur {
+    -webkit-backdrop-filter: blur(var(--overlay-blur)) saturate(0.82);
+    backdrop-filter: blur(var(--overlay-blur)) saturate(0.82);
+}
+
+.backdrop--accent {
+    background: radial-gradient(circle at 50% 16%, var(--accent-soft), transparent 42%), var(--scrim);
+}
+
+.backdrop[data-open="true"] {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .backdrop {
+        transition: none;
+    }
+}

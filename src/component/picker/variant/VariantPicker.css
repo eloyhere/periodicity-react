@@ -1,0 +1,59 @@
+/* ==========================================================================
+   Variant picker — radio-style chips with optional swatches
+   ========================================================================== */
+
+.variant-picker .picker-field__control {
+    align-items: flex-start;
+    min-height: 48px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.variant-picker__options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.variant-picker__options--vertical {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.variant-picker__option {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    gap: var(--space-2);
+}
+
+.variant-picker__option:hover {
+    border-color: var(--color-primary);
+}
+
+.variant-picker__option--selected {
+    border-color: var(--color-primary);
+    background: var(--color-primary-container);
+    color: var(--color-on-primary-container);
+    font-weight: 500;
+}
+
+.variant-picker__option:disabled {
+    opacity: var(--state-disabled-opacity);
+    cursor: not-allowed;
+}
+
+.variant-picker__swatch {
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+}

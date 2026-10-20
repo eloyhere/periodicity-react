@@ -1,0 +1,60 @@
+/* ==========================================================================
+   Waterfall layout — balanced flex columns for varying-height content
+   ========================================================================== */
+
+.waterfall-layout {
+    --waterfall-gap: var(--space-3);
+
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+    min-width: 0;
+    gap: var(--waterfall-gap);
+}
+
+.waterfall-layout--gap-none {
+    --waterfall-gap: 0px;
+}
+
+.waterfall-layout--gap-xs {
+    --waterfall-gap: var(--space-1);
+}
+
+.waterfall-layout--gap-sm {
+    --waterfall-gap: var(--space-2);
+}
+
+.waterfall-layout--gap-md {
+    --waterfall-gap: var(--space-3);
+}
+
+.waterfall-layout--gap-lg {
+    --waterfall-gap: var(--space-4);
+}
+
+.waterfall-layout--gap-xl {
+    --waterfall-gap: var(--space-6);
+}
+
+.waterfall-layout__column {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-width: 0;
+    gap: var(--waterfall-gap);
+}
+
+.waterfall-layout__item {
+    min-width: 0;
+    break-inside: avoid;
+}
+
+@media (max-width: 720px) {
+    .waterfall-layout--responsive {
+        flex-direction: column;
+    }
+
+    .waterfall-layout--responsive .waterfall-layout__column {
+        width: 100%;
+    }
+}

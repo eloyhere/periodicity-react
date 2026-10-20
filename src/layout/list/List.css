@@ -1,0 +1,98 @@
+/* ==========================================================================
+   List — adapter-backed list with virtual window and selection
+   ========================================================================== */
+
+.list {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    overflow-y: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xs);
+    background: var(--color-surface);
+    overscroll-behavior: contain;
+}
+
+.list--virtual {
+    overflow-y: auto;
+    overflow-anchor: none;
+}
+
+.list__spacer {
+    position: relative;
+    flex: none;
+    width: 100%;
+    min-height: 0;
+}
+
+.list__row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 48px;
+    padding: 0 var(--space-4);
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    gap: var(--space-2);
+}
+
+.list--virtual .list__row {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.list__row:hover {
+    background: var(--color-surface-container-low);
+}
+
+.list__row--selected {
+    background: var(--color-primary-container);
+    color: var(--color-on-primary-container);
+}
+
+.list__row--disabled {
+    opacity: var(--state-disabled-opacity);
+    cursor: not-allowed;
+}
+
+.list__row:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
+}
+
+.list__check {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+}
+
+.list__content {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.list__state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    padding: var(--space-4);
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+}
+
+.list--virtual .list__row {
+    min-height: 0;
+}

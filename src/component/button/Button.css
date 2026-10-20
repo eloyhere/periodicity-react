@@ -1,0 +1,250 @@
+.button {
+    --button-radius: var(--radius-xs);
+
+    position: relative;
+    display: inline-flex;
+    align-items: stretch;
+    max-width: 100%;
+    border: 1px solid transparent;
+    border-radius: var(--button-radius);
+    color: var(--text);
+    vertical-align: middle;
+    transition:
+        background-color 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease,
+        color 180ms ease,
+        transform 180ms ease;
+}
+
+.button > .surface__component {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.button__control {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    border: 0;
+    border-radius: inherit;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    appearance: none;
+}
+
+.button__label {
+    display: inline-block;
+    min-width: 0;
+    overflow: visible;
+}
+
+.button__label:empty {
+    display: none;
+}
+
+.button__icon {
+    opacity: 0.92;
+}
+
+.button--sm .button__control {
+    min-height: 32px;
+    padding: 0 13px;
+    gap: 6px;
+    font-size: 12px;
+}
+
+.button--md .button__control {
+    min-height: 42px;
+    padding: 0 18px;
+    gap: 8px;
+    font-size: 13.5px;
+}
+
+.button--lg .button__control {
+    min-height: 52px;
+    padding: 0 24px;
+    gap: 9px;
+    font-size: 15px;
+}
+
+.button--solid {
+    --ripple-color: rgba(255, 255, 255, 0.28);
+
+    border-color: var(--accent);
+    background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+    color: var(--accent-ink);
+    box-shadow:
+        0 10px 24px rgba(0, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.26);
+}
+
+.button--solid:hover {
+    background: linear-gradient(135deg, var(--accent-strong), var(--accent-strong));
+    box-shadow:
+        0 14px 30px rgba(0, 0, 0, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.button--outline {
+    --ripple-color: var(--accent-soft);
+
+    border-color: var(--line-strong);
+    background: transparent;
+    color: var(--text);
+}
+
+.button--outline:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    transform: translateY(-1px);
+}
+
+.button--ghost {
+    --ripple-color: var(--accent-soft);
+
+    border-color: transparent;
+    background: transparent;
+    color: var(--text-soft);
+}
+
+.button--ghost:hover {
+    background: var(--line);
+    color: var(--text);
+}
+
+.button--quiet {
+    --ripple-color: var(--line-strong);
+
+    border-color: transparent;
+    background: transparent;
+    color: var(--muted);
+}
+
+.button--quiet:hover {
+    background: var(--line);
+    color: var(--text-soft);
+}
+
+.button:not(:has(.button__control:disabled)):active {
+    transform: translateY(0);
+}
+
+.button__control:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -4px;
+}
+
+.button--solid .button__control:focus-visible {
+    outline-color: var(--accent-ink);
+}
+
+.button:has(.button__control:focus-visible) {
+    box-shadow:
+        0 0 0 2px var(--bg),
+        0 0 0 4px var(--accent);
+}
+
+.button:has(.button__control:disabled) {
+    opacity: 0.45;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.button__control:disabled {
+    cursor: not-allowed;
+}
+
+/* ==========================================================================
+   Material theme — Android Material button treatment
+   ========================================================================== */
+
+:root .button {
+    --button-radius: var(--radius-xs);
+}
+
+:root .button--solid {
+    border-color: transparent;
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: none;
+}
+
+:root .button--solid:hover {
+    background: color-mix(in srgb, var(--color-primary) 92%, #000000);
+    box-shadow: none;
+    transform: none;
+}
+
+:root .button--outline {
+    border-color: var(--color-outline);
+    background: transparent;
+    color: var(--color-primary);
+}
+
+:root .button--outline:hover {
+    border-color: var(--color-primary);
+    background: var(--color-primary-container);
+    box-shadow: none;
+    transform: none;
+}
+
+:root .button--ghost {
+    color: var(--color-primary);
+}
+
+:root .button--ghost:hover {
+    background: var(--color-primary-container);
+    color: var(--color-on-primary-container);
+    transform: none;
+}
+
+:root .button--quiet {
+    color: var(--color-on-surface-variant);
+}
+
+:root .button--quiet:hover {
+    background: var(--color-surface-container);
+    color: var(--color-on-surface);
+    transform: none;
+}
+
+:root .button--sm .button__control {
+    min-height: 32px;
+    padding: 0 16px;
+    font-size: 13px;
+}
+
+:root .button--md .button__control {
+    min-height: 36px;
+    padding: 0 24px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+:root .button--lg .button__control {
+    min-height: 42px;
+    padding: 0 32px;
+    font-size: 15px;
+}
+
+:root .button:has(.button__control:focus-visible) {
+    box-shadow: 0 0 0 3px var(--color-primary-container);
+}

@@ -1,0 +1,396 @@
+/* ==========================================================================
+   Foundations — token documentation blocks
+   ========================================================================== */
+
+/* Colour --------------------------------------------------------------- */
+
+.foundation-colour-groups {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+}
+
+.foundation-colour-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.foundation-colour-group__heading {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.foundation-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+}
+
+.foundation-swatch {
+    display: flex;
+    flex-direction: column;
+    width: 148px;
+    gap: 6px;
+}
+
+.foundation-swatch__chip {
+    display: block;
+    height: 72px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xs);
+}
+
+.foundation-swatch__name {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.foundation-swatch__token {
+    overflow: hidden;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Type ----------------------------------------------------------------- */
+
+.foundation-type {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xs);
+    background: var(--color-surface);
+}
+
+.foundation-type__row {
+    display: flex;
+    align-items: baseline;
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--line);
+    gap: var(--space-5);
+}
+
+.foundation-type__row:last-child {
+    border-bottom: 0;
+}
+
+.foundation-type__meta {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    width: 140px;
+    gap: 2px;
+}
+
+.foundation-type__name {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.foundation-type__meta code {
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 10px;
+}
+
+/* Spacing -------------------------------------------------------------- */
+
+.foundation-spacing {
+    display: flex;
+    flex-direction: column;
+    max-width: 640px;
+    gap: var(--space-2);
+}
+
+.foundation-spacing__row {
+    display: flex;
+    align-items: center;
+    min-height: 24px;
+    gap: var(--space-4);
+}
+
+.foundation-spacing__row code {
+    flex: none;
+    width: 80px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+}
+
+.foundation-spacing__bar {
+    display: block;
+    height: 16px;
+    border-radius: 3px;
+    background: var(--color-primary);
+}
+
+/* Shape and elevation -------------------------------------------------- */
+
+.foundation-shape,
+.foundation-elevation {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+}
+
+.foundation-shape__item,
+.foundation-elevation__item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+    color: var(--text);
+    font-size: 13px;
+}
+
+.foundation-shape__item code,
+.foundation-elevation__item code {
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 10px;
+}
+
+.foundation-shape__box {
+    display: block;
+    width: 112px;
+    height: 72px;
+    border: 1px solid var(--line);
+    background: var(--color-surface-container);
+}
+
+.foundation-elevation__box {
+    display: block;
+    width: 112px;
+    height: 72px;
+    border-radius: var(--radius-xs);
+    background: var(--color-surface);
+}
+
+/* Motion --------------------------------------------------------------- */
+
+.foundation-motion {
+    display: flex;
+    flex-direction: column;
+    max-width: 640px;
+    gap: var(--space-3);
+}
+
+.foundation-motion__row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.foundation-motion__name {
+    flex: none;
+    width: 80px;
+    color: var(--text);
+    font-size: 13px;
+}
+
+.foundation-motion__track {
+    position: relative;
+    display: block;
+    flex: 1 1 auto;
+    height: 8px;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-container);
+}
+
+.foundation-motion__dot {
+    position: absolute;
+    top: -4px;
+    left: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    animation-name: foundation-motion;
+    animation-timing-function: var(--ease-standard);
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+.foundation-motion__row code {
+    flex: none;
+    width: 160px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-align: right;
+}
+
+@keyframes foundation-motion {
+    from {
+        left: 0;
+    }
+
+    to {
+        left: calc(100% - 16px);
+    }
+}
+
+/* Icons ---------------------------------------------------------------- */
+
+.foundation-icons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.foundation-icons__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.foundation-icons__search {
+    display: flex;
+    align-items: center;
+    width: min(360px, 100%);
+    height: 40px;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xs);
+    background: var(--color-surface);
+    color: var(--muted);
+    gap: var(--space-2);
+}
+
+.foundation-icons__search:focus-within {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.foundation-icons__search input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    outline: none;
+}
+
+.foundation-icons__count {
+    flex: none;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.foundation-icons__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.foundation-icons__grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.foundation-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 106px;
+    height: 92px;
+    padding: var(--space-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xs);
+    background: var(--color-surface);
+    color: var(--text);
+    cursor: pointer;
+    gap: 2px;
+    transition:
+        border-color 140ms var(--ease-standard),
+        background-color 140ms var(--ease-standard);
+}
+
+.foundation-icon:hover {
+    border-color: var(--color-primary);
+    background: var(--color-primary-container);
+}
+
+.foundation-icon:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.foundation-icon__glyph {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+}
+
+.foundation-icon__name {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 11px;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.foundation-icon__category {
+    max-width: 100%;
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 9px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.foundation-icon-sizes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--space-5);
+}
+
+.foundation-icon-size {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--text);
+    gap: var(--space-1);
+}
+
+.foundation-icon-size code {
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 10px;
+}
+
+@media (max-width: 720px) {
+    .foundation-type__row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-2);
+    }
+
+    .foundation-type__meta {
+        width: auto;
+    }
+
+    .foundation-icons__toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .foundation-icon {
+        width: calc(50% - var(--space-1));
+    }
+}

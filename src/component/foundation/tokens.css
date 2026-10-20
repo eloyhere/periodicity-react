@@ -1,0 +1,301 @@
+/* ==========================================================================
+   Periodicity UI — foundation tokens
+   Additive layer on top of the brand palette defined in src/index.css.
+   Components must consume these tokens instead of raw values.
+   ========================================================================== */
+
+:root {
+    /* ------------------------------------------------------------------
+       Spacing — 4px base
+       ------------------------------------------------------------------ */
+    --space-0: 0px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-7: 32px;
+    --space-8: 40px;
+    --space-9: 48px;
+    --space-10: 64px;
+    --space-11: 80px;
+
+    /* ------------------------------------------------------------------
+       Typography
+       ------------------------------------------------------------------ */
+    --type-display: clamp(2.4rem, 4.6vw, 3.9rem);
+    --type-h1: clamp(2rem, 3.2vw, 2.75rem);
+    --type-h2: clamp(1.55rem, 2.4vw, 2rem);
+    --type-h3: clamp(1.25rem, 1.8vw, 1.55rem);
+    --type-h4: 1.1rem;
+    --type-body-lg: 1.0625rem;
+    --type-body: 0.95rem;
+    --type-body-sm: 0.85rem;
+    --type-label: 0.8125rem;
+    --type-label-sm: 0.75rem;
+    --type-mono: 0.625rem;
+
+    --weight-regular: 400;
+    --weight-medium: 500;
+    --weight-semibold: 600;
+    --weight-bold: 700;
+
+    --leading-tight: 1.1;
+    --leading-snug: 1.25;
+    --leading-normal: 1.5;
+    --leading-relaxed: 1.65;
+
+    --tracking-tight: -0.02em;
+    --tracking-normal: 0em;
+    --tracking-wide: 0.08em;
+    --tracking-widest: 0.16em;
+
+    /* ------------------------------------------------------------------
+       Controls & density
+       ------------------------------------------------------------------ */
+    --control-sm: 32px;
+    --control-md: 42px;
+    --control-lg: 52px;
+    --control-inline-sm: 12px;
+    --control-inline-md: 16px;
+    --control-inline-lg: 22px;
+    --touch-target: 44px;
+
+    /* ------------------------------------------------------------------
+       Shapes
+       ------------------------------------------------------------------ */
+    --radius-field: var(--radius-sm);
+    --radius-control: 12px;
+    --radius-surface: var(--radius-md);
+
+    /* ------------------------------------------------------------------
+       Interaction states (Material state layer, tuned for this palette)
+       ------------------------------------------------------------------ */
+    --state-hover-opacity: 0.07;
+    --state-press-opacity: 0.12;
+    --state-focus-opacity: 0.1;
+    --state-drag-opacity: 0.16;
+    --state-disabled-opacity: 0.45;
+    --state-disabled-container-opacity: 0.12;
+
+    /* ------------------------------------------------------------------
+       Elevation — border + inner highlight instead of stacked shadows
+       ------------------------------------------------------------------ */
+    --elevation-1: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 6px 18px rgba(0, 0, 0, 0.22);
+    --elevation-2: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 14px 38px rgba(0, 0, 0, 0.3);
+    --elevation-3: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 28px 80px rgba(0, 0, 0, 0.44);
+
+    /* ------------------------------------------------------------------
+       Focus
+       ------------------------------------------------------------------ */
+    --focus-ring-width: 2px;
+    --focus-ring-offset: 2px;
+    --focus-ring-color: var(--accent);
+
+    /* ------------------------------------------------------------------
+       Motion
+       ------------------------------------------------------------------ */
+    --duration-fast: 250ms;
+    --duration-medium: 500ms;
+    --duration-slow: 750ms;
+    --duration-slower: 1000ms;
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --ease-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+    --ease-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+    --ease-spring: cubic-bezier(0.22, 0.8, 0.32, 1);
+
+    /* ------------------------------------------------------------------
+       Layers
+       ------------------------------------------------------------------ */
+    --z-base: 0;
+    --z-raised: 10;
+    --z-sticky: 100;
+    --z-dropdown: 200;
+    --z-overlay: 300;
+    --z-modal: 400;
+    --z-toast: 500;
+    --z-tooltip: 600;
+
+    --scrim: rgba(3, 6, 4, 0.72);
+    --overlay-blur: 10px;
+    --measure-prose: 68ch;
+
+    /* ------------------------------------------------------------------
+       Material colour roles — semantic aliases over the brand palette
+       ------------------------------------------------------------------ */
+    --color-primary: var(--accent);
+    --color-on-primary: var(--accent-ink);
+    --color-primary-container: var(--accent-soft);
+    --color-on-primary-container: var(--accent-strong);
+    --color-secondary: var(--mint);
+    --color-on-secondary: var(--bg);
+    --color-secondary-container: var(--mint-soft);
+    --color-on-secondary-container: var(--text);
+    --color-tertiary: var(--violet);
+    --color-on-tertiary: var(--bg);
+    --color-tertiary-container: var(--violet-soft);
+    --color-on-tertiary-container: var(--text);
+    --color-error: var(--danger);
+    --color-on-error: var(--bg);
+    --color-error-container: var(--danger-soft);
+    --color-on-error-container: var(--text);
+    --color-warning: var(--amber);
+    --color-on-warning: var(--bg);
+    --color-warning-container: var(--amber-soft);
+    --color-surface: var(--panel);
+    --color-on-surface: var(--text);
+    --color-on-surface-variant: var(--muted);
+    --color-surface-container-lowest: var(--panel-muted);
+    --color-surface-container-low: var(--panel);
+    --color-surface-container: var(--panel-strong);
+    --color-surface-container-high: var(--panel-strong);
+    --color-surface-container-highest: var(--panel-strong);
+    --color-outline: var(--line-strong);
+    --color-outline-variant: var(--line);
+    --color-inverse-surface: var(--text);
+    --color-inverse-on-surface: var(--bg);
+    --color-scrim: var(--scrim);
+    --color-shadow: rgba(0, 0, 0, 0.45);
+
+    /* ------------------------------------------------------------------
+       British-spelled aliases — the public naming used by new components
+       ------------------------------------------------------------------ */
+    --colourPrimary: var(--color-primary);
+    --colourOnPrimary: var(--color-on-primary);
+    --colourPrimaryContainer: var(--color-primary-container);
+    --colourOnPrimaryContainer: var(--color-on-primary-container);
+    --colourAccent: var(--color-primary);
+    --colourOnAccent: var(--color-on-primary);
+    --colourAccentContainer: var(--color-primary-container);
+    --colourOnAccentContainer: var(--color-on-primary-container);
+    --colourSecondary: var(--color-secondary);
+    --colourOnSecondary: var(--color-on-secondary);
+    --colourSecondaryContainer: var(--color-secondary-container);
+    --colourTertiary: var(--color-tertiary);
+    --colourOnTertiary: var(--color-on-tertiary);
+    --colourTertiaryContainer: var(--color-tertiary-container);
+    --colourError: var(--color-error);
+    --colourOnError: var(--color-on-error);
+    --colourErrorContainer: var(--color-error-container);
+    --colourWarning: var(--color-warning);
+    --colourOnWarning: var(--color-on-warning);
+    --colourWarningContainer: var(--color-warning-container);
+    --colourSurface: var(--color-surface);
+    --colourOnSurface: var(--color-on-surface);
+    --colourOnSurfaceVariant: var(--color-on-surface-variant);
+    --colourSurfaceContainerLowest: var(--color-surface-container-lowest);
+    --colourSurfaceContainerLow: var(--color-surface-container-low);
+    --colourSurfaceContainer: var(--color-surface-container);
+    --colourSurfaceContainerHigh: var(--color-surface-container-high);
+    --colourSurfaceContainerHighest: var(--color-surface-container-highest);
+    --colourOutline: var(--color-outline);
+    --colourOutlineVariant: var(--color-outline-variant);
+    --colourInverseSurface: var(--color-inverse-surface);
+    --colourInverseOnSurface: var(--color-inverse-on-surface);
+    --colourScrim: var(--color-scrim);
+    --colourShadow: var(--color-shadow);
+}
+
+/* ==========================================================================
+   Tones — shared vocabulary for accent-colored components
+   Apply `.tone-accent` etc. next to your BEM class, then consume
+   var(--tone), var(--tone-soft), var(--tone-strong), var(--tone-ink).
+   ========================================================================== */
+
+.tone-neutral {
+    --tone: var(--text-soft);
+    --tone-soft: var(--line);
+    --tone-strong: var(--text);
+    --tone-ink: var(--bg);
+}
+
+.tone-accent {
+    --tone: var(--accent);
+    --tone-soft: var(--accent-soft);
+    --tone-strong: var(--accent-strong);
+    --tone-ink: var(--accent-ink);
+}
+
+.tone-mint {
+    --tone: var(--mint);
+    --tone-soft: var(--mint-soft);
+    --tone-strong: var(--mint);
+    --tone-ink: var(--bg);
+}
+
+.tone-violet {
+    --tone: var(--violet);
+    --tone-soft: var(--violet-soft);
+    --tone-strong: var(--violet);
+    --tone-ink: var(--bg);
+}
+
+.tone-amber {
+    --tone: var(--amber);
+    --tone-soft: var(--amber-soft);
+    --tone-strong: var(--amber);
+    --tone-ink: var(--bg);
+}
+
+.tone-danger {
+    --tone: var(--danger);
+    --tone-soft: var(--danger-soft);
+    --tone-strong: var(--danger);
+    --tone-ink: var(--bg);
+}
+
+/* ==========================================================================
+   Light theme adjustments for the additive layer
+   ========================================================================== */
+
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    border: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* ==========================================================================
+   Android theme colours — canonical public names
+   ========================================================================== */
+
+:root {
+    --colourPrimary: #1976d2;
+    --colourPrimaryDark: #0d47a1;
+    --colourPrimaryLight: #4791db;
+    --colourOnPrimary: #ffffff;
+    --colourPrimaryContainer: #e3f2fd;
+    --colourOnPrimaryContainer: #0d47a1;
+
+    --colourAccent: #dc004e;
+    --colourAccentDark: #9a0036;
+    --colourAccentLight: #ff5c8d;
+
+    --colourSecondary: #00897b;
+    --colourTertiary: #7b1fa2;
+    --colourError: #b3261e;
+    --colourWarning: #ed6c02;
+
+    --colourTextPrimary: rgba(0, 0, 0, 0.87);
+    --colourTextSecond: rgba(0, 0, 0, 0.6);
+    --colourTextDisabled: rgba(0, 0, 0, 0.38);
+
+    --colourBackground: #fafafa;
+    --colourSurface: #ffffff;
+    --colourSurfaceDark: #f5f5f5;
+    --colourDivider: rgba(0, 0, 0, 0.12);
+    --colourControlHighlight: rgba(0, 0, 0, 0.12);
+    --colourScrim: rgba(0, 0, 0, 0.32);
+}

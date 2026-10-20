@@ -1,0 +1,154 @@
+.arrange-stack {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.arrange-inline {
+    display: flex;
+    flex-direction: row;
+    min-width: 0;
+}
+
+.arrange-columns {
+    display: flex;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+.arrange-columns > * {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.arrange-wrap {
+    flex-wrap: wrap;
+}
+
+.arrange-gap-xs {
+    --arrange-gap: 4px;
+    gap: var(--arrange-gap);
+}
+
+.arrange-gap-sm {
+    --arrange-gap: 8px;
+    gap: var(--arrange-gap);
+}
+
+.arrange-gap-md {
+    --arrange-gap: 16px;
+    gap: var(--arrange-gap);
+}
+
+.arrange-gap-lg {
+    --arrange-gap: 24px;
+    gap: var(--arrange-gap);
+}
+
+.arrange-gap-xl {
+    --arrange-gap: 40px;
+    gap: var(--arrange-gap);
+}
+
+.arrange-align-start {
+    align-items: flex-start;
+}
+
+.arrange-align-center {
+    align-items: center;
+}
+
+.arrange-align-end {
+    align-items: flex-end;
+}
+
+.arrange-align-stretch {
+    align-items: stretch;
+}
+
+.arrange-justify-start {
+    justify-content: flex-start;
+}
+
+.arrange-justify-center {
+    justify-content: center;
+}
+
+.arrange-justify-end {
+    justify-content: flex-end;
+}
+
+.arrange-justify-between {
+    justify-content: space-between;
+}
+
+.arrange-columns-1 > * {
+    flex-basis: 100%;
+}
+
+.arrange-columns-2 > * {
+    flex-basis: calc((100% - var(--arrange-gap)) / 2);
+}
+
+.arrange-columns-3 > * {
+    flex-basis: calc((100% - var(--arrange-gap) * 2) / 3);
+}
+
+.arrange-columns-4 > * {
+    flex-basis: calc((100% - var(--arrange-gap) * 3) / 4);
+}
+
+@media (max-width: 1100px) {
+    .arrange-columns-3 > *,
+    .arrange-columns-4 > * {
+        flex-basis: calc((100% - var(--arrange-gap)) / 2);
+    }
+}
+
+@media (max-width: 720px) {
+    .arrange-columns-2 > *,
+    .arrange-columns-3 > *,
+    .arrange-columns-4 > * {
+        flex-basis: 100%;
+    }
+}
+
+/* Column tracks must use the parent gap, not a child's inherited gap token. */
+.arrange-columns.arrange-gap-xs {
+    --arrange-columns-gap: 4px;
+}
+
+.arrange-columns.arrange-gap-sm {
+    --arrange-columns-gap: 8px;
+}
+
+.arrange-columns.arrange-gap-md {
+    --arrange-columns-gap: 16px;
+}
+
+.arrange-columns.arrange-gap-lg {
+    --arrange-columns-gap: 24px;
+}
+
+.arrange-columns.arrange-gap-xl {
+    --arrange-columns-gap: 40px;
+}
+
+.arrange-columns-2 > * {
+    flex-basis: calc((100% - var(--arrange-columns-gap)) / 2);
+}
+
+.arrange-columns-3 > * {
+    flex-basis: calc(
+        (100% - var(--arrange-columns-gap) - var(--arrange-columns-gap)) / 3
+    );
+}
+
+.arrange-columns-4 > * {
+    flex-basis: calc(
+        (100% - var(--arrange-columns-gap) - var(--arrange-columns-gap) -
+                var(--arrange-columns-gap)) /
+            4
+    );
+}

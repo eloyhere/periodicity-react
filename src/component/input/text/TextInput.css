@@ -1,0 +1,398 @@
+/* ==========================================================================
+   Text field — Material outline / fill / standard with floating label
+   ========================================================================== */
+
+.text-field {
+    --text-field-pad-inline: 14px;
+    --text-field-height: 56px;
+    --text-field-bg: transparent;
+
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.text-field--sm {
+    --text-field-pad-inline: 11px;
+    --text-field-height: 48px;
+}
+
+.text-field--md {
+    --text-field-pad-inline: 14px;
+    --text-field-height: 56px;
+}
+
+.text-field--lg {
+    --text-field-pad-inline: 16px;
+    --text-field-height: 64px;
+}
+
+.text-field__control {
+    position: relative;
+    display: block;
+    min-width: 0;
+}
+
+.text-field__surface {
+    min-height: var(--text-field-height);
+    border-radius: var(--radius-xs);
+}
+
+.text-field__background {
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--color-outline);
+    border-radius: inherit;
+    background: var(--text-field-bg);
+    transition:
+        border-color 140ms var(--ease-standard),
+        background-color 140ms var(--ease-standard);
+}
+
+.text-field__edge {
+    position: absolute;
+    inset: 0;
+    border: 2px solid var(--color-primary);
+    border-radius: inherit;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.985);
+    transition:
+        opacity 220ms var(--ease-decelerate),
+        transform 220ms var(--ease-decelerate),
+        border-color 140ms var(--ease-standard);
+}
+
+.text-field__row {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    min-height: var(--text-field-height);
+    padding: 0 var(--text-field-pad-inline);
+    gap: var(--space-2);
+}
+
+.text-field__leading,
+.text-field__trailing {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    transition: color 140ms var(--ease-standard);
+}
+
+.text-field:focus-within .text-field__leading,
+.text-field:focus-within .text-field__trailing {
+    color: var(--color-primary);
+}
+
+.text-field__input {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    height: calc(var(--text-field-height) - 2px);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: var(--type-body);
+    line-height: 1.2;
+    outline: none;
+    caret-color: var(--color-primary);
+}
+
+.text-field__input::placeholder {
+    color: var(--faint);
+    opacity: 1;
+}
+
+.text-field__label {
+    position: absolute;
+    top: 50%;
+    left: var(--text-field-pad-inline);
+    z-index: 3;
+    max-width: calc(100% - var(--text-field-pad-inline) * 2);
+    padding: 0;
+    overflow: hidden;
+    color: var(--muted);
+    font-family: var(--font-sans);
+    font-size: var(--type-body);
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translateY(-50%);
+    transform-origin: left center;
+    will-change: top, transform, font-size;
+    transition:
+        top 220ms var(--ease-decelerate),
+        left 220ms var(--ease-decelerate),
+        padding 220ms var(--ease-decelerate),
+        background-color 140ms var(--ease-standard),
+        color 140ms var(--ease-standard),
+        font-size 220ms var(--ease-decelerate),
+        transform 220ms var(--ease-decelerate);
+}
+
+.text-field__required {
+    margin-left: 3px;
+    color: var(--color-error);
+}
+
+.text-field__hint,
+.text-field__error {
+    margin-top: 6px;
+    padding-left: 2px;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.text-field__hint {
+    color: var(--muted);
+}
+
+.text-field__error {
+    color: var(--color-error);
+}
+
+/* ---- outline ------------------------------------------------------------ */
+
+.text-field--outline {
+    --text-field-bg: var(--color-surface);
+}
+
+.text-field--outline .text-field__surface {
+    background: transparent;
+}
+
+.text-field--outline:focus-within .text-field__background {
+    border-color: var(--color-primary);
+}
+
+.text-field--outline:focus-within .text-field__edge {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.text-field--outline:focus-within .text-field__label,
+.text-field--outline:has(.text-field__input:not(:placeholder-shown)) .text-field__label {
+    top: 0;
+    left: calc(var(--text-field-pad-inline) - 4px);
+    padding: 0 5px;
+    background: var(--color-surface);
+    color: var(--color-primary);
+    font-size: 12px;
+    transform: translateY(-50%);
+}
+
+/* ---- fill --------------------------------------------------------------- */
+
+.text-field--fill {
+    --text-field-bg: var(--color-surface-container);
+}
+
+.text-field--fill .text-field__background {
+    border: 0;
+    border-bottom: 1px solid var(--color-outline);
+    border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+    background: var(--color-surface-container);
+}
+
+.text-field--fill .text-field__edge {
+    border: 0;
+    border-bottom: 2px solid var(--color-primary);
+    border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+    opacity: 1;
+    transform: scaleX(0);
+    transform-origin: center;
+}
+
+.text-field--fill .text-field__row {
+    padding-top: 18px;
+}
+
+.text-field--fill .text-field__label {
+    top: calc(50% + 8px);
+}
+
+.text-field--fill:focus-within .text-field__background {
+    border-bottom-color: var(--color-primary);
+    background: var(--color-surface-container-high);
+}
+
+.text-field--fill:focus-within .text-field__edge {
+    transform: scaleX(1);
+}
+
+.text-field--fill:focus-within .text-field__label,
+.text-field--fill:has(.text-field__input:not(:placeholder-shown)) .text-field__label {
+    top: 6px;
+    left: var(--text-field-pad-inline);
+    padding: 0;
+    background: transparent;
+    color: var(--color-primary);
+    font-size: 12px;
+    transform: none;
+}
+
+/* ---- standard ----------------------------------------------------------- */
+
+.text-field--standard {
+    --text-field-bg: transparent;
+    --text-field-pad-inline: 0;
+}
+
+.text-field--standard .text-field__background {
+    border: 0;
+    border-bottom: 1px solid var(--color-outline);
+    border-radius: 0;
+    background: transparent;
+}
+
+.text-field--standard .text-field__edge {
+    border: 0;
+    border-bottom: 2px solid var(--color-primary);
+    border-radius: 0;
+    opacity: 1;
+    transform: scaleX(0);
+    transform-origin: center;
+}
+
+.text-field--standard .text-field__row {
+    padding-top: 18px;
+}
+
+.text-field--standard .text-field__label {
+    top: calc(50% + 9px);
+}
+
+.text-field--standard:focus-within .text-field__background {
+    border-bottom-color: var(--color-primary);
+}
+
+.text-field--standard:focus-within .text-field__edge {
+    transform: scaleX(1);
+}
+
+.text-field--standard:focus-within .text-field__label,
+.text-field--standard:has(.text-field__input:not(:placeholder-shown)) .text-field__label {
+    top: 2px;
+    left: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--color-primary);
+    font-size: 12px;
+    transform: none;
+}
+
+/* ---- invalid ------------------------------------------------------------ */
+
+.text-field--invalid .text-field__background {
+    border-color: var(--color-error);
+}
+
+.text-field--invalid .text-field__label {
+    color: var(--color-error);
+}
+
+.text-field--invalid .text-field__edge {
+    border-color: var(--color-error);
+    transform: scale(1);
+}
+
+.text-field--invalid.text-field--fill .text-field__edge,
+.text-field--invalid.text-field--standard .text-field__edge {
+    transform: scaleX(1);
+}
+
+/* ---- leading icon ------------------------------------------------------- */
+
+.text-field--leading .text-field__label {
+    left: calc(var(--text-field-pad-inline) + 26px);
+}
+
+.text-field--leading:focus-within .text-field__label,
+.text-field--leading:has(.text-field__input:not(:placeholder-shown)) .text-field__label {
+    left: calc(var(--text-field-pad-inline) + 26px);
+}
+
+.text-field--leading.text-field--outline:focus-within .text-field__label,
+.text-field--leading.text-field--outline:has(.text-field__input:not(:placeholder-shown))
+    .text-field__label {
+    left: calc(var(--text-field-pad-inline) - 4px);
+}
+
+.text-field--leading.text-field--fill:focus-within .text-field__label,
+.text-field--leading.text-field--fill:has(.text-field__input:not(:placeholder-shown))
+    .text-field__label {
+    left: var(--text-field-pad-inline);
+}
+
+.text-field--leading.text-field--standard .text-field__label,
+.text-field--leading.text-field--standard:focus-within .text-field__label,
+.text-field--leading.text-field--standard:has(.text-field__input:not(:placeholder-shown))
+    .text-field__label {
+    left: 0;
+}
+
+/* ---- sizes -------------------------------------------------------------- */
+
+.text-field--sm .text-field__input,
+.text-field--sm .text-field__label {
+    font-size: var(--type-body-sm);
+}
+
+.text-field--lg .text-field__input,
+.text-field--lg .text-field__label {
+    font-size: var(--type-body-lg);
+}
+
+.text-field:has(.text-field__input:disabled) {
+    opacity: var(--state-disabled-opacity);
+}
+
+.text-field__input:disabled {
+    color: var(--faint);
+    cursor: not-allowed;
+}
+
+/* Fill and standard reserve space for the floating label above the input. */
+.text-field--fill .text-field__input,
+.text-field--standard .text-field__input {
+    height: calc(var(--text-field-height) - 18px);
+}
+
+/* The resting label doubles as the placeholder; keep the two from overlapping. */
+.text-field:not(:focus-within):has(.text-field__input:placeholder-shown) .text-field__input::placeholder {
+    color: transparent;
+}
+
+.text-field__input::placeholder {
+    transition: color 140ms var(--ease-standard);
+}
+
+/* Disabled fields keep a visible boundary instead of fading the whole shell. */
+.text-field:has(.text-field__input:disabled) {
+    opacity: 1;
+}
+
+.text-field:has(.text-field__input:disabled) .text-field__background {
+    border-color: var(--color-outline-variant);
+    background: var(--color-surface-container);
+}
+
+.text-field:has(.text-field__input:disabled) .text-field__label {
+    color: var(--faint);
+}
+
+.text-field:has(.text-field__input:disabled) .text-field__input {
+    color: var(--faint);
+}
+
+.text-field--fill:has(.text-field__input:disabled) .text-field__background {
+    border-bottom-color: var(--color-outline-variant);
+    background: var(--color-surface-container);
+}

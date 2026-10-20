@@ -1,0 +1,42 @@
+.state-layer {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--state-layer-color, currentColor);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.state-layer--active {
+    opacity: var(--state-hover-opacity);
+}
+
+.surface:hover > .surface__background .state-layer {
+    opacity: var(--state-hover-opacity);
+}
+
+.surface:active > .surface__background .state-layer {
+    opacity: var(--state-press-opacity);
+}
+
+.surface:has(:focus-visible) > .surface__background .state-layer {
+    opacity: var(--state-focus-opacity);
+}
+
+.surface:has(:disabled) > .surface__background .state-layer,
+.surface[data-disabled="true"] > .surface__background .state-layer {
+    opacity: 0;
+}
+
+@media (hover: none) {
+    .surface:hover > .surface__background .state-layer {
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .state-layer {
+        transition: none;
+    }
+}

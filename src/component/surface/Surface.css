@@ -1,0 +1,96 @@
+.surface {
+    position: relative;
+    display: block;
+    min-width: 0;
+    isolation: isolate;
+    overflow: hidden;
+}
+
+.surface__background,
+.surface__foreground {
+    position: absolute;
+    inset: 0;
+    min-width: 0;
+    pointer-events: none;
+}
+
+.surface__background {
+    z-index: 0;
+}
+
+.surface__component {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+}
+
+.surface__foreground {
+    z-index: 2;
+}
+
+/* ---- shape -------------------------------------------------------------- */
+
+.surface--shape-xs {
+    border-radius: var(--radius-xs);
+}
+
+.surface--shape-sm {
+    border-radius: var(--radius-sm);
+}
+
+.surface--shape-md {
+    border-radius: var(--radius-md);
+}
+
+.surface--shape-lg {
+    border-radius: var(--radius-lg);
+}
+
+.surface--shape-pill {
+    border-radius: var(--radius-pill);
+}
+
+/* ---- elevation ---------------------------------------------------------- */
+
+.surface--elevation-1 {
+    box-shadow: var(--elevation-1);
+}
+
+.surface--elevation-2 {
+    box-shadow: var(--elevation-2);
+}
+
+.surface--elevation-3 {
+    box-shadow: var(--elevation-3);
+}
+
+/* ---- tones -------------------------------------------------------------- */
+
+.surface--tone-neutral {
+    --state-layer-color: var(--text);
+}
+
+.surface--tone-accent {
+    --state-layer-color: var(--accent);
+    --ripple-color: var(--accent-soft);
+}
+
+.surface--tone-mint {
+    --state-layer-color: var(--mint);
+    --ripple-color: var(--mint-soft);
+}
+
+.surface--tone-violet {
+    --state-layer-color: var(--violet);
+    --ripple-color: var(--violet-soft);
+}
+
+.surface--tone-amber {
+    --state-layer-color: var(--amber);
+    --ripple-color: var(--amber-soft);
+}
+
+.surface--tone-danger {
+    --state-layer-color: var(--danger);
+    --ripple-color: var(--danger-soft);
+}

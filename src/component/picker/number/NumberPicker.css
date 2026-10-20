@@ -1,0 +1,268 @@
+/* ==========================================================================
+   Number picker — Android-style centred wheel with stepper buttons and editor
+   ========================================================================== */
+
+.number-picker-field {
+    display: flex;
+    flex-direction: column;
+    width: 148px;
+    min-width: 0;
+    gap: var(--space-1);
+}
+
+.number-picker-field__label {
+    color: var(--color-on-surface-variant);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+}
+
+.number-picker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    border: 1px solid var(--color-outline);
+    border-radius: var(--radius-xs);
+    background: var(--color-surface);
+}
+
+.number-picker__step {
+    width: 100%;
+    min-height: 30px;
+    border-radius: 0;
+    color: var(--muted);
+}
+
+.number-picker__wheel-shell {
+    position: relative;
+    flex: 0 0 auto;
+    width: 100%;
+}
+
+.number-picker__wheel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 160px;
+    overflow: hidden;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background:
+        linear-gradient(var(--color-surface), transparent 24%), linear-gradient(transparent 76%, var(--color-surface));
+    outline: none;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    scrollbar-width: none;
+}
+
+.number-picker__wheel::-webkit-scrollbar {
+    display: none;
+}
+
+.number-picker__wheel--dragging {
+    cursor: grabbing;
+}
+
+.number-picker__wheel:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--color-primary);
+}
+
+.number-picker__track {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    width: 100%;
+    transition: transform var(--duration-fast) var(--ease-decelerate);
+}
+
+.number-picker__wheel--dragging .number-picker__track {
+    transition: none;
+    will-change: transform;
+}
+
+.number-picker__item {
+    flex: 0 0 32px;
+    width: 100%;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    line-height: 32px;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    opacity: 0.45;
+    user-select: none;
+    -webkit-user-select: none;
+    transition:
+        opacity 140ms var(--ease-standard),
+        color 140ms var(--ease-standard);
+}
+
+.number-picker__item--adjacent {
+    opacity: 0.72;
+}
+
+.number-picker__item--placeholder {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.number-picker__item:disabled {
+    cursor: default;
+}
+
+.number-picker__item--disabled {
+    color: var(--muted);
+    text-decoration: line-through;
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.number-picker__item:not(:disabled):hover {
+    opacity: 0.9;
+    color: var(--text);
+}
+
+.number-picker__wheel--dragging .number-picker__item {
+    cursor: grabbing;
+}
+
+.number-picker__input {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    height: 32px;
+    margin: 0;
+    padding: 0 var(--space-2);
+    border: 0;
+    border-radius: var(--radius-xs);
+    background: transparent;
+    color: var(--color-primary);
+    font-family: var(--font-sans);
+    font-size: 20px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 32px;
+    text-align: center;
+    caret-color: var(--color-primary);
+    outline: none;
+    transform: translateY(-50%);
+    cursor: text;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.number-picker__input:focus {
+    box-shadow: inset 0 0 0 2px var(--color-primary);
+}
+
+.number-picker__input:disabled {
+    cursor: default;
+}
+
+.number-picker__wheel-shell--dragging .number-picker__input {
+    cursor: grabbing;
+}
+
+.number-picker__suggestions {
+    position: absolute;
+    top: calc(50% + 20px);
+    left: 0;
+    right: 0;
+    z-index: var(--z-dropdown);
+    max-height: 200px;
+    margin: 0;
+    padding: var(--space-1) 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    list-style: none;
+    border: 1px solid var(--color-outline);
+    border-radius: var(--radius-xs);
+    background: var(--color-surface-container);
+    box-shadow: var(--shadow-lg);
+}
+
+.number-picker__suggestion {
+    padding: var(--space-2) var(--space-3);
+    overflow: hidden;
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.4;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.number-picker__suggestion[data-active="true"],
+.number-picker__suggestion:hover {
+    background: var(--color-surface-container-high);
+    color: var(--color-primary);
+}
+
+.number-picker-field--invalid .number-picker {
+    border-color: var(--color-error);
+}
+
+.number-picker-field--invalid .number-picker-field__label,
+.number-picker-field--invalid .number-picker-field__error {
+    color: var(--color-error);
+}
+
+.number-picker-field--disabled {
+    opacity: var(--state-disabled-opacity);
+}
+
+.number-picker-field--disabled .number-picker {
+    background: var(--color-surface-container-low);
+}
+
+.number-picker-field--disabled .number-picker__wheel,
+.number-picker-field--disabled .number-picker__item,
+.number-picker-field--disabled .number-picker__input {
+    cursor: default;
+}
+
+.number-picker-field__hint,
+.number-picker-field__error {
+    margin: 0;
+    padding-left: 2px;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.number-picker-field__hint {
+    color: var(--muted);
+}
+
+.number-picker-field__error {
+    color: var(--color-error);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .number-picker__track,
+    .number-picker__item {
+        transition: none;
+    }
+}

@@ -1,0 +1,242 @@
+.dialog {
+    --dialog-max-height: min(86vh, 760px);
+
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    width: min(calc(100vw - var(--space-7)), 560px);
+    max-width: 560px;
+    height: fit-content;
+    max-height: var(--dialog-max-height);
+    margin: auto;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    color: var(--color-on-surface);
+}
+
+.dialog--sm {
+    width: min(calc(100vw - var(--space-7)), 420px);
+    max-width: 420px;
+}
+
+.dialog--md {
+    width: min(calc(100vw - var(--space-7)), 560px);
+    max-width: 560px;
+}
+
+.dialog--lg {
+    width: min(calc(100vw - var(--space-7)), 760px);
+    max-width: 760px;
+}
+
+.dialog::backdrop {
+    background: radial-gradient(circle at 50% 18%, var(--color-primary-container), transparent 34%), var(--color-scrim);
+    -webkit-backdrop-filter: blur(var(--overlay-blur)) saturate(0.78);
+    backdrop-filter: blur(var(--overlay-blur)) saturate(0.78);
+}
+
+.dialog[open] {
+    animation: dialog-enter var(--duration-medium) var(--ease-spring);
+}
+
+.dialog[open]::backdrop {
+    animation: dialog-backdrop-enter var(--duration-slow) var(--ease-standard);
+}
+
+.dialog__panel {
+    max-height: var(--dialog-max-height);
+    overflow: hidden;
+    border: 1px solid var(--color-outline);
+    border-radius: var(--radius-md);
+    background:
+        radial-gradient(circle at 92% -12%, var(--color-primary-container), transparent 42%),
+        linear-gradient(158deg, var(--color-surface-container), var(--color-surface-container-low) 62%);
+    box-shadow: var(--shadow-lg);
+    color: var(--color-on-surface);
+    --ripple-color: var(--color-primary-container);
+}
+
+.dialog__content {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(var(--dialog-max-height) - 2px);
+    min-height: 0;
+}
+
+.dialog__header {
+    display: flex;
+    flex: none;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-5);
+    padding: var(--space-5) var(--space-6) var(--space-4);
+    border-bottom: 1px solid var(--color-outline-variant);
+}
+
+.dialog__heading {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: var(--space-2);
+}
+
+.dialog__eyebrow {
+    color: var(--color-primary);
+    font-family: var(--font-mono);
+    font-size: var(--type-mono);
+    font-weight: var(--weight-medium);
+    letter-spacing: var(--tracking-widest);
+    line-height: var(--leading-snug);
+    text-transform: uppercase;
+}
+
+.dialog__title {
+    color: var(--color-on-surface);
+    font-family: var(--font-display);
+    font-size: var(--type-h3);
+    font-weight: var(--weight-medium);
+    letter-spacing: var(--tracking-tight);
+    line-height: var(--leading-tight);
+    text-wrap: balance;
+}
+
+.dialog__close {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--touch-target);
+    height: var(--touch-target);
+    padding: 0 0 1px;
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-container-lowest);
+    color: var(--color-on-surface-variant);
+    font-size: var(--type-h4);
+    line-height: 1;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition:
+        color var(--duration-fast) var(--ease-standard),
+        border-color var(--duration-fast) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard);
+}
+
+.dialog__close:hover {
+    border-color: var(--color-primary);
+    background: var(--color-primary-container);
+    color: var(--color-on-primary-container);
+}
+
+.dialog__close:active {
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+.dialog__close:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
+.dialog__body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    padding: var(--space-6);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    color: var(--text-soft);
+    font-size: var(--type-body);
+    line-height: var(--leading-relaxed);
+    gap: var(--space-4);
+}
+
+.dialog__description {
+    color: var(--text-soft);
+    font-size: var(--type-body);
+    line-height: var(--leading-relaxed);
+}
+
+.dialog__footer {
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-6) var(--space-5);
+    border-top: 1px solid var(--color-outline-variant);
+    background: var(--color-surface-container-lowest);
+}
+
+@keyframes dialog-enter {
+    from {
+        opacity: 0;
+        transform: translateY(var(--space-3)) scale(0.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes dialog-backdrop-enter {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 560px) {
+    .dialog {
+        width: calc(100vw - var(--space-6));
+        max-width: calc(100vw - var(--space-6));
+    }
+
+    .dialog__header {
+        padding: var(--space-4) var(--space-5) var(--space-3);
+    }
+
+    .dialog__body {
+        padding: var(--space-5);
+    }
+
+    .dialog__footer {
+        padding: var(--space-4) var(--space-5);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dialog[open],
+    .dialog[open]::backdrop {
+        animation: none;
+    }
+
+    .dialog__close {
+        transition: none;
+    }
+}
+
+/* Selection policy: dialog copy (titles, descriptions, Text body content, and
+   nested labels) is overlay chrome, not document text. Matching every
+   descendant outranks the shared .text rule through specificity alone.
+   Fields opt back into native selection for editing. */
+.dialog,
+.dialog .dialog__panel,
+.dialog .dialog__panel * {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.dialog .dialog__panel :is(input, textarea, select, [contenteditable="true"]),
+.dialog .dialog__panel [contenteditable="true"] * {
+    user-select: text;
+    -webkit-user-select: text;
+}

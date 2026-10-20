@@ -1,0 +1,187 @@
+/* ==========================================================================
+   Range — painted rail and thumb above a transparent native range input.
+   ========================================================================== */
+
+.range {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.range__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-2);
+}
+
+.range__label {
+    color: var(--color-on-surface-variant);
+    font-family: var(--font-sans);
+    font-size: var(--type-label-sm);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-wide);
+    line-height: var(--leading-snug);
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.range__spacer {
+    flex: 1 1 auto;
+}
+
+.range__value {
+    flex: none;
+    color: var(--color-on-surface);
+    font-family: var(--font-mono);
+    font-size: var(--type-label);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--tracking-wide);
+}
+
+.range__surface {
+    --ripple-color: var(--color-primary-container);
+
+    height: var(--touch-target);
+    border-radius: var(--radius-pill);
+    background: transparent;
+}
+
+.range__surface > .surface__component {
+    height: 100%;
+}
+
+.range__native {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    opacity: 0;
+    cursor: pointer;
+    touch-action: manipulation;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.range__rail {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--space-5) / 2);
+    right: calc(var(--space-5) / 2);
+}
+
+.range__track {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: var(--space-1);
+    border-radius: var(--radius-pill);
+    background: var(--color-outline);
+    overflow: hidden;
+    transform: translateY(-50%);
+}
+
+.range__fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-primary);
+    transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.range__thumb {
+    position: absolute;
+    top: 50%;
+    width: var(--space-5);
+    height: var(--space-5);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-pill);
+    background: var(--color-primary);
+    box-shadow:
+        0 var(--space-1) var(--space-2) rgba(0, 0, 0, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    transform: translate(-50%, -50%);
+    transition:
+        background-color var(--duration-fast) var(--ease-standard),
+        box-shadow var(--duration-fast) var(--ease-standard),
+        transform var(--duration-fast) var(--ease-standard);
+}
+
+.range__surface:not([data-disabled="true"]):hover .range__thumb {
+    transform: translate(-50%, -50%) scale(1.08);
+}
+
+.range__surface:has(.range__native:focus-visible) .range__thumb {
+    box-shadow:
+        0 0 0 var(--focus-ring-width) var(--bg),
+        0 0 0 calc(var(--focus-ring-width) + var(--focus-ring-offset)) var(--color-primary);
+}
+
+.range__surface:has(.range__native:active) .range__thumb {
+    transform: translate(-50%, -50%) scale(0.96);
+}
+
+.range__hint,
+.range__error {
+    margin: var(--space-2) 0 0;
+    padding-left: calc(var(--space-1) / 2);
+    font-size: var(--type-label-sm);
+    line-height: var(--leading-normal);
+}
+
+.range__hint {
+    color: var(--color-on-surface-variant);
+}
+
+.range__error {
+    color: var(--color-error);
+}
+
+.range:focus-within .range__label {
+    color: var(--color-primary);
+}
+
+.range[data-invalid="true"] .range__label {
+    color: var(--color-error);
+}
+
+.range[data-invalid="true"] .range__fill,
+.range[data-invalid="true"] .range__thumb {
+    background: var(--color-error);
+    border-color: var(--color-error);
+}
+
+.range[data-disabled="true"] {
+    opacity: var(--state-disabled-opacity);
+}
+
+.range__native:disabled {
+    cursor: not-allowed;
+}
+
+@media (pointer: coarse) {
+    .range__rail {
+        left: calc(var(--space-6) / 2);
+        right: calc(var(--space-6) / 2);
+    }
+
+    .range__thumb {
+        width: var(--space-6);
+        height: var(--space-6);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .range__label,
+    .range__fill,
+    .range__thumb {
+        transition: none;
+    }
+}

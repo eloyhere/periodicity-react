@@ -1,0 +1,63 @@
+.button.confirm-dialog__confirm--danger {
+    border-color: var(--color-error);
+    background: var(--color-error);
+    color: var(--color-on-error);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        0 10px 24px rgba(0, 0, 0, 0.18);
+    --ripple-color: rgba(0, 0, 0, 0.18);
+}
+
+.button.confirm-dialog__confirm--danger:hover {
+    background: var(--color-error);
+    box-shadow:
+        inset 0 0 0 999px rgba(255, 255, 255, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.28),
+        0 14px 30px rgba(0, 0, 0, 0.22);
+}
+
+.button.confirm-dialog__confirm--danger:active {
+    background: var(--color-error);
+    box-shadow:
+        inset 0 0 0 999px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.button.confirm-dialog__confirm--danger:has(.button__control:focus-visible) {
+    box-shadow:
+        0 0 0 var(--focus-ring-width) var(--color-surface-container),
+        0 0 0 calc(var(--focus-ring-width) * 2) var(--color-error);
+}
+
+.confirm-dialog__confirm--danger .button__control:focus-visible {
+    outline-color: var(--color-on-error);
+}
+
+.confirm-dialog__spinner {
+    display: inline-block;
+    width: var(--space-4);
+    height: var(--space-4);
+    margin-right: var(--space-2);
+    border: var(--focus-ring-width) solid currentColor;
+    border-right-color: transparent;
+    border-radius: var(--radius-pill);
+    vertical-align: middle;
+    animation: confirm-dialog-spin calc(var(--duration-slow) * 2) linear infinite;
+}
+
+@keyframes confirm-dialog-spin {
+    to {
+        transform: rotate(1turn);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .button.confirm-dialog__confirm--danger {
+        transition: none;
+    }
+
+    .confirm-dialog__spinner {
+        animation: none;
+        border-right-color: currentColor;
+    }
+}

@@ -1,0 +1,6 @@
+/* The provider is layout-transparent: it contributes only a language tag and
+   a context boundary, so wrapping a phrase or a flex item must not add a box. */
+
+.international {
+    display: contents;
+}

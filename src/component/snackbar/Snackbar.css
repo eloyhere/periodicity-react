@@ -1,0 +1,129 @@
+/* ==========================================================================
+   Snackbar — Material transient notification at the viewport edge
+   ========================================================================== */
+
+.snackbar {
+    position: fixed;
+    z-index: var(--z-toast);
+    display: flex;
+    width: min(calc(100vw - var(--space-6)), 560px);
+    pointer-events: none;
+    animation: snackbar-in var(--duration-medium) var(--ease-decelerate);
+}
+
+.snackbar--bottom-left {
+    bottom: var(--space-6);
+    left: var(--space-6);
+}
+
+.snackbar--bottom-center {
+    right: 0;
+    bottom: var(--space-6);
+    left: 0;
+    margin: 0 auto;
+}
+
+.snackbar--bottom-right {
+    right: var(--space-6);
+    bottom: var(--space-6);
+}
+
+.snackbar__surface {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    min-height: 48px;
+    padding: var(--space-1) var(--space-2) var(--space-1) var(--space-4);
+    border: 0;
+    border-radius: var(--radius-xs);
+    background: #323232;
+    box-shadow: var(--elevation-3);
+    color: #ffffff;
+    pointer-events: auto;
+    gap: var(--space-2);
+}
+
+.snackbar__surface--success {
+    background: #1b5e20;
+}
+
+.snackbar__surface--warning {
+    background: #7a4100;
+}
+
+.snackbar__surface--danger {
+    background: #8c1d18;
+}
+
+.snackbar__message {
+    flex: 1 1 auto;
+    min-width: 0;
+    color: inherit;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.snackbar__surface .snackbar__action .button__control {
+    min-height: 32px;
+    padding: 0 var(--space-2);
+    color: #90caf9;
+    font-weight: 500;
+}
+
+.snackbar__surface .snackbar__close .button__control {
+    min-width: 32px;
+    min-height: 32px;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.snackbar__surface .snackbar__close .button__control:hover {
+    color: #ffffff;
+}
+
+@keyframes snackbar-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Keep the close/action controls transparent on the dark snackbar. */
+.snackbar .snackbar__surface .snackbar__action.button,
+.snackbar .snackbar__surface .snackbar__close.button {
+    background: transparent;
+    border-color: transparent;
+    color: #ffffff;
+    --ripple-color: rgba(255, 255, 255, 0.26);
+}
+
+.snackbar .snackbar__surface .snackbar__action.button:hover,
+.snackbar .snackbar__surface .snackbar__close.button:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
+.snackbar .snackbar__surface .snackbar__action .button__control,
+.snackbar .snackbar__surface .snackbar__close .button__control {
+    color: inherit;
+}
+
+/* Selection policy: snackbar copy is transient overlay chrome, not document
+   text. Matching every descendant outranks the shared .text rule through
+   specificity. */
+.snackbar,
+.snackbar .snackbar__surface,
+.snackbar .snackbar__surface * {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.snackbar .snackbar__surface :is(input, textarea, select, [contenteditable="true"]),
+.snackbar .snackbar__surface [contenteditable="true"] * {
+    user-select: text;
+    -webkit-user-select: text;
+}

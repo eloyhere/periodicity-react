@@ -1,0 +1,49 @@
+/* ==========================================================================
+   Grid layout — flex columns with an explicit column count
+   ========================================================================== */
+
+.grid-layout {
+    --grid-columns: 3;
+    --grid-gap: var(--space-3);
+
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    min-width: 0;
+    gap: var(--grid-gap);
+}
+
+.grid-layout--gap-none {
+    --grid-gap: 0px;
+}
+
+.grid-layout--gap-xs {
+    --grid-gap: var(--space-1);
+}
+
+.grid-layout--gap-sm {
+    --grid-gap: var(--space-2);
+}
+
+.grid-layout--gap-md {
+    --grid-gap: var(--space-3);
+}
+
+.grid-layout--gap-lg {
+    --grid-gap: var(--space-4);
+}
+
+.grid-layout--gap-xl {
+    --grid-gap: var(--space-6);
+}
+
+.grid-layout__cell {
+    flex: 1 1 calc(100% / var(--grid-columns) - var(--grid-gap));
+    min-width: 0;
+}
+
+@media (max-width: 720px) {
+    .grid-layout--responsive {
+        --grid-columns: 1;
+    }
+}

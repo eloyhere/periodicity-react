@@ -1,0 +1,323 @@
+/* ==========================================================================
+   TextArea — multi-line Material field with floating label and counter.
+   ========================================================================== */
+
+.text-area {
+    --text-area-bg: var(--color-surface-container-lowest);
+    --text-area-label-bg: var(--color-surface-container-lowest);
+    --text-area-pad-inline: var(--space-3);
+
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.text-area__control {
+    position: relative;
+    min-width: 0;
+}
+
+.text-area__surface {
+    --ripple-color: var(--color-primary-container);
+
+    border-radius: var(--radius-sm);
+}
+
+.text-area__background {
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--color-outline);
+    border-radius: var(--radius-sm);
+    background: var(--text-area-bg);
+    transition:
+        border-color var(--duration-fast) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard);
+}
+
+.text-area__edge {
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-sm);
+    box-shadow:
+        inset 0 0 0 1px var(--color-primary-container),
+        inset 0 0 var(--space-6) var(--color-primary-container);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.text-area__row {
+    display: flex;
+    align-items: stretch;
+    min-width: 0;
+    padding: var(--space-5) var(--text-area-pad-inline) var(--space-2);
+}
+
+.text-area__field {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-on-surface);
+    caret-color: var(--color-primary);
+    font-family: var(--font-sans);
+    font-size: var(--type-body);
+    line-height: var(--leading-normal);
+    outline: none;
+    resize: vertical;
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+.text-area--auto-grow .text-area__field {
+    overflow: hidden;
+    resize: none;
+}
+
+.text-area__field::placeholder {
+    color: var(--faint);
+    opacity: 0;
+    transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.text-area:focus-within .text-area__field::placeholder {
+    opacity: 0.9;
+}
+
+.text-area__field:focus-visible {
+    outline: none;
+}
+
+.text-area__label {
+    position: absolute;
+    top: var(--space-4);
+    left: var(--text-area-pad-inline);
+    z-index: 3;
+    max-width: calc(100% - var(--text-area-pad-inline) * 2);
+    overflow: hidden;
+    color: var(--color-on-surface-variant);
+    font-family: var(--font-sans);
+    font-size: var(--type-body);
+    line-height: var(--leading-snug);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    pointer-events: none;
+    transform-origin: left center;
+    will-change: top, transform, font-size;
+    /* Same 220ms / 140ms timings as TextInput.css. */
+    transition:
+        top var(--duration-medium) var(--ease-decelerate),
+        left var(--duration-medium) var(--ease-decelerate),
+        padding var(--duration-medium) var(--ease-decelerate),
+        background-color var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard),
+        font-size var(--duration-medium) var(--ease-decelerate),
+        transform var(--duration-medium) var(--ease-decelerate);
+}
+
+.text-area__support {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+    padding-left: calc(var(--space-1) / 2);
+}
+
+.text-area__messages {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.text-area__hint,
+.text-area__error,
+.text-area__counter {
+    font-size: var(--type-label-sm);
+    line-height: var(--leading-normal);
+}
+
+.text-area__hint {
+    color: var(--color-on-surface-variant);
+}
+
+.text-area__error {
+    color: var(--color-error);
+}
+
+.text-area__counter {
+    flex: none;
+    color: var(--faint);
+    font-family: var(--font-mono);
+    font-size: var(--type-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--tracking-wide);
+}
+
+/* ---- outline ------------------------------------------------------------ */
+
+.text-area--outline:focus-within .text-area__label,
+.text-area--outline:has(.text-area__field:not(:placeholder-shown)) .text-area__label {
+    top: 0;
+    left: calc(var(--text-area-pad-inline) - 4px);
+    padding: 0 5px;
+    background: var(--text-area-label-bg);
+    color: var(--color-primary);
+    font-size: 12px;
+    transform: translateY(-50%);
+}
+
+.text-area--outline:focus-within .text-area__edge {
+    opacity: 1;
+}
+
+.text-area--outline.text-area--invalid .text-area__background {
+    border-color: var(--color-error);
+}
+
+.text-area--outline.text-area--invalid .text-area__label {
+    color: var(--color-error);
+}
+
+.text-area--outline.text-area--invalid .text-area__edge {
+    border-color: var(--color-error);
+    box-shadow: inset 0 0 0 1px var(--color-error-container);
+}
+
+/* ---- fill --------------------------------------------------------------- */
+
+.text-area--fill {
+    --text-area-bg: var(--color-surface-container);
+    --text-area-label-bg: var(--color-surface-container);
+}
+
+.text-area--fill .text-area__background {
+    border: 0;
+    border-bottom: 1px solid var(--color-outline);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.text-area--fill .text-area__edge {
+    border: 0;
+    border-bottom: calc(var(--space-1) / 2) solid var(--color-primary);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    box-shadow: none;
+}
+
+.text-area--fill .text-area__row {
+    padding-top: var(--space-6);
+    padding-bottom: var(--space-2);
+}
+
+.text-area--fill .text-area__label {
+    top: var(--space-5);
+}
+
+.text-area--fill:focus-within .text-area__label,
+.text-area--fill:has(.text-area__field:not(:placeholder-shown)) .text-area__label {
+    top: var(--space-2);
+    left: var(--text-area-pad-inline);
+    padding: 0;
+    background: transparent;
+    color: var(--color-primary);
+    font-size: 12px;
+    transform: none;
+}
+
+.text-area--fill:focus-within .text-area__edge {
+    opacity: 1;
+}
+
+.text-area--fill.text-area--invalid .text-area__background {
+    border-bottom-color: var(--color-error);
+}
+
+.text-area--fill.text-area--invalid .text-area__label {
+    color: var(--color-error);
+}
+
+.text-area--fill.text-area--invalid .text-area__edge {
+    border-bottom-color: var(--color-error);
+}
+
+/* ---- standard ----------------------------------------------------------- */
+
+.text-area--standard {
+    --text-area-bg: transparent;
+    --text-area-label-bg: transparent;
+    --text-area-pad-inline: 0;
+    margin-top: var(--space-3);
+}
+
+.text-area--standard .text-area__background {
+    border: 0;
+    border-bottom: 1px solid var(--color-outline);
+    border-radius: 0;
+    background: transparent;
+}
+
+.text-area--standard .text-area__edge {
+    border: 0;
+    border-bottom: calc(var(--space-1) / 2) solid var(--color-primary);
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.text-area--standard .text-area__row {
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-2);
+}
+
+.text-area--standard .text-area__label {
+    top: var(--space-4);
+}
+
+.text-area--standard:focus-within .text-area__label,
+.text-area--standard:has(.text-area__field:not(:placeholder-shown)) .text-area__label {
+    top: 0;
+    left: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--color-primary);
+    font-size: 12px;
+    transform: translateY(-100%);
+}
+
+.text-area--standard:focus-within .text-area__edge {
+    opacity: 1;
+}
+
+.text-area--standard.text-area--invalid .text-area__background {
+    border-bottom-color: var(--color-error);
+}
+
+.text-area--standard.text-area--invalid .text-area__label {
+    color: var(--color-error);
+}
+
+.text-area--standard.text-area--invalid .text-area__edge {
+    border-bottom-color: var(--color-error);
+}
+
+.text-area[data-disabled="true"] {
+    opacity: var(--state-disabled-opacity);
+}
+
+.text-area__field:disabled {
+    color: var(--faint);
+    cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .text-area__background,
+    .text-area__edge,
+    .text-area__label,
+    .text-area__field::placeholder {
+        transition: none;
+    }
+}

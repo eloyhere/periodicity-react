@@ -1,0 +1,80 @@
+/* ==========================================================================
+   Picker field — Material outlined shell for native picker controls
+   ========================================================================== */
+
+.picker-field {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.picker-field__label {
+    padding: 0 4px;
+    color: var(--color-on-surface-variant);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+}
+
+.picker-field__control {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    margin-top: 4px;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--color-outline);
+    border-radius: var(--radius-xs);
+    background: var(--color-surface);
+    gap: var(--space-2);
+    transition: border-color 140ms var(--ease-standard);
+}
+
+.picker-field:focus-within .picker-field__control {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.picker-field[data-invalid="true"] .picker-field__control {
+    border-color: var(--color-error);
+}
+
+.picker-field--disabled {
+    opacity: var(--state-disabled-opacity);
+}
+
+.picker-field__input {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    height: 42px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    outline: none;
+}
+
+.picker-field__input::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.65;
+}
+
+.picker-field__hint,
+.picker-field__error {
+    margin-top: 4px;
+    padding-left: 2px;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.picker-field__hint {
+    color: var(--muted);
+}
+
+.picker-field__error {
+    color: var(--color-error);
+}

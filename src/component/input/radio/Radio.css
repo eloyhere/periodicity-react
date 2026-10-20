@@ -1,0 +1,166 @@
+/* ==========================================================================
+   Radio — one option rendered on a Surface with a painted indicator.
+   ========================================================================== */
+
+.radio {
+    --ripple-color: var(--color-primary-container);
+    --state-layer-color: var(--color-on-surface);
+
+    border-radius: var(--radius-sm);
+}
+
+.radio__label {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    min-height: var(--touch-target);
+    padding: var(--space-2);
+    border-radius: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.radio__native {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.radio__indicator {
+    position: relative;
+    flex: none;
+    width: var(--space-5);
+    height: var(--space-5);
+    margin-top: calc(var(--space-1) / 2);
+    border-radius: var(--radius-pill);
+}
+
+.radio__indicator > .surface__component {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.radio__indicator-background {
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--color-outline);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-container-lowest);
+    transition:
+        border-color var(--duration-fast) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard);
+}
+
+.radio__indicator-edge {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-pill);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+    opacity: 0;
+    transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.radio__dot {
+    position: relative;
+    width: var(--space-2);
+    height: var(--space-2);
+    border-radius: var(--radius-pill);
+    background: var(--color-primary);
+    transform: scale(0);
+    transition: transform var(--duration-fast) var(--ease-spring);
+}
+
+.radio--checked .radio__indicator-background {
+    border-color: var(--color-primary);
+    background: var(--color-primary-container);
+}
+
+.radio--checked .radio__indicator-edge {
+    opacity: 1;
+}
+
+.radio--checked .radio__dot {
+    transform: scale(1);
+    animation: radio-confirm var(--duration-medium) var(--ease-spring);
+}
+
+.radio__copy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+    padding-top: calc(var(--space-1) / 2);
+}
+
+.radio__text {
+    color: var(--color-on-surface);
+    font-family: var(--font-sans);
+    font-size: var(--type-body);
+    line-height: var(--leading-normal);
+}
+
+.radio__description {
+    color: var(--color-on-surface-variant);
+    font-size: var(--type-body-sm);
+    line-height: var(--leading-normal);
+}
+
+.radio__native:focus-visible + .radio__label .radio__indicator {
+    box-shadow:
+        0 0 0 var(--focus-ring-width) var(--bg),
+        0 0 0 calc(var(--focus-ring-width) + var(--focus-ring-offset)) var(--color-primary);
+}
+
+.radio:not([data-disabled="true"]):hover .radio__indicator-background {
+    border-color: var(--color-primary);
+}
+
+.radio-group[data-invalid="true"] .radio__indicator-background {
+    border-color: var(--color-error);
+}
+
+.radio-group[data-invalid="true"] .radio__dot {
+    background: var(--color-error);
+}
+
+.radio[data-disabled="true"] {
+    opacity: var(--state-disabled-opacity);
+}
+
+.radio[data-disabled="true"] .radio__label {
+    cursor: not-allowed;
+}
+
+@keyframes radio-confirm {
+    0% {
+        transform: scale(0);
+    }
+    65% {
+        transform: scale(1.25);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .radio__indicator-background,
+    .radio__indicator-edge,
+    .radio__dot {
+        transition: none;
+    }
+
+    .radio--checked .radio__dot {
+        animation: none;
+    }
+}

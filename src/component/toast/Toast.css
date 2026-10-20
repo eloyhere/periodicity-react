@@ -1,0 +1,199 @@
+.toast-region {
+    position: fixed;
+    right: var(--space-6);
+    bottom: var(--space-6);
+    z-index: var(--z-toast);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    width: min(calc(100vw - var(--space-8)), calc(var(--space-11) * 4.5));
+    pointer-events: none;
+}
+
+.toast {
+    pointer-events: auto;
+    animation: toast-enter var(--duration-medium) var(--ease-decelerate);
+}
+
+.toast[data-state="leaving"] {
+    animation: toast-exit var(--duration-fast) var(--ease-accelerate) forwards;
+}
+
+.toast[data-tone="neutral"] {
+    --toast-tone: var(--color-on-surface);
+}
+
+.toast[data-tone="success"] {
+    --toast-tone: var(--color-secondary);
+}
+
+.toast[data-tone="danger"] {
+    --toast-tone: var(--color-error);
+}
+
+.toast[data-tone="warning"] {
+    --toast-tone: var(--color-warning);
+}
+
+.toast__surface {
+    --ripple-color: var(--color-primary-container);
+
+    border: 1px solid var(--color-outline);
+    border-radius: var(--radius-md);
+    background: linear-gradient(150deg, var(--color-surface-container-high), var(--color-surface));
+    box-shadow: var(--elevation-2);
+    color: var(--color-on-surface);
+}
+
+.toast__stripe {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: var(--space-1);
+    background: var(--toast-tone);
+}
+
+.toast__row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4) var(--space-3) var(--space-5);
+}
+
+.toast__icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--space-5);
+    height: var(--space-5);
+    color: var(--toast-tone);
+}
+
+.toast__content {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.toast .toast__title {
+    color: var(--color-on-surface);
+    font-weight: var(--weight-semibold);
+}
+
+.toast .toast__description {
+    color: var(--color-on-surface);
+}
+
+.toast__actions {
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-1);
+}
+
+.toast__action .button__control {
+    min-height: var(--control-sm);
+    padding: 0 var(--space-2);
+    color: var(--toast-tone);
+}
+
+.toast__close .button__control {
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
+    padding: 0;
+    color: var(--color-on-surface-variant);
+}
+
+.toast__close .button__control:hover {
+    color: var(--color-on-surface);
+}
+
+@keyframes toast-enter {
+    from {
+        opacity: 0;
+        transform: translateY(var(--space-4)) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes toast-exit {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(calc(var(--space-2) * -1)) scale(0.98);
+    }
+}
+
+@media (pointer: coarse) {
+    .toast__action .button__control {
+        min-height: var(--touch-target);
+    }
+}
+
+@media (max-width: 560px) {
+    .toast-region {
+        right: var(--space-3);
+        bottom: var(--space-3);
+        left: var(--space-3);
+        width: auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toast,
+    .toast[data-state="leaving"] {
+        animation: none;
+    }
+
+    .toast[data-state="leaving"] {
+        opacity: 0;
+    }
+}
+
+/* Close/action buttons sit on a dark snackbar surface. Never paint a light
+   hover plate or a dark ripple over the toast text. */
+.toast .toast__close.button,
+.toast .toast__action.button {
+    background: transparent;
+    border-color: transparent;
+    color: #ffffff;
+    --ripple-color: rgba(255, 255, 255, 0.26);
+}
+
+.toast .toast__close.button:hover,
+.toast .toast__action.button:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
+.toast .toast__close .button__control,
+.toast .toast__action .button__control {
+    color: inherit;
+}
+
+/* Selection policy: toast copy is transient overlay chrome, not document text.
+   Matching every descendant outranks the shared .text rule through specificity. */
+.toast,
+.toast .toast__surface,
+.toast .toast__surface * {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.toast .toast__surface :is(input, textarea, select, [contenteditable="true"]),
+.toast .toast__surface [contenteditable="true"] * {
+    user-select: text;
+    -webkit-user-select: text;
+}

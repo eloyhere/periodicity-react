@@ -1,0 +1,74 @@
+.badge {
+    --badge-border: var(--color-outline-variant);
+    --badge-background: var(--color-surface-container);
+    --badge-color: var(--color-on-surface-variant);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    min-height: var(--space-6);
+    padding: 0 var(--space-2);
+    border: 1px solid var(--badge-border);
+    border-radius: var(--radius-pill);
+    background: var(--badge-background);
+    color: var(--badge-color);
+    font-family: var(--font-mono);
+    font-size: var(--type-mono);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-wide);
+    line-height: var(--leading-tight);
+    text-transform: uppercase;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.badge--lime,
+.badge--accent {
+    --badge-border: var(--color-primary-container);
+    --badge-background: var(--color-primary-container);
+    --badge-color: var(--color-primary);
+}
+
+.badge--mint {
+    --badge-border: var(--color-secondary-container);
+    --badge-background: var(--color-secondary-container);
+    --badge-color: var(--color-secondary);
+}
+
+.badge--violet {
+    --badge-border: var(--color-tertiary-container);
+    --badge-background: var(--color-tertiary-container);
+    --badge-color: var(--color-tertiary);
+}
+
+.badge--amber {
+    --badge-border: var(--color-warning-container);
+    --badge-background: var(--color-warning-container);
+    --badge-color: var(--color-warning);
+}
+
+.badge--danger {
+    --badge-border: var(--color-error-container);
+    --badge-background: var(--color-error-container);
+    --badge-color: var(--color-error);
+}
+
+.badge--dot {
+    width: var(--space-2);
+    min-width: var(--space-2);
+    height: var(--space-2);
+    min-height: var(--space-2);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--badge-color);
+}
+
+.badge--count {
+    min-width: var(--space-5);
+    padding: 0 var(--space-1);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--tracking-normal);
+    text-transform: none;
+}

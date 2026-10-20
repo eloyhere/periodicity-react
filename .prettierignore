@@ -1,0 +1,17 @@
+# Prettier is a manual formatter here, not a lint gate.
+# The project style requires explicit `(void 0)` / `typeof(target)` parentheses and
+# keeps long type-predicate annotations on one line; Prettier normalises those
+# away and cannot be configured to preserve them, so TypeScript is not formatted
+# by Prettier. ESLint enforces the real style rules (see eslint.config.js).
+*.ts
+*.tsx
+dist
+coverage
+node_modules
+package-lock.json
+public
+src/assets
+# The icon set is owned by a separate contributor; do not reformat it here.
+src/component/icon
+contrast-check.mjs
+lab-check.mjs

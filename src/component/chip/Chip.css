@@ -1,0 +1,139 @@
+.chip {
+    --chip-border: var(--color-outline-variant);
+    --chip-background: var(--color-surface-container-low);
+    --chip-color: var(--color-on-surface);
+
+    position: relative;
+    display: inline-flex;
+    align-items: stretch;
+    max-width: 100%;
+    border: 1px solid var(--chip-border);
+    border-radius: var(--radius-pill);
+    background: var(--chip-background);
+    color: var(--chip-color);
+    vertical-align: middle;
+    transition:
+        border-color var(--duration-fast) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard);
+}
+
+.chip > .surface__component {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.chip__main {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+    min-height: var(--control-sm);
+    padding: 0 var(--space-3);
+    border: 0;
+    border-radius: inherit;
+    background: transparent;
+    color: inherit;
+    font-family: var(--font-sans);
+    font-size: var(--type-label);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-snug);
+    text-align: start;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+}
+
+button.chip__main {
+    cursor: pointer;
+}
+
+.chip__label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chip__icon,
+.chip__check {
+    flex: none;
+}
+
+.chip__check {
+    color: var(--color-primary);
+}
+
+.chip__remove {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--space-6);
+    min-height: var(--control-sm);
+    margin-inline-start: calc(var(--space-1) * -1);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--color-on-surface-variant);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.chip__remove::after {
+    position: absolute;
+    inset: calc((var(--space-6) - var(--touch-target)) / 2);
+    content: "";
+}
+
+.chip__remove:hover {
+    background: var(--color-surface-container);
+    color: var(--color-on-surface);
+}
+
+.chip__remove:disabled {
+    cursor: not-allowed;
+}
+
+.chip__main:focus-visible,
+.chip__remove:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+.chip:has(button.chip__main):hover {
+    border-color: var(--color-outline);
+}
+
+.chip--selected {
+    --chip-border: var(--color-primary);
+    --chip-background: var(--color-primary-container);
+    --chip-color: var(--color-primary);
+}
+
+.chip--input {
+    --chip-background: var(--color-surface-container-lowest);
+}
+
+.chip--disabled {
+    opacity: var(--state-disabled-opacity);
+}
+
+.chip--disabled .chip__main,
+.chip--disabled .chip__remove {
+    cursor: not-allowed;
+}
+
+@media (pointer: coarse) {
+    .chip__main,
+    .chip__remove {
+        min-height: var(--touch-target);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .chip {
+        transition: none;
+    }
+}

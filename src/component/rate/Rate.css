@@ -1,0 +1,125 @@
+/* ==========================================================================
+   Rate — Material star rating with half-star clipping
+   ========================================================================== */
+
+.rate-field {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: var(--space-1);
+}
+
+.rate-field__label {
+    color: var(--color-on-surface-variant);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+}
+
+.rate-field__stars {
+    display: flex;
+    align-items: center;
+    min-height: 32px;
+    gap: 2px;
+}
+
+.rate-field__star {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: calc(var(--rate-icon-size) + 8px);
+    height: calc(var(--rate-icon-size) + 8px);
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--color-outline);
+    cursor: pointer;
+    line-height: 0;
+    transition:
+        color 120ms var(--ease-standard),
+        transform 120ms var(--ease-standard),
+        background-color 120ms var(--ease-standard);
+}
+
+.rate-field__star:hover {
+    background: var(--color-surface-container);
+    transform: scale(1.08);
+}
+
+.rate-field__star:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
+}
+
+.rate-field__star-empty {
+    display: inline-flex;
+    color: var(--color-outline);
+}
+
+.rate-field__star-fill {
+    position: absolute;
+    inset: 4px auto 4px 4px;
+    display: block;
+    overflow: hidden;
+    color: var(--color-warning);
+    pointer-events: none;
+}
+
+.rate-field__star-fill svg {
+    display: block;
+    width: var(--rate-icon-size);
+    height: var(--rate-icon-size);
+    max-width: none;
+}
+
+.rate-field--invalid .rate-field__label {
+    color: var(--color-error);
+}
+
+.rate-field--invalid .rate-field__star {
+    color: var(--color-error);
+}
+
+.rate-field--disabled {
+    opacity: 1;
+}
+
+.rate-field--disabled .rate-field__label {
+    color: var(--faint);
+}
+
+.rate-field--disabled .rate-field__star {
+    color: var(--color-outline-variant);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.rate-field--readonly .rate-field__star {
+    cursor: default;
+}
+
+.rate-field--readonly .rate-field__star:hover {
+    background: transparent;
+    transform: none;
+}
+
+.rate-field__hint,
+.rate-field__error {
+    margin: 0;
+    padding-left: 2px;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.rate-field__hint {
+    color: var(--muted);
+}
+
+.rate-field__error {
+    color: var(--color-error);
+}

@@ -1,0 +1,235 @@
+/* ==========================================================================
+   Field — label / hint / error chrome shared by every form control.
+   Inputs may override `.field__background` / `.field__edge` in their own CSS.
+   ========================================================================== */
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.field--inline {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.field--inline .field__control {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.field__label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--text-soft);
+    font-family: var(--font-sans);
+    font-size: var(--type-label-sm);
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.065em;
+    line-height: 1.35;
+    text-transform: uppercase;
+    transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.field__required {
+    color: var(--danger);
+}
+
+.field__optional {
+    color: var(--faint);
+    font-size: 0.7em;
+    font-weight: var(--weight-regular);
+    letter-spacing: 0.04em;
+    text-transform: none;
+}
+
+.field__control {
+    min-width: 0;
+}
+
+.field__support {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-left: 2px;
+}
+
+.field__messages {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 2px;
+}
+
+.field__hint,
+.field__error,
+.field__counter {
+    font-size: 0.77rem;
+    line-height: 1.45;
+}
+
+.field__hint {
+    color: var(--muted);
+}
+
+.field__error {
+    color: var(--danger);
+}
+
+.field__counter {
+    flex: none;
+    color: var(--faint);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.08em;
+}
+
+.field:focus-within .field__label {
+    color: var(--accent);
+}
+
+.field[data-invalid="true"] .field__label {
+    color: var(--danger);
+}
+
+.field[data-disabled="true"] {
+    opacity: var(--state-disabled-opacity);
+}
+
+/* ---- input chrome (shared) ---------------------------------------------- */
+
+.field__surface {
+    border-radius: var(--radius-field);
+}
+
+.field__background {
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-field);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 55%), var(--panel-muted);
+    transition:
+        border-color var(--duration-fast) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard),
+        box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.field__edge {
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-field);
+    box-shadow:
+        inset 0 0 0 1px var(--accent-soft),
+        inset 0 0 28px var(--accent-soft);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.field__input {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    padding: 11px var(--space-3);
+    border: 0;
+    border-radius: var(--radius-field);
+    background: transparent;
+    color: var(--text);
+    caret-color: var(--accent);
+    font-family: var(--font-sans);
+    font-size: var(--type-body);
+    line-height: var(--leading-normal);
+    outline: none;
+}
+
+.field__input::placeholder {
+    color: var(--faint);
+    opacity: 0.85;
+}
+
+.field__input:focus-visible {
+    outline: none;
+}
+
+.field:hover .field__background {
+    background-color: var(--panel);
+}
+
+.field:focus-within .field__background {
+    border-color: var(--accent);
+    background-color: var(--panel-strong);
+}
+
+.field:focus-within .field__edge {
+    opacity: 1;
+}
+
+.field[data-invalid="true"] .field__background {
+    border-color: var(--danger);
+}
+
+.field[data-invalid="true"] .field__edge {
+    border-color: var(--danger);
+    box-shadow:
+        inset 0 0 0 1px var(--danger-soft),
+        inset 0 0 28px var(--danger-soft);
+}
+
+.field:has(.field__input:disabled) {
+    opacity: var(--state-disabled-opacity);
+}
+
+.field__input:disabled {
+    color: var(--faint);
+    cursor: not-allowed;
+}
+
+.field--sm .field__input {
+    padding-block: 7px;
+    font-size: var(--type-body-sm);
+}
+
+.field--lg .field__input {
+    padding-block: 15px;
+    font-size: var(--type-body-lg);
+}
+
+/* ---- helpers for adornments --------------------------------------------- */
+
+.field__row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.field__row .field__input {
+    flex: 1 1 auto;
+}
+
+.field__affix {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: var(--type-body-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .field__label,
+    .field__background,
+    .field__edge {
+        transition: none;
+    }
+}

@@ -1,0 +1,58 @@
+.divider {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-3);
+    min-width: 0;
+    color: var(--color-on-surface-variant);
+}
+
+.divider--horizontal {
+    width: 100%;
+}
+
+.divider--vertical {
+    flex-direction: column;
+    align-self: stretch;
+    justify-content: center;
+    min-height: var(--space-6);
+}
+
+.divider__line {
+    flex: 1 1 0;
+    background: var(--color-outline-variant);
+}
+
+.divider--horizontal .divider__line {
+    height: 1px;
+    min-width: var(--space-4);
+}
+
+.divider--vertical .divider__line {
+    width: 1px;
+    min-height: var(--space-4);
+}
+
+.divider__label {
+    flex: none;
+    color: var(--color-on-surface-variant);
+    font-family: var(--font-mono);
+    font-size: var(--type-mono);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-widest);
+    line-height: var(--leading-snug);
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.divider--vertical .divider__label {
+    writing-mode: vertical-rl;
+}
+
+.divider--inset-start {
+    margin-inline-start: var(--space-4);
+}
+
+.divider--inset-both {
+    margin-inline: var(--space-4);
+}

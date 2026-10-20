@@ -1,0 +1,184 @@
+/* ==========================================================================
+   Message list — adapter-backed chat transcript
+   ========================================================================== */
+
+.message-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    max-height: 480px;
+    overflow-y: auto;
+    padding: var(--space-3);
+    background: var(--color-surface);
+    gap: var(--space-3);
+    overscroll-behavior: contain;
+}
+
+.message {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+    min-width: 0;
+    gap: var(--space-2);
+}
+
+.message--self {
+    flex-direction: row-reverse;
+}
+
+.message__body {
+    display: flex;
+    flex: 0 1 auto;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: min(78%, 460px);
+    min-width: 0;
+    gap: 3px;
+}
+
+.message--self .message__body {
+    align-items: flex-end;
+}
+
+.message__author {
+    padding-left: 2px;
+    color: var(--muted);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.message__bubble {
+    max-width: 100%;
+    padding: 9px 12px;
+    border-radius: 14px 14px 14px 4px;
+    background: var(--color-surface-container);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.message--self .message__bubble {
+    border-radius: 14px 14px 4px 14px;
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+.message__meta {
+    display: flex;
+    align-items: center;
+    min-height: 14px;
+    padding: 0 2px;
+    color: var(--muted);
+    gap: 4px;
+}
+
+.message__time {
+    font-family: var(--font-sans);
+    font-size: 10px;
+    line-height: 1.2;
+}
+
+.message__status {
+    display: inline-flex;
+    align-items: center;
+    color: var(--muted);
+}
+
+.message__status[data-status="failed"] {
+    color: var(--color-error);
+}
+
+.message__status[data-status="read"] {
+    color: var(--color-primary);
+}
+
+.message-list__empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 160px;
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+}
+
+.message-list--virtual {
+    position: relative;
+    padding: 0;
+    overflow-anchor: none;
+}
+
+.message-list__spacer {
+    position: relative;
+    flex: none;
+    width: 100%;
+}
+
+.message-list--virtual .message {
+    position: absolute;
+    right: 0;
+    left: 0;
+    padding: var(--space-2) var(--space-3);
+    overflow: hidden;
+}
+
+.message__status--read svg + svg {
+    margin-left: -6px;
+    opacity: 0.72;
+}
+
+/* ContextMenu is used directly; display contents keeps virtual rows positioned. */
+.message-menu-zone {
+    display: contents;
+}
+
+.message-menu .context-menu__item-control:focus-visible {
+    outline: none;
+    background: var(--color-surface-container-high);
+}
+
+.message-menu-zone,
+.message__bubble {
+    -webkit-touch-callout: none;
+}
+
+.message-list__selection {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--line);
+    background: var(--color-surface);
+}
+
+.message-list__selection-count {
+    flex: 1 1 auto;
+    color: var(--muted);
+    font-family: var(--font-sans);
+    font-size: 11px;
+}
+
+.message--selectable {
+    cursor: pointer;
+}
+
+.message--selected .message__bubble {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+}
+
+.message__check {
+    display: inline-flex;
+    flex: none;
+    align-items: flex-start;
+    padding-top: 2px;
+}

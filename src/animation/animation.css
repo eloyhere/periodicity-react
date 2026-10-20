@@ -1,0 +1,194 @@
+/* ==========================================================================
+   Animation — shared presets, provider scope, and reduced-motion fallback
+   ========================================================================== */
+
+/* The provider is a configuration scope, not a layout box. */
+.animation-scope {
+    display: contents;
+}
+
+.animated {
+    animation-duration: var(--animation-duration, var(--duration-medium, 500ms));
+    animation-delay: var(--animation-delay, 0ms);
+    animation-timing-function: var(--animation-easing, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+    animation-fill-mode: both;
+    animation-iteration-count: var(--animation-repeat, 1);
+    transform-origin: center;
+}
+
+.animated--fade {
+    animation-name: animation-fade;
+}
+
+.animated--slide-up {
+    animation-name: animation-slide-up;
+}
+
+.animated--slide-down {
+    animation-name: animation-slide-down;
+}
+
+.animated--slide-left {
+    animation-name: animation-slide-left;
+}
+
+.animated--slide-right {
+    animation-name: animation-slide-right;
+}
+
+.animated--scale-in {
+    animation-name: animation-scale-in;
+}
+
+.animated--collapse {
+    animation-name: animation-collapse;
+}
+
+.animated--expand {
+    animation-name: animation-expand;
+}
+
+.animated--pulse {
+    animation-name: animation-pulse;
+    animation-iteration-count: var(--animation-repeat, infinite);
+}
+
+.animated--spin {
+    animation-name: animation-spin;
+    animation-iteration-count: var(--animation-repeat, infinite);
+    animation-timing-function: linear;
+}
+
+.animated--none {
+    animation-name: none;
+}
+
+.animated--reduced,
+.animated--disabled {
+    animation: none !important;
+}
+
+@keyframes animation-fade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes animation-slide-up {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 16px, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes animation-slide-down {
+    from {
+        opacity: 0;
+        transform: translate3d(0, -16px, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes animation-slide-left {
+    from {
+        opacity: 0;
+        transform: translate3d(16px, 0, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes animation-slide-right {
+    from {
+        opacity: 0;
+        transform: translate3d(-16px, 0, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes animation-scale-in {
+    from {
+        opacity: 0;
+        transform: scale(0.92);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Collapse and expand reveal their content without a CSS Grid track. */
+@keyframes animation-collapse {
+    from {
+        clip-path: inset(0 0 100% 0);
+        opacity: 0;
+    }
+
+    to {
+        clip-path: inset(-100%);
+        opacity: 1;
+    }
+}
+
+@keyframes animation-expand {
+    from {
+        clip-path: inset(50% 0 50% 0);
+        opacity: 0;
+    }
+
+    to {
+        clip-path: inset(-100%);
+        opacity: 1;
+    }
+}
+
+@keyframes animation-pulse {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.72;
+        transform: scale(1.04);
+    }
+}
+
+@keyframes animation-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Fallback for raw class utilities; Animated opts out with data false. */
+@media (prefers-reduced-motion: reduce) {
+    .animated:not([data-animation-reduced="false"]) {
+        animation: none !important;
+    }
+}

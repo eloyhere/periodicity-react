@@ -1,0 +1,14 @@
+/* Shared text-field and selectable-text context menu. */
+
+.text-menu {
+    min-width: 180px;
+}
+
+input,
+textarea,
+.text,
+.selectable,
+pre,
+code {
+    -webkit-touch-callout: none;
+}

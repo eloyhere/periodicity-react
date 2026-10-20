@@ -1,0 +1,212 @@
+/* ==========================================================================
+   Switch — labelled control on a Surface track.
+   ========================================================================== */
+
+.switch-field {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    min-width: 0;
+}
+
+.switch-field__copy {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.switch-field__label {
+    color: var(--color-on-surface);
+    font-family: var(--font-sans);
+    font-size: var(--type-body);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-normal);
+    cursor: pointer;
+}
+
+.switch-field--sm .switch-field__label {
+    font-size: var(--type-body-sm);
+}
+
+.switch-field--lg .switch-field__label {
+    font-size: var(--type-body-lg);
+}
+
+.switch-field__required {
+    margin-left: var(--space-1);
+    color: var(--color-error);
+}
+
+.switch-field__description {
+    color: var(--color-on-surface-variant);
+    font-size: var(--type-body-sm);
+    line-height: var(--leading-normal);
+}
+
+.switch-field__error {
+    color: var(--color-error);
+    font-size: var(--type-body-sm);
+    line-height: var(--leading-normal);
+}
+
+.switch-field[data-disabled="true"] {
+    opacity: var(--state-disabled-opacity);
+}
+
+.switch-field[data-disabled="true"] .switch-field__label {
+    cursor: not-allowed;
+}
+
+.switch {
+    --ripple-color: var(--color-primary-container);
+    --state-layer-color: var(--color-on-surface);
+    --switch-thumb-size: var(--space-5);
+    --switch-track-height: calc(var(--space-6) + var(--space-1) / 2);
+    --switch-inset: calc(var(--space-1) - 1px);
+
+    position: relative;
+    flex: none;
+    width: calc(var(--space-6) + var(--space-5) + var(--space-1));
+    height: var(--touch-target);
+    border-radius: var(--radius-pill);
+    background: transparent;
+}
+
+.switch > .surface__component {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.switch--sm {
+    --switch-thumb-size: var(--space-4);
+    --switch-track-height: calc(var(--space-5) + var(--space-1) / 2);
+
+    width: calc(var(--space-6) + var(--space-4) + var(--space-1));
+}
+
+.switch--lg {
+    --switch-thumb-size: var(--space-6);
+    --switch-track-height: calc(var(--space-6) + var(--space-2) - var(--space-1) / 2);
+
+    width: calc(var(--space-8) + var(--space-4));
+}
+
+.switch__native {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    cursor: pointer;
+    touch-action: manipulation;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.switch__track {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: var(--switch-track-height);
+    border: 1px solid var(--color-outline);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-container-lowest);
+    transition:
+        border-color var(--duration-fast) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard),
+        box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.switch__thumb {
+    position: absolute;
+    top: 50%;
+    left: var(--switch-inset);
+    width: var(--switch-thumb-size);
+    height: var(--switch-thumb-size);
+    border-radius: var(--radius-pill);
+    background: var(--color-on-surface-variant);
+    box-shadow: 0 var(--space-1) var(--space-2) rgba(0, 0, 0, 0.28);
+    transform: translateY(-50%);
+    transition:
+        left var(--duration-medium) var(--ease-spring),
+        background-color var(--duration-fast) var(--ease-standard),
+        transform var(--duration-fast) var(--ease-standard);
+}
+
+.switch--on .switch__track {
+    border-color: var(--color-primary);
+    background: var(--color-primary-container);
+    box-shadow: inset 0 0 var(--space-4) var(--color-primary-container);
+}
+
+.switch--on .switch__thumb {
+    left: calc(100% - var(--switch-thumb-size) - var(--switch-inset));
+    background: var(--color-primary);
+    box-shadow:
+        0 var(--space-1) var(--space-2) rgba(0, 0, 0, 0.28),
+        0 0 var(--space-4) var(--color-primary-container);
+}
+
+.switch-field[data-invalid="true"] .switch__track {
+    border-color: var(--color-error);
+}
+
+.switch:not([data-disabled="true"]):hover .switch__track {
+    border-color: var(--color-primary);
+}
+
+.switch:not([data-disabled="true"]):active .switch__thumb {
+    transform: translateY(-50%) scale(0.92);
+}
+
+.switch:has(.switch__native:focus-visible) {
+    box-shadow:
+        0 0 0 var(--focus-ring-width) var(--bg),
+        0 0 0 calc(var(--focus-ring-width) + var(--focus-ring-offset)) var(--color-primary);
+}
+
+.switch__native:disabled {
+    cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .switch__track,
+    .switch__thumb {
+        transition: none;
+    }
+}
+
+/* Clip ripple and state layer to the switch track itself. */
+.switch {
+    height: var(--switch-track-height);
+    border-radius: var(--radius-pill);
+}
+
+/* Disabled switch keeps a visible track boundary. */
+.switch-field[data-disabled="true"] {
+    opacity: 1;
+}
+
+.switch-field[data-disabled="true"] .switch-field__label,
+.switch-field[data-disabled="true"] .switch-field__description {
+    color: var(--faint);
+}
+
+.switch-field[data-disabled="true"] .switch__track {
+    border-color: var(--color-outline-variant);
+    background: var(--color-surface-container);
+}
+
+.switch-field[data-disabled="true"] .switch__thumb {
+    background: var(--color-outline);
+}

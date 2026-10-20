@@ -1,0 +1,3 @@
+.message-dialog__action {
+    min-width: calc(var(--space-10) + var(--space-4));
+}

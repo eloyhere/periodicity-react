@@ -1,0 +1,122 @@
+/* ==========================================================================
+   Timeline — vertical events with tone markers and connector line
+   ========================================================================== */
+
+.timeline {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.timeline__item {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    padding-bottom: var(--space-4);
+    gap: var(--space-3);
+}
+
+.timeline__item--last {
+    padding-bottom: 0;
+}
+
+.timeline__item::before {
+    position: absolute;
+    top: 24px;
+    bottom: 0;
+    left: 11px;
+    width: 1px;
+    background: var(--line);
+    content: "";
+}
+
+.timeline__item--last::before {
+    display: none;
+}
+
+.timeline__marker {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: var(--color-surface);
+    color: var(--muted);
+}
+
+.timeline__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.timeline__item[data-tone="accent"] .timeline__marker {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.timeline__item[data-tone="success"] .timeline__marker {
+    border-color: var(--color-success, #2e7d32);
+    color: var(--color-success, #2e7d32);
+}
+
+.timeline__item[data-tone="warning"] .timeline__marker {
+    border-color: var(--color-warning, #ed6c02);
+    color: var(--color-warning, #ed6c02);
+}
+
+.timeline__item[data-tone="danger"] .timeline__marker {
+    border-color: var(--color-error);
+    color: var(--color-error);
+}
+
+.timeline__item--active .timeline__marker {
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+.timeline__body {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-top: 2px;
+}
+
+.timeline__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    min-width: 0;
+    gap: var(--space-3);
+}
+
+.timeline__title {
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.timeline__time {
+    flex: none;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 10px;
+}
+
+.timeline__description {
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.timeline__item[data-tone="danger"] .timeline__title {
+    color: var(--color-error);
+}

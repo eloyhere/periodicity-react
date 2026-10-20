@@ -1,0 +1,122 @@
+/* ==========================================================================
+   Table — semantic Material data table with adapter-backed rows
+   ========================================================================== */
+
+.table {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xs);
+    background: var(--color-surface);
+}
+
+.table__viewport {
+    width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+}
+
+.table__element {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--color-on-surface);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    text-align: left;
+}
+
+.table__caption {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--line);
+    color: var(--color-on-surface-variant);
+    font-size: 12px;
+    font-weight: 500;
+    text-align: left;
+}
+
+.table__element th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    height: 48px;
+    padding: 0 var(--space-4);
+    border-bottom: 1px solid var(--line);
+    background: var(--color-surface);
+    color: var(--color-on-surface-variant);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.table__element td {
+    height: 52px;
+    padding: 0 var(--space-4);
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+}
+
+.table__element tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.table--compact .table__element th,
+.table--compact .table__element td {
+    height: 40px;
+    padding: 0 var(--space-3);
+}
+
+.table__cell--center {
+    text-align: center;
+}
+
+.table__cell--end {
+    text-align: right;
+}
+
+.table__selection {
+    width: 52px;
+    padding-right: 0 !important;
+    padding-left: var(--space-2) !important;
+}
+
+.table__row--hover:hover {
+    background: var(--color-surface-container-low);
+}
+
+.table--striped .table__element tbody tr:nth-child(even) {
+    background: var(--color-surface-container-low);
+}
+
+.table__row--selected {
+    background: var(--color-primary-container);
+}
+
+.table__row--clickable {
+    cursor: pointer;
+}
+
+.table__state {
+    height: 120px !important;
+    color: var(--color-on-surface-variant);
+    text-align: center;
+}
+
+.table__state .spinner {
+    margin: 0 auto;
+}
+
+.table--virtual .table__viewport {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    overflow-anchor: none;
+}
+
+.table__spacer td {
+    height: 0;
+    padding: 0;
+    border: 0;
+}

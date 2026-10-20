@@ -1,0 +1,39 @@
+/* ==========================================================================
+   Pager — horizontal scroll-snapped pages
+   ========================================================================== */
+
+.pager {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    touch-action: pan-x;
+}
+
+.pager::-webkit-scrollbar {
+    display: none;
+}
+
+.pager:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
+}
+
+.pager__page {
+    display: flex;
+    flex: 0 0 100%;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+}
+
+.pager__page[aria-hidden="true"] {
+    pointer-events: none;
+}

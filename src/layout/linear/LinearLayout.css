@@ -1,0 +1,114 @@
+/* ==========================================================================
+   Linear layout — Android LinearLayout mapped to flex
+   ========================================================================== */
+
+.linear {
+    display: flex;
+    min-width: 0;
+    min-height: 0;
+}
+
+.linear--horizontal {
+    flex-direction: row;
+}
+
+.linear--vertical {
+    flex-direction: column;
+}
+
+.linear--reverse.linear--horizontal {
+    flex-direction: row-reverse;
+}
+
+.linear--reverse.linear--vertical {
+    flex-direction: column-reverse;
+}
+
+.linear--wrap {
+    flex-wrap: wrap;
+}
+
+.linear--gravity-start {
+    justify-content: flex-start;
+}
+
+.linear--gravity-center {
+    justify-content: center;
+}
+
+.linear--gravity-end {
+    justify-content: flex-end;
+}
+
+.linear--gravity-between {
+    justify-content: space-between;
+}
+
+.linear--gravity-around {
+    justify-content: space-around;
+}
+
+.linear--gravity-evenly {
+    justify-content: space-evenly;
+}
+
+.linear--align-start {
+    align-items: flex-start;
+}
+
+.linear--align-center {
+    align-items: center;
+}
+
+.linear--align-end {
+    align-items: flex-end;
+}
+
+.linear--align-stretch {
+    align-items: stretch;
+}
+
+.linear--gap-none {
+    gap: 0;
+}
+
+.linear--gap-xs {
+    gap: var(--space-1);
+}
+
+.linear--gap-sm {
+    gap: var(--space-2);
+}
+
+.linear--gap-md {
+    gap: var(--space-3);
+}
+
+.linear--gap-lg {
+    gap: var(--space-4);
+}
+
+.linear--gap-xl {
+    gap: var(--space-6);
+}
+
+.linear__item {
+    min-width: 0;
+    min-height: 0;
+}
+
+.linear__item--align-start {
+    align-self: flex-start;
+}
+
+.linear__item--align-center {
+    align-self: center;
+}
+
+.linear__item--align-end {
+    align-self: flex-end;
+}
+
+.linear__item--align-stretch {
+    align-self: stretch;
+}

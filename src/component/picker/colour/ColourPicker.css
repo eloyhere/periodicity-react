@@ -1,0 +1,57 @@
+/* ==========================================================================
+   Colour picker — native colour input, hex value, and presets
+   ========================================================================== */
+
+.colour-picker .picker-field__control {
+    min-height: 48px;
+    gap: var(--space-3);
+}
+
+.colour-picker__input {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+}
+
+.colour-picker__input::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.colour-picker__input::-webkit-color-swatch {
+    border: 0;
+    border-radius: 50%;
+}
+
+.colour-picker__value {
+    flex: 1 1 auto;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+
+.colour-picker__presets {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 4px;
+}
+
+.colour-picker__preset {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.colour-picker__preset--selected {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 1px;
+}

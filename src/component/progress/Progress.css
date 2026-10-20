@@ -1,0 +1,108 @@
+.progress {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    width: 100%;
+    min-width: 0;
+}
+
+.progress--accent {
+    --progress-color: var(--color-primary);
+}
+
+.progress--mint {
+    --progress-color: var(--color-secondary);
+}
+
+.progress--violet {
+    --progress-color: var(--color-tertiary);
+}
+
+.progress--amber {
+    --progress-color: var(--color-warning);
+}
+
+.progress__meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.progress__label {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--color-on-surface);
+    font-size: var(--type-label);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-snug);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.progress__value {
+    flex: none;
+    color: var(--color-on-surface-variant);
+    font-family: var(--font-mono);
+    font-size: var(--type-mono);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-wide);
+    line-height: var(--leading-tight);
+    font-variant-numeric: tabular-nums;
+}
+
+.progress__track {
+    display: flex;
+    width: 100%;
+    overflow: hidden;
+    border-radius: var(--radius-pill);
+    background: var(--color-outline-variant);
+}
+
+.progress--sm .progress__track {
+    height: var(--space-1);
+}
+
+.progress--md .progress__track {
+    height: var(--space-2);
+}
+
+.progress__fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--progress-color);
+    transition: width var(--duration-medium) var(--ease-standard);
+}
+
+.progress__fill--indeterminate {
+    width: 100%;
+    background-image: repeating-linear-gradient(
+        90deg,
+        var(--progress-color) 0 var(--space-2),
+        transparent var(--space-2) var(--space-4)
+    );
+    background-size: var(--space-8) 100%;
+    animation: progress-stripes calc(var(--duration-slow) * 3) linear infinite;
+}
+
+@keyframes progress-stripes {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: var(--space-8) 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .progress__fill {
+        transition: none;
+    }
+
+    .progress__fill--indeterminate {
+        animation: none;
+    }
+}

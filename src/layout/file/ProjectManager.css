@@ -1,0 +1,696 @@
+/* ==========================================================================
+   Project manager — files, views, pager, dependencies, and project I/O
+   ========================================================================== */
+
+.project-manager {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    height: 680px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xs);
+    background: var(--color-surface);
+}
+
+.project-manager__modes {
+    flex: 0 0 176px;
+    width: 176px;
+    min-width: 0;
+    overflow-y: auto;
+    border-right: 1px solid var(--line);
+    background: var(--color-surface-container-low);
+}
+
+.project-manager__modes .navigation-view {
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.project-manager__explorer {
+    display: flex;
+    flex: 0 0 260px;
+    flex-direction: column;
+    width: 260px;
+    min-width: 0;
+    border-right: 1px solid var(--line);
+}
+
+.project-manager__project {
+    display: flex;
+    flex: none;
+    align-items: center;
+    min-height: 58px;
+    padding: 0 var(--space-3);
+    border-bottom: 1px solid var(--line);
+    gap: var(--space-2);
+}
+
+.project-manager__mark {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-xs);
+    background: var(--color-primary-container);
+    color: var(--color-on-primary-container);
+}
+
+.project-manager__project-copy {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 1px;
+}
+
+.project-manager__project-name {
+    overflow: hidden;
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.project-manager__project-meta {
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.project-manager__tree {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--space-1);
+}
+
+.project-manager__tree .tree {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.project-manager__tree .tree__row {
+    min-height: 32px;
+    padding-right: var(--space-1);
+    padding-left: var(--space-1);
+    border-bottom: 0;
+}
+
+.project-manager__file {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    gap: 5px;
+}
+
+.project-manager__file-name {
+    overflow: hidden;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.project-manager__main {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+}
+
+.project-manager__toolbar {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 58px;
+    padding: 0 var(--space-4);
+    border-bottom: 1px solid var(--line);
+    gap: var(--space-3);
+}
+
+.project-manager__identity {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 2px;
+}
+
+.project-manager__eyebrow {
+    overflow: hidden;
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.project-manager__path {
+    overflow: hidden;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.project-manager__toolbar-actions {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.project-manager__pager {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.project-manager__pager .pager {
+    height: 100%;
+}
+
+.project-manager__pager .pager__page {
+    height: 100%;
+    overflow-y: auto;
+}
+
+.project-manager__page {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: var(--space-5);
+    gap: var(--space-4);
+}
+
+.project-manager__page-header {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.project-manager__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+}
+
+.project-manager__stat {
+    display: flex;
+    flex: 1 1 100px;
+    flex-direction: column;
+    min-width: 100px;
+    padding: var(--space-3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xs);
+    background: var(--color-surface-container-low);
+    gap: 2px;
+}
+
+.project-manager__stat-value {
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.project-manager__stat-label {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.project-manager__file-summary {
+    padding: var(--space-4);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xs);
+}
+
+.project-manager__file-summary-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.project-manager__facts {
+    display: flex;
+    flex-wrap: wrap;
+    margin: var(--space-3) 0 0;
+    gap: 6px var(--space-3);
+}
+
+.project-manager__facts dt {
+    flex: 0 0 110px;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.project-manager__facts dd {
+    flex: 1 1 calc(100% - 110px);
+    margin: 0;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    overflow-wrap: anywhere;
+}
+
+.project-manager__prose {
+    max-width: 720px;
+    color: var(--text);
+    font-family: var(--font-serif);
+    font-size: 15px;
+    line-height: 1.75;
+    white-space: pre-wrap;
+}
+
+.project-manager__code {
+    margin: 0;
+    padding: var(--space-4);
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xs);
+    background: var(--color-surface-container-low);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    white-space: pre;
+}
+
+.project-manager__editor {
+    width: 100%;
+    min-height: 360px;
+    padding: var(--space-4);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xs);
+    background: var(--color-surface);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    outline: none;
+    resize: vertical;
+}
+
+.project-manager__editor:focus {
+    border-color: var(--color-primary);
+}
+
+.project-manager__editor-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.project-manager__layers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+}
+
+.project-manager__layer {
+    display: flex;
+    flex: 1 1 200px;
+    flex-direction: column;
+    min-width: 180px;
+    padding: var(--space-3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xs);
+    gap: 4px;
+}
+
+.project-manager__layer-title {
+    margin: 0 0 var(--space-2);
+    color: var(--muted);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.project-manager__node-card {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 32px;
+    padding: 0 var(--space-2);
+    border: 0;
+    border-radius: var(--radius-xs);
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+    gap: 6px;
+}
+
+.project-manager__node-card:hover {
+    background: var(--color-surface-container);
+}
+
+.project-manager__node-count {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.project-manager__dependency-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+}
+
+.project-manager__dependency-grid > div {
+    flex: 1 1 220px;
+    min-width: 200px;
+}
+
+.project-manager__dependency-list,
+.project-manager__relationship-list {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    gap: 2px;
+}
+
+.project-manager__dependency-list li,
+.project-manager__relationship-list li {
+    display: flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0 var(--space-2);
+    border-bottom: 1px solid var(--line);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    overflow-wrap: anywhere;
+    gap: 6px;
+}
+
+.project-manager__muted {
+    margin-left: auto;
+    color: var(--muted);
+    font-family: var(--font-sans);
+    font-size: 10px;
+}
+
+.project-manager__relationship-kind {
+    flex: none;
+    padding: 1px 5px;
+    border-radius: var(--radius-xs);
+    background: var(--color-surface-container);
+    color: var(--muted);
+    font-family: var(--font-sans);
+    font-size: 9px;
+    text-transform: uppercase;
+}
+
+.project-manager__link {
+    margin-left: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-primary);
+    font: inherit;
+    font-size: 10px;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.project-manager__empty {
+    margin: 0;
+    padding: var(--space-4);
+    color: var(--muted);
+    font-size: 12px;
+}
+
+@media (max-width: 1080px) {
+    .project-manager {
+        flex-wrap: wrap;
+        height: auto;
+    }
+
+    .project-manager__modes {
+        flex: 0 0 100%;
+        width: 100%;
+        max-height: 56px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .project-manager__modes .navigation-view__list {
+        flex-direction: row;
+    }
+
+    .project-manager__explorer {
+        flex: 0 0 220px;
+        width: 220px;
+        min-height: 480px;
+    }
+
+    .project-manager__main {
+        min-height: 480px;
+    }
+}
+
+/* Files and architecture pages replace the former fixed explorer column. */
+.project-manager__files-layout,
+.project-manager__architecture {
+    display: flex;
+    width: 100%;
+    min-height: 420px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xs);
+}
+
+.project-manager__files-pane {
+    display: flex;
+    flex: 0 0 260px;
+    flex-direction: column;
+    width: 260px;
+    min-width: 0;
+    overflow-y: auto;
+    padding: var(--space-1);
+    border-right: 1px solid var(--line);
+    background: var(--color-surface-container-low);
+}
+
+.project-manager__files-pane .tree {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.project-manager__files-content {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    padding: var(--space-4);
+    gap: var(--space-4);
+}
+
+.project-manager__structure {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: var(--space-4);
+    overflow: auto;
+}
+
+.project-manager__outline {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    gap: 2px;
+}
+
+.project-manager__outline .project-manager__outline {
+    margin-top: 2px;
+    margin-left: var(--space-4);
+    padding-left: var(--space-3);
+    border-left: 1px solid var(--line);
+}
+
+.project-manager__outline-row {
+    display: flex;
+    align-items: baseline;
+    min-height: 30px;
+    padding: 4px var(--space-2);
+    border-radius: var(--radius-xs);
+    gap: var(--space-2);
+}
+
+.project-manager__outline-row:hover {
+    background: var(--color-surface-container);
+}
+
+.project-manager__outline-kind {
+    flex: 0 0 auto;
+    padding: 1px 5px;
+    border-radius: var(--radius-xs);
+    background: var(--color-surface-container);
+    color: var(--muted);
+    font-family: var(--font-sans);
+    font-size: 9px;
+    text-transform: uppercase;
+}
+
+.project-manager__outline-label {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.project-manager__outline-line {
+    margin-left: auto;
+    color: var(--faint);
+    font-family: var(--font-mono);
+    font-size: 9px;
+}
+
+@media (max-width: 900px) {
+    .project-manager__files-layout,
+    .project-manager__architecture {
+        flex-direction: column;
+    }
+
+    .project-manager__files-pane {
+        flex: 0 0 220px;
+        width: 100%;
+        max-height: 220px;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+    }
+}
+
+/* Rendered file content and syntax tokens. */
+.project-manager__html {
+    max-width: 760px;
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+.project-manager__html h1,
+.project-manager__html h2,
+.project-manager__html h3,
+.project-manager__html h4,
+.project-manager__html h5,
+.project-manager__html h6 {
+    margin: 1.1em 0 0.45em;
+    color: var(--text);
+    font-family: var(--font-display);
+    line-height: 1.25;
+}
+
+.project-manager__html h1 {
+    font-size: 28px;
+}
+
+.project-manager__html h2 {
+    font-size: 22px;
+}
+
+.project-manager__html h3 {
+    font-size: 18px;
+}
+
+.project-manager__html p {
+    margin: 0 0 0.85em;
+}
+
+.project-manager__html ul,
+.project-manager__html ol {
+    margin: 0 0 0.85em;
+    padding-left: 1.4em;
+}
+
+.project-manager__html blockquote {
+    margin: 0 0 0.85em;
+    padding: 6px 12px;
+    border-left: 3px solid var(--color-primary);
+    background: var(--color-surface-container-low);
+    color: var(--muted);
+}
+
+.project-manager__html a {
+    color: var(--color-primary);
+}
+
+.project-manager__html img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-xs);
+}
+
+.project-manager__html table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.project-manager__html th,
+.project-manager__html td {
+    padding: 6px 10px;
+    border: 1px solid var(--line);
+    text-align: left;
+}
+
+.project-manager__code .token-comment,
+.project-manager__html .token-comment {
+    color: var(--muted);
+    font-style: italic;
+}
+
+.project-manager__code .token-string,
+.project-manager__html .token-string {
+    color: #2e7d32;
+}
+
+.project-manager__code .token-keyword,
+.project-manager__html .token-keyword {
+    color: #7b1fa2;
+    font-weight: 600;
+}
+
+.project-manager__code .token-number,
+.project-manager__html .token-number {
+    color: #c77700;
+}
+
+.project-manager__code .token-function,
+.project-manager__html .token-function {
+    color: #1565c0;
+}
+
+.project-manager__code .token-tag,
+.project-manager__html .token-tag {
+    color: #c62828;
+}

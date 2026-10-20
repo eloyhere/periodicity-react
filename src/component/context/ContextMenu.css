@@ -1,0 +1,185 @@
+/* ==========================================================================
+   Context menu — Material right-click menu with header, body, footer slots
+   ========================================================================== */
+
+.context-menu__zone {
+    display: block;
+    min-width: 0;
+}
+
+.context-menu__panel {
+    display: flex;
+    flex-direction: column;
+    min-width: 180px;
+    max-width: min(320px, calc(100vw - 16px));
+    max-height: min(420px, 70vh);
+    padding: 8px 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: var(--radius-xs);
+    background: var(--panel);
+    color: var(--text);
+    box-shadow:
+        0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14),
+        0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+.context-menu__panel:focus {
+    outline: none;
+}
+
+.context-menu__header,
+.context-menu__footer {
+    display: flex;
+    flex: none;
+    align-items: center;
+    min-height: 32px;
+    padding: 4px 16px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+}
+
+.context-menu__header {
+    border-bottom: 1px solid var(--line);
+}
+
+.context-menu__footer {
+    border-top: 1px solid var(--line);
+}
+
+.context-menu__body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    padding: 8px 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.context-menu__item {
+    flex: none;
+    margin: 0 8px;
+    border-radius: var(--radius-xs);
+    color: var(--text);
+    transition: background-color 120ms var(--ease-standard);
+}
+
+.context-menu__item:hover {
+    background: var(--panel-strong);
+}
+
+.context-menu__item--selected {
+    background: var(--color-primary-container);
+    color: var(--color-on-primary-container);
+}
+
+.context-menu__item--danger {
+    color: var(--color-error);
+}
+
+.context-menu__item--disabled {
+    opacity: var(--state-disabled-opacity);
+}
+
+.context-menu__item-control {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 36px;
+    margin: 0;
+    padding: 0 12px;
+    border: 0;
+    border-radius: inherit;
+    background: transparent;
+    color: inherit;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.4;
+    text-align: left;
+    cursor: pointer;
+    outline: none;
+}
+
+.context-menu__item-control:disabled {
+    cursor: not-allowed;
+}
+
+.context-menu__item-control:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+}
+
+.context-menu__item-icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    color: var(--muted);
+}
+
+.context-menu__item--selected .context-menu__item-icon,
+.context-menu__item--danger .context-menu__item-icon {
+    color: currentColor;
+}
+
+.context-menu__item-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.context-menu__item-shortcut {
+    flex: none;
+    margin-left: 24px;
+    color: var(--faint);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+}
+
+.context-menu__item-check {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    color: currentColor;
+}
+
+.context-menu__separator {
+    flex: none;
+    height: 1px;
+    margin: 8px 0;
+    background: var(--line);
+}
+
+.context-menu__group {
+    display: flex;
+    flex-direction: column;
+    padding-top: 4px;
+}
+
+.context-menu__group-label {
+    padding: 4px 16px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+}
+
+.context-menu__empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 8px 16px;
+    color: var(--muted);
+    font-size: 14px;
+    text-align: center;
+}

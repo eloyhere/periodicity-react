@@ -1,0 +1,180 @@
+.card {
+    --card-accent: var(--color-on-surface-variant);
+    --card-border: var(--color-outline-variant);
+    --card-tint: transparent;
+    --card-radius: var(--radius-md);
+
+    position: relative;
+    border: 1px solid var(--card-border);
+    border-radius: var(--card-radius);
+    background: var(--color-surface);
+    color: var(--color-on-surface);
+    box-shadow: var(--shadow-sm);
+    transition:
+        border-color var(--duration-medium) var(--ease-standard),
+        box-shadow var(--duration-medium) var(--ease-standard);
+}
+
+.card--accent {
+    --card-accent: var(--color-primary);
+    --card-border: var(--color-primary-container);
+    --card-tint: var(--color-primary-container);
+}
+
+.card--mint {
+    --card-accent: var(--color-secondary);
+    --card-border: var(--color-secondary-container);
+    --card-tint: var(--color-secondary-container);
+}
+
+.card--violet {
+    --card-accent: var(--color-tertiary);
+    --card-border: var(--color-tertiary-container);
+    --card-tint: var(--color-tertiary-container);
+}
+
+.card--amber {
+    --card-accent: var(--color-warning);
+    --card-border: var(--color-warning-container);
+    --card-tint: var(--color-warning-container);
+}
+
+.card--interactive:hover {
+    border-color: var(--color-outline);
+    box-shadow: var(--elevation-1);
+}
+
+.card__wash {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(100% 100% at 100% 0%, var(--card-tint), transparent),
+        linear-gradient(180deg, var(--color-surface-container), var(--color-surface));
+    pointer-events: none;
+}
+
+.card__edge {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--card-radius);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), transparent);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    pointer-events: none;
+}
+
+.card__hit {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.card__hit:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+.card__media {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    overflow: hidden;
+    border-bottom: 1px solid var(--color-outline-variant);
+    background: var(--color-surface-container-lowest);
+}
+
+.card__media img,
+.card__media video {
+    display: block;
+    width: 100%;
+}
+
+.card__content {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+    padding: var(--space-6);
+}
+
+.card--clickable .card__media,
+.card--clickable .card__content {
+    pointer-events: none;
+}
+
+.card--clickable .card__content :is(a, button, input, select, textarea, label, [tabindex]) {
+    pointer-events: auto;
+}
+
+.card__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+}
+
+.card__header:last-child {
+    margin-bottom: 0;
+}
+
+.card__heading {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.card__eyebrow {
+    color: var(--card-accent);
+    font-family: var(--font-mono);
+    font-size: var(--type-mono);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-widest);
+    line-height: var(--leading-snug);
+    text-transform: uppercase;
+}
+
+.card__title {
+    color: var(--color-on-surface);
+    font-family: var(--font-display);
+    font-size: var(--type-h3);
+    font-weight: var(--weight-medium);
+    letter-spacing: var(--tracking-tight);
+    line-height: var(--leading-tight);
+    overflow-wrap: break-word;
+    text-wrap: balance;
+}
+
+.card__action {
+    display: flex;
+    flex: none;
+    align-items: center;
+    align-self: flex-start;
+    margin-inline-start: auto;
+    color: var(--color-on-surface-variant);
+}
+
+.card__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-outline-variant);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .card {
+        transition: none;
+    }
+}
