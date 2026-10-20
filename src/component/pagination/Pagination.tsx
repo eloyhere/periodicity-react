@@ -4,6 +4,7 @@ import useControllableState from "../foundation/useControllableState";
 import VisuallyHidden from "../foundation/VisuallyHidden";
 import Icon from "../icon/Icon";
 import Surface, { type RippleOptions } from "../surface/Surface";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./Pagination.css";
 
 /**
@@ -32,10 +33,10 @@ type PaginationToken = number | "start-ellipsis" | "end-ellipsis";
  * - `showEdges`: Whether the first and last page shortcuts are rendered.
  * - `size`: Control size; defaults to `md`.
  * - `disabled`: Disables every control.
- * - `label`: Accessible name of the landmark; defaults to `Pagination`.
- * - `previousLabel`: Accessible name of the previous control.
- * - `nextLabel`: Accessible name of the next control.
- * - `ellipsisLabel`: Screen-reader text for a skipped range; defaults to `More pages`.
+ * - `label`: Accessible name of the landmark; defaults to the localised Pagination label.
+ * - `previousLabel`: Accessible name of the previous control; defaults to the localised Previous label.
+ * - `nextLabel`: Accessible name of the next control; defaults to the localised Next label.
+ * - `ellipsisLabel`: Screen-reader text for a skipped range; defaults to the localised More label.
  * - `className`: Extra class names for the navigation element.
  * @example
  * <Pagination page={3} pageCount={20} onPageChange={setPage} />
@@ -151,14 +152,19 @@ const Pagination: FC<PaginationProps> = ({
     showEdges = true,
     size = "md",
     disabled = false,
-    label = "Pagination",
-    previousLabel = "Previous page",
-    nextLabel = "Next page",
-    ellipsisLabel = "More pages",
+    label,
+    previousLabel,
+    nextLabel,
+    ellipsisLabel,
     className = "",
     ref,
     ...rest
 }: PaginationProps): ReactNode => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedLabel: string = label ?? t("pagination");
+    const resolvedPreviousLabel: string = previousLabel ?? t("previous");
+    const resolvedNextLabel: string = nextLabel ?? t("next");
+    const resolvedEllipsisLabel: string = ellipsisLabel ?? t("more");
     const [currentPage, setCurrentPage]: readonly [number, (next: number) => void] =
         useControllableState<number>({
             value: page,
@@ -202,7 +208,7 @@ const Pagination: FC<PaginationProps> = ({
         <nav
             ref={ref}
             className={cx("pagination", `pagination--${size}`, className)}
-            aria-label={label}
+            aria-label={resolvedLabel}
             data-disabled={disabled ? "true" : "false"}
             {...rest}
         >
@@ -219,7 +225,7 @@ const Pagination: FC<PaginationProps> = ({
                         <button
                             type="button"
                             className="pagination__button pagination__button--edge"
-                            aria-label={previousLabel}
+                            aria-label={resolvedPreviousLabel}
                             disabled={isPreviousDisabled}
                             onClick={(): void => {
                                 goToPage(activePage - 1);
@@ -236,7 +242,7 @@ const Pagination: FC<PaginationProps> = ({
                                 <span className="pagination__ellipsis" aria-hidden="true">
                                     …
                                 </span>
-                                <VisuallyHidden>{ellipsisLabel}</VisuallyHidden>
+                                <VisuallyHidden>{resolvedEllipsisLabel}</VisuallyHidden>
                             </li>
                         );
                     }
@@ -256,7 +262,7 @@ const Pagination: FC<PaginationProps> = ({
                                 <button
                                     type="button"
                                     className="pagination__button"
-                                    aria-label={`Page ${token}`}
+                                    aria-label={t("pageOf", { page: token, pages: totalPages })}
                                     aria-current={isCurrent ? "page" : (void 0)}
                                     disabled={disabled}
                                     onClick={(): void => {
@@ -278,7 +284,7 @@ const Pagination: FC<PaginationProps> = ({
                         <button
                             type="button"
                             className="pagination__button pagination__button--edge"
-                            aria-label={nextLabel}
+                            aria-label={resolvedNextLabel}
                             disabled={isNextDisabled}
                             onClick={(): void => {
                                 goToPage(activePage + 1);

@@ -11,6 +11,7 @@ import {
 import cx from "../../component/foundation/cx";
 import Field from "../../component/foundation/Field";
 import VisuallyHidden from "../../component/foundation/VisuallyHidden";
+import { useInternational, type InternationalContextValue } from "../../international";
 import { useFormContext, type FormContextValue } from "./FormContext";
 import "./Form.css";
 
@@ -154,6 +155,7 @@ const FormField: FC<FormFieldProps> = ({
     ref,
     ...rest
 }: FormFieldProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const generatedId: string = useId();
     const form: FormContextValue = useFormContext();
     const hasHint: boolean = isPresent(hint);
@@ -188,7 +190,7 @@ const FormField: FC<FormFieldProps> = ({
     const labelContent: ReactNode = isRequired ? (
         <>
             {label}
-            <VisuallyHidden> (required)</VisuallyHidden>
+            <VisuallyHidden> ({t("required")})</VisuallyHidden>
         </>
     ) : (
         label

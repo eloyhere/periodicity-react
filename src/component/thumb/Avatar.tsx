@@ -3,10 +3,13 @@ import {
     type Dispatch,
     type FC,
     type HTMLAttributes,
+    type KeyboardEvent,
+    type PointerEvent,
     type Ref,
     type SetStateAction,
 } from "react";
 import cx from "../foundation/cx";
+import { useRipple, type RippleHandlers } from "../foundation/useRipple";
 import VisuallyHidden from "../foundation/VisuallyHidden";
 import "./Avatar.css";
 
@@ -53,6 +56,7 @@ export interface AvatarProps extends Omit<HTMLAttributes<HTMLSpanElement>, "chil
     tone?: AvatarTone;
     status?: AvatarStatus;
     statusLabel?: string;
+    disabled?: boolean;
     className?: string;
     ref?: Ref<HTMLSpanElement>;
 }
@@ -102,10 +106,15 @@ const Avatar: FC<AvatarProps> = ({
     tone = "neutral",
     status,
     statusLabel,
+    disabled = false,
     className = "",
+    onPointerDown,
+    onPointerEnter,
+    onKeyDown,
     ref,
     ...rest
 }: AvatarProps) => {
+    const ripple: RippleHandlers = useRipple({ trigger: "click", disabled });
     const [failedSrc, setFailedSrc]: [string | void, Dispatch<SetStateAction<string | void>>] = useState<
         string | void
     >((void 0));
@@ -118,7 +127,31 @@ const Avatar: FC<AvatarProps> = ({
     };
 
     return (
-        <span ref={ref} className={cx("avatar", `avatar--${size}`, `avatar--${tone}`, className)} {...rest}>
+        <span
+            ref={ref}
+            className={cx(
+                "avatar",
+                `avatar--${size}`,
+                `avatar--${tone}`,
+                disabled && "avatar--disabled",
+                className,
+            )}
+            aria-disabled={disabled ? "true" : (void 0)}
+            data-disabled={disabled ? "true" : "false"}
+            onPointerDown={(event: PointerEvent<HTMLSpanElement>): void => {
+                ripple.onPointerDown(event);
+                onPointerDown?.(event);
+            }}
+            onPointerEnter={(event: PointerEvent<HTMLSpanElement>): void => {
+                ripple.onPointerEnter(event);
+                onPointerEnter?.(event);
+            }}
+            onKeyDown={(event: KeyboardEvent<HTMLSpanElement>): void => {
+                ripple.onKeyDown(event);
+                onKeyDown?.(event);
+            }}
+            {...rest}
+        >
             <span className="avatar__frame" role="img" aria-label={name}>
                 {showImage ? (
                     <img className="avatar__image" src={src} alt="" onError={handleImageError} />

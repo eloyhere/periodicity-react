@@ -1,14 +1,17 @@
 import type {
     FC,
     HTMLAttributes,
+    KeyboardEvent,
     MouseEvent as ReactMouseEvent,
     MouseEventHandler,
+    PointerEvent,
     ReactNode,
     Ref,
     RefCallback,
 } from "react";
 import cx from "../foundation/cx";
 import useMergedRef from "../foundation/useMergedRef";
+import { useRipple, type RippleHandlers } from "../foundation/useRipple";
 import Icon, { type IconName } from "../icon/Icon";
 import "./Tag.css";
 
@@ -89,11 +92,33 @@ const Tag: FC<TagProps> = ({
     disabled = false,
     className = "",
     onClick,
+    onPointerDown,
+    onPointerEnter,
+    onKeyDown,
     ref,
     "aria-label": ariaLabel,
     ...rest
 }: TagProps) => {
     const mergedRef: RefCallback<HTMLElement> = useMergedRef<HTMLElement>(ref);
+    const ripple: RippleHandlers = useRipple({ trigger: "click", disabled });
+    const handlePointerDown: (event: PointerEvent<HTMLElement>) => void = (
+        event: PointerEvent<HTMLElement>,
+    ): void => {
+        ripple.onPointerDown(event);
+        onPointerDown?.(event);
+    };
+    const handlePointerEnter: (event: PointerEvent<HTMLElement>) => void = (
+        event: PointerEvent<HTMLElement>,
+    ): void => {
+        ripple.onPointerEnter(event);
+        onPointerEnter?.(event);
+    };
+    const handleKeyDown: (event: KeyboardEvent<HTMLElement>) => void = (
+        event: KeyboardEvent<HTMLElement>,
+    ): void => {
+        ripple.onKeyDown(event);
+        onKeyDown?.(event);
+    };
     const isClickable: boolean = onClick !== (void 0);
     const canRemove: boolean = removable && onRemove !== (void 0);
     const visibleLabel: ReactNode = children ?? label;
@@ -168,6 +193,9 @@ const Tag: FC<TagProps> = ({
                 disabled={disabled}
                 aria-label={ariaLabel}
                 onClick={onClick}
+                onPointerDown={handlePointerDown}
+                onPointerEnter={handlePointerEnter}
+                onKeyDown={handleKeyDown}
                 {...rest}
             >
                 {mainContent}
@@ -183,6 +211,9 @@ const Tag: FC<TagProps> = ({
                 className={classes}
                 aria-label={groupLabel}
                 aria-disabled={disabled ? true : (void 0)}
+                onPointerDown={handlePointerDown}
+                onPointerEnter={handlePointerEnter}
+                onKeyDown={handleKeyDown}
                 {...rest}
             >
                 {mainContent}
@@ -197,6 +228,9 @@ const Tag: FC<TagProps> = ({
             className={classes}
             aria-disabled={disabled ? true : (void 0)}
             aria-label={ariaLabel}
+            onPointerDown={handlePointerDown}
+            onPointerEnter={handlePointerEnter}
+            onKeyDown={handleKeyDown}
             {...rest}
         >
             {mainContent}

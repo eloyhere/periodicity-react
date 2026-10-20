@@ -10,6 +10,7 @@ import cx from "../foundation/cx";
 import useControllableState from "../foundation/useControllableState";
 import TextInput from "../input/text/TextInput";
 import Dialog, { type DialogProps } from "./Dialog";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./InputDialog.css";
 
 /**
@@ -67,13 +68,14 @@ const InputDialogContent: FC<InputDialogProps> = ({
     placeholder,
     hint,
     error,
-    submitLabel = "Submit",
-    cancelLabel = "Cancel",
+    submitLabel,
+    cancelLabel,
     required = false,
     onSubmit,
     className = "",
     ...rest
 }: InputDialogProps): ReactElement => {
+    const { t }: InternationalContextValue = useInternational();
     const [value, setValue]: readonly [
         string,
         (next: string | ((previous: string) => string)) => void,
@@ -84,6 +86,8 @@ const InputDialogContent: FC<InputDialogProps> = ({
     });
     const formId: string = useId();
     const submitDisabled: boolean = required && value.trim().length === 0;
+    const resolvedSubmitLabel: string = submitLabel ?? t("submit");
+    const resolvedCancelLabel: string = cancelLabel ?? t("cancel");
 
     const handleChange: (event: ChangeEvent<HTMLInputElement>) => void = (
         event: ChangeEvent<HTMLInputElement>,
@@ -116,10 +120,10 @@ const InputDialogContent: FC<InputDialogProps> = ({
             footer={
                 <>
                     <Button variant="ghost" onClick={(): void => onClose("close-button")}>
-                        {cancelLabel}
+                        {resolvedCancelLabel}
                     </Button>
                     <Button type="submit" form={formId} disabled={submitDisabled}>
-                        {submitLabel}
+                        {resolvedSubmitLabel}
                     </Button>
                 </>
             }

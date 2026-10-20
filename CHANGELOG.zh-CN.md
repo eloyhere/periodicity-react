@@ -24,7 +24,8 @@
 - `PeriodicityForm`、`PeriodicityFormField`、`PeriodicityFormActions`：封装原生 `<form>`，保留原生校验、提交和重置行为，并为原生控件自动生成 `label htmlFor`、`aria-describedby` 和 `aria-invalid` 关联。
 - `PeriodicityCoordinator`、`PeriodicityAppBar`、`PeriodicityCollapse`、`PeriodicityToolbar`：协调滚动与折叠布局，Coordinator 只有 `collapse`、`header`、`main` 三个插槽；`collapse` 收缩到 0，AppBar header 固定，`main` 滚动。
 - `PeriodicityCalendar`：支持 locale 的月历网格，使用 roving tabindex、ISO 日期值、范围限制、Intl 星期/月份标签和方向键/Home/End/PageUp/PageDown 选择。
-- 18 套全局主题预设：`accessible`、`default`、`dark`、`milk`、`space-gray`、`gray`、`light-gray`、`sky-blue`、`pale-blue`、`deep-blue`、`orange`、`yellow`、`lemon`、`red`、`rose`、`green`、`deep-green`、`light-green`，通过 `theme`/`defaultTheme`/`setTheme` 切换。
+- 新增 4 套色盲主题：`protanopia`、`deuteranopia`、`tritanopia`、`achromatopsia`，使用不依赖色相或避免混淆的配色。
+- 22 套全局主题预设：`accessible`、`default`、`dark`、`milk`、`space-gray`、`gray`、`light-gray`、`sky-blue`、`pale-blue`、`deep-blue`、`orange`、`yellow`、`lemon`、`red`、`rose`、`green`、`deep-green`、`light-green`，通过 `theme`/`defaultTheme`/`setTheme` 切换。
 - 12 个内置 locale 和常用设计系统文案：`en-GB`、`en-US`、`zh-CN`、`zh-SG`、`zh-HK`、`zh-TW`、`ja-JP`、`ko-KR`、`es-ES`、`es-MX`、`pt-PT`、`pt-BR`，并提供 `localeOptions`、`builtInMessages`、`resolveLocaleMessages` 和方向信息。
 - `Page` 取代 `PagerPage` 作为分页路由组件。
 - 无障碍改进：表单 `aria-errormessage`/`aria-required`/组合描述、Drag 键盘排序、Scrollbar 键盘支持、完整日历键盘导航、Table/Tree ARIA、浮层焦点陷阱、skip link/landmarks，以及高对比度/强制颜色样式。
@@ -41,6 +42,9 @@
 - 值、选择、展开、打开状态和 Provider 配置支持受控/非受控模式。
 - 浮层和集合补充关闭原因、焦点恢复、Escape 处理、加载标签、空状态和禁用状态。
 - 新的 SVG 图表 favicon，用于开发服务器和静态预览。
+
+- Badge、Tag、Avatar、Link、StateLayer 现在会在指针/键盘激活时播放统一 Ripple；disabled 的 Badge、Tag、Avatar、Link 不触发。StateLayer 在非 Surface 区域会代理父级交互。
+- Dialog、Drawer、Snackbar、Alert、Pagination、Dropdown/Select、List/Tree/Table、文件工具、Calendar、Contact/Chat/Message 的默认文案改为 `useInternational().t()`，12 个内置语言包补齐 25 个通用 key；显式传入的 prop 仍然优先。
 
 ### 变更
 

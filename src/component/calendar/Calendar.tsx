@@ -13,6 +13,7 @@ import {
 } from "react";
 import cx from "../foundation/cx";
 import useControllableState from "../foundation/useControllableState";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./Calendar.css";
 
 /**
@@ -102,10 +103,11 @@ export interface CalendarDayContext {
  * - `weekdayLabels`: Seven visible weekday labels ordered Sunday to Saturday.
  * - `monthLabels`: Twelve visible month labels ordered January to December.
  * - `renderDay`: Replaces the default day number with custom cell content.
- * - `label`: Accessible name of the calendar group; defaults to `Calendar`.
- * - `previousMonthLabel`: Accessible name of the previous-month button.
- * - `nextMonthLabel`: Accessible name of the next-month button.
- * - `todayLabel`: Accessible suffix added to the current day; defaults to `Today`.
+ * - `label`: Accessible name of the calendar group; defaults to the localised Calendar label.
+ * - `previousMonthLabel`: Accessible name of the previous-month button; defaults to the localised
+ * Previous month label.
+ * - `nextMonthLabel`: Accessible name of the next-month button; defaults to the localised Next month label.
+ * - `todayLabel`: Accessible suffix added to the current day; defaults to the localised Today label.
  * - `className`: Extra class names for the root element.
  * - `ref`: Ref forwarded to the root element.
  * @example
@@ -657,16 +659,21 @@ export const Calendar: FC<CalendarProps> = ({
     weekdayLabels,
     monthLabels,
     renderDay,
-    label = "Calendar",
-    previousMonthLabel = "Previous month",
-    nextMonthLabel = "Next month",
-    todayLabel = "Today",
+    label,
+    previousMonthLabel,
+    nextMonthLabel,
+    todayLabel,
     className = "",
     ref,
     role,
     "aria-label": ariaLabelAttribute,
     ...rest
 }: CalendarProps): ReactNode => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedLabel: string = label ?? t("calendar");
+    const resolvedPreviousMonthLabel: string = previousMonthLabel ?? t("previousMonth");
+    const resolvedNextMonthLabel: string = nextMonthLabel ?? t("nextMonth");
+    const resolvedTodayLabel: string = todayLabel ?? t("today");
     const generatedId: string = useId();
     const titleId: string = `${generatedId}-title`;
     const gridId: string = `${generatedId}-grid`;
@@ -901,7 +908,7 @@ export const Calendar: FC<CalendarProps> = ({
             ref={ref}
             className={cx("calendar", className)}
             role={role ?? "group"}
-            aria-label={ariaLabelAttribute ?? label}
+            aria-label={ariaLabelAttribute ?? resolvedLabel}
             aria-disabled={disabled ? "true" : (void 0)}
             data-disabled={disabled ? "true" : "false"}
             data-readonly={readOnly ? "true" : "false"}
@@ -911,7 +918,7 @@ export const Calendar: FC<CalendarProps> = ({
                 <button
                     type="button"
                     className="calendar__nav"
-                    aria-label={previousMonthLabel}
+                    aria-label={resolvedPreviousMonthLabel}
                     aria-controls={gridId}
                     disabled={!canGoPrevious}
                     onClick={(): void => {
@@ -942,7 +949,7 @@ export const Calendar: FC<CalendarProps> = ({
                 <button
                     type="button"
                     className="calendar__nav"
-                    aria-label={nextMonthLabel}
+                    aria-label={resolvedNextMonthLabel}
                     aria-controls={gridId}
                     disabled={!canGoNext}
                     onClick={(): void => {
@@ -1026,7 +1033,9 @@ export const Calendar: FC<CalendarProps> = ({
                                         createLocalDate(date.year, date.month, date.day),
                                     );
                                     const accessibleLabel: string =
-                                        isToday && todayLabel.length > 0 ? `${dateLabel}, ${todayLabel}` : dateLabel;
+                                        isToday && resolvedTodayLabel.length > 0
+                                            ? `${dateLabel}, ${resolvedTodayLabel}`
+                                            : dateLabel;
                                     const context: CalendarDayContext = {
                                         date,
                                         iso,

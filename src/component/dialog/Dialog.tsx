@@ -20,6 +20,7 @@ import useControllableState from "../foundation/useControllableState";
 import useMergedRef from "../foundation/useMergedRef";
 import Icon from "../icon/Icon";
 import Surface from "../surface/Surface";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./Dialog.css";
 
 /**
@@ -86,6 +87,7 @@ export interface DialogProps
     className?: string;
     size?: DialogSize;
     headingLevel?: DialogHeadingLevel;
+    /** Accessible name of the close button; defaults to the localised Close label. */
     closeLabel?: string;
     closeOnBackdrop?: boolean;
     /** Whether Escape asks the dialog to close; defaults to `true`. */
@@ -280,7 +282,7 @@ const Dialog: FC<DialogProps> = ({
     className = "",
     size = "md",
     headingLevel = 2,
-    closeLabel = "Close dialog",
+    closeLabel,
     closeOnBackdrop = true,
     closeOnEscape = true,
     restoreFocus: restoreFocusOnClose = true,
@@ -294,6 +296,7 @@ const Dialog: FC<DialogProps> = ({
     "aria-describedby": ariaDescribedBy,
     ...rest
 }: DialogProps): ReactElement => {
+    const { t }: InternationalContextValue = useInternational();
     const dialogRef: RefObject<HTMLDialogElement | null> = useRef<HTMLDialogElement>(null);
     const panelRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
     const titleRef: RefObject<HTMLHeadingElement | null> = useRef<HTMLHeadingElement>(null);
@@ -316,6 +319,7 @@ const Dialog: FC<DialogProps> = ({
     const mergedRef: RefCallback<HTMLDialogElement> = useMergedRef<HTMLDialogElement>(dialogRef, ref);
     const labelledBy: string = joinIds(titleId, ariaLabelledBy);
     const describedBy: string = joinIds(hasDescription ? descriptionId : (void 0), ariaDescribedBy);
+    const resolvedCloseLabel: string = closeLabel ?? t("close");
 
     const requestClose: (reason: DialogCloseReason) => void = (reason: DialogCloseReason): void => {
         setOpen(false);
@@ -529,7 +533,7 @@ const Dialog: FC<DialogProps> = ({
                     <button
                         type="button"
                         className="dialog__close"
-                        aria-label={closeLabel}
+                        aria-label={resolvedCloseLabel}
                         onClick={handleCloseClick}
                     >
                         <Icon name="Close" size={20} />

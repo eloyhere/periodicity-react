@@ -9,6 +9,7 @@ import cx from "../foundation/cx";
 import useControllableState from "../foundation/useControllableState";
 import Icon, { type IconName } from "../icon/Icon";
 import Surface, { type SurfaceTone } from "../surface/Surface";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./Alert.css";
 
 /**
@@ -76,14 +77,6 @@ const DefaultIcons: Record<AlertTone, IconName> = {
     danger: "Error",
 };
 
-const DismissLabels: Record<AlertTone, string> = {
-    neutral: "Dismiss message",
-    accent: "Dismiss message",
-    success: "Dismiss message",
-    warning: "Dismiss warning",
-    danger: "Dismiss error",
-};
-
 /**
  * Renders a tone-tinted Surface with an icon, title, description, action, and optional dismissal.
  * @param props - Tone, title, description, icon, action, dismissal, visibility, and native attributes.
@@ -114,6 +107,7 @@ const Alert: FC<AlertProps> = ({
     tabIndex,
     ...rest
 }: AlertProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const [visible, setVisible]: readonly [
         boolean,
         (next: boolean | ((previous: boolean) => boolean)) => void,
@@ -169,7 +163,7 @@ const Alert: FC<AlertProps> = ({
                     <button
                         type="button"
                         className="alert__dismiss"
-                        aria-label={DismissLabels[tone]}
+                        aria-label={t("dismiss")}
                         onClick={handleDismiss}
                     >
                         <Icon name="Close" size={14} />

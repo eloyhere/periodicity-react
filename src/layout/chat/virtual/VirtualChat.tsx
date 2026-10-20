@@ -19,6 +19,7 @@ import type { ListEntry } from "../../list/adapter";
 import type { MessageAction, MessageAdapter, MessageItem } from "../../message/adapter";
 import type { ChatAdapter } from "../adapter";
 import { conversationMessages, createChatAdapter } from "../adapter";
+import { useInternational, type InternationalContextValue } from "../../../international";
 import "../Chat.css";
 
 /**
@@ -53,13 +54,21 @@ export interface VirtualChatProps extends Omit<HTMLAttributes<HTMLDivElement>, "
     onDraftChange?: (draft: string) => void;
     onQuoteCancel?: () => void;
     currentUser?: string;
+    /** Heading above the contact column; defaults to the localised Conversations label. */
     contactsTitle?: ReactNode;
+    /** Accessible name of the contact column; defaults to the localised Conversations label. */
     contactsLabel?: string;
+    /** Accessible name of the conversation pane; defaults to the localised Conversation label. */
     conversationLabel?: string;
+    /** Empty conversation pane copy; defaults to the localised Select a conversation label. */
     empty?: ReactNode;
+    /** Copy for a conversation without messages; defaults to the localised Start the conversation label. */
     messageEmpty?: ReactNode;
+    /** Composer placeholder; defaults to the localised Message template filled with the contact name. */
     placeholder?: string;
+    /** Accessible name of the composer; defaults to the localised Message label. */
     composerLabel?: string;
+    /** Accessible name of the send button; defaults to the localised Send message label. */
     sendLabel?: string;
     contactHeight?: number;
     contactItemHeight?: number;
@@ -100,14 +109,14 @@ const VirtualChat: (props: VirtualChatProps) => ReactNode = ({
     onDraftChange,
     onQuoteCancel,
     currentUser = "",
-    contactsTitle = "Conversations",
-    contactsLabel = "Conversations",
-    conversationLabel = "Conversation",
-    empty = "Select a conversation",
-    messageEmpty = "Start the conversation",
+    contactsTitle,
+    contactsLabel,
+    conversationLabel,
+    empty,
+    messageEmpty,
     placeholder,
-    composerLabel = "Message",
-    sendLabel = "Send message",
+    composerLabel,
+    sendLabel,
     contactHeight = 320,
     contactItemHeight = 76,
     messageHeight = 360,
@@ -121,6 +130,14 @@ const VirtualChat: (props: VirtualChatProps) => ReactNode = ({
     ref,
     ...rest
 }: VirtualChatProps): ReactNode => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedContactsTitle: ReactNode = contactsTitle ?? t("conversations");
+    const resolvedContactsLabel: string = contactsLabel ?? t("conversations");
+    const resolvedConversationLabel: string = conversationLabel ?? t("conversation");
+    const resolvedSendLabel: string = sendLabel ?? t("sendMessage");
+    const resolvedEmpty: ReactNode = empty ?? t("selectConversation");
+    const resolvedMessageEmpty: ReactNode = messageEmpty ?? t("startConversation");
+    const resolvedComposerLabel: string = composerLabel ?? t("message");
     const source: ChatAdapter = useMemo(
         (): ChatAdapter => adapter ?? createChatAdapter(contacts, messages),
         [adapter, contacts, messages],
@@ -205,28 +222,28 @@ const VirtualChat: (props: VirtualChatProps) => ReactNode = ({
             {...rest}
             ref={ref}
             className={cx("chat", "chat--virtual", className)}
-            aria-label={ariaLabel ?? "Chat"}
+            aria-label={ariaLabel ?? t("chat")}
             aria-busy={loading ? "true" : (void 0)}
             aria-disabled={disabled ? "true" : (void 0)}
         >
-            <aside className="chat__contacts" aria-label={contactsLabel}>
+            <aside className="chat__contacts" aria-label={resolvedContactsLabel}>
                 <VirtualContact
                     adapter={source.contacts}
                     value={active}
                     onSelect={choose}
                     onContactAction={onContactAction}
-                    title={contactsTitle}
-                    aria-label={contactsLabel}
-                    listLabel={contactsLabel}
+                    title={resolvedContactsTitle}
+                    aria-label={resolvedContactsLabel}
+                    listLabel={resolvedContactsLabel}
                     height={contactHeight}
                     itemHeight={contactItemHeight}
                     loading={contactsLoading}
                     disabled={disabled}
                 />
             </aside>
-            <section className="chat__main" aria-label={conversationLabel}>
+            <section className="chat__main" aria-label={resolvedConversationLabel}>
                 {activeContact === null ? (
-                    <div className="chat__empty">{empty}</div>
+                    <div className="chat__empty">{resolvedEmpty}</div>
                 ) : (
                     <>
                         <header className="chat__header">
@@ -242,7 +259,7 @@ const VirtualChat: (props: VirtualChatProps) => ReactNode = ({
                                 className="chat__presence"
                                 data-presence={activeContact.presence ?? "offline"}
                             >
-                                {activeContact.presence ?? "offline"}
+                                {activeContact.presence ?? t("offline")}
                             </span>
                         </header>
 
@@ -254,7 +271,7 @@ const VirtualChat: (props: VirtualChatProps) => ReactNode = ({
                                 itemHeight={messageItemHeight}
                                 loading={loading}
                                 disabled={disabled}
-                                empty={messageEmpty}
+                                empty={resolvedMessageEmpty}
                                 onMessageAction={onMessageAction}
                                 onQuote={(message: MessageItem): void => {
                                     setQuoted(message);
@@ -282,7 +299,7 @@ const VirtualChat: (props: VirtualChatProps) => ReactNode = ({
                                         <button
                                             type="button"
                                             className="chat__quote-close"
-                                            aria-label="Cancel quote"
+                                            aria-label={t("cancelQuote")}
                                             disabled={disabled}
                                             onClick={cancelQuote}
                                         >
@@ -294,8 +311,11 @@ const VirtualChat: (props: VirtualChatProps) => ReactNode = ({
                                     className="chat__input"
                                     rows={2}
                                     value={draft}
-                                    placeholder={placeholder ?? `Message ${activeContact.name}`}
-                                    aria-label={composerLabel}
+                                    placeholder={
+                                        placeholder ??
+                                        t("messagePlaceholder", { name: activeContact.name })
+                                    }
+                                    aria-label={resolvedComposerLabel}
                                     disabled={disabled}
                                     onChange={(
                                         event: ChangeEvent<HTMLTextAreaElement>,
@@ -317,7 +337,7 @@ const VirtualChat: (props: VirtualChatProps) => ReactNode = ({
                             <Button
                                 size="sm"
                                 variant="solid"
-                                aria-label={sendLabel}
+                                aria-label={resolvedSendLabel}
                                 onClick={send}
                                 disabled={disabled || sending || draft.trim().length === 0}
                             >
@@ -331,10 +351,10 @@ const VirtualChat: (props: VirtualChatProps) => ReactNode = ({
             <Dialog
                 open={forwarding !== null}
                 onClose={(): void => setForwarding(null)}
-                title="Forward message"
+                title={t("forwardMessage")}
                 footer={
                     <Button variant="ghost" onClick={(): void => setForwarding(null)}>
-                        Cancel
+                        {t("cancel")}
                     </Button>
                 }
             >

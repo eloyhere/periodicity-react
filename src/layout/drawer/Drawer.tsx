@@ -19,6 +19,7 @@ import useControllableState from "../../component/foundation/useControllableStat
 import useFocusTrap from "../../component/foundation/useFocusTrap";
 import useMergedRef from "../../component/foundation/useMergedRef";
 import Surface from "../../component/surface/Surface";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./Drawer.css";
 
 /**
@@ -148,6 +149,7 @@ const Drawer: FC<DrawerProps> = ({
     "aria-modal": ariaModal,
     ...rest
 }: DrawerProps): ReactElement | null => {
+    const { t }: InternationalContextValue = useInternational();
     const panelRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
     const titleId: string = useId();
     const descriptionId: string = useId();
@@ -266,7 +268,7 @@ const Drawer: FC<DrawerProps> = ({
                             <button
                                 type="button"
                                 className="drawer__close"
-                                aria-label="Close drawer"
+                                aria-label={t("close")}
                                 onClick={handleClose}
                             >
                                 <Icon name="Close" size={20} />

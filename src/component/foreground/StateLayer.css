@@ -1,6 +1,7 @@
 .state-layer {
     position: absolute;
     inset: 0;
+    overflow: hidden;
     border-radius: inherit;
     background: var(--state-layer-color, currentColor);
     opacity: 0;
@@ -10,6 +11,13 @@
 
 .state-layer--active {
     opacity: var(--state-hover-opacity);
+}
+
+/* The decorative layer is normally transparent; a painted ripple makes it a
+   temporary visible surface without changing the owning component. */
+.state-layer:has(> .ripple) {
+    background: transparent;
+    opacity: 1;
 }
 
 .surface:hover > .surface__background .state-layer {

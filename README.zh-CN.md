@@ -353,26 +353,30 @@ import { PeriodicityTheme } from "periodicity-react";
 
 `theme` 为受控值，`defaultTheme` 为非受控初始值，`onThemeChange` 监听切换，`useTheme().setTheme(id)` 可在运行时切换。不传 `theme` 时保持现有 `mode` 行为；显式 `mode` 会覆盖预设的明暗模式，显式 `tokens` 会覆盖预设 Token。
 
-| 预设          | 中文     | English       | 模式  |
-| ------------- | -------- | ------------- | ----- |
-| `accessible`  | 高对比度 | High contrast | light |
-| `default`     | 默认     | Default       | light |
-| `dark`        | 夜间     | Dark          | dark  |
-| `milk`        | 牛奶白   | Milk white    | light |
-| `space-gray`  | 深空灰   | Space grey    | dark  |
-| `gray`        | 灰色     | Grey          | dark  |
-| `light-gray`  | 浅灰色   | Light grey    | light |
-| `sky-blue`    | 天蓝色   | Sky blue      | light |
-| `pale-blue`   | 淡蓝色   | Pale blue     | light |
-| `deep-blue`   | 深蓝色   | Deep blue     | dark  |
-| `orange`      | 橙色     | Orange        | light |
-| `yellow`      | 黄色     | Yellow        | light |
-| `lemon`       | 柠檬黄   | Lemon yellow  | light |
-| `red`         | 红色     | Red           | light |
-| `rose`        | 玫瑰红   | Rose red      | light |
-| `green`       | 绿色     | Green         | light |
-| `deep-green`  | 深绿色   | Deep green    | dark  |
-| `light-green` | 浅绿色   | Light green   | light |
+| 预设            | 中文       | English                | 模式  |
+| --------------- | ---------- | ---------------------- | ----- |
+| `accessible`    | 高对比度   | High contrast          | light |
+| `protanopia`    | 红色盲友好 | Protanopia friendly    | light |
+| `deuteranopia`  | 绿色盲友好 | Deuteranopia friendly  | light |
+| `tritanopia`    | 蓝色盲友好 | Tritanopia friendly    | light |
+| `achromatopsia` | 全色盲友好 | Achromatopsia friendly | light |
+| `default`       | 默认       | Default                | light |
+| `dark`          | 夜间       | Dark                   | dark  |
+| `milk`          | 牛奶白     | Milk white             | light |
+| `space-gray`    | 深空灰     | Space grey             | dark  |
+| `gray`          | 灰色       | Grey                   | dark  |
+| `light-gray`    | 浅灰色     | Light grey             | light |
+| `sky-blue`      | 天蓝色     | Sky blue               | light |
+| `pale-blue`     | 淡蓝色     | Pale blue              | light |
+| `deep-blue`     | 深蓝色     | Deep blue              | dark  |
+| `orange`        | 橙色       | Orange                 | light |
+| `yellow`        | 黄色       | Yellow                 | light |
+| `lemon`         | 柠檬黄     | Lemon yellow           | light |
+| `red`           | 红色       | Red                    | light |
+| `rose`          | 玫瑰红     | Rose red               | light |
+| `green`         | 绿色       | Green                  | light |
+| `deep-green`    | 深绿色     | Deep green             | dark  |
+| `light-green`   | 浅绿色     | Light green            | light |
 
 同时导出 `themePresets`、`getThemePreset(id)` 和 `ThemePresetId`。`accessible` 提高文字、边框、焦点和禁用状态对比度；`prefers-contrast` 和 `forced-colors` 媒体查询提供系统级补充。
 

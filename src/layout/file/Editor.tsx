@@ -31,6 +31,7 @@ import type { Extension as FileExtension } from "./extension";
 import { extensionOf } from "./extension";
 import type { FileNode } from "./project";
 import { languageExtension } from "./editor/language";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./FileTools.css";
 
 /**
@@ -91,6 +92,7 @@ export interface EditorProps extends Omit<HTMLAttributes<HTMLElement>, "children
     wrap?: boolean;
     tabSize?: number;
     autoFocus?: boolean;
+    /** Save button label; defaults to the localised Save label. */
     saveLabel?: string;
     className?: string;
     ref?: Ref<HTMLElement>;
@@ -199,12 +201,14 @@ const Editor: FC<EditorProps> = ({
     wrap = false,
     tabSize = 4,
     autoFocus = false,
-    saveLabel = "Save",
+    saveLabel,
     className = "",
     "aria-label": ariaLabel,
     ref,
     ...rest
 }: EditorProps): ReactNode => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedSaveLabel: string = saveLabel ?? t("save");
     const extension: FileExtension = file.extension ?? extensionOf(file.name);
     const resolvedTabSize: number =
         Number.isFinite(tabSize) && tabSize > 0 ? Math.floor(tabSize) : 4;
@@ -491,18 +495,18 @@ const Editor: FC<EditorProps> = ({
                         variant="ghost"
                         disabled={!canUndo || readOnly}
                         onClick={undoAction}
-                        aria-label="Undo"
+                        aria-label={t("undo")}
                     >
-                        Undo
+                        {t("undo")}
                     </Button>
                     <Button
                         size="sm"
                         variant="ghost"
                         disabled={!canRedo || readOnly}
                         onClick={redoAction}
-                        aria-label="Redo"
+                        aria-label={t("redo")}
                     >
-                        Redo
+                        {t("redo")}
                     </Button>
                 </div>
             </header>
@@ -512,8 +516,8 @@ const Editor: FC<EditorProps> = ({
                     Ln {cursor.line}, Col {cursor.column}
                 </span>
                 <span>{characters} characters</span>
-                <Button size="sm" onClick={save} aria-label={saveLabel}>
-                    {saveLabel}
+                <Button size="sm" onClick={save} aria-label={resolvedSaveLabel}>
+                    {resolvedSaveLabel}
                 </Button>
             </footer>
         </section>

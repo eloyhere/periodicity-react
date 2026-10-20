@@ -2,11 +2,14 @@ import type {
     AnchorHTMLAttributes,
     CSSProperties,
     FC,
+    KeyboardEvent,
     MouseEvent as ReactMouseEvent,
+    PointerEvent,
     ReactNode,
     Ref,
 } from "react";
 import cx from "../foundation/cx";
+import { useRipple, type RippleHandlers } from "../foundation/useRipple";
 import "./Link.css";
 
 /**
@@ -63,12 +66,16 @@ const Link: FC<LinkProps> = ({
     className = "",
     ref,
     onClick,
+    onPointerDown,
+    onPointerEnter,
+    onKeyDown,
     children,
     rel,
     target,
     tabIndex,
     ...rest
 }: LinkProps) => {
+    const ripple: RippleHandlers = useRipple({ trigger: "click", disabled });
     const handleClick: (event: ReactMouseEvent<HTMLAnchorElement>) => void = (
         event: ReactMouseEvent<HTMLAnchorElement>,
     ): void => {
@@ -97,6 +104,18 @@ const Link: FC<LinkProps> = ({
             aria-disabled={disabled ? "true" : (void 0)}
             tabIndex={disabled ? -1 : tabIndex}
             onClick={handleClick}
+            onPointerDown={(event: PointerEvent<HTMLAnchorElement>): void => {
+                ripple.onPointerDown(event);
+                onPointerDown?.(event);
+            }}
+            onPointerEnter={(event: PointerEvent<HTMLAnchorElement>): void => {
+                ripple.onPointerEnter(event);
+                onPointerEnter?.(event);
+            }}
+            onKeyDown={(event: KeyboardEvent<HTMLAnchorElement>): void => {
+                ripple.onKeyDown(event);
+                onKeyDown?.(event);
+            }}
         >
             {children}
         </a>

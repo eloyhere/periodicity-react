@@ -1,6 +1,8 @@
 .link {
+    position: relative;
     display: inline-flex;
     align-items: baseline;
+    overflow: hidden;
     gap: 0.25em;
     border-radius: var(--radius-xs);
     color: var(--color-primary);

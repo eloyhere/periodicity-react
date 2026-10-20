@@ -25,6 +25,7 @@ import type { MessageAction, MessageAdapter, MessageItem } from "../adapter";
 import { createMessageAdapter } from "../adapter";
 import MessageContextMenu from "../MessageContextMenu";
 import { useMessageSelection, type MessageSelection } from "../useMessageSelection";
+import { useInternational, type InternationalContextValue } from "../../../international";
 import "../Message.css";
 
 /**
@@ -63,8 +64,10 @@ export interface VirtualMessageListProps
     onSelectionChange?: (ids: readonly string[], messages: readonly MessageItem[]) => void;
     height?: number;
     itemHeight?: number;
+    /** Empty transcript content; defaults to the localised No messages yet label. */
     empty?: ReactNode;
     loading?: boolean;
+    /** Accessible loading label; defaults to the localised Loading messages label. */
     loadingLabel?: string;
     disabled?: boolean;
     className?: string;
@@ -102,9 +105,9 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
     onSelectionChange,
     height = 360,
     itemHeight = 84,
-    empty = "No messages yet",
+    empty,
     loading = false,
-    loadingLabel = "Loading messages",
+    loadingLabel,
     disabled = false,
     className = "",
     style,
@@ -115,6 +118,9 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
     ref,
     ...rest
 }: VirtualMessageListProps): ReactNode => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedEmpty: ReactNode = empty ?? t("noMessages");
+    const resolvedLoadingLabel: string = loadingLabel ?? t("loadingMessages");
     const source: MessageAdapter = useMemo(
         (): MessageAdapter => adapter ?? createMessageAdapter(messages),
         [adapter, messages],
@@ -287,7 +293,7 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
             className={cx("message-list", "message-list--virtual", className)}
             role="log"
             aria-live={ariaLive ?? "polite"}
-            aria-label={ariaLabel ?? "Messages"}
+            aria-label={ariaLabel ?? t("messages")}
             aria-busy={loading ? "true" : (void 0)}
             aria-disabled={disabled ? "true" : (void 0)}
             style={{ height, ...style }}
@@ -295,7 +301,7 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
             onScroll={handleScroll}
         >
             {selection.selectMode && !loading ? (
-                <div className="message-list__selection" role="toolbar" aria-label="Selection">
+                <div className="message-list__selection" role="toolbar" aria-label={t("selection")}>
                     <span className="message-list__selection-count">
                         {selection.selectedIds.size} selected
                     </span>
@@ -328,10 +334,10 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
             ) : null}
             {loading ? (
                 <div className="message-list__state">
-                    <Spinner size="sm" label={loadingLabel} />
+                    <Spinner size="sm" label={resolvedLoadingLabel} />
                 </div>
             ) : rows.length === 0 ? (
-                <div className="message-list__empty">{empty}</div>
+                <div className="message-list__empty">{resolvedEmpty}</div>
             ) : (
                 <div className="message-list__spacer" style={spacerStyle}>
                     {visible.map((message: MessageItem, index: number): ReactNode => {

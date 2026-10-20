@@ -240,13 +240,13 @@ const Showcase: FC = () => {
     const localizedThemeOptions: readonly ShowcaseOption[] = themePresets.map(
         (preset: ThemePreset): ShowcaseOption => ({
             value: preset.id,
-            label: isChinese ? preset.label.zh : preset.label.en,
+            label: `${preset.label.zh} · ${preset.label.en}`,
         }),
     );
     const localizedLocaleOptions: readonly ShowcaseOption[] = localeOptions.map(
         (option: LocaleOption): ShowcaseOption => ({
             value: option.code,
-            label: isChinese ? option.nativeLabel : option.label,
+            label: `${option.nativeLabel} · ${option.label}`,
         }),
     );
     const previousEntryIdRef: RefObject<string> = useRef<string>(entry.id);

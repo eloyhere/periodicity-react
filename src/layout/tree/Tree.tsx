@@ -26,6 +26,7 @@ import { isTreeOption, optionKey, optionLabel } from "../list/node";
 import { composeRefs } from "../list/refs";
 import type { TreeAdapter } from "./adapter";
 import { createTreeAdapter } from "./adapter";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./Tree.css";
 
 /**
@@ -105,12 +106,14 @@ export interface TreeProps<Item> extends Omit<HTMLAttributes<HTMLDivElement>, "c
     isDisabled?: (item: Item, level: number) => boolean;
     disabled?: boolean;
     loading?: boolean;
+    /** Accessible loading label; defaults to the localised Loading label. */
     loadingLabel?: string;
     renderItem?: (item: Item, level: number, expanded: boolean) => ReactNode;
     slots?: TreeSlots<Item>;
     virtual?: boolean;
     itemHeight?: number;
     height?: number;
+    /** Empty-state content; defaults to the localised Empty label. */
     empty?: ReactNode;
     ref?: Ref<HTMLDivElement>;
 }
@@ -144,13 +147,13 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
     isDisabled,
     disabled = false,
     loading = false,
-    loadingLabel = "Loading",
+    loadingLabel,
     renderItem,
     slots,
     virtual = false,
     itemHeight = 40,
     height = 320,
-    empty = "No nodes",
+    empty,
     className = "",
     style,
     role = "tree",
@@ -158,6 +161,9 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
     onScroll,
     ...rest
 }: TreeProps<Item>): ReactNode => {
+    const { t }: InternationalContextValue = useInternational();
+    const loadingText: string = loadingLabel ?? t("loading");
+    const emptyContent: ReactNode = empty ?? t("empty");
     const tree: TreeAdapter<Item> = useMemo((): TreeAdapter<Item> => {
         if (adapter !== (void 0)) {
             return adapter;
@@ -731,11 +737,11 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
         >
             {loading ? (
                 <div className="tree__state">
-                    <Spinner size="sm" label={loadingLabel} />
+                    <Spinner size="sm" label={loadingText} />
                 </div>
             ) : entries.length === 0 ? (
                 <div className="tree__state" role="status">
-                    {empty}
+                    {emptyContent}
                 </div>
             ) : (
                 <div className="tree__spacer" style={spacerStyle} role="none">

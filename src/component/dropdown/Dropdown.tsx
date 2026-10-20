@@ -29,6 +29,7 @@ import { useAnchoredPosition, type AnchoredPositionResult, type Placement } from
 import Portal from "../foundation/Portal";
 import Surface from "../surface/Surface";
 import Scrollbar from "../scrollbar/Scrollbar";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./Dropdown.css";
 
 /**
@@ -306,6 +307,7 @@ export const Dropdown: FC<DropdownProps> = ({
     restoreFocus = true,
     onKeyDown,
 }: DropdownProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const internalAnchorRef: RefObject<HTMLElement | null> = useRef<HTMLElement | null>(null);
     const panelRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
     const wasOpenRef: MutableRefObject<boolean> = useRef<boolean>(openProp ?? defaultOpen);
@@ -622,7 +624,7 @@ export const Dropdown: FC<DropdownProps> = ({
                             scrollbarLabel="Options"
                         >
                             {isEmpty ? (
-                                <div className="dropdown__empty">{empty ?? "No options"}</div>
+                                <div className="dropdown__empty">{empty ?? t("noResults")}</div>
                             ) : (
                                 <DropdownContext.Provider value={contextValue}>
                                     {children}

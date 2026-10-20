@@ -2,6 +2,7 @@ import type { FC, ReactElement, ReactNode } from "react";
 import Button from "../button/Button";
 import cx from "../foundation/cx";
 import Dialog, { type DialogProps } from "./Dialog";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./ConfirmDialog.css";
 
 /**
@@ -59,13 +60,16 @@ const ConfirmDialog: FC<ConfirmDialogProps> = ({
     onConfirm,
     title,
     description,
-    confirmLabel = "Confirm",
-    cancelLabel = "Cancel",
+    confirmLabel,
+    cancelLabel,
     tone = "default",
     loading = false,
     className = "",
     ...rest
 }: ConfirmDialogProps): ReactElement => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedConfirmLabel: string = confirmLabel ?? t("confirm");
+    const resolvedCancelLabel: string = cancelLabel ?? t("cancel");
     const isDanger: boolean = tone === "danger";
     const cancelFocus: string | void = isDanger ? "true" : (void 0);
     const confirmFocus: string | void = isDanger ? (void 0) : "true";
@@ -95,7 +99,7 @@ const ConfirmDialog: FC<ConfirmDialogProps> = ({
                         data-autofocus={cancelFocus}
                         onClick={(): void => onClose("close-button")}
                     >
-                        {cancelLabel}
+                        {resolvedCancelLabel}
                     </Button>
                     <Button
                         className={cx("confirm-dialog__confirm", isDanger && "confirm-dialog__confirm--danger")}
@@ -105,7 +109,7 @@ const ConfirmDialog: FC<ConfirmDialogProps> = ({
                         onClick={handleConfirm}
                     >
                         {loading ? <span className="confirm-dialog__spinner" aria-hidden="true" /> : null}
-                        {confirmLabel}
+                        {resolvedConfirmLabel}
                     </Button>
                     <span className="visually-hidden" role="status">
                         {loading ? "Processing" : ""}

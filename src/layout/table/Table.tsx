@@ -19,6 +19,7 @@ import Checkbox from "../../component/input/check/Checkbox";
 import Spinner from "../../component/progress/Spinner";
 import cx from "../../component/foundation/cx";
 import useVirtualWindow, { type VirtualWindow } from "../../component/foundation/useVirtualWindow";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./Table.css";
 
 /**
@@ -71,7 +72,9 @@ export interface TableProps<Row> extends Omit<HTMLAttributes<HTMLDivElement>, "c
     onRowClick?: (row: Row, key: string) => void;
     onRowDoubleClick?: (row: Row, key: string) => void;
     loading?: boolean;
+    /** Accessible loading label; defaults to the localised Loading label. */
     loadingLabel?: string;
+    /** Empty-state content; defaults to the localised Empty label. */
     empty?: ReactNode;
     virtual?: boolean;
     height?: number;
@@ -107,8 +110,8 @@ const Table: <Row>(props: TableProps<Row>) => ReactElement = <Row,>({
     onRowClick,
     onRowDoubleClick,
     loading = false,
-    loadingLabel = "Loading",
-    empty = "No rows",
+    loadingLabel,
+    empty,
     virtual = false,
     height = 360,
     rowHeight,
@@ -121,6 +124,9 @@ const Table: <Row>(props: TableProps<Row>) => ReactElement = <Row,>({
     onScroll,
     ...rest
 }: TableProps<Row>): ReactElement => {
+    const { t }: InternationalContextValue = useInternational();
+    const loadingText: string = loadingLabel ?? t("loading");
+    const emptyContent: ReactNode = empty ?? t("empty");
     const captionId: string = useId();
     const list: ListAdapter<Row> = useMemo((): ListAdapter<Row> => {
         if (adapter !== (void 0)) {
@@ -261,7 +267,7 @@ const Table: <Row>(props: TableProps<Row>) => ReactElement = <Row,>({
                                         disabled={disabled || entries.length === 0}
                                         onCheckedChange={toggleAll}
                                         label={
-                                            <span className="visually-hidden">Select all rows</span>
+                                            <span className="visually-hidden">{t("selectAll")}</span>
                                         }
                                     />
                                 </th>
@@ -282,13 +288,13 @@ const Table: <Row>(props: TableProps<Row>) => ReactElement = <Row,>({
                         {loading ? (
                             <tr>
                                 <td className="table__state" colSpan={columnCount}>
-                                    <Spinner size="sm" label={loadingLabel} />
+                                    <Spinner size="sm" label={loadingText} />
                                 </td>
                             </tr>
                         ) : entries.length === 0 ? (
                             <tr>
                                 <td className="table__state" colSpan={columnCount}>
-                                    {empty}
+                                    {emptyContent}
                                 </td>
                             </tr>
                         ) : (

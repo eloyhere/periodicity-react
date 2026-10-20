@@ -24,6 +24,7 @@ import type { ContactAction, ContactAdapter, ContactItem, ContactPresence } from
 import { createContactAdapter } from "../adapter";
 import ContactContextMenu from "../ContactContextMenu";
 import { focusListOption } from "../keyboard";
+import { useInternational, type InternationalContextValue } from "../../../international";
 import "../Contact.css";
 
 /**
@@ -46,18 +47,24 @@ export interface VirtualContactProps
     onSelect?: (contact: ContactItem) => void;
     onContactAction?: (action: ContactAction, contact: ContactItem) => void;
     onContactMenuOpenChange?: (open: boolean, contact: ContactItem) => void;
+    /** Heading above the list; defaults to the localised Contacts label. */
     title?: ReactNode;
     titleText?: string;
     searchable?: boolean;
+    /** Search placeholder; defaults to the localised Search contacts label. */
     searchPlaceholder?: string;
+    /** Accessible name of the search field; defaults to the localised Search contacts label. */
     searchLabel?: string;
     onSearchChange?: (query: string) => void;
+    /** Accessible name of the listbox; defaults to the localised Contact list label. */
     listLabel?: string;
     height?: number;
     itemHeight?: number;
     loading?: boolean;
+    /** Accessible loading label; defaults to the localised Loading contacts label. */
     loadingLabel?: string;
     disabled?: boolean;
+    /** Empty-state content; defaults to the localised No contacts label. */
     empty?: ReactNode;
     emptySearch?: ReactNode;
     className?: string;
@@ -80,19 +87,19 @@ const VirtualContact: (props: VirtualContactProps) => ReactNode = ({
     onSelect,
     onContactAction,
     onContactMenuOpenChange,
-    title = "Contacts",
+    title,
     titleText,
     searchable = true,
-    searchPlaceholder = "Search contacts",
-    searchLabel = "Search contacts",
+    searchPlaceholder,
+    searchLabel,
     onSearchChange,
-    listLabel = "Contact list",
+    listLabel,
     height = 320,
     itemHeight = 76,
     loading = false,
-    loadingLabel = "Loading contacts",
+    loadingLabel,
     disabled = false,
-    empty = "No contacts",
+    empty,
     emptySearch,
     className = "",
     "aria-label": ariaLabel,
@@ -101,6 +108,13 @@ const VirtualContact: (props: VirtualContactProps) => ReactNode = ({
     ref,
     ...rest
 }: VirtualContactProps): ReactNode => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedTitle: ReactNode = title ?? t("contacts");
+    const resolvedListLabel: string = listLabel ?? t("contactList");
+    const resolvedSearchPlaceholder: string = searchPlaceholder ?? t("searchContacts");
+    const resolvedSearchLabel: string = searchLabel ?? t("searchContacts");
+    const resolvedLoadingLabel: string = loadingLabel ?? t("loadingContacts");
+    const resolvedEmpty: ReactNode = empty ?? t("noContacts");
     const source: ContactAdapter = useMemo(
         (): ContactAdapter => adapter ?? createContactAdapter(contacts),
         [adapter, contacts],
@@ -212,11 +226,11 @@ const VirtualContact: (props: VirtualContactProps) => ReactNode = ({
             {...rest}
             ref={ref}
             className={cx("contact", "contact--virtual", className)}
-            aria-label={ariaLabel ?? "Contacts"}
+            aria-label={ariaLabel ?? t("contacts")}
             aria-busy={loading ? "true" : (void 0)}
             title={titleText}
         >
-            {title === (void 0) ? null : <h3 className="contact__title">{title}</h3>}
+            {resolvedTitle === (void 0) ? null : <h3 className="contact__title">{resolvedTitle}</h3>}
             {searchable ? (
                 <label className="contact__search">
                     <Icon name="Search" size={16} />
@@ -224,8 +238,8 @@ const VirtualContact: (props: VirtualContactProps) => ReactNode = ({
                         className="contact__search-input"
                         type="search"
                         value={query}
-                        placeholder={searchPlaceholder}
-                        aria-label={searchLabel}
+                        placeholder={resolvedSearchPlaceholder}
+                        aria-label={resolvedSearchLabel}
                         disabled={disabled}
                         onChange={handleSearch}
                     />
@@ -235,7 +249,7 @@ const VirtualContact: (props: VirtualContactProps) => ReactNode = ({
                 ref={attachViewport}
                 className="contact__list"
                 role="listbox"
-                aria-label={listLabel}
+                aria-label={resolvedListLabel}
                 aria-busy={loading ? "true" : (void 0)}
                 aria-disabled={disabled ? "true" : (void 0)}
                 style={{ height }}
@@ -244,11 +258,11 @@ const VirtualContact: (props: VirtualContactProps) => ReactNode = ({
             >
                 {loading ? (
                     <div className="contact__state">
-                        <Spinner size="sm" label={loadingLabel} />
+                        <Spinner size="sm" label={resolvedLoadingLabel} />
                     </div>
                 ) : rows.length === 0 ? (
                     <div className="contact__empty">
-                        {normalized.length > 0 ? (emptySearch ?? empty) : empty}
+                        {normalized.length > 0 ? (emptySearch ?? resolvedEmpty) : resolvedEmpty}
                     </div>
                 ) : (
                     <div className="contact__spacer" style={spacerStyle}>
@@ -316,7 +330,7 @@ const VirtualContact: (props: VirtualContactProps) => ReactNode = ({
                                         <span
                                             className="contact__presence"
                                             data-presence={contact.presence ?? "offline"}
-                                            aria-label={contact.presence ?? "offline"}
+                                            aria-label={contact.presence ?? t("offline")}
                                         />
                                     </Surface>
                                 </ContactContextMenu>

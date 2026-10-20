@@ -4,8 +4,10 @@
     position: relative;
     display: inline-flex;
     flex: none;
+    overflow: hidden;
     width: var(--avatar-size);
     height: var(--avatar-size);
+    border-radius: 50%;
     vertical-align: middle;
 }
 
@@ -116,4 +118,19 @@
     border-radius: 1px;
     background: var(--color-warning);
     transform: rotate(45deg);
+}
+
+
+.avatar--disabled {
+    cursor: not-allowed;
+    opacity: var(--state-disabled-opacity);
+}
+
+.avatar > .ripple {
+    z-index: 0;
+}
+
+.avatar > *:not(.ripple) {
+    position: relative;
+    z-index: 1;
 }

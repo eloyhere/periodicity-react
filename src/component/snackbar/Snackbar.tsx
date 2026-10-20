@@ -11,6 +11,7 @@ import Portal from "../foundation/Portal";
 import useControllableState from "../foundation/useControllableState";
 import Surface from "../surface/Surface";
 import Button from "../button/Button";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./Snackbar.css";
 
 /**
@@ -91,6 +92,7 @@ const Snackbar: FC<SnackbarProps> = ({
     ref,
     ...rest
 }: SnackbarProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const [open, setOpen]: readonly [
         boolean,
         (next: boolean | ((previous: boolean) => boolean)) => void,
@@ -160,7 +162,7 @@ const Snackbar: FC<SnackbarProps> = ({
                             variant="quiet"
                             size="sm"
                             icon="Close"
-                            aria-label="Dismiss snackbar"
+                            aria-label={t("dismiss")}
                             onClick={(): void => requestClose("dismiss")}
                         />
                     ) : null}

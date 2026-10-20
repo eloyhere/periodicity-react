@@ -20,6 +20,7 @@ import type { ListAdapter, ListEntry } from "./adapter";
 import { createListAdapter } from "./adapter";
 import { optionKey, optionLabel } from "./node";
 import { composeRefs } from "./refs";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./List.css";
 
 /**
@@ -83,7 +84,9 @@ export interface ListProps<Item> extends Omit<HTMLAttributes<HTMLDivElement>, "c
     itemHeight?: number;
     height?: number;
     loading?: boolean;
+    /** Accessible loading label; defaults to the localised Loading label. */
     loadingLabel?: string;
+    /** Empty-state content; defaults to the localised Empty label. */
     empty?: ReactNode;
     ref?: Ref<HTMLDivElement>;
 }
@@ -114,8 +117,8 @@ const List: <Item>(props: ListProps<Item>) => ReactNode = <Item,>({
     itemHeight = 48,
     height = 320,
     loading = false,
-    loadingLabel = "Loading",
-    empty = "No items",
+    loadingLabel,
+    empty,
     className = "",
     style,
     role = "listbox",
@@ -123,6 +126,9 @@ const List: <Item>(props: ListProps<Item>) => ReactNode = <Item,>({
     onScroll,
     ...rest
 }: ListProps<Item>): ReactNode => {
+    const { t }: InternationalContextValue = useInternational();
+    const loadingText: string = loadingLabel ?? t("loading");
+    const emptyContent: ReactNode = empty ?? t("empty");
     const list: ListAdapter<Item> = useMemo((): ListAdapter<Item> => {
         if (adapter !== (void 0)) {
             return adapter;
@@ -263,11 +269,11 @@ const List: <Item>(props: ListProps<Item>) => ReactNode = <Item,>({
         >
             {loading ? (
                 <div className="list__state">
-                    <Spinner size="sm" label={loadingLabel} />
+                    <Spinner size="sm" label={loadingText} />
                 </div>
             ) : entries.length === 0 ? (
                 <div className="list__state" role="status">
-                    {empty}
+                    {emptyContent}
                 </div>
             ) : (
                 <div className="list__spacer" style={spacerStyle}>

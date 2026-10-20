@@ -20,6 +20,7 @@ import useField, { type FieldState } from "../../../foundation/useField";
 import useMergedRef from "../../../foundation/useMergedRef";
 import Icon from "../../../icon/Icon";
 import Surface from "../../../surface/Surface";
+import { useInternational, type InternationalContextValue } from "../../../../international";
 import "../Select.css";
 
 /**
@@ -57,7 +58,8 @@ export type SelectSize = "sm" | "md" | "lg";
  * @param size - Control size.
  * @param hint - Supporting text shown below the field.
  * @param error - Validation message; replaces the hint and marks the field invalid.
- * @param placeholder - Text shown while the listbox is open without a selection.
+ * @param placeholder - Text shown while the listbox is open without a selection; defaults to the localised
+ * Select label.
  * @param disabled - Disables the trigger natively.
  * @param readOnly - Keeps the value visible but suppresses opening and selection.
  * @param open - Controlled listbox visibility.
@@ -127,6 +129,7 @@ const Select: FC<SelectProps> = ({
     ref,
     ...rest
 }: SelectProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const fieldState: FieldState = useField({ id, label, hint, error });
     const controlId: string = fieldState.controlId;
     const labelId: string = `${controlId}-label`;
@@ -153,7 +156,7 @@ const Select: FC<SelectProps> = ({
         : hint !== (void 0) && hint.length > 0
           ? fieldState.hintId
           : "";
-    const placeholderText: string = placeholder ?? "";
+    const placeholderText: string = placeholder ?? t("select");
     const source: SelectAdapter = useMemo(
         (): SelectAdapter => adapter ?? createSelectAdapter(options),
         [adapter, options],

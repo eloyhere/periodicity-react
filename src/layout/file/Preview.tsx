@@ -8,6 +8,7 @@ import type { RenderedFile } from "./render";
 import { renderFile } from "./render";
 import type { StructureKind, StructureNode } from "./structure";
 import { parseStructure } from "./structure";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./FileTools.css";
 
 /**
@@ -55,6 +56,7 @@ export interface PreviewProps extends Omit<HTMLAttributes<HTMLElement>, "childre
     onCopyFile?: (file: FileNode, content: string) => void;
     onCopySuccess?: (file: FileNode, content: string) => void;
     onCopyError?: (error: unknown, file: FileNode) => void;
+    /** Copy button label; defaults to the localised Copy label. */
     copyLabel?: string;
     renderedLabel?: string;
     sourceLabel?: string;
@@ -173,7 +175,7 @@ const Preview: FC<PreviewProps> = ({
     onCopyFile,
     onCopySuccess,
     onCopyError,
-    copyLabel = "Copy file content",
+    copyLabel,
     renderedLabel = "Rendered",
     sourceLabel = "Source",
     structureLabel = "Structure",
@@ -186,6 +188,8 @@ const Preview: FC<PreviewProps> = ({
     ref,
     ...rest
 }: PreviewProps): ReactNode => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedCopyLabel: string = copyLabel ?? t("copy");
     const rendered: RenderedFile = useMemo((): RenderedFile => renderFile(file), [file]);
     const structure: StructureNode = useMemo(
         (): StructureNode => parseStructure(file),
@@ -374,7 +378,7 @@ const Preview: FC<PreviewProps> = ({
                         <Button
                             size="sm"
                             variant="ghost"
-                            aria-label={copyLabel}
+                            aria-label={resolvedCopyLabel}
                             onClick={copy}
                         >
                             <Icon name="Clipboard" size={14} />
