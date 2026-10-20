@@ -13,11 +13,41 @@ sense.
 - **Requirements:** React 19, React DOM 19, and a modern browser
 - **License:** Apache 2.0
 
+## Design philosophy
+
+Periodicity is built around five rules:
+
+- **Semantic before decorative.** Components consume theme tokens such as `--colourPrimary`, `--surface`, and
+  `--state-hover-opacity`; they do not hard-code a house palette. Themes and colour-vision palettes therefore change
+  every component at once.
+- **Flex-first layout.** The library uses flexbox for composition and never relies on CSS Grid, so it embeds safely in
+  host layouts, virtualisers, and scrolling panes.
+- **Native behaviour first.** Forms submit, anchors navigate, inputs validate, dialogs trap focus, and refs point at
+  real DOM nodes. ARIA and data attributes are additions, not replacements for browser semantics.
+- **Composable surfaces.** `Surface`, `StateLayer`, `Ripple`, `Icon`, `Text`, and the layout primitives are shared
+  building blocks. High-level components stay thin and remain styleable through tokens.
+- **Accessible and international by default.** Focus rings, keyboard paths, reduced-motion handling, contrast-audited
+  palettes, and 12 built-in locale dictionaries are part of the public API rather than an afterthought.
+
+## Function map
+
+| Function            | Components                                                                                                                          | Use it for                                             |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| Foundations         | `Theme`, `International`, `Surface`, `StateLayer`, `Ripple`, `Text`, `Icon`, `LinearLayout`, `Inline`, `Stack`, `Divider`, `Spacer` | Design tokens, typography, surfaces, and composition.  |
+| Inputs              | `Button`, `TextInput`, `TextArea`, `Select`, `Checkbox`, `Switch`, `Range`, `NumberInput`, pickers, `Calendar`                      | Forms, filters, and parameter editing.                 |
+| Data                | `List`, `Table`, `Tree`, `Pagination`, `Scrollbar`, `Badge`, `Tag`, `Chip`, `Avatar`                                                | Dense records, virtualised collections, and identity.  |
+| Layout              | `Coordinator`, `AppBar`, `Collapse`, `Toolbar`, `Drawer`, `DrawerLayout`, `Tabs`, `Accordion`                                       | Application shells, navigation, and responsive panes.  |
+| Overlays            | `Dialog`, `ConfirmDialog`, `InputDialog`, `MessageDialog`, `Dropdown`, `Menu`, `Tooltip`, `Toast`, `Snackbar`                       | Transient feedback, menus, and modal tasks.            |
+| Files and messaging | `Editor`, `Preview`, `ProjectManager`, `Chat`, `VirtualChat`, `Contact`, `MessageList`                                              | Code, project structures, conversations, and contacts. |
+| Auxiliary           | `Link`, `Anchor`, `Progress`, `Skeleton`, `EmptyState`, `Kbd`, `VisuallyHidden`                                                     | Small, reusable affordances.                           |
+
 ## Contents
 
+- [Design philosophy](#design-philosophy)
+- [Function map](#function-map)
 - [Install](#install)
 - [Quick start](#quick-start)
-- [Forms](#forms)
+- [Components by function](#components-by-function)
 - [Component names](#component-names)
 - [Forms and pickers](#forms-and-pickers)
 - [Collections and data](#collections-and-data)
@@ -74,48 +104,30 @@ export function SignIn() {
 }
 ```
 
-### Links and anchors
+Wrap the application in the providers when global theming or locale switching is needed:
 
 ```tsx
-import { Anchor, Link } from "periodicity-react";
-
-<Link href="https://example.com" external>Documentation</Link>
-<Anchor href="#installation" active>Installation</Anchor>;
+<PeriodicityTheme theme="accessible">
+    <PeriodicityInternational locale="ja-JP">{app}</PeriodicityInternational>
+</PeriodicityTheme>
 ```
 
-`Link` renders one native anchor with tone, underline, external, disabled, and focus handling. `Anchor` adds an
-active section marker and an `onNavigate` callback for in-page navigation. Both preserve native `href`, `target`,
-`rel`, keyboard behaviour, and context-menu behaviour.
+## Components by function
 
-## Forms
-
-`PeriodicityForm` wraps the native `<form>` element, so browser validation, submission, reset, method, action, and
-autocomplete behaviour stay intact.
-
-```tsx
-import { PeriodicityButton, PeriodicityForm, PeriodicityFormActions, PeriodicityFormField } from "periodicity-react";
-
-<PeriodicityForm
-    action="/subscribe"
-    method="post"
-    onSubmit={(event) => {
-        event.preventDefault();
-        subscribe(new FormData(event.currentTarget));
-    }}
->
-    <PeriodicityFormField label="Email" name="email" hint="We never share it." required>
-        {(field) => <input {...field} type="email" autoComplete="email" />}
-    </PeriodicityFormField>
-
-    <PeriodicityFormActions align="end">
-        <PeriodicityButton type="submit">Subscribe</PeriodicityButton>
-    </PeriodicityFormActions>
-</PeriodicityForm>;
-```
-
-`PeriodicityFormField` generates the control id and binds `label htmlFor`, `aria-describedby`, and `aria-invalid`.
-UI inputs such as `PeriodicityTextInput` already provide the same label association internally, so they can be
-placed directly inside `PeriodicityForm`.
+- **Foundations and tokens:** `Theme`, `International`, `Surface`, `StateLayer`, `Ripple`, `Text`, `Icon`,
+  `LinearLayout`, `Inline`, `Stack`, `Divider`, `Spacer`, `VisuallyHidden`.
+- **Inputs and pickers:** `Button`, `TextInput`, `TextArea`, `Select`, `VirtualSelect`, `Checkbox`, `Switch`,
+  `Range`, `NumberInput`, `ColourPicker`, `TimePicker`, `DateTimePicker`, `NumberPicker`, `CyclePicker`,
+  `VariantPicker`, `Calendar`.
+- **Data and identity:** `List`, `VirtualList`, `Table`, `VirtualTable`, `Tree`, `VirtualTree`, `Pagination`,
+  `Scrollbar`, `Badge`, `Tag`, `Chip`, `Avatar`, `AvatarGroup`.
+- **Navigation and layout:** `Coordinator`, `AppBar`, `Collapse`, `Toolbar`, `Drawer`, `DrawerLayout`, `Tabs`,
+  `Accordion`.
+- **Overlays and feedback:** `Dialog`, `ConfirmDialog`, `InputDialog`, `MessageDialog`, `Dropdown`, `Menu`,
+  `Tooltip`, `Toast`, `Snackbar`, `Progress`, `Skeleton`, `EmptyState`.
+- **Files and messaging:** `Editor`, `Preview`, `ProjectManager`, `Chat`, `VirtualChat`, `Contact`,
+  `VirtualContact`, `MessageList`, `VirtualMessageList`.
+- **Auxiliary:** `Link`, `Anchor`, `Kbd`, `Badge`, `Divider`, `VisuallyHidden`.
 
 ## Component names
 
@@ -134,19 +146,6 @@ import { Table } from "periodicity-react";
 
 New code should use the prefixed names. They make component boundaries explicit and avoid collisions with host
 application components.
-
-### Links and anchors
-
-```tsx
-import { Anchor, Link } from "periodicity-react";
-
-<Link href="https://example.com" external>Documentation</Link>
-<Anchor href="#installation" active>Installation</Anchor>;
-```
-
-`Link` renders one native anchor with tone, underline, external, disabled, and focus handling. `Anchor` adds an
-active section marker and an `onNavigate` callback for in-page navigation. Both preserve native `href`, `target`,
-`rel`, keyboard behaviour, and context-menu behaviour.
 
 ## Forms and pickers
 
@@ -392,30 +391,31 @@ import { PeriodicityTheme } from "periodicity-react";
 `useTheme().setTheme(id)` switches the preset at runtime. A bare `<Theme>` keeps the existing system-mode behaviour.
 An explicit `mode` prop overrides the preset's light/dark mode; explicit `tokens` override preset tokens.
 
-| Preset          | Chinese    | English                | Mode  |
-| --------------- | ---------- | ---------------------- | ----- |
-| `accessible`    | 高对比度   | High contrast          | light |
-| `protanopia`    | 红色盲友好 | Protanopia friendly    | light |
-| `deuteranopia`  | 绿色盲友好 | Deuteranopia friendly  | light |
-| `tritanopia`    | 蓝色盲友好 | Tritanopia friendly    | light |
-| `achromatopsia` | 全色盲友好 | Achromatopsia friendly | light |
-| `default`       | 默认       | Default                | light |
-| `dark`          | 夜间       | Dark                   | dark  |
-| `milk`          | 牛奶白     | Milk white             | light |
-| `space-gray`    | 深空灰     | Space grey             | dark  |
-| `gray`          | 灰色       | Grey                   | dark  |
-| `light-gray`    | 浅灰色     | Light grey             | light |
-| `sky-blue`      | 天蓝色     | Sky blue               | light |
-| `pale-blue`     | 淡蓝色     | Pale blue              | light |
-| `deep-blue`     | 深蓝色     | Deep blue              | dark  |
-| `orange`        | 橙色       | Orange                 | light |
-| `yellow`        | 黄色       | Yellow                 | light |
-| `lemon`         | 柠檬黄     | Lemon yellow           | light |
-| `red`           | 红色       | Red                    | light |
-| `rose`          | 玫瑰红     | Rose red               | light |
-| `green`         | 绿色       | Green                  | light |
-| `deep-green`    | 深绿色     | Deep green             | dark  |
-| `light-green`   | 浅绿色     | Light green            | light |
+| Preset            | Chinese      | English                | Mode  |
+| ----------------- | ------------ | ---------------------- | ----- |
+| `accessible`      | 高对比度     | High contrast          | light |
+| `accessible-dark` | 高对比度夜间 | High contrast dark     | dark  |
+| `protanopia`      | 红色盲友好   | Protanopia friendly    | light |
+| `deuteranopia`    | 绿色盲友好   | Deuteranopia friendly  | light |
+| `tritanopia`      | 蓝色盲友好   | Tritanopia friendly    | light |
+| `achromatopsia`   | 全色盲友好   | Achromatopsia friendly | light |
+| `default`         | 默认         | Default                | light |
+| `dark`            | 夜间         | Dark                   | dark  |
+| `milk`            | 牛奶白       | Milk white             | light |
+| `space-gray`      | 深空灰       | Space grey             | dark  |
+| `gray`            | 灰色         | Grey                   | dark  |
+| `light-gray`      | 浅灰色       | Light grey             | light |
+| `sky-blue`        | 天蓝色       | Sky blue               | light |
+| `pale-blue`       | 淡蓝色       | Pale blue              | light |
+| `deep-blue`       | 深蓝色       | Deep blue              | dark  |
+| `orange`          | 橙色         | Orange                 | light |
+| `yellow`          | 黄色         | Yellow                 | light |
+| `lemon`           | 柠檬黄       | Lemon yellow           | light |
+| `red`             | 红色         | Red                    | light |
+| `rose`            | 玫瑰红       | Rose red               | light |
+| `green`           | 绿色         | Green                  | light |
+| `deep-green`      | 深绿色       | Deep green             | dark  |
+| `light-green`     | 浅绿色       | Light green            | light |
 
 `themePresets`, `getThemePreset(id)`, and the `ThemePresetId` type are exported. The accessibility preset raises
 text, border, focus, and disabled contrast; the `prefers-contrast` and `forced-colors` media queries provide an
@@ -570,6 +570,9 @@ The repository is checked with:
 ```bash
 npx tsc -p tsconfig.app.json --noEmit
 npx eslint src --max-warnings 0
+npm run audit:contrast
+npm run audit:locales
+npm run test:a11y
 npm run build
 ```
 

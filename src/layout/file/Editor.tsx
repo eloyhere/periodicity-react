@@ -478,7 +478,7 @@ const Editor: FC<EditorProps> = ({
             {...rest}
             ref={ref}
             className={cx("file-editor", "code-editor", className)}
-            aria-label={ariaLabel ?? `${file.name} editor`}
+            aria-label={ariaLabel ?? t("fileEditor", { name: file.name })}
             data-file-id={file.id}
             data-language={extension || "text"}
             data-read-only={readOnly ? "true" : "false"}
@@ -489,7 +489,7 @@ const Editor: FC<EditorProps> = ({
                 <span className="file-editor__name">{file.name}</span>
                 <span className="file-editor__meta">{extension || "text"}</span>
                 <Badge tone="neutral">CodeMirror</Badge>
-                <div className="file-editor__actions" role="toolbar" aria-label="Editor history">
+                <div className="file-editor__actions" role="toolbar" aria-label={t("editorHistory")}>
                     <Button
                         size="sm"
                         variant="ghost"
@@ -513,9 +513,9 @@ const Editor: FC<EditorProps> = ({
             <div ref={hostRef} className="code-mirror" />
             <footer className="file-editor__footer">
                 <span>
-                    Ln {cursor.line}, Col {cursor.column}
+                    {t("lineColumn", { line: cursor.line, column: cursor.column })}
                 </span>
-                <span>{characters} characters</span>
+                <span>{t("characters", { count: characters })}</span>
                 <Button size="sm" onClick={save} aria-label={resolvedSaveLabel}>
                     {resolvedSaveLabel}
                 </Button>

@@ -75,7 +75,7 @@ const Link: FC<LinkProps> = ({
     tabIndex,
     ...rest
 }: LinkProps) => {
-    const ripple: RippleHandlers = useRipple({ trigger: "click", disabled });
+    const ripple: RippleHandlers = useRipple({ trigger: "both", disabled });
     const handleClick: (event: ReactMouseEvent<HTMLAnchorElement>) => void = (
         event: ReactMouseEvent<HTMLAnchorElement>,
     ): void => {

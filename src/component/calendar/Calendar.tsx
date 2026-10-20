@@ -96,7 +96,7 @@ export interface CalendarDayContext {
  * - `max`: Latest selectable ISO date; invalid values leave the range open.
  * - `disabled`: Disables browsing and selection.
  * - `readOnly`: Prevents selection while leaving month browsing available.
- * - `locale`: BCP 47 locale for Intl month, weekday, and date labels; defaults to `en-GB`.
+ * - `locale`: BCP 47 locale for Intl month, weekday, and date labels; defaults to the active International locale.
  * - `firstDayOfWeek`: First weekday column, 0 (Sunday) to 6 (Saturday); defaults to 1 (Monday).
  * - `today`: ISO date that overrides the real local date for the `aria-current="date"` marker.
  * - `showAdjacentDays`: Whether leading and trailing days from adjacent months are rendered.
@@ -652,7 +652,7 @@ export const Calendar: FC<CalendarProps> = ({
     max,
     disabled = false,
     readOnly = false,
-    locale = DefaultLocale,
+    locale,
     firstDayOfWeek = DefaultFirstDayOfWeek,
     today,
     showAdjacentDays = true,
@@ -669,7 +669,8 @@ export const Calendar: FC<CalendarProps> = ({
     "aria-label": ariaLabelAttribute,
     ...rest
 }: CalendarProps): ReactNode => {
-    const { t }: InternationalContextValue = useInternational();
+    const { t, locale: contextLocale }: InternationalContextValue = useInternational();
+    const resolvedLocale: string = locale ?? contextLocale;
     const resolvedLabel: string = label ?? t("calendar");
     const resolvedPreviousMonthLabel: string = previousMonthLabel ?? t("previousMonth");
     const resolvedNextMonthLabel: string = nextMonthLabel ?? t("nextMonth");
@@ -702,8 +703,8 @@ export const Calendar: FC<CalendarProps> = ({
         [today],
     );
     const formatters: CalendarFormatters = useMemo<CalendarFormatters>(
-        () => createFormatters(locale),
-        [locale],
+        () => createFormatters(resolvedLocale),
+        [resolvedLocale],
     );
     const safeFirstDayOfWeek: number = Number.isFinite(firstDayOfWeek)
         ? ((Math.floor(firstDayOfWeek) % DaysPerWeek) + DaysPerWeek) % DaysPerWeek

@@ -60,11 +60,11 @@ const StateLayer: FC<StateLayerProps> = ({
 
         const pointerDown: (event: PointerEvent) => void = (event: PointerEvent): void => {
             if (event.button === 0) {
-                paintRipple(host, event.clientX, event.clientY);
+                paintRipple(host, event.clientX, event.clientY, parent);
             }
         };
         const pointerEnter: (event: PointerEvent) => void = (event: PointerEvent): void => {
-            paintRipple(host, event.clientX, event.clientY);
+            paintRipple(host, event.clientX, event.clientY, parent);
         };
 
         parent.addEventListener("pointerdown", pointerDown);

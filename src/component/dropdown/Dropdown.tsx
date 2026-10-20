@@ -621,7 +621,7 @@ export const Dropdown: FC<DropdownProps> = ({
                             autoHide={false}
                             orientation="vertical"
                             viewportProps={{ tabIndex: -1 }}
-                            scrollbarLabel="Options"
+                            scrollbarLabel={t("options")}
                         >
                             {isEmpty ? (
                                 <div className="dropdown__empty">{empty ?? t("noResults")}</div>

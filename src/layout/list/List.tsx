@@ -257,6 +257,7 @@ const List: <Item>(props: ListProps<Item>) => ReactNode = <Item,>({
             {...rest}
             ref={rootRef}
             role={role}
+            aria-label={rest["aria-label"] ?? t("list")}
             className={cx("list", virtual && "list--virtual", disabled && "list--disabled", className)}
             style={virtual ? { ...style, height } : style}
             aria-busy={loading ? "true" : rest["aria-busy"]}
@@ -323,7 +324,10 @@ const List: <Item>(props: ListProps<Item>) => ReactNode = <Item,>({
                                             onCheckedChange={(): void => toggle(entry.key)}
                                             label={
                                                 <span className="visually-hidden">
-                                                    Select row {entry.index + 1}
+                                                    {t("selectRow", {
+                                                        index: entry.index + 1,
+                                                        total: list.size,
+                                                    })}
                                                 </span>
                                             }
                                         />

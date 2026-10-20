@@ -24,8 +24,11 @@
 - `PeriodicityForm`、`PeriodicityFormField`、`PeriodicityFormActions`：封装原生 `<form>`，保留原生校验、提交和重置行为，并为原生控件自动生成 `label htmlFor`、`aria-describedby` 和 `aria-invalid` 关联。
 - `PeriodicityCoordinator`、`PeriodicityAppBar`、`PeriodicityCollapse`、`PeriodicityToolbar`：协调滚动与折叠布局，Coordinator 只有 `collapse`、`header`、`main` 三个插槽；`collapse` 收缩到 0，AppBar header 固定，`main` 滚动。
 - `PeriodicityCalendar`：支持 locale 的月历网格，使用 roving tabindex、ISO 日期值、范围限制、Intl 星期/月份标签和方向键/Home/End/PageUp/PageDown 选择。
+- `accessible-dark`：`accessible` 的深色高对比度版本，使用 3px 焦点环和强边框。
 - 新增 4 套色盲主题：`protanopia`、`deuteranopia`、`tritanopia`、`achromatopsia`，使用不依赖色相或避免混淆的配色。
-- 22 套全局主题预设：`accessible`、`default`、`dark`、`milk`、`space-gray`、`gray`、`light-gray`、`sky-blue`、`pale-blue`、`deep-blue`、`orange`、`yellow`、`lemon`、`red`、`rose`、`green`、`deep-green`、`light-green`，通过 `theme`/`defaultTheme`/`setTheme` 切换。
+- 23 套全局主题预设：`accessible`、`accessible-dark`、`protanopia`、`deuteranopia`、`tritanopia`、`achromatopsia`、`default`、`dark`、`milk`、`space-gray`、`gray`、`light-gray`、`sky-blue`、`pale-blue`、`deep-blue`、`orange`、`yellow`、`lemon`、`red`、`rose`、`green`、`deep-green`、`light-green`，通过 `theme`/`defaultTheme`/`setTheme` 切换。
+- `accessible-dark`：`accessible` 的深色高对比度版本，使用白色焦点、强边框和 3px 焦点环。
+- 新增 4 套色盲主题：`protanopia`、`deuteranopia`、`tritanopia`、`achromatopsia`，使用不依赖色相或避免混淆的配色。
 - 12 个内置 locale 和常用设计系统文案：`en-GB`、`en-US`、`zh-CN`、`zh-SG`、`zh-HK`、`zh-TW`、`ja-JP`、`ko-KR`、`es-ES`、`es-MX`、`pt-PT`、`pt-BR`，并提供 `localeOptions`、`builtInMessages`、`resolveLocaleMessages` 和方向信息。
 - `Page` 取代 `PagerPage` 作为分页路由组件。
 - 无障碍改进：表单 `aria-errormessage`/`aria-required`/组合描述、Drag 键盘排序、Scrollbar 键盘支持、完整日历键盘导航、Table/Tree ARIA、浮层焦点陷阱、skip link/landmarks，以及高对比度/强制颜色样式。
@@ -45,6 +48,16 @@
 
 - Badge、Tag、Avatar、Link、StateLayer 现在会在指针/键盘激活时播放统一 Ripple；disabled 的 Badge、Tag、Avatar、Link 不触发。StateLayer 在非 Surface 区域会代理父级交互。
 - Dialog、Drawer、Snackbar、Alert、Pagination、Dropdown/Select、List/Tree/Table、文件工具、Calendar、Contact/Chat/Message 的默认文案改为 `useInternational().t()`，12 个内置语言包补齐 25 个通用 key；显式传入的 prop 仍然优先。
+
+- 新增 `npm run audit:contrast`、`npm run audit:locales`、`npm run test:a11y` 三个可重复执行的无障碍检查；对比度脚本覆盖 `accessible`、`accessible-dark` 和 4 套色盲主题。
+- Badge、Tag、Avatar、Link、StateLayer 的 ripple 同时响应悬浮和点击；颜色根据实际表面亮度选择黑/白高对比色，StateLayer 使用父级背景计算对比度。
+- Alert、Tag、Snackbar 增加图标和隐藏状态文本作为颜色之外的第二通道；Toast 使用 tone 图标。
+- 12 个内置语言包各补齐 165 个公共 key；Drawer 方位标签、Calendar 的 Intl locale、CodeBlock 的 Copy/Copied 等剩余默认文案改为跟随 Provider。
+- 文档外壳为 12 个语言提供本地化导航、主题/语言选择、About、skip link、返回顶部和 CodeBlock 文案。
+- README 与 README.zh-CN 按设计理念、功能地图、组件分类重构；新增主题、无障碍检查与国际化审计说明。
+
+- 主题选项名称改为跟随当前语言，不再始终显示“中文 · English”；组件页面标题显示 API 名与本地名称，例如 `Tag 标签`。
+- 面包屑展开、评论空/加载状态、右键菜单与文本操作、数字步进器、时间/日期时间占位符、时分标签、评论加载和 Toolbar 返回标签等剩余默认文案改为 `t()`。
 
 ### 变更
 

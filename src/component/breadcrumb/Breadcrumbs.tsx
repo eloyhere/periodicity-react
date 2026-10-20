@@ -12,6 +12,7 @@ import useControllableState from "../foundation/useControllableState";
 import Icon, { type IconName } from "../icon/Icon";
 import Surface from "../surface/Surface";
 import Text from "../text/Text";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./Breadcrumbs.css";
 
 /**
@@ -89,11 +90,13 @@ const Breadcrumbs: FC<BreadcrumbsProps> = ({
     defaultExpanded = false,
     onExpandedChange,
     onItemClick,
-    ellipsisLabel = "Show all breadcrumbs",
+    ellipsisLabel,
     className = "",
     ref,
     ...rest
 }: BreadcrumbsProps): ReactNode => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedEllipsisLabel: string = ellipsisLabel ?? t("showAllBreadcrumbs");
     const adapter: ListAdapter<BreadcrumbItem> = useMemo<ListAdapter<BreadcrumbItem>>(
         () => createListAdapter<BreadcrumbItem>(items),
         [items],
@@ -160,7 +163,7 @@ const Breadcrumbs: FC<BreadcrumbsProps> = ({
                                     <button
                                         type="button"
                                         className="breadcrumbs__ellipsis"
-                                        aria-label={ellipsisLabel}
+                                        aria-label={resolvedEllipsisLabel}
                                         aria-expanded={isExpanded}
                                         onClick={(): void => {
                                             setExpanded(true);

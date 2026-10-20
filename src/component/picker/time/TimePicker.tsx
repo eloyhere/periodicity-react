@@ -20,6 +20,7 @@ import { composeEventHandlers } from "../shared/composeEventHandlers";
 import type { PickerDataAttributes } from "../shared/native";
 import { NumberPicker } from "../number";
 import PickerField from "../shared/PickerField";
+import { useInternational, type InternationalContextValue } from "../../../international";
 import "./TimePicker.css";
 
 /**
@@ -132,7 +133,7 @@ const TimePicker: FC<TimePickerProps> = ({
     readOnly = false,
     required = false,
     step,
-    placeholder = "Select a time",
+    placeholder,
     className = "",
     id,
     onOpenChange,
@@ -143,6 +144,8 @@ const TimePicker: FC<TimePickerProps> = ({
     ref,
     ...rest
 }: TimePickerProps) => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedPlaceholder: string = placeholder ?? t("selectTime");
     const generatedId: string = useId();
     const pickerId: string = id ?? generatedId;
     const panelId: string = `${pickerId}-panel`;
@@ -316,7 +319,7 @@ const TimePicker: FC<TimePickerProps> = ({
                     >
                         <Icon name="Clock" size={16} />
                         <span className="time-picker__value">
-                            {hasValue ? formatTime(parts.hour, parts.minute) : placeholder}
+                            {hasValue ? formatTime(parts.hour, parts.minute) : resolvedPlaceholder}
                         </span>
                     </button>
                 </Surface>
@@ -341,7 +344,7 @@ const TimePicker: FC<TimePickerProps> = ({
                     <div className="time-picker__wheels">
                         <NumberPicker
                             id={`${pickerId}-hours`}
-                            label="Hours"
+                            label={t("hours")}
                             value={parts.hour}
                             min={0}
                             max={23}
@@ -352,7 +355,7 @@ const TimePicker: FC<TimePickerProps> = ({
                         />
                         <NumberPicker
                             id={`${pickerId}-minutes`}
-                            label="Minutes"
+                            label={t("minutes")}
                             value={parts.minute}
                             min={0}
                             max={59}

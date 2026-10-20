@@ -3,18 +3,23 @@ import ContextMenu, { ContextMenuItem } from "../../component/context/ContextMen
 import type { IconName } from "../../component/icon/Icon";
 import cx from "../../component/foundation/cx";
 import type { MessageAction, MessageItem } from "./adapter";
+import {
+    useInternational,
+    type CommonMessageKey,
+    type InternationalContextValue,
+} from "../../international";
 import "./Message.css";
 
 /**
  * Presentation of one message menu action.
  * Type: interface.
- * Fields: icon, label, danger.
+ * Fields: icon, labelKey, danger.
  * @example
  * const definition: MessageActionDefinition = MessageActionDefinitions.copy;
  */
 interface MessageActionDefinition {
     icon: IconName;
-    label: string;
+    labelKey: CommonMessageKey;
     danger?: boolean;
 }
 
@@ -36,20 +41,20 @@ const MessageActionOrder: readonly MessageAction[] = [
 ];
 
 /**
- * Icon, label, and tone of every message menu action.
+ * Icon, label key, and tone of every message menu action.
  * Type: constant.
  * Fields: recall, copy, forward, favourite, select, quote, delete.
  * @example
- * <ContextMenuItem icon={MessageActionDefinitions.copy.icon}>Copy</ContextMenuItem>
+ * <ContextMenuItem icon={MessageActionDefinitions.copy.icon}>{t("copy")}</ContextMenuItem>
  */
 const MessageActionDefinitions: Record<MessageAction, MessageActionDefinition> = {
-    recall: { icon: "Refresh", label: "Recall" },
-    copy: { icon: "Clipboard", label: "Copy" },
-    forward: { icon: "Forward", label: "Forward" },
-    favourite: { icon: "Star", label: "Favourite" },
-    select: { icon: "Select", label: "Multi-select" },
-    quote: { icon: "Reply", label: "Quote" },
-    delete: { icon: "Close", label: "Delete", danger: true },
+    recall: { icon: "Refresh", labelKey: "recall" },
+    copy: { icon: "Clipboard", labelKey: "copy" },
+    forward: { icon: "Forward", labelKey: "forward" },
+    favourite: { icon: "Star", labelKey: "favourite" },
+    select: { icon: "Select", labelKey: "multiSelect" },
+    quote: { icon: "Reply", labelKey: "quote" },
+    delete: { icon: "Close", labelKey: "delete", danger: true },
 };
 
 /**
@@ -106,11 +111,13 @@ const MessageContextMenu: FC<MessageContextMenuProps> = ({
     closeOnSelect,
     className = "",
     menuClassName = "",
-    ariaLabel = "Message actions",
+    ariaLabel,
     children,
     ref,
     ...rest
 }: MessageContextMenuProps) => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedAriaLabel: string = ariaLabel ?? t("messageActions");
     const available: readonly MessageAction[] = MessageActionOrder.filter(
         (action: MessageAction): boolean =>
             actions.includes(action) && (action !== "recall" || self),
@@ -128,7 +135,7 @@ const MessageContextMenu: FC<MessageContextMenuProps> = ({
                           danger={definition.danger === true}
                           onSelect={(): void => onAction(action, message)}
                       >
-                          {definition.label}
+                          {t(definition.labelKey)}
                       </ContextMenuItem>
                   );
               });
@@ -140,7 +147,7 @@ const MessageContextMenu: FC<MessageContextMenuProps> = ({
             className={cx("message-menu-zone", className)}
             menuClassName={cx("message-menu", menuClassName)}
             menu={menu}
-            header={header ?? (self ? "Your message" : "Message")}
+            header={header ?? (self ? t("yourMessage") : t("message"))}
             empty={empty}
             disabled={disabled}
             open={open}
@@ -149,7 +156,7 @@ const MessageContextMenu: FC<MessageContextMenuProps> = ({
             longPress={longPress}
             longPressDelay={longPressDelay}
             closeOnSelect={closeOnSelect}
-            ariaLabel={ariaLabel}
+            ariaLabel={resolvedAriaLabel}
         >
             {children}
         </ContextMenu>

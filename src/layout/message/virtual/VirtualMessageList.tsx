@@ -303,7 +303,7 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
             {selection.selectMode && !loading ? (
                 <div className="message-list__selection" role="toolbar" aria-label={t("selection")}>
                     <span className="message-list__selection-count">
-                        {selection.selectedIds.size} selected
+                        {t("selectedCount", { count: selection.selectedIds.size })}
                     </span>
                     <Button
                         variant="ghost"
@@ -311,7 +311,7 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
                         disabled={disabled}
                         onClick={(): void => selection.clear()}
                     >
-                        Cancel
+                        {t("cancel")}
                     </Button>
                     {onDelete === (void 0) ? null : (
                         <Button
@@ -320,7 +320,7 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
                             disabled={disabled || selection.selectedIds.size === 0}
                             onClick={deleteSelected}
                         >
-                            Delete
+                            {t("delete")}
                         </Button>
                     )}
                     <Button
@@ -328,7 +328,7 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
                         disabled={disabled || selection.selectedIds.size === 0}
                         onClick={forwardSelected}
                     >
-                        Forward
+                        {t("forward")}
                     </Button>
                 </div>
             ) : null}
@@ -472,7 +472,7 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
                                                     onRetry(message);
                                                 }}
                                             >
-                                                Retry
+                                                {t("retry")}
                                             </button>
                                         ) : null}
                                     </div>

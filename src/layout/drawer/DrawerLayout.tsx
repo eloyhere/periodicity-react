@@ -16,6 +16,7 @@ import {
 import cx from "../../component/foundation/cx";
 import useControllableState from "../../component/foundation/useControllableState";
 import useMergedRef from "../../component/foundation/useMergedRef";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./DrawerLayout.css";
 
 /**
@@ -157,16 +158,21 @@ const DrawerLayout: FC<DrawerLayoutProps> = ({
     rightWidth = 280,
     topHeight = 120,
     bottomHeight = 120,
-    leftLabel = "Left drawer",
-    rightLabel = "Right drawer",
-    topLabel = "Top drawer",
-    bottomLabel = "Bottom drawer",
+    leftLabel,
+    rightLabel,
+    topLabel,
+    bottomLabel,
     centreLabel,
     className = "",
     rootRef: rootRefProp,
     ref,
     ...rest
 }: DrawerLayoutProps) => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedLeftLabel: string = leftLabel ?? t("leftDrawer");
+    const resolvedRightLabel: string = rightLabel ?? t("rightDrawer");
+    const resolvedTopLabel: string = topLabel ?? t("topDrawer");
+    const resolvedBottomLabel: string = bottomLabel ?? t("bottomDrawer");
     const [leftOpen, setLeftOpen]: readonly [
         boolean,
         (next: boolean | ((previous: boolean) => boolean)) => void,
@@ -456,7 +462,7 @@ const DrawerLayout: FC<DrawerLayoutProps> = ({
                     ref={leftPaneRef}
                     className="drawer-layout__pane drawer-layout__pane--left"
                     style={{ width: active("left") ? leftLength : "0px" }}
-                    aria-label={leftLabel}
+                    aria-label={resolvedLeftLabel}
                     aria-hidden={!active("left")}
                     inert={!active("left")}
                     data-open={active("left") ? "true" : "false"}
@@ -473,7 +479,7 @@ const DrawerLayout: FC<DrawerLayoutProps> = ({
                         ref={topPaneRef}
                         className="drawer-layout__pane drawer-layout__pane--top"
                         style={{ height: active("top") ? topLength : "0px" }}
-                        aria-label={topLabel}
+                        aria-label={resolvedTopLabel}
                         aria-hidden={!active("top")}
                         inert={!active("top")}
                         data-open={active("top") ? "true" : "false"}
@@ -497,7 +503,7 @@ const DrawerLayout: FC<DrawerLayoutProps> = ({
                         ref={bottomPaneRef}
                         className="drawer-layout__pane drawer-layout__pane--bottom"
                         style={{ height: active("bottom") ? bottomLength : "0px" }}
-                        aria-label={bottomLabel}
+                        aria-label={resolvedBottomLabel}
                         aria-hidden={!active("bottom")}
                         inert={!active("bottom")}
                         data-open={active("bottom") ? "true" : "false"}
@@ -514,7 +520,7 @@ const DrawerLayout: FC<DrawerLayoutProps> = ({
                     ref={rightPaneRef}
                     className="drawer-layout__pane drawer-layout__pane--right"
                     style={{ width: active("right") ? rightLength : "0px" }}
-                    aria-label={rightLabel}
+                    aria-label={resolvedRightLabel}
                     aria-hidden={!active("right")}
                     inert={!active("right")}
                     data-open={active("right") ? "true" : "false"}

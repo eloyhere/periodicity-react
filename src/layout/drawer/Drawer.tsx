@@ -167,7 +167,7 @@ const Drawer: FC<DrawerProps> = ({
     const [closing, setClosing]: [boolean, (next: boolean) => void] = useState<boolean>(false);
     const mergedRef: RefCallback<HTMLDivElement> = useMergedRef<HTMLDivElement>(panelRef, ref);
     const labelledBy: string = joinIds(hasTitle ? titleId : (void 0), ariaLabelledBy);
-    const label: string = ariaLabel ?? (labelledBy.length > 0 ? "" : "Drawer");
+    const label: string = ariaLabel ?? (labelledBy.length > 0 ? "" : t("drawer"));
     const describedBy: string = joinIds(hasDescription ? descriptionId : (void 0), ariaDescribedBy);
 
     const requestClose: (reason: DrawerCloseReason) => void = (reason: DrawerCloseReason): void => {

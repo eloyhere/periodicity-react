@@ -10,11 +10,35 @@
 - **要求：** React 19、React DOM 19、现代浏览器
 - **许可证：** Apache 2.0
 
+## 设计理念
+
+Periodicity 遵循五条规则：
+
+- **语义优先于装饰。** 组件只消费 `--colourPrimary`、`--surface`、`--state-hover-opacity` 等主题 token，不硬编码某套品牌色，因此切换主题或色盲配色时，所有组件会一起变化。
+- **Flex 优先布局。** 组件使用 flexbox 组合，不依赖 CSS Grid，可以安全嵌入宿主布局、虚拟列表和滚动容器。
+- **原生行为优先。** 表单仍可提交，链接仍可导航，输入仍走浏览器校验，对话框仍管理焦点，`ref` 指向真实 DOM；ARIA 和 data 属性是在原生语义上的增强。
+- **可组合的表面。** `Surface`、`StateLayer`、`Ripple`、`Icon`、`Text` 和布局原语是共享积木，高层组件保持轻量，并可通过 token 定制。
+- **默认可访问、可国际化。** 焦点环、键盘路径、减少动效、经过对比度审计的配色，以及 12 个内置语言包都属于公共 API，而不是事后补丁。
+
+## 功能地图
+
+| 功能       | 组件                                                                                                                                | 适用场景                         |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| 基础       | `Theme`、`International`、`Surface`、`StateLayer`、`Ripple`、`Text`、`Icon`、`LinearLayout`、`Inline`、`Stack`、`Divider`、`Spacer` | design token、排版、表面与组合。 |
+| 输入       | `Button`、`TextInput`、`TextArea`、`Select`、`Checkbox`、`Switch`、`Range`、`NumberInput`、各种 Picker、`Calendar`                  | 表单、筛选和参数编辑。           |
+| 数据       | `List`、`Table`、`Tree`、`Pagination`、`Scrollbar`、`Badge`、`Tag`、`Chip`、`Avatar`                                                | 密集记录、虚拟集合和身份展示。   |
+| 布局       | `Coordinator`、`AppBar`、`Collapse`、`Toolbar`、`Drawer`、`DrawerLayout`、`Tabs`、`Accordion`                                       | 应用壳、导航和响应式面板。       |
+| 浮层       | `Dialog`、`ConfirmDialog`、`InputDialog`、`MessageDialog`、`Dropdown`、`Menu`、`Tooltip`、`Toast`、`Snackbar`                       | 临时反馈、菜单和模态任务。       |
+| 文件与消息 | `Editor`、`Preview`、`ProjectManager`、`Chat`、`VirtualChat`、`Contact`、`MessageList`                                              | 代码、项目结构、会话和联系人。   |
+| 辅助       | `Link`、`Anchor`、`Progress`、`Skeleton`、`EmptyState`、`Kbd`、`VisuallyHidden`                                                     | 小型可复用交互元素。             |
+
 ## 目录
 
+- [设计理念](#设计理念)
+- [功能地图](#功能地图)
 - [安装](#安装)
 - [快速开始](#快速开始)
-- [表单](#表单)
+- [按功能划分的组件](#按功能划分的组件)
 - [组件命名](#组件命名)
 - [表单与选择器](#表单与选择器)
 - [集合与数据](#集合与数据)
@@ -70,44 +94,23 @@ export function SignIn() {
 }
 ```
 
-### 链接与锚点
+需要全局主题或语言切换时，在应用外层包住 Provider：
 
 ```tsx
-import { Anchor, Link } from "periodicity-react";
-
-<Link href="https://example.com" external>文档</Link>
-<Anchor href="#installation" active>安装</Anchor>;
+<PeriodicityTheme theme="accessible">
+    <PeriodicityInternational locale="ja-JP">{app}</PeriodicityInternational>
+</PeriodicityTheme>
 ```
 
-`Link` 封装单个原生 anchor，提供 tone、下划线、外链、禁用和焦点处理。`Anchor` 增加当前区块标记和 `onNavigate` 回调，用于页内导航。两者都保留原生 `href`、`target`、`rel`、键盘和右键菜单行为。
+## 按功能划分的组件
 
-## 表单
-
-`PeriodicityForm` 封装原生 `<form>`，保留浏览器原生校验、提交、重置、method、action 和 autocomplete 行为。
-
-```tsx
-import { PeriodicityButton, PeriodicityForm, PeriodicityFormActions, PeriodicityFormField } from "periodicity-react";
-
-<PeriodicityForm
-    action="/subscribe"
-    method="post"
-    onSubmit={(event) => {
-        event.preventDefault();
-        subscribe(new FormData(event.currentTarget));
-    }}
->
-    <PeriodicityFormField label="邮箱" name="email" hint="我们不会分享你的邮箱。" required>
-        {(field) => <input {...field} type="email" autoComplete="email" />}
-    </PeriodicityFormField>
-
-    <PeriodicityFormActions align="end">
-        <PeriodicityButton type="submit">订阅</PeriodicityButton>
-    </PeriodicityFormActions>
-</PeriodicityForm>;
-```
-
-`PeriodicityFormField` 自动生成控件 id，并绑定 `label htmlFor`、`aria-describedby` 和 `aria-invalid`。
-`PeriodicityTextInput` 等 UI 输入组件已经内置同样的 label 关联，可以直接放进 `PeriodicityForm`。
+- **基础与 token：** `Theme`、`International`、`Surface`、`StateLayer`、`Ripple`、`Text`、`Icon`、`LinearLayout`、`Inline`、`Stack`、`Divider`、`Spacer`、`VisuallyHidden`。
+- **输入与选择器：** `Button`、`TextInput`、`TextArea`、`Select`、`VirtualSelect`、`Checkbox`、`Switch`、`Range`、`NumberInput`、`ColourPicker`、`TimePicker`、`DateTimePicker`、`NumberPicker`、`CyclePicker`、`VariantPicker`、`Calendar`。
+- **数据与身份：** `List`、`VirtualList`、`Table`、`VirtualTable`、`Tree`、`VirtualTree`、`Pagination`、`Scrollbar`、`Badge`、`Tag`、`Chip`、`Avatar`、`AvatarGroup`。
+- **导航与布局：** `Coordinator`、`AppBar`、`Collapse`、`Toolbar`、`Drawer`、`DrawerLayout`、`Tabs`、`Accordion`。
+- **浮层与反馈：** `Dialog`、`ConfirmDialog`、`InputDialog`、`MessageDialog`、`Dropdown`、`Menu`、`Tooltip`、`Toast`、`Snackbar`、`Progress`、`Skeleton`、`EmptyState`。
+- **文件与消息：** `Editor`、`Preview`、`ProjectManager`、`Chat`、`VirtualChat`、`Contact`、`VirtualContact`、`MessageList`、`VirtualMessageList`。
+- **辅助：** `Link`、`Anchor`、`Kbd`、`Badge`、`Divider`、`VisuallyHidden`。
 
 ## 组件命名
 
@@ -125,17 +128,6 @@ import { Table } from "periodicity-react";
 ```
 
 新代码应使用带前缀的名称，以明确组件边界并避免与宿主应用组件重名。
-
-### 链接与锚点
-
-```tsx
-import { Anchor, Link } from "periodicity-react";
-
-<Link href="https://example.com" external>文档</Link>
-<Anchor href="#installation" active>安装</Anchor>;
-```
-
-`Link` 封装单个原生 anchor，提供 tone、下划线、外链、禁用和焦点处理。`Anchor` 增加当前区块标记和 `onNavigate` 回调，用于页内导航。两者都保留原生 `href`、`target`、`rel`、键盘和右键菜单行为。
 
 ## 表单与选择器
 
@@ -353,30 +345,31 @@ import { PeriodicityTheme } from "periodicity-react";
 
 `theme` 为受控值，`defaultTheme` 为非受控初始值，`onThemeChange` 监听切换，`useTheme().setTheme(id)` 可在运行时切换。不传 `theme` 时保持现有 `mode` 行为；显式 `mode` 会覆盖预设的明暗模式，显式 `tokens` 会覆盖预设 Token。
 
-| 预设            | 中文       | English                | 模式  |
-| --------------- | ---------- | ---------------------- | ----- |
-| `accessible`    | 高对比度   | High contrast          | light |
-| `protanopia`    | 红色盲友好 | Protanopia friendly    | light |
-| `deuteranopia`  | 绿色盲友好 | Deuteranopia friendly  | light |
-| `tritanopia`    | 蓝色盲友好 | Tritanopia friendly    | light |
-| `achromatopsia` | 全色盲友好 | Achromatopsia friendly | light |
-| `default`       | 默认       | Default                | light |
-| `dark`          | 夜间       | Dark                   | dark  |
-| `milk`          | 牛奶白     | Milk white             | light |
-| `space-gray`    | 深空灰     | Space grey             | dark  |
-| `gray`          | 灰色       | Grey                   | dark  |
-| `light-gray`    | 浅灰色     | Light grey             | light |
-| `sky-blue`      | 天蓝色     | Sky blue               | light |
-| `pale-blue`     | 淡蓝色     | Pale blue              | light |
-| `deep-blue`     | 深蓝色     | Deep blue              | dark  |
-| `orange`        | 橙色       | Orange                 | light |
-| `yellow`        | 黄色       | Yellow                 | light |
-| `lemon`         | 柠檬黄     | Lemon yellow           | light |
-| `red`           | 红色       | Red                    | light |
-| `rose`          | 玫瑰红     | Rose red               | light |
-| `green`         | 绿色       | Green                  | light |
-| `deep-green`    | 深绿色     | Deep green             | dark  |
-| `light-green`   | 浅绿色     | Light green            | light |
+| 预设              | 中文         | English                | 模式  |
+| ----------------- | ------------ | ---------------------- | ----- |
+| `accessible`      | 高对比度     | High contrast          | light |
+| `accessible-dark` | 高对比度夜间 | High contrast dark     | dark  |
+| `protanopia`      | 红色盲友好   | Protanopia friendly    | light |
+| `deuteranopia`    | 绿色盲友好   | Deuteranopia friendly  | light |
+| `tritanopia`      | 蓝色盲友好   | Tritanopia friendly    | light |
+| `achromatopsia`   | 全色盲友好   | Achromatopsia friendly | light |
+| `default`         | 默认         | Default                | light |
+| `dark`            | 夜间         | Dark                   | dark  |
+| `milk`            | 牛奶白       | Milk white             | light |
+| `space-gray`      | 深空灰       | Space grey             | dark  |
+| `gray`            | 灰色         | Grey                   | dark  |
+| `light-gray`      | 浅灰色       | Light grey             | light |
+| `sky-blue`        | 天蓝色       | Sky blue               | light |
+| `pale-blue`       | 淡蓝色       | Pale blue              | light |
+| `deep-blue`       | 深蓝色       | Deep blue              | dark  |
+| `orange`          | 橙色         | Orange                 | light |
+| `yellow`          | 黄色         | Yellow                 | light |
+| `lemon`           | 柠檬黄       | Lemon yellow           | light |
+| `red`             | 红色         | Red                    | light |
+| `rose`            | 玫瑰红       | Rose red               | light |
+| `green`           | 绿色         | Green                  | light |
+| `deep-green`      | 深绿色       | Deep green             | dark  |
+| `light-green`     | 浅绿色       | Light green            | light |
 
 同时导出 `themePresets`、`getThemePreset(id)` 和 `ThemePresetId`。`accessible` 提高文字、边框、焦点和禁用状态对比度；`prefers-contrast` 和 `forced-colors` 媒体查询提供系统级补充。
 

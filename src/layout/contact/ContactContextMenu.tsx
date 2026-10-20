@@ -3,18 +3,23 @@ import ContextMenu, { ContextMenuItem } from "../../component/context/ContextMen
 import type { IconName } from "../../component/icon/Icon";
 import cx from "../../component/foundation/cx";
 import type { ContactAction, ContactItem } from "./adapter";
+import {
+    useInternational,
+    type CommonMessageKey,
+    type InternationalContextValue,
+} from "../../international";
 import "./Contact.css";
 
 /**
  * Presentation of one contact menu action.
  * Type: interface.
- * Fields: icon, label, danger.
+ * Fields: icon, labelKey, danger.
  * @example
  * const definition: ContactActionDefinition = ContactActionDefinitions.profile;
  */
 interface ContactActionDefinition {
     icon: IconName;
-    label: string;
+    labelKey: CommonMessageKey;
     danger?: boolean;
 }
 
@@ -28,17 +33,17 @@ interface ContactActionDefinition {
 const ContactActionOrder: readonly ContactAction[] = ["profile", "chat", "delete", "block"];
 
 /**
- * Icon, label, and tone of every contact menu action.
+ * Icon, label key, and tone of every contact menu action.
  * Type: constant.
  * Fields: profile, chat, delete, block.
  * @example
- * <ContextMenuItem icon={ContactActionDefinitions.profile.icon}>Profile</ContextMenuItem>
+ * <ContextMenuItem icon={ContactActionDefinitions.profile.icon}>{t("profile")}</ContextMenuItem>
  */
 const ContactActionDefinitions: Record<ContactAction, ContactActionDefinition> = {
-    profile: { icon: "Profile", label: "Profile" },
-    chat: { icon: "Chat", label: "Chat" },
-    delete: { icon: "Close", label: "Delete", danger: true },
-    block: { icon: "RemoveUser", label: "Block" },
+    profile: { icon: "Profile", labelKey: "profile" },
+    chat: { icon: "Chat", labelKey: "chat" },
+    delete: { icon: "Close", labelKey: "delete", danger: true },
+    block: { icon: "RemoveUser", labelKey: "block" },
 };
 
 /**
@@ -93,11 +98,13 @@ const ContactContextMenu: FC<ContactContextMenuProps> = ({
     closeOnSelect,
     className = "",
     menuClassName = "",
-    ariaLabel = "Contact actions",
+    ariaLabel,
     children,
     ref,
     ...rest
 }: ContactContextMenuProps) => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedAriaLabel: string = ariaLabel ?? t("contactActions");
     const available: readonly ContactAction[] = ContactActionOrder.filter(
         (action: ContactAction): boolean => actions.includes(action),
     );
@@ -114,7 +121,7 @@ const ContactContextMenu: FC<ContactContextMenuProps> = ({
                           danger={definition.danger === true}
                           onSelect={(): void => onAction(action, contact)}
                       >
-                          {definition.label}
+                          {t(definition.labelKey)}
                       </ContextMenuItem>
                   );
               });
@@ -135,7 +142,7 @@ const ContactContextMenu: FC<ContactContextMenuProps> = ({
             longPress={longPress}
             longPressDelay={longPressDelay}
             closeOnSelect={closeOnSelect}
-            ariaLabel={ariaLabel}
+            ariaLabel={resolvedAriaLabel}
         >
             {children}
         </ContextMenu>

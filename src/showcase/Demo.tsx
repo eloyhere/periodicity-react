@@ -12,6 +12,7 @@ import {
 } from "react";
 import Button from "../component/button/Button";
 import Text from "../component/text/Text";
+import { useInternational, type InternationalContextValue } from "../international";
 import { demoAnchor } from "./anchors";
 import { ShowcaseFocusContext } from "./focus";
 import "./Demo.css";
@@ -80,9 +81,11 @@ const CopyResetDelay: number = 1600;
  */
 export const CodeBlock: FC<CodeBlockProps> = ({
     code,
-    label = "Code example",
+    label,
     language = "TSX",
 }: CodeBlockProps) => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedLabel: string = label ?? t("code");
     const [copied, setCopied]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false);
     const timerRef: RefObject<number | null> = useRef<number | null>(null);
 
@@ -116,25 +119,25 @@ export const CodeBlock: FC<CodeBlockProps> = ({
             <div className="code-block__bar">
                 <span className="code-block__language">{language}</span>
                 <Button
-                    aria-label={copied ? `${label} copied` : `Copy ${label}`}
+                    aria-label={copied ? `${resolvedLabel} ${t("copied")}` : `${t("copy")} ${resolvedLabel}`}
                     icon={copied ? "Check" : "Clipboard"}
                     onClick={handleCopy}
                     size="sm"
                     variant="ghost"
                 >
-                    {copied ? "Copied" : "Copy"}
+                    {copied ? t("copied") : t("copy")}
                 </Button>
             </div>
             <pre
                 className="code-block__pre"
                 tabIndex={0}
                 role="region"
-                aria-label={`${label} source code`}
+                aria-label={`${resolvedLabel} ${t("code")}`}
             >
                 <code className="code-block__code">{code}</code>
             </pre>
             <span className="code-block__status" role="status" aria-live="polite">
-                {copied ? "Copied to clipboard" : ""}
+                {copied ? t("copied") : ""}
             </span>
         </div>
     );

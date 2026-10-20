@@ -1,5 +1,6 @@
 import type { CSSProperties, FC, HTMLAttributes, Ref } from "react";
 import cx from "../foundation/cx";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./CircularProgress.css";
 
 /**
@@ -41,11 +42,13 @@ const CircularProgress: FC<CircularProgressProps> = ({
     step = 0,
     size = 48,
     stroke = 4,
-    label = "Loading",
+    label,
     className = "",
     ref,
     ...rest
 }: CircularProgressProps) => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedLabel: string = label ?? t("loading");
     const determinate: boolean =
         maximum > minimum && value !== (void 0) && Number.isFinite(value);
     const radius: number = Math.max((size - stroke) / 2, 1);
@@ -71,7 +74,7 @@ const CircularProgress: FC<CircularProgressProps> = ({
                 className,
             )}
             role="progressbar"
-            aria-label={label}
+            aria-label={resolvedLabel}
             aria-valuemin={determinate ? minimum : (void 0)}
             aria-valuemax={determinate ? maximum : (void 0)}
             aria-valuenow={determinate ? Math.round(snapped) : (void 0)}

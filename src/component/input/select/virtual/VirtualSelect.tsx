@@ -633,7 +633,7 @@ const VirtualSelect: FC<VirtualSelectProps> = ({
                 role="listbox"
                 ariaLabel={label}
                 isEmpty={source.size === 0}
-                empty={<span id={listboxId}>No options</span>}
+                empty={<span id={listboxId}>{t("noResults")}</span>}
             >
                 <div
                     ref={attachViewport}

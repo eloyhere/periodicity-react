@@ -32,10 +32,14 @@ The first public npm release of `periodicity-react`.
   scroll-driven progress.
 - `PeriodicityCalendar`: locale-aware month grid with roving tabindex, ISO date values, range limits, Intl
   weekday/month labels, and arrow/Home/End/PageUp/PageDown selection.
-- 22 global theme presets: `accessible`, `default`, `dark`, `milk`, `space-gray`, `gray`, `light-gray`,
-- Four colour-vision themes: `protanopia`, `deuteranopia`, `tritanopia`, and `achromatopsia`, using hue-independent or confusion-safe palettes.
-  `sky-blue`, `pale-blue`, `deep-blue`, `orange`, `yellow`, `lemon`, `red`, `rose`, `green`, `deep-green`, and
-  `light-green`, controlled through `theme`/`defaultTheme`/`setTheme`.
+- 23 global theme presets: `accessible`, `accessible-dark`, `protanopia`, `deuteranopia`,
+  `tritanopia`, `achromatopsia`, `default`, `dark`, `milk`, `space-gray`, `gray`, `light-gray`,
+  `sky-blue`, `pale-blue`, `deep-blue`, `orange`, `yellow`, `lemon`, `red`, `rose`, `green`,
+  `deep-green`, and `light-green`, controlled through `theme`/`defaultTheme`/`setTheme`.
+- `accessible-dark`: a dark high-contrast companion to `accessible` with white focus, strong borders, and a
+  3px ring.
+- Four colour-vision themes: `protanopia`, `deuteranopia`, `tritanopia`, and `achromatopsia`, using
+  hue-independent or confusion-safe palettes.
 - 12 built-in locales with common design-system messages, `localeOptions`, `builtInMessages`,
   `resolveLocaleMessages`, and locale direction: `en-GB`, `en-US`, `zh-CN`, `zh-SG`, `zh-HK`, `zh-TW`, `ja-JP`,
   `ko-KR`, `es-ES`, `es-MX`, `pt-PT`, and `pt-BR`.
@@ -66,6 +70,16 @@ The first public npm release of `periodicity-react`.
 
 - Badge, Tag, Avatar, Link, and StateLayer now paint the shared ripple on pointer/keyboard activation; disabled badges, tags, avatars, and links suppress it. StateLayer forwards parent interaction when it is not already inside a Surface ripple.
 - Common component defaults (dialogs, drawers, snackbars, alerts, pagination, dropdown/select, list/tree/table, file tools, calendar, contact/chat/message) now resolve through `useInternational().t()`, with 25 new common message keys in all 12 built-in locale dictionaries. Explicit caller props still win.
+
+- Added `npm run audit:contrast`, `npm run audit:locales`, and `npm run test:a11y` as repeatable accessibility checks; the contrast audit covers `accessible`, `accessible-dark`, and the four colour-vision themes.
+- Badge, Tag, Avatar, Link, and StateLayer ripples now answer both hover and press. Their colour is chosen from the effective surface luminance, and StateLayer measures contrast against its parent background.
+- Alert, Tag, and Snackbar add an icon plus visually hidden status text as a second channel beyond colour; Toast keeps its tone icon.
+- All 12 built-in dictionaries now carry every common message key (165 keys). Drawer edge labels, Calendar's Intl locale, and CodeBlock copy labels follow the active provider instead of hard-coded English.
+- The documentation shell localises navigation, theme/language controls, About, skip link, back-to-top, and CodeBlock labels for all 12 locales.
+- README and README.zh-CN are restructured around design philosophy, a function map, and components by function, with theme, accessibility-audit, and locale-audit documentation.
+
+- Theme option labels now use the active locale instead of always showing Chinese · English, and component page titles show the API name plus its localized name (for example `Tag 标签`).
+- Additional visible and accessible defaults now resolve through `t()`: breadcrumb expander, comment empty/loading states, context-menu and text-action labels, number stepper controls, time/date-time placeholders, hour/minute labels, comment loading, and toolbar back label.
 
 ### Changed
 

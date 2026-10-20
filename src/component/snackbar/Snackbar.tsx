@@ -11,6 +11,8 @@ import Portal from "../foundation/Portal";
 import useControllableState from "../foundation/useControllableState";
 import Surface from "../surface/Surface";
 import Button from "../button/Button";
+import Icon, { type IconName } from "../icon/Icon";
+import VisuallyHidden from "../foundation/VisuallyHidden";
 import { useInternational, type InternationalContextValue } from "../../international";
 import "./Snackbar.css";
 
@@ -131,6 +133,23 @@ const Snackbar: FC<SnackbarProps> = ({
         return null;
     }
 
+    const toneIcon: IconName | undefined =
+        tone === "success"
+            ? "Success"
+            : tone === "warning"
+              ? "Warning"
+              : tone === "danger"
+                ? "Error"
+                : (void 0);
+    const toneLabel: string | undefined =
+        tone === "success"
+            ? t("success")
+            : tone === "warning"
+              ? t("warning")
+              : tone === "danger"
+                ? t("error")
+                : (void 0);
+
     return (
         <Portal>
             <div {...rest} ref={ref} className={cx("snackbar", `snackbar--${anchor}`, className)}>
@@ -142,7 +161,17 @@ const Snackbar: FC<SnackbarProps> = ({
                     aria-live="polite"
                     aria-atomic="true"
                 >
-                    <span className="snackbar__message">{message}</span>
+                    {toneIcon === (void 0) ? null : (
+                        <span className="snackbar__status-icon" aria-hidden="true">
+                            <Icon name={toneIcon} size={16} />
+                        </span>
+                    )}
+                    <span className="snackbar__message">
+                        {toneLabel === (void 0) ? null : (
+                            <VisuallyHidden>{`${toneLabel}: `}</VisuallyHidden>
+                        )}
+                        {message}
+                    </span>
                     {actionLabel === (void 0) ? null : (
                         <Button
                             className="snackbar__action"

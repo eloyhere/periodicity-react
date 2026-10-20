@@ -21,6 +21,7 @@ import useControllableState from "../../foundation/useControllableState";
 import useMergedRef from "../../foundation/useMergedRef";
 import type { PickerDataAttributes } from "../shared/native";
 import PickerField from "../shared/PickerField";
+import { useInternational, type InternationalContextValue } from "../../../international";
 import "./DateTimePicker.css";
 
 interface DateTimeParts {
@@ -290,7 +291,7 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
     disabled = false,
     readOnly = false,
     required = false,
-    placeholder = "Select date and time",
+    placeholder,
     id,
     className = "",
     step,
@@ -302,6 +303,8 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
     ref,
     ...rest
 }: DateTimePickerProps) => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedPlaceholder: string = placeholder ?? t("selectDateTime");
     const generatedId: string = useId();
     const inputId: string = id ?? generatedId;
     const panelId: string = `${inputId}-panel`;
@@ -652,7 +655,7 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
 
     const displayValue: string =
         selectedValue.length === 0
-            ? placeholder
+            ? resolvedPlaceholder
             : `${parts.year}/${pad(parts.month)}/${pad(parts.day)} ${pad(parts.hour)}:${pad(parts.minute)}`;
 
     return (
@@ -761,7 +764,7 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
                         ref={gridRef}
                         className="date-time-picker__days"
                         role="grid"
-                        aria-label="Days"
+                        aria-label={t("days")}
                         aria-colcount={7}
                         aria-rowcount={weeks.length}
                         aria-readonly={readOnly ? "true" : (void 0)}

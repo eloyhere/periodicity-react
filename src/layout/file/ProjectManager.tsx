@@ -36,6 +36,11 @@ import type { StructureNode } from "./structure";
 import { parseStructure } from "./structure";
 import Preview from "./Preview";
 import Editor from "./Editor";
+import {
+    useInternational,
+    type CommonMessageKey,
+    type InternationalContextValue,
+} from "../../international";
 import "./ProjectManager.css";
 
 /**
@@ -87,18 +92,22 @@ export interface ProjectManagerProps extends Omit<HTMLAttributes<HTMLDivElement>
     ref?: Ref<HTMLDivElement>;
 }
 
-const modes: readonly NavigationItem[] = [
-    { value: "files", label: "Files", icon: "Folder" },
-    { value: "preview", label: "Preview", icon: "View" },
-    { value: "edit", label: "Edit", icon: "Pencil" },
-    { value: "architecture", label: "Architecture", icon: "Tree" },
-    { value: "dependencies", label: "Dependencies", icon: "Link" },
-    { value: "imports", label: "Imports", icon: "Download" },
-    { value: "exports", label: "Exports", icon: "Upload" },
+interface ProjectModeOption extends Omit<NavigationItem, "label"> {
+    label: CommonMessageKey;
+}
+
+const modes: readonly ProjectModeOption[] = [
+    { value: "files", label: "files", icon: "Folder" },
+    { value: "preview", label: "preview", icon: "View" },
+    { value: "edit", label: "edit", icon: "Pencil" },
+    { value: "architecture", label: "architecture", icon: "Tree" },
+    { value: "dependencies", label: "dependencies", icon: "Link" },
+    { value: "imports", label: "imports", icon: "Download" },
+    { value: "exports", label: "exports", icon: "Upload" },
 ];
 
 const modeSet: ReadonlySet<string> = new Set<string>(
-    modes.map((item: NavigationItem): string => item.value),
+    modes.map((item: ProjectModeOption): string => item.value),
 );
 
 /**
@@ -373,6 +382,10 @@ const ProjectManager: FC<ProjectManagerProps> = ({
     ref,
     ...rest
 }: ProjectManagerProps) => {
+    const { t }: InternationalContextValue = useInternational();
+    const modeItems: readonly NavigationItem[] = modes.map(
+        (item: ProjectModeOption): NavigationItem => ({ ...item, label: t(item.label) }),
+    );
     const initialFiles: readonly FileNode[] = files ?? defaultFiles ?? project.files;
     const [internalFiles, setInternalFiles]: [
         readonly FileNode[],
@@ -423,9 +436,9 @@ const ProjectManager: FC<ProjectManagerProps> = ({
         (dependency: ProjectDependency): boolean => dependency.kind === "reference",
     );
     const filesDetail: string = [
-        `${fileNodes.length} files`,
-        `${packageDependencies.length} packages`,
-        `${references.length} references`,
+        t("detailCount", { label: t("files"), count: fileNodes.length }),
+        t("detailCount", { label: t("packages"), count: packageDependencies.length }),
+        t("detailCount", { label: t("references"), count: references.length }),
     ].join(" · ");
 
     const changeMode: (next: ProjectMode) => void = (next: ProjectMode): void => {
@@ -602,24 +615,24 @@ const ProjectManager: FC<ProjectManagerProps> = ({
             ref={ref}
             role={role}
             className={cx("project-manager", className)}
-            aria-label={ariaLabel ?? `${project.name} project manager`}
+            aria-label={ariaLabel ?? t("projectManager", { name: project.name })}
             data-project={project.id}
             data-mode={activeMode}
             data-selected-id={selected === null ? (void 0) : selected.id}
             data-file-count={fileNodes.length}
         >
-            <aside className="project-manager__modes" aria-label="Project views">
+            <aside className="project-manager__modes" aria-label={t("projectViews")}>
                 <NavigationView
-                    items={modes}
+                    items={modeItems}
                     value={activeMode}
                     onValueChange={(value: string): void => {
                         changeMode(value as ProjectMode);
                     }}
-                    ariaLabel="Project views"
+                    ariaLabel={t("projectViews")}
                 />
             </aside>
 
-            <section className="project-manager__main" aria-label="Project workspace">
+            <section className="project-manager__main" aria-label={t("projectWorkspace")}>
                 <header className="project-manager__toolbar">
                     <div className="project-manager__identity">
                         <span className="project-manager__eyebrow">{project.name}</span>
@@ -636,7 +649,7 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                             icon="Upload"
                             onClick={(): void => inputRef.current?.click()}
                         >
-                            Import
+                            {t("import")}
                         </Button>
                         <Button
                             size="sm"
@@ -644,14 +657,14 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                             icon="Download"
                             onClick={exportProject}
                         >
-                            Export
+                            {t("export")}
                         </Button>
                         <input
                             ref={inputRef}
                             className="visually-hidden"
                             type="file"
                             accept={importAccept}
-                            aria-label="Import project file"
+                            aria-label={t("importProjectFile")}
                             onChange={importProject}
                         />
                     </div>
@@ -663,18 +676,18 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                         onRouteChange={(route: string): void => {
                             changeMode(route as ProjectMode);
                         }}
-                        ariaLabel="Project views"
+                        ariaLabel={t("projectViews")}
                     >
                         <Page route="files">
                             <section className="project-manager__page">
                                 {renderPageTitle(
-                                    "Project files",
+                                    t("projectFiles"),
                                     filesDetail,
                                 )}
                                 <div className="project-manager__files-layout">
                                     <aside
                                         className="project-manager__files-pane"
-                                        aria-label="Project files"
+                                        aria-label={t("projectFiles")}
                                     >
                                         <ProjectFileTree
                                             files={activeFiles}
@@ -690,29 +703,37 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                                         <span className="project-manager__stat-value">
                                             {fileNodes.length}
                                         </span>
-                                        <span className="project-manager__stat-label">Files</span>
+                                        <span className="project-manager__stat-label">
+                                            {t("files")}
+                                        </span>
                                     </div>
                                     <div className="project-manager__stat">
                                         <span className="project-manager__stat-value">
                                             {graph.edges.length}
                                         </span>
-                                        <span className="project-manager__stat-label">Edges</span>
+                                        <span className="project-manager__stat-label">
+                                            {t("edges")}
+                                        </span>
                                     </div>
                                     <div className="project-manager__stat">
                                         <span className="project-manager__stat-value">
                                             {packageDependencies.length}
                                         </span>
-                                        <span className="project-manager__stat-label">Packages</span>
+                                        <span className="project-manager__stat-label">
+                                            {t("packages")}
+                                        </span>
                                     </div>
                                     <div className="project-manager__stat">
                                         <span className="project-manager__stat-value">
                                             {references.length}
                                         </span>
-                                        <span className="project-manager__stat-label">References</span>
+                                        <span className="project-manager__stat-label">
+                                            {t("references")}
+                                        </span>
                                     </div>
                                 </div>
                                 {selected === null ? (
-                                    <p className="project-manager__empty">Select a file to begin.</p>
+                                    <p className="project-manager__empty">{t("selectFile")}</p>
                                 ) : (
                                     <div className="project-manager__file-summary">
                                         <div className="project-manager__file-summary-head">
@@ -720,15 +741,15 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                                             <Text variant="h4">{selected.name}</Text>
                                         </div>
                                         <dl className="project-manager__facts">
-                                            <dt>Path</dt>
+                                            <dt>{t("path")}</dt>
                                             <dd>{selected.path}</dd>
-                                            <dt>Language</dt>
+                                            <dt>{t("language")}</dt>
                                             <dd>{selected.language ?? project.language}</dd>
-                                            <dt>Layer</dt>
+                                            <dt>{t("layer")}</dt>
                                             <dd>{selected.layer ?? inferLayer(selected.path)}</dd>
-                                            <dt>Imports</dt>
+                                            <dt>{t("imports")}</dt>
                                             <dd>{imports.length}</dd>
-                                            <dt>Exports</dt>
+                                            <dt>{t("exports")}</dt>
                                             <dd>{exports.length}</dd>
                                         </dl>
                                     </div>
@@ -741,11 +762,11 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                         <Page route="preview">
                             <section className="project-manager__page">
                                 {renderPageTitle(
-                                    "Preview",
-                                    selected === null ? "No file selected" : selected.path,
+                                    t("preview"),
+                                    selected === null ? t("noFileSelected") : selected.path,
                                 )}
                                 {selected === null ? (
-                                    <p className="project-manager__empty">Select a file to preview.</p>
+                                    <p className="project-manager__empty">{t("selectFile")}</p>
                                 ) : (
                                     <Preview key={selected.id} file={selected} />
                                 )}
@@ -755,11 +776,11 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                         <Page route="edit">
                             <section className="project-manager__page">
                                 {renderPageTitle(
-                                    "Edit",
-                                    selected === null ? "No file selected" : selected.path,
+                                    t("edit"),
+                                    selected === null ? t("noFileSelected") : selected.path,
                                 )}
                                 {selected === null ? (
-                                    <p className="project-manager__empty">Select a file to edit.</p>
+                                    <p className="project-manager__empty">{t("selectFile")}</p>
                                 ) : (
                                     <Editor
                                         key={selected.id}
@@ -776,13 +797,13 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                         <Page route="architecture">
                             <section className="project-manager__page">
                                 {renderPageTitle(
-                                    "Architecture",
-                                    "Project node tree and the selected file's parsed structure",
+                                    t("architecture"),
+                                    t("architectureDetail"),
                                 )}
                                 <div className="project-manager__architecture">
                                     <aside
                                         className="project-manager__files-pane"
-                                        aria-label="Project structure"
+                                        aria-label={t("projectStructure")}
                                     >
                                         <ProjectFileTree
                                             files={activeFiles}
@@ -795,7 +816,7 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                                     <div className="project-manager__structure">
                                         {selected === null ? (
                                             <p className="project-manager__empty">
-                                                Select a file to inspect its structure.
+                                                {t("selectFile")}
                                             </p>
                                         ) : (
                                             <>
@@ -806,7 +827,7 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                                                     nodes={
                                                         parseStructure(selected).children ?? []
                                                     }
-                                                    aria-label="Selected file structure"
+                                                    aria-label={t("selectedFileStructure")}
                                                 />
                                             </>
                                         )}
@@ -818,14 +839,14 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                         <Page route="dependencies">
                             <section className="project-manager__page">
                                 {renderPageTitle(
-                                    "Dependencies",
-                                    "Packages, references, and internal file edges",
+                                    t("dependencies"),
+                                    t("dependenciesDetail"),
                                 )}
                                 <div className="project-manager__dependency-grid">
                                     <div>
-                                        <h4 className="project-manager__layer-title">Packages</h4>
+                                        <h4 className="project-manager__layer-title">{t("packages")}</h4>
                                         {packageDependencies.length === 0 ? (
-                                            <p className="project-manager__empty">No packages.</p>
+                                            <p className="project-manager__empty">{t("noPackages")}</p>
                                         ) : (
                                             <ul className="project-manager__dependency-list">
                                                 {packageDependencies.map(
@@ -843,9 +864,9 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                                         )}
                                     </div>
                                     <div>
-                                        <h4 className="project-manager__layer-title">References</h4>
+                                        <h4 className="project-manager__layer-title">{t("references")}</h4>
                                         {references.length === 0 ? (
-                                            <p className="project-manager__empty">No references.</p>
+                                            <p className="project-manager__empty">{t("noReferences")}</p>
                                         ) : (
                                             <ul className="project-manager__dependency-list">
                                                 {references.map(
@@ -860,9 +881,9 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                                         )}
                                     </div>
                                     <div>
-                                        <h4 className="project-manager__layer-title">File edges</h4>
+                                        <h4 className="project-manager__layer-title">{t("fileEdges")}</h4>
                                         {graph.edges.length === 0 ? (
-                                            <p className="project-manager__empty">No edges.</p>
+                                            <p className="project-manager__empty">{t("noEdges")}</p>
                                         ) : (
                                             <ul className="project-manager__dependency-list">
                                                 {graph.edges.slice(0, 40).map(
@@ -887,11 +908,11 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                         <Page route="imports">
                             <section className="project-manager__page">
                                 {renderPageTitle(
-                                    "Imports",
-                                    selected === null ? "No file selected" : selected.path,
+                                    t("imports"),
+                                    selected === null ? t("noFileSelected") : selected.path,
                                 )}
                                 {imports.length === 0 ? (
-                                    <p className="project-manager__empty">No imports in this file.</p>
+                                    <p className="project-manager__empty">{t("noImports")}</p>
                                 ) : (
                                     <ul className="project-manager__relationship-list">
                                         {imports.map((record: ImportRecord): ReactNode => {
@@ -935,11 +956,11 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                         <Page route="exports">
                             <section className="project-manager__page">
                                 {renderPageTitle(
-                                    "Exports",
-                                    selected === null ? "No file selected" : selected.path,
+                                    t("exports"),
+                                    selected === null ? t("noFileSelected") : selected.path,
                                 )}
                                 {exports.length === 0 ? (
-                                    <p className="project-manager__empty">No exports in this file.</p>
+                                    <p className="project-manager__empty">{t("noExports")}</p>
                                 ) : (
                                     <ul className="project-manager__relationship-list">
                                         {exports.map((record: ExportRecord): ReactNode => (
@@ -950,7 +971,7 @@ const ProjectManager: FC<ProjectManagerProps> = ({
                                                 <span>{record.name}</span>
                                                 {record.line === (void 0) ? null : (
                                                     <span className="project-manager__muted">
-                                                        line {record.line}
+                                                        {t("lineNumber", { line: record.line })}
                                                     </span>
                                                 )}
                                             </li>

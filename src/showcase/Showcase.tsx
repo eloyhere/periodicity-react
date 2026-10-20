@@ -47,6 +47,9 @@ import {
     type ComponentRecord,
     type ComponentSection,
 } from "./componentCatalogue";
+import { shellMessages, type ShellMessageKey, type ShellMessages } from "./shellMessages";
+import { themeNames } from "./themeMessages";
+import { localizeComponentName } from "./componentNames";
 import "./Foundations.css";
 import "./Showcase.css";
 
@@ -236,11 +239,14 @@ const Showcase: FC = () => {
     ] = useState<ThemePresetId>("default");
     const [locale, setLocale]: [LocaleCode, Dispatch<SetStateAction<LocaleCode>>] =
         useState<LocaleCode>("en-GB");
+    const shell: ShellMessages = shellMessages[locale] ?? shellMessages["en-GB"];
     const isChinese: boolean = locale.startsWith("zh");
     const localizedThemeOptions: readonly ShowcaseOption[] = themePresets.map(
         (preset: ThemePreset): ShowcaseOption => ({
             value: preset.id,
-            label: `${preset.label.zh} · ${preset.label.en}`,
+            label: locale.startsWith("en")
+                ? (themeNames[locale]?.[preset.id] ?? preset.label.en)
+                : `${themeNames[locale]?.[preset.id] ?? preset.label.en} · ${preset.label.en}`,
         }),
     );
     const localizedLocaleOptions: readonly ShowcaseOption[] = localeOptions.map(
@@ -258,7 +264,7 @@ const Showcase: FC = () => {
      * the current page while still skipping the sidebar.
      * @param event - The skip link click event.
      * @example
-     * <a href="#main-content" onClick={handleSkipToContent}>{isChinese ? "跳到内容" : "Skip to content"}</a>
+     * <a href="#main-content" onClick={handleSkipToContent}>{shell.skip}</a>
      */
     const handleSkipToContent: (event: MouseEvent<HTMLAnchorElement>) => void = (
         event: MouseEvent<HTMLAnchorElement>,
@@ -309,7 +315,7 @@ const Showcase: FC = () => {
                         href="#main-content"
                         onClick={handleSkipToContent}
                     >
-                        {isChinese ? "跳到内容" : "Skip to content"}
+                        {shell.skip}
                     </Link>
                     <Coordinator
                         className="showcase-coordinator"
@@ -338,12 +344,11 @@ const Showcase: FC = () => {
                                                 key={category.id}
                                             >
                                                 <Select
-                                                    label={
-                                                        isChinese
-                                                            ? category.label
-                                                            : category.labelEn
-                                                    }
-                                                    options={category.options}
+                                                    label={shell[category.id as ShellMessageKey]}
+                                                    options={category.options.map((option: ShowcaseOption): ShowcaseOption => ({
+                                                        ...option,
+                                                        label: localizeComponentName(option.label, locale),
+                                                    }))}
                                                     value={selected}
                                                     onChange={navigate}
                                                 />
@@ -362,15 +367,15 @@ const Showcase: FC = () => {
                             >
                                 <Toolbar
                                     title="Periodicity"
-                                    subtitle={isChinese ? "设计系统" : "Design system"}
+                                    subtitle={shell.designSystem}
                                     navigationIcon="i"
-                                    navigationLabel={isChinese ? "关于 Periodicity" : "About Periodicity"}
+                                    navigationLabel={shell.aboutTitle}
                                     onNavigationClick={(): void => setAboutOpen(true)}
                                     actions={
                                         <div className="showcase-toolbar-actions">
                                             <Select
                                                 size="sm"
-                                                label={isChinese ? "主题" : "Theme"}
+                                                label={shell.theme}
                                                 options={localizedThemeOptions}
                                                 value={themePreset}
                                                 onChange={(value: string): void =>
@@ -379,7 +384,7 @@ const Showcase: FC = () => {
                                             />
                                             <Select
                                                 size="sm"
-                                                label={isChinese ? "语言" : "Language"}
+                                                label={shell.language}
                                                 options={localizedLocaleOptions}
                                                 value={locale}
                                                 onChange={(value: string): void =>
@@ -420,7 +425,7 @@ const Showcase: FC = () => {
                                     tabIndex={-1}
                                     variant="h1"
                                 >
-                                    {entry.title}
+                                    {localizeComponentName(entry.title, locale)}
                                 </Text>
                                 <Text className="showcase-page__lead" variant="body" tone="muted">
                                     {entry.description}
@@ -430,14 +435,14 @@ const Showcase: FC = () => {
                                 <div className="showcase-page__focus">
                                     <span className="showcase-page__focus-copy">
                                         <Text variant="label" tone="accent">
-                                            {entry.label}
+                                            {localizeComponentName(entry.label, locale)}
                                         </Text>
                                         <Text variant="body-sm" tone="muted">
-                                            {`Live demo · ${demoLabel}`}
+                                            {`${shell.liveDemo} · ${demoLabel}`}
                                         </Text>
                                     </span>
                                     <Text variant="body-sm" tone="muted">
-                                        The full family page stays below.
+                                        {shell.fullFamily}
                                     </Text>
                                 </div>
                             )}
@@ -459,7 +464,7 @@ const Showcase: FC = () => {
                                         });
                                     }}
                                 >
-                                    {isChinese ? "返回顶部" : "Back to top"}
+                                    {shell.backToTop}
                                 </Anchor>
                             </footer>
                         </article>
@@ -469,11 +474,11 @@ const Showcase: FC = () => {
                     <Dialog
                         open={aboutOpen}
                         size="sm"
-                        title={isChinese ? "关于 Periodicity" : "About Periodicity"}
-                        eyebrow={isChinese ? "设计系统" : "Design system"}
+                        title={shell.aboutTitle}
+                        eyebrow={shell.designSystem}
                         onClose={(): void => setAboutOpen(false)}
                         footer={
-                            <Button onClick={(): void => setAboutOpen(false)}>{isChinese ? "关闭" : "Close"}</Button>
+                            <Button onClick={(): void => setAboutOpen(false)}>{shell.close}</Button>
                         }
                     >
                         <div className="showcase-about">
@@ -483,9 +488,7 @@ const Showcase: FC = () => {
                                 {isChinese ? " · Apache 2.0 许可证" : " · Apache License 2.0"}
                             </p>
                             <p>
-                                {isChinese
-                                    ? "面向产品界面、管理后台和数据密集型应用的 Material 风格 React 组件库。"
-                                    : "A Material-inspired React component library for product interfaces, admin tools, and data-heavy applications."}
+                                {shell.aboutLead}
                             </p>
                             <p className="showcase-about__links">
                                 <Link
@@ -501,7 +504,7 @@ const Showcase: FC = () => {
                                     npm
                                 </Link>
                             </p>
-                            <h3>{isChinese ? "依赖组件" : "Dependencies"}</h3>
+                            <h3>{shell.dependencies}</h3>
                             <ul>
                                 <li>React 19 / React DOM 19</li>
                                 <li>CodeMirror 6</li>

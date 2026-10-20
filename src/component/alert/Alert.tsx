@@ -8,6 +8,7 @@ import {
 import cx from "../foundation/cx";
 import useControllableState from "../foundation/useControllableState";
 import Icon, { type IconName } from "../icon/Icon";
+import VisuallyHidden from "../foundation/VisuallyHidden";
 import Surface, { type SurfaceTone } from "../surface/Surface";
 import { useInternational, type InternationalContextValue } from "../../international";
 import "./Alert.css";
@@ -119,6 +120,14 @@ const Alert: FC<AlertProps> = ({
     const surfaceTone: SurfaceTone = SurfaceTones[tone];
     const iconName: IconName = icon ?? DefaultIcons[tone];
     const role: AriaRole = roleProp ?? (tone === "danger" ? "alert" : "status");
+    const statusLabel: string | undefined =
+        tone === "success"
+            ? t("success")
+            : tone === "warning"
+              ? t("warning")
+              : tone === "danger"
+                ? t("error")
+                : (void 0);
 
     const handleDismiss: () => void = (): void => {
         setVisible(false);
@@ -150,7 +159,12 @@ const Alert: FC<AlertProps> = ({
                         <Icon name={iconName} size={17} />
                     </span>
                     <div className="alert__copy">
-                        <div className="alert__title">{title}</div>
+                        <div className="alert__title">
+                            {statusLabel === (void 0) ? null : (
+                                <VisuallyHidden>{`${statusLabel}: `}</VisuallyHidden>
+                            )}
+                            {title}
+                        </div>
                         {description === (void 0) || description === null || description === false ? null : (
                             <div className="alert__description">{description}</div>
                         )}

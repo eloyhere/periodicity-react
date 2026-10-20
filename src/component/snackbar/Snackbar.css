@@ -127,3 +127,19 @@
     user-select: text;
     -webkit-user-select: text;
 }
+
+.snackbar__status-icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+}
+
+.snackbar__status-icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+}

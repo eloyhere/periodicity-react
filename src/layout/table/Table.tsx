@@ -380,8 +380,10 @@ const Table: <Row>(props: TableProps<Row>) => ReactElement = <Row,>({
                                                             }
                                                             label={
                                                                 <span className="visually-hidden">
-                                                                    Select row {entry.index + 1} of{" "}
-                                                                    {entries.length}
+                                                                    {t("selectRow", {
+                                                                        index: entry.index + 1,
+                                                                        total: entries.length,
+                                                                    })}
                                                                 </span>
                                                             }
                                                         />

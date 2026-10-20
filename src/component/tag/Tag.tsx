@@ -100,7 +100,7 @@ const Tag: FC<TagProps> = ({
     ...rest
 }: TagProps) => {
     const mergedRef: RefCallback<HTMLElement> = useMergedRef<HTMLElement>(ref);
-    const ripple: RippleHandlers = useRipple({ trigger: "click", disabled });
+    const ripple: RippleHandlers = useRipple({ trigger: "both", disabled });
     const handlePointerDown: (event: PointerEvent<HTMLElement>) => void = (
         event: PointerEvent<HTMLElement>,
     ): void => {
@@ -131,6 +131,15 @@ const Tag: FC<TagProps> = ({
     const groupLabel: string | undefined = ariaLabel ?? (labelText.length > 0 ? labelText : (void 0));
     const iconSize: number = size === "sm" ? 12 : 14;
     const removeIconSize: number = size === "sm" ? 12 : 13;
+    const statusIcon: IconName | undefined =
+        icon ??
+        (tone === "success"
+            ? "Success"
+            : tone === "warning"
+              ? "Warning"
+              : tone === "danger"
+                ? "Error"
+                : (void 0));
     const classes: string = cx(
         "tag",
         `tag--${tone}`,
@@ -156,7 +165,9 @@ const Tag: FC<TagProps> = ({
 
     const content: ReactNode = (
         <>
-            {icon === (void 0) ? null : <Icon className="tag__icon" name={icon} size={iconSize} />}
+            {statusIcon === (void 0) ? null : (
+                <Icon className="tag__icon" name={statusIcon} size={iconSize} />
+            )}
             {visibleLabel === (void 0) || visibleLabel === null || visibleLabel === false ? null : (
                 <span className="tag__label">{visibleLabel}</span>
             )}

@@ -8,6 +8,7 @@ import type {
 import cx from "../../component/foundation/cx";
 import Button from "../../component/button/Button";
 import "../coordinator/Coordinator.css";
+import { useInternational, type InternationalContextValue } from "../../international";
 
 /**
  * Props for a Material toolbar row.
@@ -17,7 +18,7 @@ import "../coordinator/Coordinator.css";
  * @example
  * <Toolbar title="Explore" navigationIcon="←" actions={<Button>Save</Button>} />
  */
-export interface ToolbarProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
+export interface ToolbarProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
     navigationIcon?: ReactNode;
     navigationLabel?: string;
     onNavigationClick?: (event: ReactMouseEvent<HTMLButtonElement>) => void;
@@ -27,7 +28,7 @@ export interface ToolbarProps extends Omit<HTMLAttributes<HTMLElement>, "title">
     children?: ReactNode;
     ariaLabel?: string;
     className?: string;
-    ref?: Ref<HTMLElement>;
+    ref?: Ref<HTMLDivElement>;
 }
 
 /**
@@ -40,7 +41,7 @@ export interface ToolbarProps extends Omit<HTMLAttributes<HTMLElement>, "title">
  */
 const Toolbar: FC<ToolbarProps> = ({
     navigationIcon,
-    navigationLabel = "Back",
+    navigationLabel,
     onNavigationClick,
     title,
     subtitle,
@@ -51,8 +52,11 @@ const Toolbar: FC<ToolbarProps> = ({
     ref,
     ...rest
 }: ToolbarProps) => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedNavigationLabel: string = navigationLabel ?? t("back");
+
     return (
-        <header
+        <div
             {...rest}
             ref={ref}
             className={cx("toolbar", className)}
@@ -65,7 +69,7 @@ const Toolbar: FC<ToolbarProps> = ({
                     variant="ghost"
                     size="sm"
                     className="toolbar__navigation"
-                    aria-label={navigationLabel}
+                    aria-label={resolvedNavigationLabel}
                     onClick={onNavigationClick}
                 >
                     {navigationIcon}
@@ -79,7 +83,7 @@ const Toolbar: FC<ToolbarProps> = ({
             </div>
             {children === (void 0) ? null : <div className="toolbar__content">{children}</div>}
             {actions === (void 0) ? null : <div className="toolbar__actions">{actions}</div>}
-        </header>
+        </div>
     );
 };
 

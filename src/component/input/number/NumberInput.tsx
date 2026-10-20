@@ -19,6 +19,7 @@ import Icon from "../../icon/Icon";
 import cx from "../../foundation/cx";
 import useField, { type FieldState } from "../../foundation/useField";
 import Surface from "../../surface/Surface";
+import { useInternational, type InternationalContextValue } from "../../../international";
 import "./NumberInput.css";
 
 /**
@@ -232,6 +233,7 @@ const NumberInput: FC<NumberInputProps> = ({
     ref,
     ...rest
 }: NumberInputProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const field: FieldState = useField({ id, label, hint, error });
     const controlled: boolean = value !== (void 0);
     const [uncontrolledValue, setUncontrolledValue]: [number | null, (next: number | null) => void] =
@@ -422,7 +424,7 @@ const NumberInput: FC<NumberInputProps> = ({
                             <button
                                 type="button"
                                 className="number-field__step"
-                                aria-label="Decrease value"
+                                aria-label={t("decreaseValue")}
                                 disabled={atMinimum}
                                 onMouseDown={preventFocusLoss}
                                 onClick={handleDecrease}
@@ -432,7 +434,7 @@ const NumberInput: FC<NumberInputProps> = ({
                             <button
                                 type="button"
                                 className="number-field__step"
-                                aria-label="Increase value"
+                                aria-label={t("increaseValue")}
                                 disabled={atMaximum}
                                 onMouseDown={preventFocusLoss}
                                 onClick={handleIncrease}

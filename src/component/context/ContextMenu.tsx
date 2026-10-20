@@ -27,6 +27,7 @@ import useControllableState from "../foundation/useControllableState";
 import useDismiss from "../foundation/useDismiss";
 import useMergedRef from "../foundation/useMergedRef";
 import Surface from "../surface/Surface";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./ContextMenu.css";
 
 /**
@@ -137,6 +138,7 @@ const ContextMenu: FC<ContextMenuProps> = ({
     onPointerCancel,
     ...rest
 }: ContextMenuProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const zoneRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
     const panelRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
     const longPressTimerRef: RefObject<number | null> = useRef<number | null>(null);
@@ -408,7 +410,7 @@ const ContextMenu: FC<ContextMenuProps> = ({
     const hasMenu: boolean = menu !== (void 0) && menu !== null && menu !== false;
     const hasHeader: boolean = header !== (void 0) && header !== null && header !== false;
     const hasFooter: boolean = footer !== (void 0) && footer !== null && footer !== false;
-    const menuLabel: string = ariaLabelAttribute ?? ariaLabel ?? "Context menu";
+    const menuLabel: string = ariaLabelAttribute ?? ariaLabel ?? t("contextMenu");
 
     return (
         <div

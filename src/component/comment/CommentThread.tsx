@@ -16,6 +16,7 @@ import Avatar from "../thumb/Avatar";
 import Button from "../button/Button";
 import Icon from "../icon/Icon";
 import Mention, { type MentionItem, type MentionSearch } from "../mention/Mention";
+import { useInternational, type InternationalContextValue } from "../../international";
 import Spinner from "../progress/Spinner";
 import cx from "../foundation/cx";
 import Surface from "../surface/Surface";
@@ -160,9 +161,9 @@ const CommentThread: FC<CommentThreadProps> = ({
     onMention,
     currentUser = "",
     maxDepth = 6,
-    empty = "No comments yet",
+    empty,
     loading = false,
-    loadingLabel = "Loading comments",
+    loadingLabel,
     disabled = false,
     header,
     footer,
@@ -173,6 +174,9 @@ const CommentThread: FC<CommentThreadProps> = ({
     ref,
     ...rest
 }: CommentThreadProps) => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedEmpty: ReactNode = empty ?? t("empty");
+    const resolvedLoadingLabel: string = loadingLabel ?? t("loadingComments");
     const tree: TreeAdapter<CommentData> = useMemo((): TreeAdapter<CommentData> => {
         if (adapter !== (void 0)) {
             return adapter;
@@ -299,10 +303,10 @@ const CommentThread: FC<CommentThreadProps> = ({
 
             {loading ? (
                 <div className="comment-thread__state">
-                    {slots?.loading ?? <Spinner size="sm" label={loadingLabel} />}
+                    {slots?.loading ?? <Spinner size="sm" label={resolvedLoadingLabel} />}
                 </div>
             ) : rows.length === 0 ? (
-                <div className="comment-thread__empty">{slots?.empty ?? empty}</div>
+                <div className="comment-thread__empty">{slots?.empty ?? resolvedEmpty}</div>
             ) : null}
 
             {loading

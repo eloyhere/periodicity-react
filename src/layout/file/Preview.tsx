@@ -8,7 +8,11 @@ import type { RenderedFile } from "./render";
 import { renderFile } from "./render";
 import type { StructureKind, StructureNode } from "./structure";
 import { parseStructure } from "./structure";
-import { useInternational, type InternationalContextValue } from "../../international";
+import {
+    useInternational,
+    type CommonMessageKey,
+    type InternationalContextValue,
+} from "../../international";
 import "./FileTools.css";
 
 /**
@@ -58,9 +62,13 @@ export interface PreviewProps extends Omit<HTMLAttributes<HTMLElement>, "childre
     onCopyError?: (error: unknown, file: FileNode) => void;
     /** Copy button label; defaults to the localised Copy label. */
     copyLabel?: string;
+    /** Rendered-view label; defaults to the localised Rendered label. */
     renderedLabel?: string;
+    /** Source-view label; defaults to the localised Source label. */
     sourceLabel?: string;
+    /** Structure-view label; defaults to the localised Structure label. */
     structureLabel?: string;
+    /** Code-view label; defaults to the localised Code label. */
     codeLabel?: string;
     showCopy?: boolean;
     showViewSwitch?: boolean;
@@ -74,21 +82,21 @@ interface StructureBranchProps {
     depth: number;
 }
 
-const kindLabels: Readonly<Record<StructureKind, string>> = {
-    file: "file",
-    tag: "tag",
-    attribute: "attr",
-    section: "section",
-    paragraph: "text",
-    sentence: "sentence",
-    function: "function",
-    class: "class",
-    method: "method",
-    property: "property",
-    comment: "comment",
-    constant: "variable",
-    type: "type",
-    interface: "interface",
+const KindMessageKeys: Readonly<Record<StructureKind, CommonMessageKey>> = {
+    file: "kindFile",
+    tag: "kindTag",
+    attribute: "kindAttribute",
+    section: "kindSection",
+    paragraph: "kindParagraph",
+    sentence: "kindSentence",
+    function: "kindFunction",
+    class: "kindClass",
+    method: "kindMethod",
+    property: "kindProperty",
+    comment: "kindComment",
+    constant: "kindConstant",
+    type: "kindType",
+    interface: "kindInterface",
 };
 
 const summaryKinds: readonly StructureKind[] = [
@@ -125,6 +133,7 @@ const StructureBranch: FC<StructureBranchProps> = ({
     node,
     depth,
 }: StructureBranchProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const children: readonly StructureNode[] = node.children ?? [];
 
     return (
@@ -136,7 +145,7 @@ const StructureBranch: FC<StructureBranchProps> = ({
             aria-expanded={children.length > 0 ? true : (void 0)}
         >
             <div className="file-structure__row" data-kind={node.kind}>
-                <span className="file-structure__kind">{kindLabels[node.kind]}</span>
+                <span className="file-structure__kind">{t(KindMessageKeys[node.kind])}</span>
                 <span className="file-structure__label">{node.label}</span>
                 {node.line === (void 0) ? null : (
                     <span className="file-structure__line">L{node.line}</span>
@@ -176,10 +185,10 @@ const Preview: FC<PreviewProps> = ({
     onCopySuccess,
     onCopyError,
     copyLabel,
-    renderedLabel = "Rendered",
-    sourceLabel = "Source",
-    structureLabel = "Structure",
-    codeLabel = "Code",
+    renderedLabel,
+    sourceLabel,
+    structureLabel,
+    codeLabel,
     showCopy = true,
     showViewSwitch = true,
     showCodeViewSwitch = true,
@@ -190,6 +199,10 @@ const Preview: FC<PreviewProps> = ({
 }: PreviewProps): ReactNode => {
     const { t }: InternationalContextValue = useInternational();
     const resolvedCopyLabel: string = copyLabel ?? t("copy");
+    const resolvedRenderedLabel: string = renderedLabel ?? t("rendered");
+    const resolvedSourceLabel: string = sourceLabel ?? t("source");
+    const resolvedStructureLabel: string = structureLabel ?? t("structure");
+    const resolvedCodeLabel: string = codeLabel ?? t("code");
     const rendered: RenderedFile = useMemo((): RenderedFile => renderFile(file), [file]);
     const structure: StructureNode = useMemo(
         (): StructureNode => parseStructure(file),
@@ -268,19 +281,25 @@ const Preview: FC<PreviewProps> = ({
 
     const structureBody: ReactNode = (
         <div className="file-structure">
-            <div className="file-structure__summary" role="group" aria-label="Structure summary">
+            <div
+                className="file-structure__summary"
+                role="group"
+                aria-label={t("structureSummary")}
+            >
                 {summaryKinds.map((kind: StructureKind): ReactNode => {
                     const count: number = counts[kind] ?? 0;
 
                     return count === 0 ? null : (
                         <span key={kind} data-kind={kind}>
-                            {count} {kindLabels[kind]}
-                            {count === 1 ? "" : "s"}
+                            {t("structureSummaryItem", {
+                                label: t(KindMessageKeys[kind]),
+                                count,
+                            })}
                         </span>
                     );
                 })}
             </div>
-            <ul className="file-structure__tree" role="tree" aria-label="File structure">
+            <ul className="file-structure__tree" role="tree" aria-label={t("fileStructure")}>
                 {children.map(
                     (node: StructureNode): ReactNode => (
                         <StructureBranch key={node.id} node={node} depth={0} />
@@ -288,7 +307,7 @@ const Preview: FC<PreviewProps> = ({
                 )}
             </ul>
             {children.length === 0 ? (
-                <p className="file-structure__empty">No structure found.</p>
+                <p className="file-structure__empty">{t("noStructure")}</p>
             ) : null}
         </div>
     );
@@ -322,7 +341,7 @@ const Preview: FC<PreviewProps> = ({
             {...rest}
             ref={ref}
             className={cx("file-preview", "selectable", className)}
-            aria-label={ariaLabel ?? `${file.name} preview`}
+            aria-label={ariaLabel ?? t("filePreview", { name: file.name })}
             data-file-id={file.id}
             data-language={rendered.language}
             data-mode={rendered.mode}
@@ -333,7 +352,7 @@ const Preview: FC<PreviewProps> = ({
                 <span className="file-preview__name">{file.name}</span>
                 <span className="file-preview__meta">{rendered.language}</span>
                 <Badge tone="neutral">{rendered.mode}</Badge>
-                <div className="file-preview__actions" role="group" aria-label="Preview controls">
+                <div className="file-preview__actions" role="group" aria-label={t("previewControls")}>
                     {showViewSwitch ? (
                         <>
                             <Button
@@ -342,7 +361,7 @@ const Preview: FC<PreviewProps> = ({
                                 aria-pressed={activeView === "rendered"}
                                 onClick={(): void => changeView("rendered")}
                             >
-                                {renderedLabel}
+                                {resolvedRenderedLabel}
                             </Button>
                             <Button
                                 size="sm"
@@ -350,7 +369,7 @@ const Preview: FC<PreviewProps> = ({
                                 aria-pressed={activeView === "source"}
                                 onClick={(): void => changeView("source")}
                             >
-                                {sourceLabel}
+                                {resolvedSourceLabel}
                             </Button>
                         </>
                     ) : null}
@@ -362,7 +381,7 @@ const Preview: FC<PreviewProps> = ({
                                 aria-pressed={activeCodeView === "structure"}
                                 onClick={(): void => changeCodeView("structure")}
                             >
-                                {structureLabel}
+                                {resolvedStructureLabel}
                             </Button>
                             <Button
                                 size="sm"
@@ -370,7 +389,7 @@ const Preview: FC<PreviewProps> = ({
                                 aria-pressed={activeCodeView === "code"}
                                 onClick={(): void => changeCodeView("code")}
                             >
-                                {codeLabel}
+                                {resolvedCodeLabel}
                             </Button>
                         </>
                     ) : null}

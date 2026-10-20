@@ -49,10 +49,16 @@ export interface RippleHandlers {
  * @example
  * paintRipple(host, 120, 80);
  */
-export const paintRipple: (element: HTMLElement, clientX?: number, clientY?: number) => void = (
+export const paintRipple: (
     element: HTMLElement,
     clientX?: number,
     clientY?: number,
+    colourElement?: HTMLElement,
+) => void = (
+    element: HTMLElement,
+    clientX?: number,
+    clientY?: number,
+    colourElement?: HTMLElement,
 ): void => {
     const bounds: DOMRect = element.getBoundingClientRect();
 
@@ -72,7 +78,7 @@ export const paintRipple: (element: HTMLElement, clientX?: number, clientY?: num
     ripple.style.setProperty("--ripple-x", `${geometry.x}px`);
     ripple.style.setProperty("--ripple-y", `${geometry.y}px`);
     ripple.style.setProperty("--ripple-size", `${geometry.size}px`);
-    ripple.style.setProperty("--ripple-color", rippleColour(element));
+    ripple.style.setProperty("--ripple-color", rippleColour(colourElement ?? element));
     ripple.setAttribute("aria-hidden", "true");
     element.append(ripple);
 

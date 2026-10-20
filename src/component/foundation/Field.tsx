@@ -1,5 +1,6 @@
 import type { FC, ReactNode } from "react";
 import cx from "./cx";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./Field.css";
 
 /**
@@ -72,6 +73,7 @@ const Field: FC<FieldProps> = ({
     errorId,
     className = "",
 }: FieldProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const hasError: boolean = invalid && error !== (void 0) && error !== null && error !== false;
     const hasHint: boolean = hint !== (void 0) && hint !== null && hint !== false;
     const hasLabel: boolean = label !== (void 0) && label !== null && label !== false;
@@ -86,7 +88,7 @@ const Field: FC<FieldProps> = ({
                     *
                 </span>
             ) : null}
-            {optional ? <span className="field__optional">Optional</span> : null}
+            {optional ? <span className="field__optional">{t("optional")}</span> : null}
         </>
     );
 

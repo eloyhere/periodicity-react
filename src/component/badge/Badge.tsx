@@ -65,7 +65,7 @@ const Badge: FC<BadgeProps> = ({
     ref,
     ...rest
 }: BadgeProps) => {
-    const ripple: RippleHandlers = useRipple({ trigger: "click", disabled });
+    const ripple: RippleHandlers = useRipple({ trigger: "both", disabled });
     const hasLabel: boolean = ariaLabel !== (void 0) && ariaLabel.length > 0;
     const isCount: boolean = count !== (void 0);
     const display: ReactNode =

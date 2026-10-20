@@ -110,13 +110,19 @@ const relativeLuminance: (red: number, green: number, blue: number) => number = 
 const backgroundLuminance: (element: HTMLElement) => number | null = (
     element: HTMLElement,
 ): number | null => {
-    const style: CSSStyleDeclaration = window.getComputedStyle(element);
-    const channels: readonly [number, number, number, number] | null = parseColour(
-        style.backgroundColor,
-    );
+    let current: HTMLElement | null = element;
 
-    if (channels !== null && channels[3] >= 0.5) {
-        return relativeLuminance(channels[0], channels[1], channels[2]);
+    while (current !== null) {
+        const style: CSSStyleDeclaration = window.getComputedStyle(current);
+        const channels: readonly [number, number, number, number] | null = parseColour(
+            style.backgroundColor,
+        );
+
+        if (channels !== null && channels[3] >= 0.5) {
+            return relativeLuminance(channels[0], channels[1], channels[2]);
+        }
+
+        current = current.parentElement;
     }
 
     return null;

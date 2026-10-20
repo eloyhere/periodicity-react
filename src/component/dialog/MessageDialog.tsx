@@ -2,6 +2,7 @@ import type { FC, ReactElement, ReactNode } from "react";
 import Button from "../button/Button";
 import cx from "../foundation/cx";
 import Dialog, { type DialogProps } from "./Dialog";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./MessageDialog.css";
 
 /**
@@ -44,8 +45,9 @@ const MessageDialog: FC<MessageDialogProps> = ({
     className = "",
     ...rest
 }: MessageDialogProps): ReactElement => {
+    const { t }: InternationalContextValue = useInternational();
     const hasAction: boolean = actionLabel !== (void 0) || onAction !== (void 0);
-    const actionText: string = actionLabel ?? "OK";
+    const actionText: string = actionLabel ?? t("ok");
 
     const handleAction: () => void = (): void => {
         if (onAction !== (void 0)) {

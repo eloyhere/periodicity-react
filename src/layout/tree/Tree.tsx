@@ -679,7 +679,10 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
                             }}
                             label={
                                 <span className="visually-hidden">
-                                    Check node {entry.index + 1} of {visible.size}
+                                    {t("selectNode", {
+                                        index: entry.index + 1,
+                                        total: visible.size,
+                                    })}
                                 </span>
                             }
                         />
@@ -722,6 +725,7 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
             {...rest}
             ref={rootRef}
             role={role}
+            aria-label={rest["aria-label"] ?? t("tree")}
             className={cx("tree", virtual && "tree--virtual", disabled && "tree--disabled", className)}
             style={virtual ? { ...style, height } : style}
             aria-busy={loading ? "true" : rest["aria-busy"]}

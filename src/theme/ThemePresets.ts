@@ -9,6 +9,7 @@ import type { ThemeTokens } from "./ThemeContext";
  */
 export type ThemePresetId =
     | "accessible"
+    | "accessible-dark"
     | "protanopia"
     | "deuteranopia"
     | "tritanopia"
@@ -447,6 +448,47 @@ const presetSeeds: readonly ThemePresetSeed[] = [
             },
         },
     },
+    {
+        id: "accessible-dark",
+        label: { zh: "高对比度夜间", en: "High contrast dark" },
+        description: "AAA-oriented dark palette with white focus, strong borders, and a 3px ring.",
+        mode: "dark",
+        palette: {
+            background: "#000000",
+            surface: "#000000",
+            surfaceStrong: "#141414",
+            text: "#ffffff",
+            textMuted: "#e6e6e6",
+            textDisabled: "#a6a6a6",
+            divider: "#a6a6a6",
+            primary: "#9ecbff",
+            onPrimary: "#001b3f",
+            primaryContainer: "#003a75",
+            onPrimaryContainer: "#d6e8ff",
+            accent: "#ffb4ab",
+            secondary: "#7ee2a8",
+            tertiary: "#d0bcff",
+            success: "#7ee2a8",
+            warning: "#ffd166",
+            error: "#ffb4ab",
+            focusRing: "#ffffff",
+            inversePaper: "#ffffff",
+            overrides: {
+                "--focus-ring-width": "3px",
+                "--focus-ring-offset": "3px",
+                "--colourControlHighlight": "rgba(255, 255, 255, 0.28)",
+                "--colourHoverWash": "rgba(255, 255, 255, 0.14)",
+                "--colourActiveWash": "rgba(255, 255, 255, 0.24)",
+                "--state-disabled-opacity": "0.72",
+                "--scrim": "rgba(0, 0, 0, 0.9)",
+                "--colourScrim": "rgba(0, 0, 0, 0.9)",
+                "--colourTooltipPaper": "#ffffff",
+                "--colourOnInverse": "#000000",
+                "--colourOnInverseMuted": "rgba(0, 0, 0, 0.76)",
+                "--colourInverseAction": "#003a75",
+            },
+        },
+    },
     defaultSeed,
     {
         id: "dark",
@@ -487,7 +529,7 @@ const presetSeeds: readonly ThemePresetSeed[] = [
             text: "#151820",
             textMuted: "#4d5564",
             textDisabled: "#858d9b",
-            divider: "#c9d1df",
+            divider: "#7f8999",
             primary: "#005eb8",
             onPrimary: "#ffffff",
             primaryContainer: "#d6e8ff",
@@ -514,7 +556,7 @@ const presetSeeds: readonly ThemePresetSeed[] = [
             text: "#1b1a17",
             textMuted: "#565247",
             textDisabled: "#8c877a",
-            divider: "#d6d0c3",
+            divider: "#918b7e",
             primary: "#004f9e",
             onPrimary: "#ffffff",
             primaryContainer: "#d9e9ff",
@@ -541,7 +583,7 @@ const presetSeeds: readonly ThemePresetSeed[] = [
             text: "#201816",
             textMuted: "#5f504a",
             textDisabled: "#95837b",
-            divider: "#ddcec5",
+            divider: "#9b8a80",
             primary: "#a43a24",
             onPrimary: "#ffffff",
             primaryContainer: "#ffded4",

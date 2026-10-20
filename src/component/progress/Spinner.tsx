@@ -1,6 +1,7 @@
 import type { FC, HTMLAttributes, Ref } from "react";
 import cx from "../foundation/cx";
 import VisuallyHidden from "../foundation/VisuallyHidden";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./Spinner.css";
 
 /**
@@ -37,18 +38,22 @@ export interface SpinnerProps extends Omit<HTMLAttributes<HTMLSpanElement>, "chi
  */
 const Spinner: FC<SpinnerProps> = ({
     size = "md",
-    label = "Loading",
+    label,
     className = "",
     ref,
     ...rest
-}: SpinnerProps) => (
+}: SpinnerProps) => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedLabel: string = label ?? t("loading");
+    return (
     <span ref={ref} className={cx("spinner", `spinner--${size}`, className)} role="status" {...rest}>
         <svg className="spinner__svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <circle className="spinner__track" cx={12} cy={12} r={9} />
             <circle className="spinner__arc" cx={12} cy={12} r={9} pathLength={100} strokeDasharray="56 44" />
         </svg>
-        <VisuallyHidden>{label}</VisuallyHidden>
+        <VisuallyHidden>{resolvedLabel}</VisuallyHidden>
     </span>
-);
+    );
+};
 
 export default Spinner;

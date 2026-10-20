@@ -112,7 +112,7 @@ const ConfirmDialog: FC<ConfirmDialogProps> = ({
                         {resolvedConfirmLabel}
                     </Button>
                     <span className="visually-hidden" role="status">
-                        {loading ? "Processing" : ""}
+                        {loading ? t("processing") : ""}
                     </span>
                 </>
             }

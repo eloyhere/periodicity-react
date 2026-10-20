@@ -114,7 +114,7 @@ const Avatar: FC<AvatarProps> = ({
     ref,
     ...rest
 }: AvatarProps) => {
-    const ripple: RippleHandlers = useRipple({ trigger: "click", disabled });
+    const ripple: RippleHandlers = useRipple({ trigger: "both", disabled });
     const [failedSrc, setFailedSrc]: [string | void, Dispatch<SetStateAction<string | void>>] = useState<
         string | void
     >((void 0));
