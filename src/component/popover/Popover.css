@@ -3,6 +3,9 @@
     max-width: calc(100vw - var(--space-6));
     transform-origin: center top;
     animation: popover-enter var(--duration-fast) var(--ease-decelerate);
+    /* Electron drag regions on app chrome swallow pointer events for overlays
+       that visually cross them; the panel must opt out of window dragging. */
+    -webkit-app-region: no-drag;
 }
 
 .popover[data-placement^="top"] {

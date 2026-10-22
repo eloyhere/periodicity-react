@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    Dropdown 鈥?Material surface with header, body, items, footer, empty slot
    ========================================================================== */
 
@@ -15,6 +15,9 @@
     background: var(--color-surface-container);
     color: var(--color-on-surface);
     box-shadow: var(--elevation-3);
+    /* Electron drag regions on app chrome swallow pointer events for overlays
+       that visually cross them; the panel must opt out of window dragging. */
+    -webkit-app-region: no-drag;
 }
 
 .dropdown__panel:focus {
