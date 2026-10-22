@@ -2,6 +2,7 @@ import {
     useCallback,
     useEffect,
     useLayoutEffect,
+    useRef,
     useState,
     type CSSProperties,
     type Dispatch,
@@ -120,6 +121,9 @@ const oppositeSide: (placement: Placement) => Placement = (placement: Placement)
 };
 /**
  * Anchors a floating layer to its trigger, flipping and clamping inside the viewport.
+ * While the layer is mounted, the anchor's viewport rectangle is tracked every frame so
+ * layout shifts without a scroll or resize event (for example, a collapsing Coordinator
+ * header) keep the layer attached.
  * @param anchorRef - Anchor ref.
  * @param floatingRef - Floating layer ref.
  * @param options - Placement, offset, padding, and width matching.
@@ -143,6 +147,7 @@ export const useAnchoredPosition: (
 ): AnchoredPositionResult => {
     const [position, setPosition]: [Position, Dispatch<SetStateAction<Position>>] =
         useState<Position>(initialPosition);
+    const lastAnchorRectSignatureRef: RefObject<string | null> = useRef<string | null>(null);
 
     const update: () => void = useCallback((): void => {
         const anchor: HTMLElement | null = anchorRef.current;
@@ -247,12 +252,44 @@ export const useAnchoredPosition: (
     }, [update]);
 
     useEffect((): (() => void) => {
-        // Run after every render: the floating panel mounts later than the hook,
-        // so the layout effect above can see a null ref on the first pass.
-        const handle: number = window.requestAnimationFrame(update);
+        // Anchored layers are fixed-position portals, so scrolling and resizing are not
+        // the only ways their trigger can move. A collapsing Coordinator header, an
+        // expanding accordion, or a CSS height transition shifts the anchor without
+        // firing either event. Following the anchor's viewport rect every frame keeps
+        // the panel attached through layout changes; the loop stops once the floating
+        // layer unmounts and restarts when the next render mounts it again.
+        let frame: number = 0;
+
+        const track: () => void = (): void => {
+            const anchor: HTMLElement | null = anchorRef.current;
+            const floating: HTMLElement | null = floatingRef.current;
+
+            if (anchor === null || floating === null) {
+                frame = 0;
+                return;
+            }
+
+            const rect: DOMRect = anchor.getBoundingClientRect();
+            const signature: string = `${rect.top}:${rect.left}:${rect.width}:${rect.height}`;
+            const changed: boolean = lastAnchorRectSignatureRef.current !== signature;
+
+            lastAnchorRectSignatureRef.current = signature;
+            // Queue the next frame before the state update: if React renders
+            // synchronously, the effect cleanup cancels this handle and the next
+            // effect run starts exactly one replacement loop.
+            frame = window.requestAnimationFrame(track);
+
+            if (changed) {
+                update();
+            }
+        };
+
+        frame = window.requestAnimationFrame(track);
 
         return (): void => {
-            window.cancelAnimationFrame(handle);
+            if (frame !== 0) {
+                window.cancelAnimationFrame(frame);
+            }
         };
     });
 
