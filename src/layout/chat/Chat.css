@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    Chat 鈥?contacts, transcript, and composer
    ========================================================================== */
 
@@ -25,6 +25,72 @@
     border: 0;
     border-radius: 0;
     height: 100%;
+}
+
+/* Recent-conversation row: avatar, name, preview, last activity, and unread badge. */
+.chat__conversation {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    min-width: 0;
+    gap: var(--space-3);
+}
+
+.chat__conversation-body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    gap: 2px;
+}
+
+.chat__conversation-head,
+.chat__conversation-foot {
+    display: flex;
+    align-items: baseline;
+    min-width: 0;
+    gap: var(--space-2);
+}
+
+.chat__conversation-name {
+    flex: 1 1 auto;
+    overflow: hidden;
+    color: var(--text);
+    font-size: var(--type-body-sm);
+    font-weight: var(--font-weight-current, 600);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chat__conversation-time {
+    flex: none;
+    color: var(--muted);
+    font-size: var(--type-label);
+}
+
+.chat__conversation-preview {
+    flex: 1 1 auto;
+    overflow: hidden;
+    color: var(--muted);
+    font-size: var(--type-label);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chat__conversation-unread {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: var(--radius-pill);
+    background: var(--color-error);
+    color: var(--color-on-error, #fff);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
 }
 
 .chat__main {
@@ -104,37 +170,137 @@
 .chat__composer {
     display: flex;
     flex: none;
-    align-items: flex-end;
+    flex-direction: column;
     padding: var(--space-3);
     border-top: 1px solid var(--line);
+}
+
+/* The card is the only visible frame; the native textarea and toolbar inside are borderless. */
+.chat__composer-card {
+    width: 100%;
+    box-shadow: none;
+}
+
+.chat__composer-card .card__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+}
+
+.chat__composer-card .card__wash,
+.chat__composer-card .card__edge {
+    display: none;
+}
+
+.chat__composer-input {
+    display: block;
+    width: 100%;
+    min-height: 72px;
+    max-height: 180px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-body-sm);
+    line-height: var(--font-leading-current, 1.5);
+    outline: none;
+    resize: none;
+}
+
+.chat__composer-input::placeholder {
+    color: var(--muted);
+}
+
+.chat__composer-input:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.chat__composer-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: var(--space-2);
 }
 
-.chat__input {
-    flex: 1 1 auto;
-    min-width: 0;
-    min-height: 44px;
-    max-height: 120px;
-    padding: 10px var(--space-3);
-    border: 1px solid var(--color-outline);
+.chat__composer-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.chat__composer-right {
+    display: flex;
+    flex: none;
+    align-items: center;
+    margin-left: auto;
+    gap: var(--space-2);
+}
+
+.chat__composer-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
     border-radius: var(--radius-xs);
-    background: var(--color-surface);
+    background: transparent;
+    color: var(--color-on-surface-variant);
+    cursor: pointer;
+}
+
+.chat__composer-action:hover:not(:disabled) {
+    background: var(--color-surface-container);
     color: var(--text);
-    font-family: var(--font-family-current, var(--font-sans));
-    font-size: var(--type-label);
-    line-height: var(--font-leading-current, 1.45);
-    outline: none;
-    resize: vertical;
 }
 
-.chat__input:focus {
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 1px var(--color-primary);
+.chat__composer-action:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
 
-.chat__input:disabled {
-    opacity: 0.65;
+.chat__composer-action:disabled {
+    opacity: var(--state-disabled-opacity);
     cursor: not-allowed;
+}
+
+/* The emoji popover matches the composer width and scrolls when it overflows. */
+.chat__emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+    gap: 2px;
+    max-height: 200px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: var(--space-2);
+}
+
+.chat__emoji {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-xs);
+    background: transparent;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.chat__emoji:hover {
+    background: var(--color-surface-container);
+}
+
+.chat__emoji:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
 }
 
 .chat__empty {
@@ -162,14 +328,6 @@
     .chat__contacts .contact {
         height: auto;
     }
-}
-
-.chat__compose {
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: column;
-    min-width: 0;
-    gap: 6px;
 }
 
 .chat__quote {

@@ -1,5 +1,8 @@
 import type { FC, HTMLAttributes, ReactNode, Ref } from "react";
-import ContextMenu, { ContextMenuItem } from "../../component/context/ContextMenu";
+import ContextMenu, {
+    ContextMenuGroup,
+    ContextMenuItem,
+} from "../../component/context/ContextMenu";
 import type { IconName } from "../../component/icon/Icon";
 import cx from "../../component/foundation/cx";
 import type { MessageAction, MessageItem } from "./adapter";
@@ -50,6 +53,8 @@ const MessageActionOrder: readonly MessageAction[] = [
 const MessageActionDefinitions: Record<MessageAction, MessageActionDefinition> = {
     recall: { icon: "Refresh", labelKey: "recall" },
     copy: { icon: "Clipboard", labelKey: "copy" },
+    ["copy-text"]: { icon: "Document", labelKey: "copy" },
+    ["copy-markdown"]: { icon: "Markdown", labelKey: "copy" },
     forward: { icon: "Forward", labelKey: "forward" },
     favourite: { icon: "Star", labelKey: "favourite" },
     select: { icon: "Select", labelKey: "multiSelect" },
@@ -121,27 +126,78 @@ const MessageContextMenu: FC<MessageContextMenuProps> = ({
 }: MessageContextMenuProps) => {
     const { t }: InternationalContextValue = useInternational();
     const resolvedAriaLabel: string = ariaLabel ?? t("messageActions");
-    const available: readonly MessageAction[] = MessageActionOrder.filter(
+    const canCopyText: boolean =
+        actions.includes("copy") || actions.includes("copy-text");
+    const canCopyMarkdown: boolean =
+        actions.includes("copy") || actions.includes("copy-markdown");
+    const menuActions: readonly MessageAction[] = MessageActionOrder.filter(
         (action: MessageAction): boolean =>
-            actions.includes(action) && (action !== "recall" || self),
+            actions.includes(action) &&
+            action !== "copy" &&
+            action !== "copy-text" &&
+            action !== "copy-markdown" &&
+            action !== "recall" &&
+            action !== "delete",
     );
-    const defaultMenu: ReactNode =
-        available.length === 0
-            ? (void 0)
-            : available.map((action: MessageAction): ReactNode => {
-                  const definition: MessageActionDefinition = MessageActionDefinitions[action];
+    const dangerActions: readonly MessageAction[] = MessageActionOrder.filter(
+        (action: MessageAction): boolean =>
+            (action === "recall" || action === "delete") &&
+            actions.includes(action) &&
+            (action !== "recall" || self),
+    );
+    const renderAction: (action: MessageAction) => ReactNode = (
+        action: MessageAction,
+    ): ReactNode => {
+        const definition: MessageActionDefinition = MessageActionDefinitions[action];
 
-                  return (
-                      <ContextMenuItem
-                          key={action}
-                          icon={definition.icon}
-                          danger={definition.danger === true}
-                          onSelect={(): void => onAction(action, message)}
-                      >
-                          {t(definition.labelKey)}
-                      </ContextMenuItem>
-                  );
-              });
+        return (
+            <ContextMenuItem
+                key={action}
+                icon={definition.icon}
+                danger={definition.danger === true}
+                onSelect={(): void => onAction(action, message)}
+            >
+                {t(definition.labelKey)}
+            </ContextMenuItem>
+        );
+    };
+    const defaultMenu: ReactNode =
+        !canCopyText && !canCopyMarkdown && menuActions.length === 0 && dangerActions.length === 0
+            ? (void 0)
+            : (
+                  <>
+                      {!canCopyText && !canCopyMarkdown ? null : (
+                          <ContextMenuGroup label={t("copy")}>
+                              {canCopyText ? (
+                                  <ContextMenuItem
+                                      icon="Document"
+                                      onSelect={(): void => onAction("copy-text", message)}
+                                  >
+                                      {t("text")}
+                                  </ContextMenuItem>
+                              ) : null}
+                              {canCopyMarkdown ? (
+                                  <ContextMenuItem
+                                      icon="Markdown"
+                                      onSelect={(): void => onAction("copy-markdown", message)}
+                                  >
+                                      {t("markdown")}
+                                  </ContextMenuItem>
+                              ) : null}
+                          </ContextMenuGroup>
+                      )}
+                      {menuActions.length === 0 ? null : (
+                          <ContextMenuGroup label={t("actionsGroup")}>
+                              {menuActions.map(renderAction)}
+                          </ContextMenuGroup>
+                      )}
+                      {dangerActions.length === 0 ? null : (
+                          <ContextMenuGroup label={t("danger")}>
+                              {dangerActions.map(renderAction)}
+                          </ContextMenuGroup>
+                      )}
+                  </>
+              );
 
     return (
         <ContextMenu

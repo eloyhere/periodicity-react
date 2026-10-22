@@ -2,12 +2,12 @@
 
 A Material-inspired React 19 component library for product interfaces, admin tools, and data-heavy applications.
 
-`periodicity-react` ships **138 `Periodicity*` components**, four chart types, file and image pickers, scoped
+`periodicity-react` ships **140 `Periodicity*` components**, four chart types, file and image pickers, scoped
 typography, design-system providers, and **12 built-in locales**. The API is TypeScript-first, flex-first, and close
 to the browser: native attributes, events, ARIA, and refs pass through wherever they make sense.
 
 - **npm:** [`periodicity-react`](https://www.npmjs.com/package/periodicity-react)
-- **Version:** `0.1.11`
+- **Version:** `0.1.12`
 - **Showcase:** run `npm run dev`; source in [`src/showcase`](src/showcase)
 - **Source:** [github.com/eloyhere/periodicity-react](https://github.com/eloyhere/periodicity-react)
 - **Requirements:** React 19 and React DOM 19
@@ -722,13 +722,20 @@ ghost while sorting.
 ## Messaging and comments
 
 The messaging family includes `PeriodicityContact` / `PeriodicityVirtualContact`, `PeriodicityMessageList` /
-`PeriodicityVirtualMessageList`, `PeriodicityChat` / `PeriodicityVirtualChat`, and the contact and message context
-menus.
+`PeriodicityVirtualMessageList`, `PeriodicityChat` / `PeriodicityVirtualChat`,
+`PeriodicityAgentChat` / `PeriodicityVirtualAgentChat`, and the contact and message context menus.
 
 - `PeriodicityContact` supports search, virtualisation, selection, and a contact context menu.
 - `PeriodicityMessageList` supports selection, copy, quote, forward, delete, recall, retry, and a message context
-  menu.
+  menu. Pass `reactions` (for example `defaultMessageReactions`) to add Telegram-style emoji reactions to the
+  footer beside the timestamp: six quick choices form one native radio group, and the trailing more button opens
+  the remaining emoji packs in a popover. `PeriodicityVirtualMessageList` defaults to a 136px row so the footer
+  stays visible.
 - `PeriodicityChat` combines the contact list, conversation, composer, and message actions.
+- `PeriodicityAgentChat` and `PeriodicityVirtualAgentChat` reuse that layout for an agent workspace: the left pane is
+  session history, agent answers render Markdown, and reasoning appears in its own collapsible view with a stable
+  width and an animated height transition. Messages marked `streaming` reveal through a typewriter with a caret, and
+  `typingSpeed` controls the cadence.
 - `PeriodicityCommentThread` supports replies, mentions, references, resolving, and deletion; the new
   `PeriodicityVirtualCommentThread` virtualises the flattened thread at a fixed row height.
 
@@ -863,7 +870,7 @@ the structural components themselves remain flex containers.
 
 ## Component index
 
-The published package contains 138 `Periodicity*` components. The prefix is omitted below for readability.
+The published package contains 140 `Periodicity*` components. The prefix is omitted below for readability.
 
 | Family                    | Components                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -874,7 +881,7 @@ The published package contains 138 `Periodicity*` components. The prefix is omit
 | Collections and data      | List, VirtualList, NormalList, MultipleList, SelectList, CheckList, Tree, VirtualTree, CheckTree, SelectTree, Table, VirtualTable, Transfer, Pagination, Scrollbar, Scroll, Drag, Timeline, Card                                                                                                                                                                                                                                                                               |
 | Overlays and feedback     | Dialog, ConfirmDialog, MessageDialog, InputDialog, Drawer, DrawerLayout, Popover, Dropdown, DropdownItem, DropdownGroup, DropdownSeparator, ContextMenu, ContextMenuItem, ContextMenuGroup, ContextMenuSeparator, Menu, MenuItem, MenuGroup, MenuSeparator, Tooltip, ToastProvider, Snackbar, Alert, Banner, Backdrop, FullscreenLoading, ElementLoading, Progress, CircularProgress, ProgressRing, Spinner, Skeleton, Rate, Badge, Tag, Chip, Avatar, AvatarGroup, EmptyState |
 | Navigation and layout     | Coordinator, AppBar, Collapse, Toolbar, Tabs, TabPanel, Pager, Page, NavigationView, Stepper, Accordion, Breadcrumbs, LinearLayout, LinearLayoutItem, ConstraintLayout, Constraint, GridLayout, WaterfallLayout                                                                                                                                                                                                                                                                |
-| Messaging and comments    | Contact, VirtualContact, ContactContextMenu, MessageList, VirtualMessageList, MessageContextMenu, Chat, VirtualChat, CommentThread, VirtualCommentThread                                                                                                                                                                                                                                                                                                                       |
+| Messaging and comments    | Contact, VirtualContact, ContactContextMenu, MessageList, VirtualMessageList, MessageContextMenu, Chat, VirtualChat, AgentChat, VirtualAgentChat, CommentThread, VirtualCommentThread                                                                                                                                                                                                                                                                                          |
 | Documents                 | Markdown, Tex                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ## Development

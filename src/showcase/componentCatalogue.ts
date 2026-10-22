@@ -925,6 +925,18 @@ export const uiComponentSections: readonly ComponentSection[] = [
             description: "Windowed conversation layout for long threads.",
         },
         {
+            name: "AgentChat",
+            family: "messaging",
+            demo: "Agent chat",
+            description: "History sessions, markdown agent answers, and a separate reasoning view.",
+        },
+        {
+            name: "VirtualAgentChat",
+            family: "messaging",
+            demo: "Agent chat",
+            description: "Windowed agent conversation with history sessions and reasoning.",
+        },
+        {
             name: "CommentThread",
             family: "discussion",
             demo: "Threaded comments",

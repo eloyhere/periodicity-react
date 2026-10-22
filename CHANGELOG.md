@@ -3,6 +3,28 @@
 All notable changes to Periodicity React are recorded here. The format follows the spirit of Keep a Changelog,
 and this project uses British English in its English documentation.
 
+## [0.1.12] - 2026-10-23
+
+### Added
+
+- `MessageList`, `VirtualMessageList`, `Chat`, and `VirtualChat` accept emoji-based `reactions` (including Like
+  and Dislike) rendered in each message footer alongside the timestamp and delivery state. The quick choices form
+  one native radio group, and a trailing more button opens the remaining emoji packs in a popover.
+- `Chat` and `VirtualChat` now render their composer as one card: a borderless native textarea, an emoji popover,
+  native file selection, screenshot capture, and an icon send button. Chosen files and screenshots are reported
+  through `onSendFiles`.
+- `Chat` and `VirtualChat` accept a conversation-centric source: `ChatConversation`, `ChatMessage`, and the plain or
+  indexed `ChatDataSource` built with `createChatDataSource`. The sidebar shows previews, last-activity labels, and
+  unread badges, while transcripts filter by `conversationId`; the legacy `contacts` and `messages` props still work.
+- `AgentChat` and `VirtualAgentChat` add an agent workspace on top of the chat layouts. The left pane lists historical
+  sessions, agent answers render Markdown, and reasoning appears in a separate collapsible view that expands with a
+  height and opacity transition at a stable width. Streaming messages use a typewriter reveal with an animated caret,
+  controlled by `typingSpeed`.
+
+### Fixed
+
+- Virtual message rows now default to 136px so timestamps, delivery state, and inline reactions stay visible.
+
 ## [0.1.11] - 2026-10-23
 
 ### Added

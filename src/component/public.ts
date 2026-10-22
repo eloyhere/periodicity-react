@@ -327,10 +327,23 @@ import BasePeriodicityMessageList from "../layout/message/normal/MessageList";
 export const PeriodicityMessageList = withStandardEvents(BasePeriodicityMessageList);
 import BasePeriodicityVirtualMessageList from "../layout/message/virtual/VirtualMessageList";
 export const PeriodicityVirtualMessageList = withStandardEvents(BasePeriodicityVirtualMessageList);
+export { defaultMessageReactions } from "../layout/message";
+export type { MessageReactionOption } from "../layout/message";
 import BasePeriodicityChat from "../layout/chat/normal/Chat";
 export const PeriodicityChat = withStandardEvents(BasePeriodicityChat);
 import BasePeriodicityVirtualChat from "../layout/chat/virtual/VirtualChat";
 export const PeriodicityVirtualChat = withStandardEvents(BasePeriodicityVirtualChat);
+import BasePeriodicityAgentChat from "../layout/AgentChat/normal/AgentChat";
+export const PeriodicityAgentChat = withStandardEvents(BasePeriodicityAgentChat);
+import BasePeriodicityVirtualAgentChat from "../layout/AgentChat/virtual/VirtualAgentChat";
+export const PeriodicityVirtualAgentChat = withStandardEvents(BasePeriodicityVirtualAgentChat);
+export type {
+    AgentChatProps,
+    AgentMessageItem,
+    AgentProfile,
+    AgentSession,
+} from "../layout/AgentChat";
+export type { VirtualAgentChatProps } from "../layout/AgentChat";
 import BasePeriodicityCommentThread from "./comment/normal/CommentThread";
 export const PeriodicityCommentThread = withStandardEvents(BasePeriodicityCommentThread);
 import BasePeriodicityVirtualCommentThread from "./comment/virtual/VirtualCommentThread";

@@ -91,7 +91,58 @@ export type ExtraMessageKey =
     | "verticalScrollbar"
     | "value"
     | "you"
-    | "zoom";
+    | "zoom"
+    | "agentHistory"
+    | "searchSessions"
+    | "thinking"
+    | "inference"
+    | "thinkingOff"
+    | "thinkingMinimum"
+    | "thinkingMedium"
+    | "thinkingMaximum"
+    | "reactions"
+    | "moreReactions"
+    | "actionsGroup"
+    | "danger"
+    | "markdown"
+    | "selectMessageFrom"
+    | "reactionLike"
+    | "reactionDislike"
+    | "reactionLove"
+    | "reactionLaugh"
+    | "reactionSurprised"
+    | "reactionSad"
+    | "reactionHappy"
+    | "reactionSmile"
+    | "reactionCry"
+    | "reactionAngry"
+    | "reactionWink"
+    | "reactionSleep"
+    | "reactionHandshake"
+    | "reactionWave"
+    | "reactionParty"
+    | "reactionFirework"
+    | "reactionBalloon"
+    | "reactionSparkle"
+    | "reactionCrown"
+    | "reactionTrophy"
+    | "reactionGift"
+    | "reactionCake"
+    | "reactionRocket"
+    | "reactionStar"
+    | "reactionCheck"
+    | "reactionCross"
+    | "reactionFire"
+    | "reactionSun"
+    | "reactionMoon"
+    | "reactionGroupExpressions"
+    | "reactionGroupGestures"
+    | "reactionGroupCelebration"
+    | "reactionGroupSymbols"
+    | "messageSending"
+    | "messageSent"
+    | "messageRead"
+    | "messageFailed";
 
 /**
  * Complete extra-message dictionary for one locale.
@@ -99,7 +150,7 @@ export type ExtraMessageKey =
  * @example
  * const messages: ExtraMessages = extraMessages["ja-JP"];
  */
-export type ExtraMessages = Readonly<Record<ExtraMessageKey, string>>;
+export type ExtraMessages = Readonly<Partial<Record<ExtraMessageKey, string>>>;
 
 const en: ExtraMessages = {
     all: "All",
@@ -184,6 +235,57 @@ const en: ExtraMessages = {
     value: "Value",
     you: "You",
     zoom: "Zoom",
+    agentHistory: "History",
+    searchSessions: "Search sessions",
+    thinking: "Thinking",
+    inference: "Inference",
+    thinkingOff: "Off",
+    thinkingMinimum: "Minimum",
+    thinkingMedium: "Medium",
+    thinkingMaximum: "Maximum",
+    reactions: "Reactions",
+    moreReactions: "More reactions",
+    actionsGroup: "Actions",
+    danger: "Danger",
+    markdown: "Markdown",
+    selectMessageFrom: "Select message from {author}",
+    reactionLike: "Like",
+    reactionDislike: "Dislike",
+    reactionLove: "Love",
+    reactionLaugh: "Laugh",
+    reactionSurprised: "Surprised",
+    reactionSad: "Sad",
+    reactionHappy: "Happy",
+    reactionSmile: "Smile",
+    reactionCry: "Cry",
+    reactionAngry: "Angry",
+    reactionWink: "Wink",
+    reactionSleep: "Sleep",
+    reactionHandshake: "Handshake",
+    reactionWave: "Wave",
+    reactionParty: "Party",
+    reactionFirework: "Firework",
+    reactionBalloon: "Balloon",
+    reactionSparkle: "Sparkle",
+    reactionCrown: "Crown",
+    reactionTrophy: "Trophy",
+    reactionGift: "Gift",
+    reactionCake: "Cake",
+    reactionRocket: "Rocket",
+    reactionStar: "Star",
+    reactionCheck: "Check",
+    reactionCross: "Cross",
+    reactionFire: "Fire",
+    reactionSun: "Sun",
+    reactionMoon: "Moon",
+    reactionGroupExpressions: "Expressions",
+    reactionGroupGestures: "Gestures",
+    reactionGroupCelebration: "Celebration",
+    reactionGroupSymbols: "Symbols",
+    messageSending: "Sending",
+    messageSent: "Sent",
+    messageRead: "Read",
+    messageFailed: "Failed",
 };
 
 const zhCn: ExtraMessages = {
@@ -269,6 +371,57 @@ const zhCn: ExtraMessages = {
     value: "值",
     you: "你",
     zoom: "缩放",
+    agentHistory: "历史",
+    searchSessions: "搜索会话",
+    thinking: "思考",
+    inference: "推理等级",
+    thinkingOff: "关闭",
+    thinkingMinimum: "最低",
+    thinkingMedium: "中等",
+    thinkingMaximum: "最高",
+    reactions: "回应",
+    moreReactions: "更多回应",
+    actionsGroup: "操作",
+    danger: "危险操作",
+    markdown: "Markdown",
+    selectMessageFrom: "选择来自 {author} 的消息",
+    reactionLike: "点赞",
+    reactionDislike: "点踩",
+    reactionLove: "喜欢",
+    reactionLaugh: "大笑",
+    reactionSurprised: "惊讶",
+    reactionSad: "难过",
+    reactionHappy: "开心",
+    reactionSmile: "微笑",
+    reactionCry: "哭泣",
+    reactionAngry: "生气",
+    reactionWink: "眨眼",
+    reactionSleep: "睡觉",
+    reactionHandshake: "握手",
+    reactionWave: "挥手",
+    reactionParty: "庆祝",
+    reactionFirework: "烟花",
+    reactionBalloon: "气球",
+    reactionSparkle: "闪光",
+    reactionCrown: "皇冠",
+    reactionTrophy: "奖杯",
+    reactionGift: "礼物",
+    reactionCake: "蛋糕",
+    reactionRocket: "火箭",
+    reactionStar: "星星",
+    reactionCheck: "对勾",
+    reactionCross: "叉号",
+    reactionFire: "火焰",
+    reactionSun: "太阳",
+    reactionMoon: "月亮",
+    reactionGroupExpressions: "表情",
+    reactionGroupGestures: "手势",
+    reactionGroupCelebration: "庆祝",
+    reactionGroupSymbols: "符号",
+    messageSending: "发送中",
+    messageSent: "已发送",
+    messageRead: "已读",
+    messageFailed: "发送失败",
 };
 
 const zhHk: ExtraMessages = {

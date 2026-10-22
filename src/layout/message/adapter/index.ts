@@ -20,6 +20,8 @@ export type MessageStatus = "sending" | "sent" | "read" | "failed";
  */
 export type MessageAction =
     | "copy"
+    | "copy-text"
+    | "copy-markdown"
     | "forward"
     | "favourite"
     | "select"
@@ -30,7 +32,8 @@ export type MessageAction =
 /**
  * One chat message.
  * Type: interface.
- * Fields: id, author, content, timestamp, avatar, self, contactId, status, disabled.
+ * Fields: id, author, content, timestamp, avatar, self, contactId, conversationId, status,
+ * reaction, disabled.
  * @example
  * const message: MessageItem = { id: "m1", author: "Mira", content: "Hello" };
  */
@@ -41,8 +44,13 @@ export interface MessageItem {
     timestamp?: string;
     avatar?: string;
     self?: boolean;
+    /** Legacy conversation key used by `Chat`; prefer `conversationId` in new code. */
     contactId?: string;
+    /** Conversation this message belongs to; `Chat` filters the transcript by it. */
+    conversationId?: string;
     status?: MessageStatus;
+    /** Selected reaction value; when set the owning list treats the reaction as controlled. */
+    reaction?: string;
     disabled?: boolean;
 }
 

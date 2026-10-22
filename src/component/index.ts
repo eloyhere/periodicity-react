@@ -29,6 +29,7 @@ export * from "../layout/linear";
 export * from "../layout/navigation";
 export * from "../layout/pager";
 export * from "../layout/chat";
+export * from "../layout/AgentChat";
 export * from "../layout/contact";
 export * from "../layout/message";
 export * from "../layout/table";

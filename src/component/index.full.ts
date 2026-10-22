@@ -28,6 +28,7 @@ export * from "../layout/linear";
 export * from "../layout/navigation";
 export * from "../layout/pager";
 export * from "../layout/chat";
+export * from "../layout/AgentChat";
 export * from "../layout/contact";
 export * from "../layout/message";
 export * from "../layout/table";
@@ -206,6 +207,8 @@ export { default as PeriodicityMessageList } from "../layout/message/normal/Mess
 export { default as PeriodicityVirtualMessageList } from "../layout/message/virtual/VirtualMessageList";
 export { default as PeriodicityChat } from "../layout/chat/normal/Chat";
 export { default as PeriodicityVirtualChat } from "../layout/chat/virtual/VirtualChat";
+export { default as PeriodicityAgentChat } from "../layout/AgentChat/normal/AgentChat";
+export { default as PeriodicityVirtualAgentChat } from "../layout/AgentChat/virtual/VirtualAgentChat";
 export { default as PeriodicityCommentThread } from "./comment/normal/CommentThread";
 export { default as PeriodicityVirtualCommentThread } from "./comment/virtual/VirtualCommentThread";
 export { default as PeriodicityContactContextMenu } from "../layout/contact/ContactContextMenu";

@@ -667,3 +667,41 @@ export const renderMarkdown: (source: string, options?: MarkdownOptions) => stri
 
     return renderBlocks(lines, options);
 };
+
+/**
+ * Converts Markdown source to plain text for the copy menu.
+ * Markdown is rendered through the same safe pipeline before text extraction, so formatting
+ * markers disappear while escaped HTML stays text rather than becoming markup.
+ * @param source - Markdown source.
+ * @example
+ * markdownToText("Hello **world**."); // "Hello world."
+ * @returns Plain text, or the original source when no DOM is available.
+ */
+export const markdownToText: (source: string) => string = (source: string): string => {
+    if (typeof document === "undefined") {
+        return source;
+    }
+
+    const template: HTMLTemplateElement = document.createElement("template");
+    template.innerHTML = renderMarkdown(source);
+
+    for (const cell of Array.from(template.content.querySelectorAll("td, th"))) {
+        cell.append(" ");
+    }
+
+    for (const row of Array.from(template.content.querySelectorAll("tr"))) {
+        row.append("\n");
+    }
+
+    for (const block of Array.from(
+        template.content.querySelectorAll("p, li, h1, h2, h3, h4, h5, h6, pre, blockquote"),
+    )) {
+        block.append("\n");
+    }
+
+    for (const br of Array.from(template.content.querySelectorAll("br"))) {
+        br.replaceWith("\n");
+    }
+
+    return (template.content.textContent ?? "").replace(/\n{3,}/g, "\n\n").trim();
+};

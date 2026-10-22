@@ -2,6 +2,8 @@ import {
     useEffect,
     useMemo,
     useRef,
+    useState,
+    type Dispatch,
     type HTMLAttributes,
     type KeyboardEvent as ReactKeyboardEvent,
     type MouseEvent as ReactMouseEvent,
@@ -9,11 +11,13 @@ import {
     type Ref,
     type RefCallback,
     type RefObject,
+    type SetStateAction,
 } from "react";
 import Avatar from "../../../component/thumb/Avatar";
 import Button from "../../../component/button/Button";
 import Checkbox from "../../../component/input/check/Checkbox";
 import Icon from "../../../component/icon/Icon";
+import { markdownToText } from "../../../component/markdown/render";
 import Surface from "../../../component/surface/Surface";
 import Spinner from "../../../component/progress/Spinner";
 import VisuallyHidden from "../../../component/foundation/VisuallyHidden";
@@ -23,6 +27,8 @@ import type { ListEntry } from "../../list/adapter";
 import type { MessageAction, MessageAdapter, MessageItem } from "../adapter";
 import { createMessageAdapter } from "../adapter";
 import MessageContextMenu from "../MessageContextMenu";
+import MessageReactions from "../reactions";
+import type { MessageReactionOption } from "../reactionOptions";
 import type { MessageSlots } from "../slots";
 import { useMessageSelection, type MessageSelection } from "../useMessageSelection";
 import { useInternational, type InternationalContextValue } from "../../../international";
@@ -34,8 +40,9 @@ import "../Message.css";
  * Fields: messages, adapter, currentUser, autoScroll, onMessageAction, onQuote, onForward,
  * onDelete, onRecall, onFavourite, onCopyMessage, copyToClipboard, onRetry, onMessageClick,
  * onMessageMenuOpenChange, selectMode, defaultSelectMode, onSelectModeChange, selectedIds,
- * defaultSelectedIds, onSelectionChange, empty, loading, loadingLabel, disabled, slots, className,
- * ref, plus native div attributes and events.
+ * defaultSelectedIds, onSelectionChange, reactions, quickReactionCount, defaultReactions,
+ * onReactionChange, empty, loading, loadingLabel, disabled, slots, className, ref, plus native div
+ * attributes and events.
  * @example
  * <MessageList messages={messages} currentUser="Mira" />
  */
@@ -61,6 +68,14 @@ export interface MessageListProps extends Omit<HTMLAttributes<HTMLDivElement>, "
     selectedIds?: readonly string[];
     defaultSelectedIds?: readonly string[];
     onSelectionChange?: (ids: readonly string[], messages: readonly MessageItem[]) => void;
+    /** Reaction choices rendered beneath every message; omit to hide reactions. */
+    reactions?: readonly MessageReactionOption[];
+    /** Number of reaction choices kept inline before the more button. Defaults to 6. */
+    quickReactionCount?: number;
+    /** Initial reaction values keyed by message id for uncontrolled lists. */
+    defaultReactions?: Readonly<Record<string, string>>;
+    /** Reports a reaction change for one message. */
+    onReactionChange?: (message: MessageItem, reaction: string) => void;
     /** Empty transcript content; defaults to the localised No messages yet label. */
     empty?: ReactNode;
     loading?: boolean;
@@ -102,6 +117,10 @@ const MessageList: (props: MessageListProps) => ReactNode = ({
     selectedIds: controlledSelectedIds,
     defaultSelectedIds,
     onSelectionChange,
+    reactions,
+    quickReactionCount = 6,
+    defaultReactions,
+    onReactionChange,
     empty,
     loading = false,
     loadingLabel,
@@ -135,6 +154,10 @@ const MessageList: (props: MessageListProps) => ReactNode = ({
         defaultSelectedIds,
         onSelectionChange,
     });
+    const [localReactions, setLocalReactions]: [
+        Record<string, string>,
+        Dispatch<SetStateAction<Record<string, string>>>,
+    ] = useState<Record<string, string>>({});
 
     useEffect((): void => {
         if (autoScroll && listRef.current !== null) {
@@ -150,8 +173,9 @@ const MessageList: (props: MessageListProps) => ReactNode = ({
             return;
         }
 
-        if (action === "copy") {
-            const text: string = typeof message.content === "string" ? message.content : "";
+        if (action === "copy" || action === "copy-text" || action === "copy-markdown") {
+            const source: string = typeof message.content === "string" ? message.content : "";
+            const text: string = action === "copy-text" ? markdownToText(source) : source;
 
             if (text.length > 0 && copyToClipboard) {
                 void navigator.clipboard?.writeText(text);
@@ -174,6 +198,22 @@ const MessageList: (props: MessageListProps) => ReactNode = ({
         }
 
         onMessageAction?.(action, message);
+    };
+
+    const chooseReaction: (message: MessageItem, reaction: string) => void = (
+        message: MessageItem,
+        reaction: string,
+    ): void => {
+        if (message.reaction === (void 0)) {
+            setLocalReactions(
+                (previous: Record<string, string>): Record<string, string> => ({
+                    ...previous,
+                    [message.id]: reaction,
+                }),
+            );
+        }
+
+        onReactionChange?.(message, reaction);
     };
 
     const forwardSelected: () => void = (): void => {
@@ -265,6 +305,23 @@ const MessageList: (props: MessageListProps) => ReactNode = ({
                 rows.map((message: MessageItem, index: number): ReactNode => {
                     const self: boolean = message.self === true || message.author === currentUser;
                     const messageDisabled: boolean = disabled || message.disabled === true;
+                    const reactionBar: ReactNode =
+                        reactions === (void 0) || reactions.length === 0 ? null : (
+                            <MessageReactions
+                                options={reactions}
+                                quickCount={quickReactionCount}
+                                selected={
+                                    message.reaction ??
+                                    localReactions[message.id] ??
+                                    defaultReactions?.[message.id]
+                                }
+                                self={self}
+                                disabled={messageDisabled || selection.selectMode}
+                                onChange={(reaction: string): void =>
+                                    chooseReaction(message, reaction)
+                                }
+                            />
+                        );
 
                     return (
                         <div
@@ -307,7 +364,9 @@ const MessageList: (props: MessageListProps) => ReactNode = ({
                                         }
                                         label={
                                             <VisuallyHidden>
-                                                {`Select message from ${message.author}`}
+                                                {t("selectMessageFrom", {
+                                                    author: message.author,
+                                                })}
                                             </VisuallyHidden>
                                         }
                                     />
@@ -322,6 +381,7 @@ const MessageList: (props: MessageListProps) => ReactNode = ({
                                 {self ? null : (
                                     <span className="message__author">{message.author}</span>
                                 )}
+                                {slots?.beforeMessage?.(index, message)}
                                 <MessageContextMenu
                                     message={message}
                                     self={self}
@@ -345,6 +405,7 @@ const MessageList: (props: MessageListProps) => ReactNode = ({
                                     </Surface>
                                 </MessageContextMenu>
                                 <div className="message__meta">
+                                    {self ? reactionBar : null}
                                     {message.timestamp === (void 0) ? null : (
                                         <time className="message__time">{message.timestamp}</time>
                                     )}
@@ -356,7 +417,15 @@ const MessageList: (props: MessageListProps) => ReactNode = ({
                                                     "message__status--read",
                                             )}
                                             data-status={message.status}
-                                            aria-label={message.status}
+                                            aria-label={t(
+                                                message.status === "read"
+                                                    ? "messageRead"
+                                                    : message.status === "failed"
+                                                      ? "messageFailed"
+                                                      : message.status === "sending"
+                                                        ? "messageSending"
+                                                        : "messageSent",
+                                            )}
                                         >
                                             {message.status === "read" ? (
                                                 <>
@@ -392,6 +461,7 @@ const MessageList: (props: MessageListProps) => ReactNode = ({
                                             {t("retry")}
                                         </button>
                                     ) : null}
+                                    {self ? null : reactionBar}
                                 </div>
                             </div>
                         </div>

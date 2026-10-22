@@ -237,6 +237,8 @@ export interface PopoverProps extends Omit<HTMLAttributes<HTMLDivElement>, "role
     offset?: number;
     matchWidth?: boolean;
     modal?: boolean;
+    /** Wraps the content in the default Surface card; set false for a caller-styled panel. */
+    surface?: boolean;
     className?: string;
     onDismiss?: (reason: PopoverCloseReason) => void;
     ariaLabel?: string;
@@ -274,6 +276,7 @@ const Popover: FC<PopoverProps> = ({
     offset = 8,
     matchWidth = false,
     modal = false,
+    surface = true,
     className = "",
     onDismiss,
     ariaLabel,
@@ -519,9 +522,13 @@ const Popover: FC<PopoverProps> = ({
                 onFocus={handleFocus}
                 onKeyDown={handleKeyDown}
             >
-                <Surface className="popover__surface" elevation={3} shape="md">
-                    {children}
-                </Surface>
+                {surface ? (
+                    <Surface className="popover__surface" elevation={3} shape="md">
+                        {children}
+                    </Surface>
+                ) : (
+                    <div className="popover__plain">{children}</div>
+                )}
             </div>
         </Portal>
     );

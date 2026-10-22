@@ -2,10 +2,10 @@
 
 面向产品界面、管理后台和数据密集型应用的 Material 风格 React 19 组件库。
 
-`periodicity-react` 提供 **138 个 `Periodicity*` 组件**、四种统计图、文件与图片选择器、作用域排版、设计系统 Provider，以及 **12 个内置语言包**。API 以 TypeScript 为先、以 Flex 布局为基础，并尽量贴近浏览器原生行为：在合理的地方透传原生属性、事件、ARIA 和 `ref`。
+`periodicity-react` 提供 **140 个 `Periodicity*` 组件**、四种统计图、文件与图片选择器、作用域排版、设计系统 Provider，以及 **12 个内置语言包**。API 以 TypeScript 为先、以 Flex 布局为基础，并尽量贴近浏览器原生行为：在合理的地方透传原生属性、事件、ARIA 和 `ref`。
 
 - **npm：** [`periodicity-react`](https://www.npmjs.com/package/periodicity-react)
-- **版本：** `0.1.11`
+- **版本：** `0.1.12`
 - **在线示例：** 运行 `npm run dev`；源码见 [`src/showcase`](src/showcase)
 - **源码：** [github.com/eloyhere/periodicity-react](https://github.com/eloyhere/periodicity-react)
 - **要求：** React 19、React DOM 19
@@ -634,11 +634,12 @@ Dropdown 和 Popover 会 portal 到 `document.body`，并标记 `-webkit-app-reg
 
 ## 消息与评论
 
-消息家族包括 `PeriodicityContact` / `PeriodicityVirtualContact`、`PeriodicityMessageList` / `PeriodicityVirtualMessageList`、`PeriodicityChat` / `PeriodicityVirtualChat`，以及联系人/消息右键菜单。
+消息家族包括 `PeriodicityContact` / `PeriodicityVirtualContact`、`PeriodicityMessageList` / `PeriodicityVirtualMessageList`、`PeriodicityChat` / `PeriodicityVirtualChat`、`PeriodicityAgentChat` / `PeriodicityVirtualAgentChat`，以及联系人/消息右键菜单。
 
 - `PeriodicityContact` 支持搜索、虚拟化、选择，以及联系人右键菜单。
-- `PeriodicityMessageList` 支持消息选择、复制、引用、转发、删除、撤回、重试，以及消息右键菜单。
+- `PeriodicityMessageList` 支持消息选择、复制、引用、转发、删除、撤回、重试，以及消息右键菜单。传入 `reactions`（例如 `defaultMessageReactions`）即可在时间旁的消息底部加入 Telegram 风格 emoji 回应：前六个快捷项构成一个原生 radio 组，末尾的 more 图标按钮在浮窗中展示其余 emoji 分组；`PeriodicityVirtualMessageList` 默认使用 136px 行高以完整显示底部内容。
 - `PeriodicityChat` 组合联系人列表、会话、输入区和消息操作。
+- `PeriodicityAgentChat` / `PeriodicityVirtualAgentChat` 复用该布局做 Agent 工作区：左侧是历史会话，Agent 回复按 Markdown 渲染，思考过程放在独立的折叠视图中，展开时带动画且宽度保持稳定。消息设置 `streaming` 后会以打字机效果逐字显示并带光标，`typingSpeed` 控制速度。
 - `PeriodicityCommentThread` 支持回复、提及、引用、标记解决和删除；新增的 `PeriodicityVirtualCommentThread` 按固定行高对扁平化评论线程做虚拟滚动。
 
 两种评论线程都接受 `comment` slot 替换整条评论。联系人、消息和聊天组件暴露 `contact`、`context`、`message`、`messageContext`、`avatar` slots，并接收渲染索引和对应数据项。
@@ -740,7 +741,7 @@ import { PeriodicityMarkdown, PeriodicityTex } from "periodicity-react";
 
 ## 组件索引
 
-发布包包含 138 个 `Periodicity*` 组件。下表省略前缀以便阅读。
+发布包包含 140 个 `Periodicity*` 组件。下表省略前缀以便阅读。
 
 | 家族            | 组件                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -751,7 +752,7 @@ import { PeriodicityMarkdown, PeriodicityTex } from "periodicity-react";
 | 集合与数据      | List, VirtualList, NormalList, MultipleList, SelectList, CheckList, Tree, VirtualTree, CheckTree, SelectTree, Table, VirtualTable, Transfer, Pagination, Scrollbar, Scroll, Drag, Timeline, Card                                                                                                                                                                                                                                                                               |
 | 浮层与反馈      | Dialog, ConfirmDialog, MessageDialog, InputDialog, Drawer, DrawerLayout, Popover, Dropdown, DropdownItem, DropdownGroup, DropdownSeparator, ContextMenu, ContextMenuItem, ContextMenuGroup, ContextMenuSeparator, Menu, MenuItem, MenuGroup, MenuSeparator, Tooltip, ToastProvider, Snackbar, Alert, Banner, Backdrop, FullscreenLoading, ElementLoading, Progress, CircularProgress, ProgressRing, Spinner, Skeleton, Rate, Badge, Tag, Chip, Avatar, AvatarGroup, EmptyState |
 | 导航与布局      | Coordinator, AppBar, Collapse, Toolbar, Tabs, TabPanel, Pager, Page, NavigationView, Stepper, Accordion, Breadcrumbs, LinearLayout, LinearLayoutItem, ConstraintLayout, Constraint, GridLayout, WaterfallLayout                                                                                                                                                                                                                                                                |
-| 消息与评论      | Contact, VirtualContact, ContactContextMenu, MessageList, VirtualMessageList, MessageContextMenu, Chat, VirtualChat, CommentThread, VirtualCommentThread                                                                                                                                                                                                                                                                                                                       |
+| 消息与评论      | Contact, VirtualContact, ContactContextMenu, MessageList, VirtualMessageList, MessageContextMenu, Chat, VirtualChat, AgentChat, VirtualAgentChat, CommentThread, VirtualCommentThread                                                                                                                                                                                                                                                                                          |
 | 文档            | Markdown, Tex                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ## 开发

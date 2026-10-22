@@ -2,6 +2,19 @@
 
 本文件记录 Periodicity React 的重要变更。格式参考 Keep a Changelog。
 
+## [0.1.12] - 2026-10-23
+
+### 新增
+
+- `MessageList`、`VirtualMessageList`、`Chat`、`VirtualChat` 支持基于 emoji 的 `reactions`（含点赞、点踩等）：回应与时间、送达状态一起排列在消息底部，前六个快捷项构成一个原生 radio 组，末尾 more 按钮通过浮窗展示其余 emoji 分组。
+- `Chat` 与 `VirtualChat` 的输入区改为单一卡片：内部是无边框的原生 textarea、emoji 浮窗、原生文件选择、截图和图标发送按钮；选中的文件与截图通过 `onSendFiles` 回传。
+- `Chat` 与 `VirtualChat` 支持以会话为中心的数据源：`ChatConversation`、`ChatMessage`，以及由 `createChatDataSource` 构建的普通或索引式 `ChatDataSource`。左侧显示最后消息预览、时间与未读角标，右侧按 `conversationId` 过滤消息；旧的 `contacts`、`messages` 入参继续可用。
+- 新增 `AgentChat` / `VirtualAgentChat`：左侧为历史会话，Agent 回复按 Markdown 渲染，思考过程位于独立的折叠视图，展开时以高度与透明度过渡且宽度保持稳定；流式消息使用打字机效果逐字显示并带光标，`typingSpeed` 控制速度。
+
+### 修复
+
+- 虚拟消息行默认高度提升到 136px，时间、送达状态与内联回应都不会再被裁切。
+
 ## [0.1.11] - 2026-10-23
 
 ### 新增

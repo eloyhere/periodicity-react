@@ -1,24 +1,30 @@
 import {
     useMemo,
     useState,
-    type ChangeEvent,
     type HTMLAttributes,
-    type KeyboardEvent as ReactKeyboardEvent,
     type ReactNode,
     type Ref,
 } from "react";
 import Button from "../../../component/button/Button";
 import Dialog from "../../../component/dialog/Dialog";
-import Icon from "../../../component/icon/Icon";
 import Avatar from "../../../component/thumb/Avatar";
 import Contact from "../../contact/normal/Contact";
 import MessageList from "../../message/normal/MessageList";
+import type { MessageReactionOption } from "../../message/reactionOptions";
 import cx from "../../../component/foundation/cx";
 import type { ContactAction, ContactItem } from "../../contact/adapter";
 import type { ListEntry } from "../../list/adapter";
 import type { MessageAction, MessageAdapter, MessageItem } from "../../message/adapter";
 import type { ChatAdapter } from "../adapter";
-import { conversationMessages, createChatAdapter } from "../adapter";
+import { conversationMessages } from "../adapter";
+import ChatComposer, { type ChatComposerAction } from "../ChatComposer";
+import ConversationRow from "../ConversationRow";
+import type {
+    ChatConversation,
+    ChatDataSource,
+    ChatDataSourceAdapter,
+} from "../model";
+import { useChatSource, type ChatSource } from "../useChatSource";
 import type { ChatSlots } from "../slots";
 import type { ContactSlots } from "../../contact/slots";
 import type { MessageSlots } from "../../message/slots";
@@ -32,14 +38,19 @@ import "../Chat.css";
  * onContactAction, onMessageAction, onQuote, onForward, onDelete, onRecall, onFavourite,
  * onCopyMessage, onSend, onDraftChange, onQuoteCancel, currentUser, contactsTitle,
  * contactsLabel, conversationLabel, empty, messageEmpty, placeholder, composerLabel, sendLabel,
- * contactsLoading, loading, sending, disabled, slots, className, ref, plus native div attributes
- * and events.
+ * reactions, quickReactionCount, defaultReactions, onReactionChange, onComposerAction,
+ * contactsLoading, loading, sending, disabled, slots, className, ref, plus native div attributes and
+ * events.
  * @example
  * <Chat contacts={contacts} messages={messages} onSend={sendMessage} />
  */
 export interface ChatProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
     contacts?: readonly ContactItem[];
+    /** Recent conversations shown on the left; replaces `contacts` when supplied. */
+    conversations?: readonly ChatConversation[];
     messages?: readonly MessageItem[];
+    /** Plain or indexed chat data source; wins over `conversations` and `messages`. */
+    dataSource?: ChatDataSource | ChatDataSourceAdapter;
     adapter?: ChatAdapter;
     value?: string;
     defaultValue?: string;
@@ -54,6 +65,8 @@ export interface ChatProps extends Omit<HTMLAttributes<HTMLDivElement>, "childre
     onFavourite?: (message: MessageItem) => void;
     onCopyMessage?: (message: MessageItem, content: string) => void;
     onSend?: (body: string, contact: ContactItem) => void;
+    /** Called with files chosen from the composer, including captured screenshots. */
+    onSendFiles?: (files: readonly File[], contact: ContactItem) => void;
     onDraftChange?: (draft: string) => void;
     onQuoteCancel?: () => void;
     currentUser?: string;
@@ -61,6 +74,10 @@ export interface ChatProps extends Omit<HTMLAttributes<HTMLDivElement>, "childre
     contactsTitle?: ReactNode;
     /** Accessible name of the contact column; defaults to the localised Conversations label. */
     contactsLabel?: string;
+    /** Search placeholder in the contact or history pane. */
+    contactsSearchPlaceholder?: string;
+    /** Accessible name of the contact or history search field. */
+    contactsSearchLabel?: string;
     /** Accessible name of the conversation pane; defaults to the localised Conversation label. */
     conversationLabel?: string;
     /** Empty conversation pane copy; defaults to the localised Select a conversation label. */
@@ -73,6 +90,18 @@ export interface ChatProps extends Omit<HTMLAttributes<HTMLDivElement>, "childre
     composerLabel?: string;
     /** Accessible name of the send button; defaults to the localised Send message label. */
     sendLabel?: string;
+    /** Reaction choices forwarded to the transcript; omit to hide reactions. */
+    reactions?: readonly MessageReactionOption[];
+    /** Number of reaction choices kept inline before the more button. Defaults to 6. */
+    quickReactionCount?: number;
+    /** Initial reaction values keyed by message id for uncontrolled transcripts. */
+    defaultReactions?: Readonly<Record<string, string>>;
+    /** Reports a reaction change for one transcript message. */
+    onReactionChange?: (message: MessageItem, reaction: string) => void;
+    /** Called when one of the composer toolbar icons is activated. */
+    onComposerAction?: (action: ChatComposerAction) => void;
+    /** Optional control rendered immediately before the send button. */
+    composerAccessory?: ReactNode;
     contactsLoading?: boolean;
     loading?: boolean;
     sending?: boolean;
@@ -92,7 +121,9 @@ export interface ChatProps extends Omit<HTMLAttributes<HTMLDivElement>, "childre
  */
 const Chat: (props: ChatProps) => ReactNode = ({
     contacts = [],
+    conversations,
     messages = [],
+    dataSource,
     adapter,
     value,
     defaultValue,
@@ -107,17 +138,26 @@ const Chat: (props: ChatProps) => ReactNode = ({
     onFavourite,
     onCopyMessage,
     onSend,
+    onSendFiles,
     onDraftChange,
     onQuoteCancel,
     currentUser = "",
     contactsTitle,
     contactsLabel,
+    contactsSearchPlaceholder,
+    contactsSearchLabel,
     conversationLabel,
     empty,
     messageEmpty,
     placeholder,
     composerLabel,
     sendLabel,
+    reactions,
+    quickReactionCount = 6,
+    defaultReactions,
+    onReactionChange,
+    onComposerAction,
+    composerAccessory,
     contactsLoading = false,
     loading = false,
     sending = false,
@@ -136,10 +176,15 @@ const Chat: (props: ChatProps) => ReactNode = ({
     const resolvedEmpty: ReactNode = empty ?? t("selectConversation");
     const resolvedMessageEmpty: ReactNode = messageEmpty ?? t("startConversation");
     const resolvedComposerLabel: string = composerLabel ?? t("message");
-    const source: ChatAdapter = useMemo(
-        (): ChatAdapter => adapter ?? createChatAdapter(contacts, messages),
-        [adapter, contacts, messages],
-    );
+    const chatSource: ChatSource = useChatSource({
+        dataSource,
+        conversations,
+        messages,
+        contacts,
+        adapter,
+    });
+    const source: ChatAdapter = chatSource.adapter;
+    const { conversationById }: ChatSource = chatSource;
     const firstKey: string =
         source.contacts.size > 0 ? source.contacts.getKey(0) : "";
     const [internalValue, setInternalValue]: [string, (next: string) => void] =
@@ -208,6 +253,28 @@ const Chat: (props: ChatProps) => ReactNode = ({
         setQuoted(null);
         onQuoteCancel?.();
     };
+    const conversationSlot: (index: number, contact: ContactItem) => ReactNode = (
+        index: number,
+        contact: ContactItem,
+    ): ReactNode => {
+        void index;
+        const conversation: ChatConversation | undefined = conversationById.get(contact.id);
+
+        return conversation === (void 0) ? (
+            <>{contact.name}</>
+        ) : (
+            <ConversationRow conversation={conversation} />
+        );
+    };
+    const contactSlot: ((index: number, contact: ContactItem) => ReactNode) | void =
+        slots?.contact ?? (conversationById.size > 0 ? conversationSlot : (void 0));
+    const contactSlots: ContactSlots | undefined =
+        contactSlot === (void 0) && slots?.contactContext === (void 0)
+            ? (void 0)
+            : {
+                  contact: contactSlot === (void 0) ? (void 0) : contactSlot,
+                  context: slots?.contactContext,
+              };
 
     return (
         <div
@@ -227,16 +294,11 @@ const Chat: (props: ChatProps) => ReactNode = ({
                     title={resolvedContactsTitle}
                     aria-label={resolvedContactsLabel}
                     listLabel={resolvedContactsLabel}
+                    searchPlaceholder={contactsSearchPlaceholder}
+                    searchLabel={contactsSearchLabel}
                     loading={contactsLoading}
                     disabled={disabled}
-                    slots={
-                        slots === (void 0)
-                            ? (void 0)
-                            : {
-                                  contact: slots.contact,
-                                  context: slots.contactContext,
-                              } satisfies ContactSlots
-                    }
+                    slots={contactSlots}
                 />
             </aside>
             <section className="chat__main" aria-label={resolvedConversationLabel}>
@@ -245,26 +307,36 @@ const Chat: (props: ChatProps) => ReactNode = ({
                 ) : (
                     <>
                         <header className="chat__header">
-                            <span className="chat__identity">
-                                <span className="chat__name">{activeContact.name}</span>
-                                {activeContact.description === (void 0) ? null : (
-                                    <span className="chat__description">
-                                        {activeContact.description}
+                            {slots?.header === (void 0) ? (
+                                <>
+                                    <span className="chat__identity">
+                                        <span className="chat__name">{activeContact.name}</span>
+                                        {activeContact.description === (void 0) ? null : (
+                                            <span className="chat__description">
+                                                {activeContact.description}
+                                            </span>
+                                        )}
                                     </span>
-                                )}
-                            </span>
-                            <span
-                                className="chat__presence"
-                                data-presence={activeContact.presence ?? "offline"}
-                            >
-                                {t(activeContact.presence ?? "offline")}
-                            </span>
+                                    <span
+                                        className="chat__presence"
+                                        data-presence={activeContact.presence ?? "offline"}
+                                    >
+                                        {t(activeContact.presence ?? "offline")}
+                                    </span>
+                                </>
+                            ) : (
+                                slots.header(activeContact)
+                            )}
                         </header>
 
                         <div className="chat__transcript">
                             <MessageList
                                 messages={transcript}
                                 currentUser={currentUser}
+                                reactions={reactions}
+                                quickReactionCount={quickReactionCount}
+                                defaultReactions={defaultReactions}
+                                onReactionChange={onReactionChange}
                                 loading={loading}
                                 disabled={disabled}
                                 empty={resolvedMessageEmpty}
@@ -283,6 +355,7 @@ const Chat: (props: ChatProps) => ReactNode = ({
                                         ? (void 0)
                                         : {
                                               message: slots.message,
+                                              beforeMessage: slots.beforeMessage,
                                               messageContext: slots.messageContext,
                                               avatar: slots.avatar,
                                           } satisfies MessageSlots
@@ -290,65 +363,38 @@ const Chat: (props: ChatProps) => ReactNode = ({
                             />
                         </div>
 
-                        <footer className="chat__composer">
-                            <div className="chat__compose">
-                                {quoted === null ? null : (
-                                    <div className="chat__quote">
-                                        <Icon name="Reply" size={14} />
-                                        <span className="chat__quote-author">
-                                            {quoted.author}
-                                        </span>
-                                        <span className="chat__quote-text">
-                                            {textOf(quoted.content)}
-                                        </span>
-                                        <button
-                                            type="button"
-                                            className="chat__quote-close"
-                                            aria-label={t("cancelQuote")}
-                                            disabled={disabled}
-                                            onClick={cancelQuote}
-                                        >
-                                            <Icon name="Close" size={13} />
-                                        </button>
-                                    </div>
-                                )}
-                                <textarea
-                                    className="chat__input"
-                                    rows={2}
-                                    value={draft}
-                                    placeholder={
-                                        placeholder ??
-                                        t("messagePlaceholder", { name: activeContact.name })
-                                    }
-                                    aria-label={resolvedComposerLabel}
-                                    disabled={disabled}
-                                    onChange={(
-                                        event: ChangeEvent<HTMLTextAreaElement>,
-                                    ): void => {
-                                        const next: string = event.target.value;
-                                        setDraft(next);
-                                        onDraftChange?.(next);
-                                    }}
-                                    onKeyDown={(
-                                        event: ReactKeyboardEvent<HTMLTextAreaElement>,
-                                    ): void => {
-                                        if (event.key === "Enter" && !event.shiftKey) {
-                                            event.preventDefault();
-                                            send();
-                                        }
-                                    }}
-                                />
-                            </div>
-                            <Button
-                                size="sm"
-                                variant="solid"
-                                aria-label={resolvedSendLabel}
-                                onClick={send}
-                                disabled={disabled || sending || draft.trim().length === 0}
-                            >
-                                <Icon name="Send" size={16} />
-                            </Button>
-                        </footer>
+                        <ChatComposer
+                            value={draft}
+                            placeholder={
+                                placeholder ??
+                                t("messagePlaceholder", { name: activeContact.name })
+                            }
+                            label={resolvedComposerLabel}
+                            sendLabel={resolvedSendLabel}
+                            quoted={
+                                quoted === null
+                                    ? null
+                                    : {
+                                          author: quoted.author,
+                                          text: textOf(quoted.content),
+                                      }
+                            }
+                            disabled={disabled}
+                            sending={sending}
+                            onDraftChange={(next: string): void => {
+                                setDraft(next);
+                                onDraftChange?.(next);
+                            }}
+                            onSend={send}
+                            onQuoteCancel={cancelQuote}
+                            onSendFiles={(files: readonly File[]): void => {
+                                if (activeContact !== null) {
+                                    onSendFiles?.(files, activeContact);
+                                }
+                            }}
+                            onComposerAction={onComposerAction}
+                            accessory={composerAccessory}
+                        />
                     </>
                 )}
             </section>

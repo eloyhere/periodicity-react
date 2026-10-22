@@ -6,3 +6,6 @@ export type { MessageListProps } from "./normal/MessageList";
 export type { VirtualMessageListProps } from "./virtual/VirtualMessageList";
 export * from "./adapter";
 export type { MessageSlots } from "./slots";
+export { defaultMessageReactions } from "./reactionOptions";
+export type { MessageReactionOption } from "./reactionOptions";
+export type { MessageReactionsProps } from "./reactions";

@@ -2,19 +2,23 @@ import {
     useCallback,
     useLayoutEffect,
     useMemo,
+    useState,
     type CSSProperties,
+    type Dispatch,
     type HTMLAttributes,
     type KeyboardEvent as ReactKeyboardEvent,
     type MouseEvent as ReactMouseEvent,
     type ReactNode,
     type Ref,
     type RefCallback,
+    type SetStateAction,
     type UIEvent,
 } from "react";
 import Avatar from "../../../component/thumb/Avatar";
 import Button from "../../../component/button/Button";
 import Checkbox from "../../../component/input/check/Checkbox";
 import Icon from "../../../component/icon/Icon";
+import { markdownToText } from "../../../component/markdown/render";
 import Surface from "../../../component/surface/Surface";
 import Spinner from "../../../component/progress/Spinner";
 import VisuallyHidden from "../../../component/foundation/VisuallyHidden";
@@ -24,6 +28,8 @@ import type { ListEntry } from "../../list/adapter";
 import type { MessageAction, MessageAdapter, MessageItem } from "../adapter";
 import { createMessageAdapter } from "../adapter";
 import MessageContextMenu from "../MessageContextMenu";
+import MessageReactions from "../reactions";
+import type { MessageReactionOption } from "../reactionOptions";
 import type { MessageSlots } from "../slots";
 import { useMessageSelection, type MessageSelection } from "../useMessageSelection";
 import { useInternational, type InternationalContextValue } from "../../../international";
@@ -35,10 +41,11 @@ import "../Message.css";
  * Fields: messages, adapter, currentUser, autoScroll, onMessageAction, onQuote, onForward,
  * onDelete, onRecall, onFavourite, onCopyMessage, copyToClipboard, onRetry, onMessageClick,
  * onMessageMenuOpenChange, selectMode, defaultSelectMode, onSelectModeChange, selectedIds,
- * defaultSelectedIds, onSelectionChange, height, itemHeight, empty, loading, loadingLabel,
- * disabled, slots, className, ref, plus native div attributes and events.
+ * defaultSelectedIds, onSelectionChange, height, itemHeight, reactions, quickReactionCount,
+ * defaultReactions, onReactionChange, empty, loading, loadingLabel, disabled, slots, className, ref,
+ * plus native div attributes and events.
  * @example
- * <VirtualMessageList messages={messages} height={360} itemHeight={84} />
+ * <VirtualMessageList messages={messages} height={360} itemHeight={136} />
  */
 export interface VirtualMessageListProps
     extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
@@ -64,7 +71,16 @@ export interface VirtualMessageListProps
     defaultSelectedIds?: readonly string[];
     onSelectionChange?: (ids: readonly string[], messages: readonly MessageItem[]) => void;
     height?: number;
+    /** Fixed row height. Defaults to 136 so timestamps, state, and reactions fit. */
     itemHeight?: number;
+    /** Reaction choices rendered beneath every message; omit to hide reactions. */
+    reactions?: readonly MessageReactionOption[];
+    /** Number of reaction choices kept inline before the more button. Defaults to 6. */
+    quickReactionCount?: number;
+    /** Initial reaction values keyed by message id for uncontrolled lists. */
+    defaultReactions?: Readonly<Record<string, string>>;
+    /** Reports a reaction change for one message. */
+    onReactionChange?: (message: MessageItem, reaction: string) => void;
     /** Empty transcript content; defaults to the localised No messages yet label. */
     empty?: ReactNode;
     loading?: boolean;
@@ -107,7 +123,11 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
     defaultSelectedIds,
     onSelectionChange,
     height = 360,
-    itemHeight = 84,
+    itemHeight,
+    reactions,
+    quickReactionCount = 6,
+    defaultReactions,
+    onReactionChange,
     empty,
     loading = false,
     loadingLabel,
@@ -134,6 +154,7 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
         .map((entry: ListEntry<MessageItem>): MessageItem => entry.item);
     const firstKey: string = source.size > 0 ? source.getKey(0) : "";
     const lastKey: string = source.size > 0 ? source.getKey(source.size - 1) : "";
+    const resolvedItemHeight: number = itemHeight ?? 136;
     const {
         attachViewport,
         start,
@@ -142,7 +163,7 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
         scrollToBottom,
     }: VirtualWindow = useVirtualWindow({
         count: rows.length,
-        itemHeight,
+        itemHeight: resolvedItemHeight,
         fallbackHeight: height,
         overscan: 2,
         resetKey: loading,
@@ -156,8 +177,12 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
         defaultSelectedIds,
         onSelectionChange,
     });
+    const [localReactions, setLocalReactions]: [
+        Record<string, string>,
+        Dispatch<SetStateAction<Record<string, string>>>,
+    ] = useState<Record<string, string>>({});
     const visible: readonly MessageItem[] = rows.slice(start, end);
-    const spacerStyle: CSSProperties = { height: rows.length * itemHeight };
+    const spacerStyle: CSSProperties = { height: rows.length * resolvedItemHeight };
 
     /**
      * Attaches the virtual viewport while forwarding the caller ref.
@@ -222,8 +247,9 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
             return;
         }
 
-        if (action === "copy") {
-            const text: string = typeof message.content === "string" ? message.content : "";
+        if (action === "copy" || action === "copy-text" || action === "copy-markdown") {
+            const source: string = typeof message.content === "string" ? message.content : "";
+            const text: string = action === "copy-text" ? markdownToText(source) : source;
 
             if (text.length > 0 && copyToClipboard) {
                 void navigator.clipboard?.writeText(text);
@@ -246,6 +272,22 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
         }
 
         onMessageAction?.(action, message);
+    };
+
+    const chooseReaction: (message: MessageItem, reaction: string) => void = (
+        message: MessageItem,
+        reaction: string,
+    ): void => {
+        if (message.reaction === (void 0)) {
+            setLocalReactions(
+                (previous: Record<string, string>): Record<string, string> => ({
+                    ...previous,
+                    [message.id]: reaction,
+                }),
+            );
+        }
+
+        onReactionChange?.(message, reaction);
     };
 
     const forwardSelected: () => void = (): void => {
@@ -349,9 +391,26 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
                             message.self === true || message.author === currentUser;
                         const messageDisabled: boolean = disabled || message.disabled === true;
                         const rowIndex: number = start + index;
+                        const reactionBar: ReactNode =
+                            reactions === (void 0) || reactions.length === 0 ? null : (
+                                <MessageReactions
+                                    options={reactions}
+                                    quickCount={quickReactionCount}
+                                    selected={
+                                        message.reaction ??
+                                        localReactions[message.id] ??
+                                        defaultReactions?.[message.id]
+                                    }
+                                    self={self}
+                                    disabled={messageDisabled || selection.selectMode}
+                                    onChange={(reaction: string): void =>
+                                        chooseReaction(message, reaction)
+                                    }
+                                />
+                            );
                         const rowStyle: CSSProperties = {
-                            top: rowIndex * itemHeight,
-                            height: itemHeight,
+                            top: rowIndex * resolvedItemHeight,
+                            height: resolvedItemHeight,
                         };
 
                         return (
@@ -396,7 +455,9 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
                                             }
                                             label={
                                                 <VisuallyHidden>
-                                                    {`Select message from ${message.author}`}
+                                                    {t("selectMessageFrom", {
+                                                        author: message.author,
+                                                    })}
                                                 </VisuallyHidden>
                                             }
                                         />
@@ -411,6 +472,7 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
                                     {self ? null : (
                                         <span className="message__author">{message.author}</span>
                                     )}
+                                    {slots?.beforeMessage?.(rowIndex, message)}
                                     <MessageContextMenu
                                         message={message}
                                         self={self}
@@ -434,6 +496,7 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
                                         </Surface>
                                     </MessageContextMenu>
                                     <div className="message__meta">
+                                        {self ? reactionBar : null}
                                         {message.timestamp === (void 0) ? null : (
                                             <time className="message__time">
                                                 {message.timestamp}
@@ -447,7 +510,15 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
                                                         "message__status--read",
                                                 )}
                                                 data-status={message.status}
-                                                aria-label={message.status}
+                                                aria-label={t(
+                                                    message.status === "read"
+                                                        ? "messageRead"
+                                                        : message.status === "failed"
+                                                          ? "messageFailed"
+                                                          : message.status === "sending"
+                                                            ? "messageSending"
+                                                            : "messageSent",
+                                                )}
                                             >
                                                 {message.status === "read" ? (
                                                     <>
@@ -483,6 +554,7 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
                                                 {t("retry")}
                                             </button>
                                         ) : null}
+                                        {self ? null : reactionBar}
                                     </div>
                                 </div>
                             </div>
