@@ -1,4 +1,4 @@
-﻿.avatar {
+.avatar {
     --avatar-size: var(--space-8);
 
     position: relative;
@@ -73,6 +73,21 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+.avatar__custom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.avatar__custom > svg {
+    display: block;
+    width: 100%;
+    height: 100%;
 }
 
 .avatar__initials {
