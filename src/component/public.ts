@@ -401,5 +401,11 @@ export type {
 } from "../layout/appbar";
 export type { CollapseProps as PeriodicityCollapseProps } from "../layout/collapse";
 export type { ToolbarProps as PeriodicityToolbarProps } from "../layout/toolbar";
+import BasePeriodicityMarkdown from "./markdown/Markdown";
+export const PeriodicityMarkdown = withStandardEvents(BasePeriodicityMarkdown);
+export type { MarkdownProps as PeriodicityMarkdownProps } from "./markdown/Markdown";
+import BasePeriodicityTex from "./tex/Tex";
+export const PeriodicityTex = withStandardEvents(BasePeriodicityTex);
+export type { TexProps as PeriodicityTexProps } from "./tex/Tex";
 
 export type { StandardEventProps as PeriodicityStandardEventProps } from "../gesture/react/withStandardEvents";

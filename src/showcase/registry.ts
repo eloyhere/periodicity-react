@@ -12,6 +12,7 @@ import ChartsPage from "./pages/components/ChartsPage";
 import ChoicesPage from "./pages/components/ChoicesPage";
 import DialogsPage from "./pages/components/DialogsPage";
 import DiscussionPage from "./pages/components/DiscussionPage";
+import DocumentsPage from "./pages/components/DocumentsPage";
 import FeedbackPage from "./pages/components/FeedbackPage";
 import LayoutPage from "./pages/components/LayoutPage";
 import ListVariantsPage from "./pages/components/ListVariantsPage";
@@ -147,6 +148,13 @@ const familyRecords: readonly FamilyRecord[] = [
         title: "Text",
         description: "The typographic scale rendered as live text, with semantic tones.",
         page: TextPage,
+    },
+    {
+        id: "documents",
+        label: "Documents",
+        title: "Documents",
+        description: "Read-only Markdown and TeX previews, including complete LaTeX documents, rendered as HTML and MathML.",
+        page: DocumentsPage,
     },
     {
         id: "text-fields",

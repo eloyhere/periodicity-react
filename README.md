@@ -2,7 +2,7 @@
 
 A Material-inspired React 19 component library for product interfaces, admin tools, and data-heavy applications.
 
-`periodicity-react` ships **136 `Periodicity*` components**, four chart types, file and image pickers, scoped
+`periodicity-react` ships **138 `Periodicity*` components**, four chart types, file and image pickers, scoped
 typography, design-system providers, and **12 built-in locales**. The API is TypeScript-first, flex-first, and close
 to the browser: native attributes, events, ARIA, and refs pass through wherever they make sense.
 
@@ -756,6 +756,33 @@ const font = useFont(triggerRef);
 `display`, `mono`, or a raw CSS family stack. `useFont` falls back to the nearest `Font` scope before the ref
 mounts, which makes it useful for portalled overlays that should match their trigger.
 
+## Documents
+
+`PeriodicityMarkdown` renders a read-only Markdown document as sanitised, semantic HTML: headings, paragraphs,
+nested lists, tables, quotes, fenced code, task lists, links, and images. Raw HTML is escaped rather than executed,
+and links and images are limited to safe URL schemes.
+
+`PeriodicityTex` renders TeX as native MathML. A source containing `\begin{document}` is treated as a complete LaTeX
+document and becomes an HTML article: title, authors, abstract, numbered sections and appendix, lists, tables,
+figures, footnotes, citations, cross-references, and embedded formulas. Preamble `\newcommand`, `\renewcommand`,
+`\def`, and `\DeclareMathOperator` definitions are expanded, and `\includegraphics`, `\href`, and `\url` are limited
+to safe URL schemes.
+
+```tsx
+import { PeriodicityMarkdown, PeriodicityTex } from "periodicity-react";
+
+<PeriodicityMarkdown source={"# Notes\n\nRead **only**."} />;
+
+<PeriodicityTex source="E = mc^2" />;
+<PeriodicityTex display={false} source="a^2 + b^2 = c^2" />;
+<PeriodicityTex source={paper} />;
+```
+
+`Markdown` accepts `source` and an optional `breaks` flag. `Tex` accepts `source` and a `display` flag that chooses
+between block and inline maths; `display` is ignored for complete documents. External files referenced with
+`\input` or `\bibliography` are not loaded, packages are not executed, custom environments fall back to their
+rendered content, and rows inside `align` are not individually numbered.
+
 ## Motion and standard events
 
 `PeriodicityAnimation` and `PeriodicityAnimated` provide motion configuration, reduced-motion handling, and
@@ -836,7 +863,7 @@ the structural components themselves remain flex containers.
 
 ## Component index
 
-The published package contains 136 `Periodicity*` components. The prefix is omitted below for readability.
+The published package contains 138 `Periodicity*` components. The prefix is omitted below for readability.
 
 | Family                    | Components                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -848,6 +875,7 @@ The published package contains 136 `Periodicity*` components. The prefix is omit
 | Overlays and feedback     | Dialog, ConfirmDialog, MessageDialog, InputDialog, Drawer, DrawerLayout, Popover, Dropdown, DropdownItem, DropdownGroup, DropdownSeparator, ContextMenu, ContextMenuItem, ContextMenuGroup, ContextMenuSeparator, Menu, MenuItem, MenuGroup, MenuSeparator, Tooltip, ToastProvider, Snackbar, Alert, Banner, Backdrop, FullscreenLoading, ElementLoading, Progress, CircularProgress, ProgressRing, Spinner, Skeleton, Rate, Badge, Tag, Chip, Avatar, AvatarGroup, EmptyState |
 | Navigation and layout     | Coordinator, AppBar, Collapse, Toolbar, Tabs, TabPanel, Pager, Page, NavigationView, Stepper, Accordion, Breadcrumbs, LinearLayout, LinearLayoutItem, ConstraintLayout, Constraint, GridLayout, WaterfallLayout                                                                                                                                                                                                                                                                |
 | Messaging and comments    | Contact, VirtualContact, ContactContextMenu, MessageList, VirtualMessageList, MessageContextMenu, Chat, VirtualChat, CommentThread, VirtualCommentThread                                                                                                                                                                                                                                                                                                                       |
+| Documents                 | Markdown, Tex                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ## Development
 

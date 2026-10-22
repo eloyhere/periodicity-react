@@ -1,0 +1,35 @@
+.tex {
+    display: inline-block;
+    max-width: 100%;
+    color: var(--color-on-surface);
+    font-size: var(--type-body);
+    line-height: var(--leading-normal);
+    vertical-align: -0.15em;
+}
+
+.tex--block {
+    display: block;
+    margin: 0;
+    padding: var(--space-2) 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    text-align: center;
+}
+
+.tex math {
+    font-size: 1.15em;
+}
+
+.tex--inline math {
+    font-size: 1.02em;
+}
+
+.tex--block math {
+    margin-inline: auto;
+}
+
+@media (forced-colors: active) {
+    .tex {
+        color: CanvasText;
+    }
+}

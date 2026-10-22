@@ -262,8 +262,19 @@ const allowedAttributes: ReadonlySet<string> = new Set<string>([
     "title",
 ]);
 
+const hasControlCharacter: (value: string) => boolean = (value: string): boolean =>
+    Array.from(value).some((char: string): boolean => {
+        const code: number = char.charCodeAt(0);
+
+        return code < 0x20 || code === 0x7f;
+    });
+
 const safeUrl: (value: string) => boolean = (value: string): boolean => {
     const trimmed: string = value.trim().toLowerCase();
+
+    if (hasControlCharacter(trimmed)) {
+        return false;
+    }
 
     return (
         trimmed.startsWith("http://") ||
@@ -291,6 +302,9 @@ const sanitizeHtml: (source: string) => string = (source: string): string => {
             const tag: string = child.tagName.toLowerCase();
 
             if (!allowedTags.has(tag)) {
+                // Clean the subtree before unwrapping it, otherwise allowed
+                // descendants move into the body without an attribute pass.
+                walk(child);
                 child.replaceWith(...Array.from(child.childNodes));
                 continue;
             }

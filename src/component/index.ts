@@ -46,6 +46,8 @@ export * from "./input/range";
 export * from "./input/switch";
 export * from "./input/textarea";
 export * from "./loading";
+export * from "./markdown";
+export * from "./tex";
 export * from "./mention";
 export * from "./pagination";
 export * from "./picker/colour";

@@ -2,7 +2,7 @@
 
 面向产品界面、管理后台和数据密集型应用的 Material 风格 React 19 组件库。
 
-`periodicity-react` 提供 **136 个 `Periodicity*` 组件**、四种统计图、文件与图片选择器、作用域排版、设计系统 Provider，以及 **12 个内置语言包**。API 以 TypeScript 为先、以 Flex 布局为基础，并尽量贴近浏览器原生行为：在合理的地方透传原生属性、事件、ARIA 和 `ref`。
+`periodicity-react` 提供 **138 个 `Periodicity*` 组件**、四种统计图、文件与图片选择器、作用域排版、设计系统 Provider，以及 **12 个内置语言包**。API 以 TypeScript 为先、以 Flex 布局为基础，并尽量贴近浏览器原生行为：在合理的地方透传原生属性、事件、ARIA 和 `ref`。
 
 - **npm：** [`periodicity-react`](https://www.npmjs.com/package/periodicity-react)
 - **版本：** `0.1.10`
@@ -659,6 +659,24 @@ const font = useFont(triggerRef);
 
 `Font` 的 level 可选 `display`、`h1`、`h2`、`h3`、`h4`、`body`、`body-sm`、`label`、`mono`；family 可选 `sans`、`display`、`mono`，也可以传原始 CSS 字体栈。`useFont` 在 ref 挂载前会回退到最近的 `Font` 上下文，适合让 portal 浮层与触发元素保持一致。
 
+## 文档
+
+`PeriodicityMarkdown` 把只读 Markdown 文档渲染为经过清理的语义化 HTML，支持标题、段落、嵌套列表、表格、引用、代码块、任务列表、链接和图片；原始 HTML 会被转义而不是执行，链接与图片只接受安全的 URL 协议。
+
+`PeriodicityTex` 把 TeX 渲染为原生 MathML；当源码包含 `\begin{document}` 时，它会被视为完整 LaTeX 文档并渲染为 HTML 文章：标题、作者、摘要、带编号的章节与附录、列表、表格、图片、脚注、引用、交叉引用，以及内嵌公式。前导区中的 `\newcommand`、`\renewcommand`、`\def` 和 `\DeclareMathOperator` 会被展开；`\includegraphics`、`\href` 和 `\url` 只接受安全的 URL 协议。
+
+```tsx
+import { PeriodicityMarkdown, PeriodicityTex } from "periodicity-react";
+
+<PeriodicityMarkdown source={"# 笔记\n\n只读预览。"} />;
+
+<PeriodicityTex source="E = mc^2" />;
+<PeriodicityTex display={false} source="a^2 + b^2 = c^2" />;
+<PeriodicityTex source={paper} />;
+```
+
+`Markdown` 接受 `source` 和可选的 `breaks`；`Tex` 接受 `source` 和 `display`，用于在行内公式与独立公式之间切换；完整文档模式下 `display` 会被忽略。通过 `\input` 或 `\bibliography` 引用的外部文件不会被加载，宏包不会执行，未知环境会退化为渲染其内容，`align` 的每一行不会单独编号。
+
 ## 动效与标准事件
 
 `PeriodicityAnimation` 和 `PeriodicityAnimated` 提供动效配置、减少动效处理和元素多态动画包装。Ripple 层由可交互表面共享，在关闭动效时停止。
@@ -722,7 +740,7 @@ const font = useFont(triggerRef);
 
 ## 组件索引
 
-发布包包含 136 个 `Periodicity*` 组件。下表省略前缀以便阅读。
+发布包包含 138 个 `Periodicity*` 组件。下表省略前缀以便阅读。
 
 | 家族            | 组件                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -734,6 +752,7 @@ const font = useFont(triggerRef);
 | 浮层与反馈      | Dialog, ConfirmDialog, MessageDialog, InputDialog, Drawer, DrawerLayout, Popover, Dropdown, DropdownItem, DropdownGroup, DropdownSeparator, ContextMenu, ContextMenuItem, ContextMenuGroup, ContextMenuSeparator, Menu, MenuItem, MenuGroup, MenuSeparator, Tooltip, ToastProvider, Snackbar, Alert, Banner, Backdrop, FullscreenLoading, ElementLoading, Progress, CircularProgress, ProgressRing, Spinner, Skeleton, Rate, Badge, Tag, Chip, Avatar, AvatarGroup, EmptyState |
 | 导航与布局      | Coordinator, AppBar, Collapse, Toolbar, Tabs, TabPanel, Pager, Page, NavigationView, Stepper, Accordion, Breadcrumbs, LinearLayout, LinearLayoutItem, ConstraintLayout, Constraint, GridLayout, WaterfallLayout                                                                                                                                                                                                                                                                |
 | 消息与评论      | Contact, VirtualContact, ContactContextMenu, MessageList, VirtualMessageList, MessageContextMenu, Chat, VirtualChat, CommentThread, VirtualCommentThread                                                                                                                                                                                                                                                                                                                       |
+| 文档            | Markdown, Tex                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ## 开发
 

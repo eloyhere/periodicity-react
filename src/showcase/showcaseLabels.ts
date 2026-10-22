@@ -23,6 +23,7 @@ type LabelKey =
     | "Messaging"
     | "Files"
     | "Display"
+    | "Documents"
     | "Providers"
     | "Primitives";
 
@@ -45,6 +46,7 @@ const enGb: Labels = {
     Messaging: "Messaging",
     Files: "Files",
     Display: "Display",
+    Documents: "Documents",
     Providers: "Providers",
     Primitives: "Primitives",
 };
@@ -72,6 +74,7 @@ const zh: Labels = {
     Messaging: "消息",
     Files: "文件",
     Display: "展示",
+    Documents: "文档",
     Providers: "Provider",
     Primitives: "原语",
 };
@@ -83,6 +86,7 @@ const zhHk: Labels = {
     Layout: "佈局",
     Navigation: "導覽",
     Files: "檔案",
+    Documents: "文檔",
     Providers: "Provider",
     Primitives: "原語",
 };
@@ -94,6 +98,7 @@ const zhTw: Labels = {
     Layout: "版面",
     Navigation: "導覽",
     Files: "檔案",
+    Documents: "文檔",
     Primitives: "原語",
 };
 
@@ -114,6 +119,7 @@ const ja: Labels = {
     Messaging: "メッセージ",
     Files: "ファイル",
     Display: "表示",
+    Documents: "ドキュメント",
     Providers: "プロバイダー",
     Primitives: "プリミティブ",
 };
@@ -135,6 +141,7 @@ const ko: Labels = {
     Messaging: "메시지",
     Files: "파일",
     Display: "표시",
+    Documents: "문서",
     Providers: "프로바이더",
     Primitives: "프리미티브",
 };
@@ -156,6 +163,7 @@ const es: Labels = {
     Messaging: "Mensajería",
     Files: "Archivos",
     Display: "Visualización",
+    Documents: "Documentos",
     Providers: "Proveedores",
     Primitives: "Primitivas",
 };
@@ -177,6 +185,7 @@ const pt: Labels = {
     Messaging: "Mensageria",
     Files: "Arquivos",
     Display: "Exibição",
+    Documents: "Documentos",
     Providers: "Provedores",
     Primitives: "Primitivas",
 };

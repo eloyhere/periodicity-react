@@ -2,6 +2,19 @@
 
 本文件记录 Periodicity React 的重要变更。格式参考 Keep a Changelog。
 
+## [Unreleased]
+
+### 新增
+
+- `Markdown` 把只读 Markdown 文档渲染为经过清理的语义化 HTML，支持标题、嵌套列表、表格、引用、代码块、任务列表、链接和图片；原始 HTML 会被转义，链接与图片只接受安全的 URL 协议。
+- `Tex` 把 TeX 数学公式渲染为原生 MathML，公式保持可选中、可缩放，并能被辅助技术读取。
+- `Tex` 现在可以把完整 LaTeX 文档（`\begin{document}`）渲染为 HTML 文章，包含标题、作者、摘要、带编号的章节与附录、列表、表格、图片、脚注、引用、交叉引用和内嵌 MathML；前导区中的 `\newcommand`、`\renewcommand`、`\def`、`\DeclareMathOperator` 定义会被展开。
+
+### 修复
+
+- 加固文件预览的 HTML 清理器：`svg`、`math`、`marquee`、`details` 等容器被解包前会先清理其后代。此前精心构造的 HTML 文件可能借助这类容器保留 `javascript:` URL 或事件处理属性。
+- `Markdown`、`Tex` 与文件预览现在会拒绝 URL 中的控制字符。
+
 ## [0.1.10] - 2026-10-22
 
 ### 新增

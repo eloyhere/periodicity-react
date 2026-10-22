@@ -413,6 +413,20 @@ export const uiComponentSections: readonly ComponentSection[] = [
             description: "Centred empty message with icon, description, and action slots.",
         },
     ]),
+    createSection("documents", "Documents", [
+        {
+            name: "Markdown",
+            family: "documents",
+            demo: "Markdown document",
+            description: "Read-only Markdown preview rendered as sanitised, semantic HTML.",
+        },
+        {
+            name: "Tex",
+            family: "documents",
+            demo: "TeX mathematics",
+            description: "Read-only TeX mathematics and complete LaTeX documents rendered as MathML and HTML.",
+        },
+    ]),
     createSection("feedback", "Feedback", [
         {
             name: "Alert",

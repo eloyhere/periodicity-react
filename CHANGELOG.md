@@ -3,6 +3,26 @@
 All notable changes to Periodicity React are recorded here. The format follows the spirit of Keep a Changelog,
 and this project uses British English in its English documentation.
 
+## [Unreleased]
+
+### Added
+
+- `Markdown` renders read-only Markdown documents as sanitised, semantic HTML. Headings, nested lists, tables,
+  quotes, fenced code, task lists, links, and images are supported; raw HTML is escaped and links and images are
+  limited to safe URL schemes.
+- `Tex` renders TeX mathematics as native MathML, so formulas stay selectable, scalable, and accessible to
+  assistive technology.
+- `Tex` now renders complete LaTeX documents (`\begin{document}`) as an HTML article with title, authors, abstract,
+  numbered sections and appendix, lists, tables, figures, footnotes, citations, cross-references, and embedded
+  MathML. Preamble `\newcommand`, `\renewcommand`, `\def`, and `\DeclareMathOperator` definitions are expanded.
+
+### Fixed
+
+- Hardened the file preview HTML sanitizer: descendants of unwrapped containers such as `svg`, `math`, `marquee`,
+  and `details` are now sanitised before they move into the preview. Previously, a crafted HTML file could keep
+  `javascript:` URLs or event-handler attributes alive through such a container.
+- `Markdown`, `Tex`, and the file preview now reject control characters in URLs.
+
 ## [0.1.10] - 2026-10-22
 
 ### Added
