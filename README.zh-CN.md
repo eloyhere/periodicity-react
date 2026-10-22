@@ -114,20 +114,36 @@ export function SignIn() {
 
 ## 组件命名
 
-每个公共组件都提供 `Periodicity` 前缀：
+每个公共组件只导出带 `Periodicity` 前缀的名称：
 
 ```tsx
 import { PeriodicityButton, PeriodicityDialog, PeriodicityTable, PeriodicityTextInput } from "periodicity-react";
 ```
 
-不带前缀的名称作为兼容别名保留，下面两种写法指向同一个组件：
+不再导出不带前缀的兼容别名。统一使用带前缀的名称，以明确组件边界并避免与宿主应用组件重名。
 
 ```tsx
 import { PeriodicityTable } from "periodicity-react";
-import { Table } from "periodicity-react";
 ```
 
-新代码应使用带前缀的名称，以明确组件边界并避免与宿主应用组件重名。
+### 动态图标
+
+`PeriodicityIcon` 增加了十个动态图标，用于加载与活动反馈：
+
+```tsx
+<PeriodicityIcon name="Spinner" size={24} />
+<PeriodicityIcon name="LoadingDots" size={24} />
+<PeriodicityIcon name="Pulse" size={24} />
+<PeriodicityIcon name="Orbit" size={24} />
+<PeriodicityIcon name="Bars" size={24} />
+<PeriodicityIcon name="Wave" size={24} />
+<PeriodicityIcon name="Radar" size={24} />
+<PeriodicityIcon name="Breathe" size={24} />
+<PeriodicityIcon name="Sync" size={24} />
+<PeriodicityIcon name="BellRing" size={24} />
+```
+
+`Spinner` 是安卓风格的转圈图标，旋转时缺口大小会动态变化。所有动态图标都尊重 `prefers-reduced-motion`。`Agent` 组是静态 AI 厂商图标；`Motion` 和 `Live` 使用 CSS 动画；专门新增的 `Dynamic` 组把 SMIL 动画写在 SVG 内部：`DynamicRotateRight`、`DynamicRotateLeft`、`DynamicThrob`、`DynamicBounceBall`、`DynamicFlipCard`、`DynamicMorphing`、`DynamicLoad`、`DynamicSatellite`、`DynamicBlink`、`DynamicRipple`、`DynamicPulse`、`DynamicTyping`、`DynamicWave`、`DynamicScan`、`DynamicOrbit`、`DynamicBreathe`、`DynamicShake`。新增 `Programming` 编程分组（Java、Python、JavaScript、TypeScript、C、C++、C#、PHP、Kotlin、Rust、Go、Swift、Ruby、Dart、Scala、Perl、Lua、Bash、HTML、CSS、SQL、npm、Maven、JSON 等）、`Computer` 分组（终端、服务器、数据库、代码、芯片、网络、存储等）和 `Electronics` 分组（电阻、电容、二极管、晶体管、PCB、示波器、万用表、电位器、热敏电阻、MOSFET、桥式整流、高压危险、触电警示等）。`Math` 分类新增 `Equal`、`NotEqual`、`LessThan`、`GreaterThan`、`Sum`、`Pi`、`Infinity`、`SquareRoot`、`Fraction`、`Percent`、`Integral`、`Function`、`Matrix`、`Angle`、`Delta`、`Partial`、`Nabla`、`Product`、`Factorial`、`Union`、`Intersection`、`ElementOf`、`NotElementOf`、`Subset`、`ForAll`、`Exists`、`PlusMinus`、`Approximately`、`Degree`、`Proportional`、`Therefore`、`Because`、`Vector`、`Coordinate`、`Integer`、`Negative`、`Absolute`、`Rational`、`Irrational`、`Real`、`Imaginary`、`Quaternion`、`Natural`、`Complex`、`Even`、`Odd`、`Positive`。新增独立的 `Animal` 和 `Plant` 分组，每组 30 个图标。现在每个分组都至少有 30 个图标；`Motion`、`Live`、`Dynamic` 还包含额外的动效和状态变体。
 
 ## 表单与选择器
 
@@ -187,12 +203,14 @@ import { PeriodicityCalendar } from "periodicity-react";
     onChange={setDate}
     min="2026-01-01"
     max="2026-12-31"
-    locale="zh-CN"
     firstDayOfWeek={1}
+    slots={{
+        body: ({ day }) => <span>{day % 2 === 0 ? "偶数" : "奇数"}</span>,
+    }}
 />;
 ```
 
-键盘：方向键按天/周移动，Home/End 到本周首尾，PageUp/PageDown 切换月份，Shift+PageUp/PageDown 切换年份，Enter 或 Space 选择。`showAdjacentDays`、`weekdayLabels`、`monthLabels`、`renderDay`、`disabled` 和 `readOnly` 可用于定制。
+每个日期 cell 有 `slots.header`、`slots.body`、`slots.footer` 三行；header 默认显示日期数字。键盘：方向键按天/周移动，Home/End 到本周首尾，PageUp/PageDown 切换月份，Shift+PageUp/PageDown 切换年份，Enter 或 Space 选择。`showAdjacentDays`、`weekdayLabels`、`monthLabels`、`slots`、`renderDay`、`disabled` 和 `readOnly` 可用于定制。
 
 大部分表单和选择器支持受控/非受控值、`disabled`、适当的 `readOnly`，以及调用方与内部事件处理器的组合。`PeriodicityMention` 提供异步建议列表和 Token 化 Chip；加载器由调用方提供。
 
@@ -480,7 +498,6 @@ import { PeriodicityInternational } from "periodicity-react";
 - `PeriodicityMessageContextMenu`
 - `PeriodicityPortal`
 - `PeriodicityVisuallyHidden`
-- `PeriodicityTabLayout`
 
 ## 开发
 

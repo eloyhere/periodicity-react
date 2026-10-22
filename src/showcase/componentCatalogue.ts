@@ -3,34 +3,18 @@
  *
  * How the inventory was built
  * ---------------------------
- * The only source of truth is the public barrel `src/component/index.ts`.
- * A TypeScript program that reads that barrel reports 439 exported symbols:
- * 257 are type-only exports (interfaces, type aliases, and props), so they
- * cannot be rendered and are excluded automatically. The remaining 178 are
- * runtime values. Every runtime value was inspected and classified:
+ * The only source of truth is the public component surface
+ * `src/component/public.ts`, which exports `PeriodicityXX` names only.
+ * Every renderable public component gets exactly one top-level record.
+ * Subcomponents such as `FormField` and `FormActions` carry a `parent` and
+ * are grouped under their parent, so the introduction shows one project per
+ * component. Hooks, adapters, parsers, validators, constants, fixture data,
+ * and React context objects are listed in `nonUiExportGroups` with the reason
+ * they were filtered out.
  *
- * - 118 are renderable UI components: function components, layout
- *   primitives, and providers whose public usage is JSX (`<Name />`).
- * - `useLoad` is a hook, but it owns the full-screen loading surface and the
- *   loading entry point, so it keeps its own entry (the task asks for it).
- * - 61 are hooks, adapters, parsers, validators, constants, fixture data, or
- *   React context objects. They are listed in `nonUiExportGroups` with the
- *   reason they were filtered out.
- * - 2 are duplicate aliases of components that already have an entry:
- *   `TabLayout` (alias of `Tabs`) and `Animate` (alias of `Animated`). They
- *   are listed in `duplicateAliasExports` and documented inside the entry of
- *   the component they alias.
- *
- * That gives 119 sidebar entries for 118 UI components plus `useLoad`.
- * `Icon` is used by the showcase but is intentionally absent: it is not
- * exported from the public barrel and is documented by the Icons foundation
- * entry instead.
- *
- * Each record names the existing family page and the exact `Demo` title that
- * documents the component, so a sidebar entry can scroll straight to live
- * coverage instead of duplicating demo JSX. Components without existing
- * coverage point at one of the dedicated pages added next to the family
- * pages (`providers`, `primitives`, `list-variants`, `message-menus`).
+ * Each record names the family page and the exact `Demo` title that documents
+ * the component. A component entry renders only that demo; the family entry
+ * keeps every sibling demo on one page.
  *
  * Type: module.
  * Fields: component seeds, component records, sections, and filter metadata.
@@ -41,7 +25,7 @@
 /**
  * One public UI component before its hash id is derived.
  * Type: interface.
- * Fields: name, family, demo, description.
+ * Fields: name, family, demo, description, parent.
  * @example
  * const seed: ComponentSeed = {
  *     name: "Tag",
@@ -55,6 +39,7 @@ export interface ComponentSeed {
     family: string;
     demo: string;
     description: string;
+    parent?: string;
 }
 
 /**
@@ -222,6 +207,12 @@ export const uiComponentSections: readonly ComponentSection[] = [
             family: "text-fields",
             demo: "Virtual selects",
             description: "Windowed select for long option lists, rendering only the visible rows.",
+        },
+        {
+            name: "TreeSelect",
+            family: "text-fields",
+            demo: "Tree select",
+            description: "Single-select tree inside a select trigger, with expandable branches.",
         },
         {
             name: "Combobox",
@@ -452,12 +443,6 @@ export const uiComponentSections: readonly ComponentSection[] = [
             family: "feedback",
             demo: "Element and fullscreen loading",
             description: "Native-dialog loader that covers the viewport and accepts a duration.",
-        },
-        {
-            name: "useLoad",
-            family: "feedback",
-            demo: "Element and fullscreen loading",
-            description: "Imperative loader service with element, delay, and promise overloads.",
         },
     ]),
     createSection("overlays", "Overlays", [
@@ -724,12 +709,14 @@ export const uiComponentSections: readonly ComponentSection[] = [
             family: "layout",
             demo: "Form",
             description: "Accessible label, hint, error, and ARIA binding for a native form control.",
+            parent: "Form",
         },
         {
             name: "FormActions",
             family: "layout",
             demo: "Form",
             description: "Flex action row for submit and cancel controls.",
+            parent: "Form",
         },
         {
             name: "Coordinator",
@@ -824,6 +811,12 @@ export const uiComponentSections: readonly ComponentSection[] = [
             description: "Column-driven table with selection, row clicks, and virtual rows.",
         },
         {
+            name: "VirtualTable",
+            family: "layout",
+            demo: "Virtual table",
+            description: "Table preset with row windowing enabled by default.",
+        },
+        {
             name: "Transfer",
             family: "transfer",
             demo: "Transfer",
@@ -886,26 +879,6 @@ export const uiComponentSections: readonly ComponentSection[] = [
             description: "Message row wrapped in the shared context menu.",
         },
     ]),
-    createSection("files", "Files", [
-        {
-            name: "ProjectManager",
-            family: "project",
-            demo: "Project manager",
-            description: "File tree, preview, dependency graph, and imports in one manager.",
-        },
-        {
-            name: "Preview",
-            family: "file-tools",
-            demo: "Preview",
-            description: "Tokenised read-only file preview with line numbers.",
-        },
-        {
-            name: "Editor",
-            family: "file-tools",
-            demo: "Editor",
-            description: "Debounced N-gram completion editor with an explicit save callback.",
-        },
-    ]),
     createSection("providers", "Providers", [
         {
             name: "Theme",
@@ -957,6 +930,12 @@ export const uiComponentSections: readonly ComponentSection[] = [
             demo: "Links and anchors",
             description: "In-page section anchor with an active indicator and navigation callback.",
         },
+        {
+            name: "Icon",
+            family: "primitives",
+            demo: "Icons",
+            description: "Searchable SVG icon set with static and animated glyphs.",
+        },
     ]),
 ];
 
@@ -980,6 +959,35 @@ export const uiComponents: readonly ComponentRecord[] = uiComponentSections.flat
 export const uiComponentCount: number = uiComponents.length;
 
 /**
+ * Top-level components shown in the introduction and sidebar. Subcomponents
+ * such as FormField and FormActions are part of their parent component, so
+ * one project maps to one component.
+ * Type: constant.
+ * Fields: none.
+ * @example
+ * const count: number = topLevelComponents.length;
+ */
+export const topLevelComponents: readonly ComponentRecord[] = uiComponents.filter(
+    (component: ComponentRecord): boolean => component.parent === (void 0),
+);
+
+/**
+ * Top-level component sections without subcomponent rows.
+ * Type: constant.
+ * Fields: id, label, components.
+ * @example
+ * const first: ComponentSection = topLevelComponentSections[0];
+ */
+export const topLevelComponentSections: readonly ComponentSection[] = uiComponentSections.map(
+    (section: ComponentSection): ComponentSection => ({
+        ...section,
+        components: section.components.filter(
+            (component: ComponentRecord): boolean => component.parent === (void 0),
+        ),
+    }),
+);
+
+/**
  * Runtime exports that are deliberately not UI components, grouped by kind.
  * These are values, not type-only exports, so each one was inspected before
  * being filtered out of the sidebar.
@@ -991,7 +999,7 @@ export const uiComponentCount: number = uiComponents.length;
 export const nonUiExportGroups: readonly NonUiExportGroup[] = [
     {
         kind: "Hooks",
-        reason: "Called from a component, never rendered as JSX. useLoad is the exception and keeps an entry.",
+        reason: "Called from a component, never rendered as JSX.",
         names: ["useTheme", "useInternational", "useAnimation", "usePrefersReducedMotion", "useToast"],
     },
     {
@@ -1080,13 +1088,11 @@ export const nonUiExportGroups: readonly NonUiExportGroup[] = [
 ];
 
 /**
- * Exports that duplicate a component already documented by its canonical name.
+ * Duplicate aliases removed from the public surface. The canonical
+ * `PeriodicityTabs` and `PeriodicityAnimated` exports remain.
  * Type: constant.
  * Fields: name, aliasOf.
  * @example
- * const alias: string = duplicateAliasExports[0].aliasOf;
+ * const aliases: number = duplicateAliasExports.length;
  */
-export const duplicateAliasExports: ReadonlyArray<{ name: string; aliasOf: string }> = [
-    { name: "TabLayout", aliasOf: "Tabs" },
-    { name: "Animate", aliasOf: "Animated" },
-];
+export const duplicateAliasExports: ReadonlyArray<{ name: string; aliasOf: string }> = [];

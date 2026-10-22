@@ -1,6 +1,6 @@
 {
     "name": "periodicity-react",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Material-inspired React components, layouts, data views, and design-system providers.",
     "license": "Apache-2.0",
     "type": "module",
@@ -50,7 +50,7 @@
         "dev": "vite",
         "build": "npm run build:lib",
         "build:app": "tsc -b && vite build",
-        "build:lib": "vite build --config vite.lib.config.ts && tsc -p tsconfig.lib.json",
+        "build:lib": "vite build --config vite.lib.config.ts && tsc -p tsconfig.lib.json && node scripts/prepare-types.cjs",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "audit:contrast": "node scripts/audit-contrast.cjs",
@@ -58,7 +58,8 @@
         "test:a11y": "vitest run tests/a11y.test.tsx",
         "format": "prettier --write .",
         "format:check": "prettier --check .",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "prepublishOnly": "npm run build:lib"
     },
     "dependencies": {
         "@codemirror/commands": "^6.11.1",

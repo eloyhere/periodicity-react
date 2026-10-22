@@ -31,7 +31,6 @@ export * from "../layout/chat";
 export * from "../layout/contact";
 export * from "../layout/message";
 export * from "../layout/table";
-export * from "../layout/file";
 export * from "../layout/list";
 export * from "../layout/tree";
 export * from "../layout/waterfall";
@@ -106,8 +105,10 @@ export { default as PeriodicityTelephoneInput } from "./input/telephone/Telephon
 export { default as PeriodicityNumberInput } from "./input/number/NumberInput";
 export { default as PeriodicityCompleteInput } from "./input/complete/CompleteInput";
 export { default as PeriodicityMention } from "./mention/Mention";
-export { default as PeriodicitySelect } from "./input/select/normal/Select";
-export { default as PeriodicityVirtualSelect } from "./input/select/virtual/VirtualSelect";
+export { default as PeriodicitySelect } from "./input/select/list/normal/Select";
+export { default as PeriodicityVirtualSelect } from "./input/select/list/virtual/VirtualSelect";
+export { default as PeriodicityTreeSelect } from "./input/select/tree/TreeSelect";
+export type { TreeSelectOption as PeriodicityTreeSelectOption, TreeSelectProps as PeriodicityTreeSelectProps } from "./input/select/tree/TreeSelect";
 export { default as PeriodicityCombobox } from "./combobox/Combobox";
 export { default as PeriodicityCheckbox } from "./input/check/Checkbox";
 export { default as PeriodicityRadio } from "./input/radio/Radio";
@@ -124,6 +125,8 @@ export { default as PeriodicityColourPicker } from "./picker/colour/ColourPicker
 export { default as PeriodicityVariantPicker } from "./picker/variant/VariantPicker";
 export { default as PeriodicityText } from "./text/Text";
 export { default as PeriodicityCard } from "./card/Card";
+export { default as PeriodicityIcon } from "./icon/Icon";
+export type { IconName as PeriodicityIconName, IconProps as PeriodicityIconProps } from "./icon/Icon";
 export { default as PeriodicitySurface } from "./surface/Surface";
 export { default as PeriodicityStateLayer } from "./foreground/StateLayer";
 export { default as PeriodicityBadge } from "./badge/Badge";
@@ -195,6 +198,8 @@ export { CheckTree as PeriodicityCheckTree } from "../layout/tree/check/CheckTre
 export { SelectTree as PeriodicitySelectTree } from "../layout/tree/select/SelectTree";
 export { VirtualTree as PeriodicityVirtualTree } from "../layout/tree/virtual/VirtualTree";
 export { default as PeriodicityTable } from "../layout/table/Table";
+export { default as PeriodicityVirtualTable } from "../layout/table/VirtualTable";
+export type { VirtualTableProps as PeriodicityVirtualTableProps } from "../layout/table/VirtualTable";
 export { default as PeriodicityTransfer } from "./transfer/Transfer";
 export { default as PeriodicityContact } from "../layout/contact/normal/Contact";
 export { default as PeriodicityVirtualContact } from "../layout/contact/virtual/VirtualContact";
@@ -205,9 +210,6 @@ export { default as PeriodicityVirtualChat } from "../layout/chat/virtual/Virtua
 export { default as PeriodicityCommentThread } from "./comment/CommentThread";
 export { default as PeriodicityContactContextMenu } from "../layout/contact/ContactContextMenu";
 export { default as PeriodicityMessageContextMenu } from "../layout/message/MessageContextMenu";
-export { default as PeriodicityProjectManager } from "../layout/file/ProjectManager";
-export { default as PeriodicityPreview } from "../layout/file/Preview";
-export { default as PeriodicityEditor } from "../layout/file/Editor";
 export { default as PeriodicityTheme } from "../theme/Theme";
 export { default as PeriodicityInternational } from "../international/International";
 export { default as PeriodicityAnimation } from "../animation/Animation";
@@ -253,3 +255,4 @@ export type {
 } from "../layout/appbar";
 export type { CollapseProps as PeriodicityCollapseProps } from "../layout/collapse";
 export type { ToolbarProps as PeriodicityToolbarProps } from "../layout/toolbar";
+

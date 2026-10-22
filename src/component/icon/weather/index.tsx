@@ -11,6 +11,7 @@ export type WeatherIconName =
     | "Snow"
     | "Storm"
     | "Thunder"
+    | "Lightning"
     | "Wind"
     | "Fog"
     | "Rainbow"
@@ -74,6 +75,13 @@ export const weatherIcons: Record<WeatherIconName, Icon> = {
         </>,
     ),
     Thunder: createIcon("Thunder", <path d="M13 2 5 13.5h5.5L10.5 22 19 10.5h-5.5L13 2Z" />),
+    Lightning: createIcon(
+        "Lightning",
+        <>
+            <path d="M7 15h9a4 4 0 0 0 0-8 5 5 0 0 0-9.5 1.5A3.5 3.5 0 0 0 7 15Z" />
+            <path d="M13 13 10 18h3l-1 4 4-6h-3v-3Z" />
+        </>,
+    ),
     Wind: createIcon(
         "Wind",
         <>

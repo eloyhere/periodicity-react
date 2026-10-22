@@ -6,6 +6,12 @@
 
 暂无变更。
 
+## [0.1.1] - 2026-10-22
+
+### 修复
+
+- 发布生成的 TypeScript 声明（dist/types）和 CSS 模块声明 shim，使 	ypes 与 exports.types 能被消费者解析。
+
 ## [0.1.0] - 2026-10-20
 
 `periodicity-react` 首个 npm 公开版本。

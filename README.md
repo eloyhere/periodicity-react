@@ -131,21 +131,52 @@ Wrap the application in the providers when global theming or locale switching is
 
 ## Component names
 
-Every public component is available with a `Periodicity` prefix:
+Every public component is exported only with a `Periodicity` prefix:
 
 ```tsx
 import { PeriodicityButton, PeriodicityDialog, PeriodicityTable, PeriodicityTextInput } from "periodicity-react";
 ```
 
-The unprefixed names remain as compatibility aliases, so both of these refer to the same component:
+Unprefixed aliases are not exported. The prefix makes component boundaries explicit and avoids collisions with
+host application components.
+
+### Motion icons
+
+`PeriodicityIcon` includes ten animated glyphs for loading and activity feedback:
 
 ```tsx
-import { PeriodicityTable } from "periodicity-react";
-import { Table } from "periodicity-react";
+<PeriodicityIcon name="Spinner" size={24} />
+<PeriodicityIcon name="LoadingDots" size={24} />
+<PeriodicityIcon name="Pulse" size={24} />
+<PeriodicityIcon name="Orbit" size={24} />
+<PeriodicityIcon name="Bars" size={24} />
+<PeriodicityIcon name="Wave" size={24} />
+<PeriodicityIcon name="Radar" size={24} />
+<PeriodicityIcon name="Breathe" size={24} />
+<PeriodicityIcon name="Sync" size={24} />
+<PeriodicityIcon name="BellRing" size={24} />
 ```
 
-New code should use the prefixed names. They make component boundaries explicit and avoid collisions with host
-application components.
+`Spinner` is the Android-style arc whose gap changes while the ring rotates. All motion icons respect
+`prefers-reduced-motion`. The `Agent` group contains static AI provider marks. `Motion` and `Live`
+use CSS animations; the dedicated `Dynamic` group carries SMIL animation inside the SVG itself:
+`DynamicRotateRight`, `DynamicRotateLeft`, `DynamicThrob`, `DynamicBounceBall`,
+`DynamicFlipCard`, `DynamicMorphing`, `DynamicLoad`, `DynamicSatellite`, `DynamicBlink`,
+`DynamicRipple`, `DynamicPulse`, `DynamicTyping`, `DynamicWave`, `DynamicScan`, `DynamicOrbit`,
+`DynamicBreathe`, and `DynamicShake`. The `Computer` group adds terminal, server, database, code,
+chip, network, and storage icons; `Electronics` adds resistor, capacitor, diode, transistor, PCB,
+oscilloscope, multimeter, potentiometer, thermistor, MOSFET, bridge rectifier, high-voltage
+warning, electric-shock, and related hardware icons. The `Programming` group includes Java,
+Python, JavaScript, TypeScript, C, C++, C#, PHP, Kotlin, Rust, Go, Swift, Ruby, Dart, Scala, Perl,
+Lua, Bash, HTML, CSS, SQL, npm, Maven, JSON, and more. The `Math` category adds `Equal`,
+`NotEqual`, `LessThan`, `GreaterThan`, `Sum`, `Pi`, `Infinity`, `SquareRoot`, `Fraction`, `Percent`,
+`Integral`, `Function`, `Matrix`, `Angle`, `Delta`, `Partial`, `Nabla`, `Product`, `Factorial`,
+`Union`, `Intersection`, `ElementOf`, `NotElementOf`, `Subset`, `ForAll`, `Exists`, `PlusMinus`,
+`Approximately`, `Degree`, `Proportional`, `Therefore`, `Because`, `Vector`, `Coordinate`, `Integer`,
+`Negative`, `Absolute`, `Rational`, `Irrational`, `Real`, `Imaginary`, `Quaternion`, `Natural`,
+`Complex`, `Even`, `Odd`, and `Positive`. The standalone `Animal` and `Plant` groups each contain
+30 icons. Every group contains at least 30 icons; `Motion`, `Live`, and `Dynamic` include additional
+effect and status variants.
 
 ## Forms and pickers
 
@@ -213,14 +244,17 @@ import { PeriodicityCalendar } from "periodicity-react";
     onChange={setDate}
     min="2026-01-01"
     max="2026-12-31"
-    locale="en-GB"
     firstDayOfWeek={1}
+    slots={{
+        body: ({ day }) => <span>{day % 2 === 0 ? "Even" : "Odd"}</span>,
+    }}
 />;
 ```
 
+Each day cell has `slots.header`, `slots.body`, and `slots.footer` rows; the header defaults to the day number.
 Keyboard: arrows move by day or week, Home/End move to the week bounds, PageUp/PageDown change month,
 Shift+PageUp/PageDown change year, and Enter or Space selects. `showAdjacentDays`, `weekdayLabels`, `monthLabels`,
-`renderDay`, `disabled`, and `readOnly` cover the common customisations.
+`slots`, `renderDay`, `disabled`, and `readOnly` cover the common customisations.
 
 Most form and picker components support controlled and uncontrolled values, `disabled`, `readOnly` where relevant,
 and caller-composed native handlers. `PeriodicityMention` adds an asynchronous suggestion list and tokenised chips;
@@ -497,7 +531,6 @@ The following components are part of the public API. Use the showcase for live e
 | `StateLayer`           | Hover, press, and focus tint painted above a surface background.                 |
 | `Badge`                | Compact status label or count bubble with semantic tones.                        |
 | `Tag`                  | Small removable label for categories, states, and filters.                       |
-| `TabLayout`            | Compatibility alias for `Tabs`, retained for existing imports.                   |
 | `Chip`                 | Assist, filter, and input chips with icons and removal.                          |
 | `Avatar`               | Identity mark with initials or image, size, tone, and presence.                  |
 | `AvatarGroup`          | Overlapping avatar stack with an overflow count.                                 |

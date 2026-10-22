@@ -14,7 +14,9 @@ import {
     TelephoneInput,
     TextArea,
     TextInput,
+    TreeSelect,
     VirtualSelect,
+    type TreeSelectOption,
 } from "../../../component";
 import Icon from "../../../component/icon/Icon";
 import Demo, { DemoGroup } from "../../Demo";
@@ -25,6 +27,33 @@ import {
     virtualComboboxOptions,
     virtualSelectOptions,
 } from "../../samples";
+
+const treeOptions: readonly TreeSelectOption[] = [
+    {
+        value: "design",
+        label: "Design",
+        children: [
+            { value: "design-system", label: "Design system" },
+            { value: "research", label: "Research" },
+        ],
+    },
+    {
+        value: "engineering",
+        label: "Engineering",
+        children: [
+            { value: "frontend", label: "Frontend" },
+            { value: "platform", label: "Platform" },
+        ],
+    },
+    { value: "operations", label: "Operations" },
+];
+
+const treeSelectCode: string = `<TreeSelect
+    label="Workspace"
+    options={treeOptions}
+    value={treeValue}
+    onChange={setTreeValue}
+/>`;
 
 const variantsCode: string = `<div className="showcase__field-grid">
     <TextInput
@@ -204,6 +233,8 @@ const TextFieldsPage: FC = () => {
         string,
         Dispatch<SetStateAction<string>>,
     ] = useState<string>("option-0");
+    const [treeValue, setTreeValue]: [string, Dispatch<SetStateAction<string>>] =
+        useState<string>("design-system");
     const [textValue, setTextValue]: [string, Dispatch<SetStateAction<string>>] =
         useState<string>("The Long Now");
     const [areaValue, setAreaValue]: [string, Dispatch<SetStateAction<string>>] =
@@ -349,6 +380,20 @@ const TextFieldsPage: FC = () => {
                         hint="160 options, windowed"
                     />
                 </Columns>
+            </Demo>
+
+            <Demo
+                title="Tree select"
+                description="A single-select tree inside a select trigger; branches expand while the selected leaf stays visible."
+                code={treeSelectCode}
+            >
+                <TreeSelect
+                    label="Workspace"
+                    options={treeOptions}
+                    value={treeValue}
+                    onChange={setTreeValue}
+                    hint="Design system / Research / Engineering"
+                />
             </Demo>
 
             <Demo title="Sizes" code={sizesCode}>

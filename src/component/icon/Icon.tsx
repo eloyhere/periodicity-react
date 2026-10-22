@@ -1,4 +1,13 @@
-import type { FC, SVGProps } from "react";
+import {
+    Children,
+    cloneElement,
+    isValidElement,
+    type FC,
+    type ReactElement,
+    type ReactNode,
+    type SVGProps,
+} from "react";
+import { usePrefersReducedMotion } from "../../animation/usePrefersReducedMotion";
 import { actionIcons, type ActionIconName } from "./action";
 import { interactionIcons, type InteractionIconName } from "./interaction";
 import { toolIcons, type ToolIconName } from "./tool";
@@ -26,6 +35,18 @@ import { transportIcons, type TransportIconName } from "./transport";
 import { uiIcons, type UiIconName } from "./ui";
 import { agentIcons, type AgentIconName } from "./agent";
 import { companyIcons, type CompanyIconName } from "./company";
+import { motionIcons, type MotionIconName } from "./motion";
+import { mathIcons, type MathIconName } from "./math";
+import { liveIcons, type LiveIconName } from "./live";
+import { dynamicIcons, type DynamicIconName } from "./dynamic";
+import { motionExtraIcons, type MotionExtraIconName } from "./motion-extra";
+import { liveExtraIcons, type LiveExtraIconName } from "./live-extra";
+import { dynamicExtraIcons, type DynamicExtraIconName } from "./dynamic-extra";
+import { computerIcons, type ComputerIconName } from "./computer";
+import { programmingIcons, type ProgrammingIconName } from "./programming";
+import { electronicsIcons, type ElectronicsIconName } from "./electronics";
+import { animalExtraIcons, type AnimalExtraIconName } from "./animal-extra";
+import { plantIcons, type PlantIconName } from "./plant";
 import type { Icon as IconDefinition } from "./types";
 import "./Icon.css";
 
@@ -56,7 +77,19 @@ export type IconName =
     | TransportIconName
     | UiIconName
     | AgentIconName
-    | CompanyIconName;
+    | CompanyIconName
+    | MotionIconName
+    | MathIconName
+    | LiveIconName
+    | DynamicIconName
+    | MotionExtraIconName
+    | LiveExtraIconName
+    | DynamicExtraIconName
+    | ComputerIconName
+    | ProgrammingIconName
+    | ElectronicsIconName
+    | AnimalExtraIconName
+    | PlantIconName;
 
 const glyphs: Record<IconName, IconDefinition> = {
     ...actionIcons,
@@ -86,20 +119,70 @@ const glyphs: Record<IconName, IconDefinition> = {
     ...uiIcons,
     ...agentIcons,
     ...companyIcons,
+    ...motionIcons,
+    ...mathIcons,
+    ...liveIcons,
+    ...dynamicIcons,
+    ...motionExtraIcons,
+    ...liveExtraIcons,
+    ...dynamicExtraIcons,
+    ...computerIcons,
+    ...programmingIcons,
+    ...electronicsIcons,
+    ...animalExtraIcons,
+    ...plantIcons,
 };
 
-interface IconProps extends SVGProps<SVGSVGElement> {
+export interface IconProps extends SVGProps<SVGSVGElement> {
     name: IconName;
     size?: number;
+    motion?: "auto" | "always";
 }
 
-const Icon: FC<IconProps> = ({ name, size, className = "", ...rest }: IconProps) => {
-    const glyph: IconDefinition = glyphs[name];
+const isAnimationNode: (element: ReactElement) => boolean = (element: ReactElement): boolean =>
+    typeof element.type === "string" &&
+    (element.type === "animate" ||
+        element.type === "animateTransform" ||
+        element.type === "animateMotion");
+
+const stripAnimationNodes: (node: ReactNode) => ReactNode = (node: ReactNode): ReactNode => {
+    if (!isValidElement(node)) {
+        return node;
+    }
+
+    const element: ReactElement<{ children?: ReactNode }> = node as ReactElement<{
+        children?: ReactNode;
+    }>;
+
+    if (isAnimationNode(element)) {
+        return null;
+    }
+
+    const children: ReactNode | undefined = element.props.children;
+
+    if (children === (void 0)) {
+        return element;
+    }
+
+    return cloneElement(element, element.props, Children.map(children, stripAnimationNodes));
+};
+
+const Icon: FC<IconProps> = ({ name, size, motion = "auto", className = "", ...rest }: IconProps) => {
+    // The catalogue and the glyph registry are separate modules. During an HMR
+    // update one can briefly be newer than the other, so an unknown name must
+    // fall back instead of crashing the whole page.
+    const glyph: IconDefinition | undefined = (glyphs as Record<string, IconDefinition>)[name];
+    const resolvedGlyph: IconDefinition = glyph ?? glyphs.Help;
+    const prefersReducedMotion: boolean = usePrefersReducedMotion();
+    const content: ReactNode =
+        prefersReducedMotion && motion !== "always"
+            ? stripAnimationNodes(resolvedGlyph.component)
+            : resolvedGlyph.component;
 
     return (
         <svg
-            width={size ?? glyph.size}
-            height={size ?? glyph.size}
+            width={size ?? resolvedGlyph.size}
+            height={size ?? resolvedGlyph.size}
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -108,10 +191,13 @@ const Icon: FC<IconProps> = ({ name, size, className = "", ...rest }: IconProps)
             strokeLinejoin="round"
             aria-hidden="true"
             focusable="false"
+            data-icon={name}
+            data-icon-fallback={glyph === (void 0) ? "true" : (void 0)}
+            data-icon-motion={motion}
             className={`icon ${className}`.trim()}
             {...rest}
         >
-            {glyph.component}
+            {content}
         </svg>
     );
 };

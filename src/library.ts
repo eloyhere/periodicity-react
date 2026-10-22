@@ -1,3 +1,4 @@
 import "./index.css";
 
-export * from "./component";
+export * from "./component/public";
+export * from "./gesture";

@@ -1,8 +1,8 @@
 import type { FC } from "react";
 import { demoAnchor } from "./anchors";
 import {
-    uiComponents,
-    uiComponentSections,
+    topLevelComponents,
+    topLevelComponentSections,
     type ComponentRecord,
     type ComponentSection,
 } from "./componentCatalogue";
@@ -12,7 +12,6 @@ import ChoicesPage from "./pages/components/ChoicesPage";
 import DialogsPage from "./pages/components/DialogsPage";
 import DiscussionPage from "./pages/components/DiscussionPage";
 import FeedbackPage from "./pages/components/FeedbackPage";
-import FileToolsPage from "./pages/components/FileToolsPage";
 import LayoutPage from "./pages/components/LayoutPage";
 import ListVariantsPage from "./pages/components/ListVariantsPage";
 import MessagingPage from "./pages/components/MessagingPage";
@@ -22,7 +21,6 @@ import OverlaysPage from "./pages/components/OverlaysPage";
 import OverviewPage from "./pages/components/OverviewPage";
 import PickersPage from "./pages/components/PickersPage";
 import PrimitivesPage from "./pages/components/PrimitivesPage";
-import ProjectPage from "./pages/components/ProjectPage";
 import ProvidersPage from "./pages/components/ProvidersPage";
 import TextFieldsPage from "./pages/components/TextFieldsPage";
 import TextPage from "./pages/components/TextPage";
@@ -190,20 +188,6 @@ const familyRecords: readonly FamilyRecord[] = [
         title: "Messaging",
         description: "Contacts, transcripts, and full conversation layouts.",
         page: MessagingPage,
-    },
-    {
-        id: "project",
-        label: "Project",
-        title: "Project manager",
-        description: "File trees, dependency graphs, previews, imports, and exports for a project.",
-        page: ProjectPage,
-    },
-    {
-        id: "file-tools",
-        label: "Preview & editor",
-        title: "Preview & editor",
-        description: "Tokenised file previews and a debounced N-gram completion editor.",
-        page: FileToolsPage,
     },
     {
         id: "overlays",
@@ -388,7 +372,7 @@ export const foundationEntries: readonly ShowcaseEntry[] = [
  * @example
  * const tag: ShowcaseEntry | void = componentEntries.find((entry) => entry.id === "tag");
  */
-export const componentEntries: readonly ShowcaseEntry[] = uiComponents.map(
+export const componentEntries: readonly ShowcaseEntry[] = topLevelComponents.map(
     (component: ComponentRecord): ShowcaseEntry => {
         const family: FamilyRecord = familyOf(component.family);
 
@@ -423,7 +407,7 @@ const componentEntryById: ReadonlyMap<string, ShowcaseEntry> = new Map<string, S
  * @example
  * const inputs: ShowcaseSection = componentSections[1];
  */
-const componentSections: readonly ShowcaseSection[] = uiComponentSections.map(
+const componentSections: readonly ShowcaseSection[] = topLevelComponentSections.map(
     (section: ComponentSection): ShowcaseSection => ({
         id: section.id,
         label: section.label,
@@ -489,7 +473,7 @@ export const showcaseEntries: readonly ShowcaseEntry[] = showcaseGroups.flatMap(
  * @example
  * window.location.hash = `#${defaultEntryId}`;
  */
-export const defaultEntryId: string = "colours";
+export const defaultEntryId: string = "overview";
 
 /**
  * Alias pairs: an alternative hash and the entry id it resolves to.
@@ -509,8 +493,6 @@ const aliasEntries: ReadonlyArray<readonly [string, string]> = [
     ["choices", "checkbox"],
     ["discussion", "comment-thread"],
     ["messaging", "contact"],
-    ["project", "project-manager"],
-    ["file-tools", "preview"],
     ["overlays", "dropdown"],
     ["navigation", "tabs"],
     ["feedback", "alert"],

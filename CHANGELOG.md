@@ -7,6 +7,12 @@ and this project uses British English in its English documentation.
 
 No changes yet.
 
+## [0.1.1] - 2026-10-22
+
+### Fixed
+
+- Publish generated TypeScript declarations (dist/types) and a CSS module shim, so 	ypes and exports.types resolve for consumers.
+
 ## [0.1.0] - 2026-10-20
 
 The first public npm release of `periodicity-react`.

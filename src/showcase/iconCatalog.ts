@@ -26,6 +26,18 @@ import { transportIcons } from "../component/icon/transport";
 import { travelIcons } from "../component/icon/travel";
 import { uiIcons } from "../component/icon/ui";
 import { weatherIcons } from "../component/icon/weather";
+import { motionIcons } from "../component/icon/motion";
+import { mathIcons } from "../component/icon/math";
+import { liveIcons } from "../component/icon/live";
+import { dynamicIcons } from "../component/icon/dynamic";
+import { motionExtraIcons } from "../component/icon/motion-extra";
+import { liveExtraIcons } from "../component/icon/live-extra";
+import { dynamicExtraIcons } from "../component/icon/dynamic-extra";
+import { computerIcons } from "../component/icon/computer";
+import { programmingIcons } from "../component/icon/programming";
+import { electronicsIcons } from "../component/icon/electronics";
+import { animalExtraIcons } from "../component/icon/animal-extra";
+import { plantIcons } from "../component/icon/plant";
 /**
  * One searchable entry in the icon catalogue.
  * Type: interface.
@@ -72,7 +84,20 @@ export const iconCatalog: IconCatalogEntry[] = [
     ...Object.keys(transportIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "Transport" })),
     ...Object.keys(travelIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "Travel" })),
     ...Object.keys(uiIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "Ui" })),
-    ...Object.keys(weatherIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "Weather" })),];
+    ...Object.keys(weatherIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "Weather" })),
+    ...Object.keys(motionIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "Motion" })),
+    ...Object.keys(mathIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "Math" })),
+    ...Object.keys(liveIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "Live" })),
+    ...Object.keys(dynamicIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "Dynamic" })),
+    ...Object.keys(motionExtraIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "MotionExtra" })),
+    ...Object.keys(liveExtraIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "LiveExtra" })),
+    ...Object.keys(dynamicExtraIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "DynamicExtra" })),
+    ...Object.keys(computerIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "Computer" })),
+    ...Object.keys(programmingIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "Programming" })),
+    ...Object.keys(electronicsIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "Electronics" })),
+    ...Object.keys(animalExtraIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "AnimalExtra" })),
+    ...Object.keys(plantIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "Plant" })),
+];
 
 /**
  * Category names in display order.
@@ -83,4 +108,128 @@ export const iconCatalog: IconCatalogEntry[] = [
  */
 export const iconCategories: string[] = Array.from(
     new Set<string>(iconCatalog.map((entry: IconCatalogEntry): string => entry.category)),
+);
+
+/**
+ * One broad icon group shown in the Icon component page.
+ * Type: interface.
+ * Fields: id, label, categories, entries.
+ * @example
+ * const group: IconGroup = iconGroups[0];
+ */
+export interface IconGroup {
+    readonly id: string;
+    readonly label: string;
+    readonly categories: readonly string[];
+    readonly entries: IconCatalogEntry[];
+}
+
+/**
+ * Broad groups that combine the internal categories into task-oriented sets.
+ * Every internal category belongs to exactly one group.
+ * Type: constant.
+ * Fields: id, label, categories, entries.
+ * @example
+ * const math: IconGroup = iconGroups.find((group) => group.id === "math");
+ */
+export const iconGroups: readonly IconGroup[] = [
+    {
+        id: "company",
+        label: "Company",
+        categories: ["Business", "Finance", "File", "Tool"],
+    },
+    {
+        id: "brand",
+        label: "Brand",
+        categories: ["Company"],
+    },
+    {
+        id: "life",
+        label: "Life",
+        categories: [
+            "Celebration",
+            "Education",
+            "Emotion",
+            "Food",
+            "Health",
+            "Music",
+            "Nature",
+            "Sport",
+            "Travel",
+            "Weather",
+        ],
+    },
+    {
+        id: "animal",
+        label: "Animal",
+        categories: ["Animal", "AnimalExtra"],
+    },
+    {
+        id: "plant",
+        label: "Plant",
+        categories: ["Plant"],
+    },
+    {
+        id: "interaction",
+        label: "Interaction",
+        categories: [
+            "Action",
+            "Communication",
+            "Device",
+            "Interaction",
+            "Media",
+            "Security",
+            "Social",
+            "Time",
+            "Transport",
+            "Ui",
+        ],
+    },
+    {
+        id: "agent",
+        label: "Agent",
+        categories: ["Agent"],
+    },
+    {
+        id: "motion",
+        label: "Motion",
+        categories: ["Motion", "MotionExtra"],
+    },
+    {
+        id: "live",
+        label: "Live",
+        categories: ["Live", "LiveExtra"],
+    },
+    {
+        id: "dynamic",
+        label: "Dynamic",
+        categories: ["Dynamic", "DynamicExtra"],
+    },
+    {
+        id: "programming",
+        label: "Programming",
+        categories: ["Programming"],
+    },
+    {
+        id: "computer",
+        label: "Computer",
+        categories: ["Computer"],
+    },
+    {
+        id: "electronics",
+        label: "Electronics",
+        categories: ["Electronics"],
+    },
+    {
+        id: "math",
+        label: "Math",
+        categories: ["Math"],
+    },
+].map(
+    (group: Omit<IconGroup, "entries">): IconGroup => ({
+        ...group,
+        entries: iconCatalog.filter(
+            (entry: IconCatalogEntry): boolean => group.categories.includes(entry.category),
+        ),
+    }),
 );

@@ -195,6 +195,10 @@ const Demo: FC<DemoProps> = ({
     const previewClassName: string =
         layout === "row" ? "demo__preview demo__preview--row" : "demo__preview";
 
+    if (focusedAnchor !== "" && !isFocused) {
+        return null;
+    }
+
     return (
         <section className={className} id={anchorId} aria-labelledby={titleId}>
             <header className="demo__header">

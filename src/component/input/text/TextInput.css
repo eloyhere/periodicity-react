@@ -152,6 +152,28 @@
 
 .text-field__hint {
     color: var(--muted);
+    animation: text-field-hint-enter 260ms var(--ease-decelerate) both;
+    transition:
+        color 160ms var(--ease-standard),
+        transform 160ms var(--ease-standard);
+}
+
+.text-field:hover .text-field__hint,
+.text-field:focus-within .text-field__hint {
+    color: var(--color-on-surface);
+    transform: translateX(2px);
+}
+
+@keyframes text-field-hint-enter {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .text-field__error {
@@ -399,4 +421,16 @@
 .text-field--fill:has(.text-field__input:disabled) .text-field__background {
     border-bottom-color: var(--color-outline-variant);
     background: var(--color-surface-container);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .text-field__hint {
+        animation: none;
+        transition: none;
+    }
+
+    .text-field:hover .text-field__hint,
+    .text-field:focus-within .text-field__hint {
+        transform: none;
+    }
 }

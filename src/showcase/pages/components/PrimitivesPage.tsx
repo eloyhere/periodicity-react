@@ -1,16 +1,21 @@
 import {
     useState,
+    type ChangeEvent,
     type Dispatch,
     type FC,
     type MouseEvent,
+    type ReactNode,
     type SetStateAction,
 } from "react";
 import { Inline, Stack } from "../../../arrange/layout";
+import { useInternational, type InternationalContextValue } from "../../../international";
 import {
     Anchor,
     Backdrop,
     Button,
+    Card,
     Link,
+    PeriodicityIcon,
     Portal,
     StateLayer,
     Surface,
@@ -18,6 +23,13 @@ import {
     VisuallyHidden,
 } from "../../../component";
 import Demo, { DemoGroup } from "../../Demo";
+import {
+    iconCatalog,
+    iconGroups,
+    type IconCatalogEntry,
+    type IconGroup,
+} from "../../iconCatalog";
+import { resolveIconMessages, type IconMessages } from "../../iconMessages";
 
 const backdropCode: string = `const [open, setOpen] = useState(false);
 
@@ -58,6 +70,22 @@ const visuallyHiddenCode: string = `<Button variant="outline" icon="Search">
     <VisuallyHidden>Search rituals</VisuallyHidden>
 </Button>`;
 
+const iconsCode: string = `const [query, setQuery] = useState("");
+const visible = iconCatalog.filter((entry) =>
+    entry.name.toLowerCase().includes(query.toLowerCase()),
+);
+
+<input
+    type="search"
+    value={query}
+    onChange={(event) => setQuery(event.target.value)}
+    aria-label="Search icons"
+/>
+
+{visible.map((entry) => (
+    <PeriodicityIcon key={entry.name} name={entry.name} size={22} />
+))}`;
+
 const linksCode: string = `<Link href="#primitives">In-page link</Link>
 <Link href="https://example.com" external>External link</Link>
 <Link href="#disabled" disabled>Disabled link</Link>
@@ -78,6 +106,35 @@ const PrimitivesPage: FC = () => {
         useState<boolean>(false);
     const [portalVisible, setPortalVisible]: [boolean, Dispatch<SetStateAction<boolean>>] =
         useState<boolean>(false);
+    const { locale }: InternationalContextValue = useInternational();
+    const copy: IconMessages = resolveIconMessages(locale);
+    const [iconQuery, setIconQuery]: [string, Dispatch<SetStateAction<string>>] = useState<string>("");
+    const normalisedIconQuery: string = iconQuery.trim().toLowerCase();
+    const visibleIconGroups: IconGroup[] = iconGroups
+        .map(
+            (group: IconGroup): IconGroup => {
+                const label: string = copy.groups[group.id] ?? group.label;
+                const groupMatches: boolean =
+                    label.toLowerCase().includes(normalisedIconQuery) ||
+                    group.label.toLowerCase().includes(normalisedIconQuery);
+
+                return {
+                    ...group,
+                    label,
+                    entries: group.entries.filter(
+                        (entry: IconCatalogEntry): boolean =>
+                            groupMatches ||
+                            entry.name.toLowerCase().includes(normalisedIconQuery) ||
+                            entry.category.toLowerCase().includes(normalisedIconQuery),
+                    ),
+                };
+            },
+        )
+        .filter((group: IconGroup): boolean => group.entries.length > 0);
+    const visibleIconCount: number = visibleIconGroups.reduce(
+        (count: number, group: IconGroup): number => count + group.entries.length,
+        0,
+    );
 
     return (
         <>
@@ -141,6 +198,80 @@ const PrimitivesPage: FC = () => {
                         <StateLayer active />
                     </div>
                 </DemoGroup>
+            </Demo>
+
+            <Demo
+                title="Icons"
+                description={copy.description(iconCatalog.length)}
+                code={iconsCode}
+            >
+                <div className="showcase__icon-catalogue">
+                        <div className="showcase__icon-toolbar">
+                            <label className="showcase__icon-search">
+                                <PeriodicityIcon name="Search" size={16} />
+                                <input
+                                    type="search"
+                                    value={iconQuery}
+                                    placeholder={copy.searchPlaceholder}
+                                    aria-label={copy.searchLabel}
+                                    onChange={(event: ChangeEvent<HTMLInputElement>): void =>
+                                        setIconQuery(event.target.value)
+                                    }
+                                />
+                            </label>
+                            <span className="showcase__icon-count">
+                                {visibleIconCount} / {iconCatalog.length}
+                            </span>
+                        </div>
+                        <div className="showcase__icon-groups">
+                            {visibleIconGroups.map(
+                                (group: IconGroup): ReactNode => (
+                                    <Card
+                                        className="showcase__icon-group-card"
+                                        key={group.id}
+                                        title={group.label}
+                                        action={
+                                            <span className="showcase__icon-group-count">
+                                                {group.entries.length}
+                                            </span>
+                                        }
+                                        headingLevel={3}
+                                        ripple={false}
+                                    >
+                                        <div className="showcase__icon-grid">
+                                            {group.entries.map(
+                                                (entry: IconCatalogEntry): ReactNode => (
+                                                    <div
+                                                        className="showcase__icon-cell"
+                                                        key={`${entry.category}-${entry.name}`}
+                                                        title={`${entry.category} / ${entry.name}`}
+                                                    >
+                                                        <PeriodicityIcon
+                                                            name={entry.name}
+                                                            size={22}
+                                                            motion={
+                                                                group.id === "dynamic"
+                                                                    ? "always"
+                                                                    : "auto"
+                                                            }
+                                                        />
+                                                        <span className="showcase__icon-name">
+                                                            {entry.name}
+                                                        </span>
+                                                    </div>
+                                                ),
+                                            )}
+                                        </div>
+                                    </Card>
+                                ),
+                            )}
+                        </div>
+                        {visibleIconCount === 0 ? (
+                            <Text variant="body-sm" tone="muted">
+                                {copy.empty(iconQuery)}
+                            </Text>
+                        ) : null}
+                </div>
             </Demo>
 
             <Demo

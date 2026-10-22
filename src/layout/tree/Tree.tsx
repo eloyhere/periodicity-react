@@ -75,7 +75,7 @@ export type TreeSelectionMode = "none" | "single" | "multiple";
  * Type: interface.
  * Fields: items, adapter, getKey, getChildren, expandedKeys, defaultExpandedKeys,
  * onExpandedChange, selectionMode, selectedKeys, defaultSelectedKeys, onSelectionChange,
- * checkable, checkedKeys, defaultCheckedKeys, onCheckedChange, onItemClick, isDisabled,
+ * checkable, checkedKeys, defaultCheckedKeys, onCheckedChange, onItemClick, isSelectable, isDisabled,
  * disabled, loading, loadingLabel, renderItem, slots, virtual, itemHeight, height, empty,
  * ref, and native `div` attributes.
  * Native `id`, `className`, `style`, `title`, `tabIndex`, `role`, `aria-*`, `data-*`, pointer,
@@ -103,6 +103,7 @@ export interface TreeProps<Item> extends Omit<HTMLAttributes<HTMLDivElement>, "c
     defaultCheckedKeys?: readonly string[];
     onCheckedChange?: (keys: readonly string[]) => void;
     onItemClick?: (item: Item, key: string) => void;
+    isSelectable?: (item: Item, key: string) => boolean;
     isDisabled?: (item: Item, level: number) => boolean;
     disabled?: boolean;
     loading?: boolean;
@@ -144,6 +145,7 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
     defaultCheckedKeys,
     onCheckedChange,
     onItemClick,
+    isSelectable,
     isDisabled,
     disabled = false,
     loading = false,
@@ -396,6 +398,14 @@ const Tree: <Item>(props: TreeProps<Item>) => ReactNode = <Item,>({
 
     const toggleSelection: (key: string) => void = (key: string): void => {
         if (selectionMode === "none") {
+            return;
+        }
+
+        if (isSelectable !== (void 0) && !isSelectable(tree.getItem(key), key)) {
+            if (tree.isExpandable(key)) {
+                toggleExpansion(key);
+            }
+
             return;
         }
 

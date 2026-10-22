@@ -13,6 +13,7 @@ import {
     TimePicker,
     VariantPicker,
 } from "../../../component";
+import { useInternational, type InternationalContextValue } from "../../../international";
 import Demo from "../../Demo";
 import { variantOptions } from "../../samples";
 
@@ -55,12 +56,11 @@ const pickersCode: string = `<div className="showcase__field-grid">
 </div>`;
 
 const calendarCode: string = `<Calendar
-    label="Delivery date"
+    label="Calendar"
     value={calendarValue}
     onChange={setCalendarValue}
     min="2026-01-01"
     max="2026-12-31"
-    locale="en-GB"
     firstDayOfWeek={1}
 />`;
 
@@ -71,6 +71,7 @@ const calendarCode: string = `<Calendar
  * @returns The Pickers entry.
  */
 const PickersPage: FC = () => {
+    const { t }: InternationalContextValue = useInternational();
     const [timeValue, setTimeValue]: [string, Dispatch<SetStateAction<string>>] =
         useState<string>("09:30");
     const [dateTimeValue, setDateTimeValue]: [string, Dispatch<SetStateAction<string>>] =
@@ -143,12 +144,11 @@ const PickersPage: FC = () => {
                 code={calendarCode}
             >
                 <Calendar
-                    label="Delivery date"
+                    label={t("calendar")}
                     value={calendarValue}
                     onChange={setCalendarValue}
                     min="2026-01-01"
                     max="2026-12-31"
-                    locale="en-GB"
                     firstDayOfWeek={1}
                 />
             </Demo>

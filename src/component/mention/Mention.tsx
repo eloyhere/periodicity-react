@@ -1925,7 +1925,7 @@ const Mention: FC<MentionProps> = ({
                     {error}
                 </p>
             ) : hasHint ? (
-                <p className="text-field__hint" id={hintId}>
+                <p className="text-field__hint" id={hintId} key={hint}>
                     {hint}
                 </p>
             ) : null}

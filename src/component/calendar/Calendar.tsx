@@ -12,6 +12,7 @@ import {
     type RefObject,
 } from "react";
 import cx from "../foundation/cx";
+import Surface from "../surface/Surface";
 import useControllableState from "../foundation/useControllableState";
 import { useInternational, type InternationalContextValue } from "../../international";
 import "./Calendar.css";
@@ -83,6 +84,24 @@ export interface CalendarDayContext {
 }
 
 /**
+ * Row slots rendered inside one calendar day cell.
+ * Type: interface.
+ * Fields: header, body, footer.
+ * @example
+ * <Calendar
+ *     slots={{
+ *         header: ({ day }) => <strong>{day}</strong>,
+ *         body: () => <span>3 tasks</span>,
+ *     }}
+ * />
+ */
+export interface CalendarDaySlots {
+    header?: (context: CalendarDayContext) => ReactNode;
+    body?: (context: CalendarDayContext) => ReactNode;
+    footer?: (context: CalendarDayContext) => ReactNode;
+}
+
+/**
  * Props for the Calendar component.
  * Type: interface.
  * Extends the native `div` attributes, so `id`, `style`, `role`, `aria-*`, pointer, mouse, keyboard,
@@ -102,7 +121,8 @@ export interface CalendarDayContext {
  * - `showAdjacentDays`: Whether leading and trailing days from adjacent months are rendered.
  * - `weekdayLabels`: Seven visible weekday labels ordered Sunday to Saturday.
  * - `monthLabels`: Twelve visible month labels ordered January to December.
- * - `renderDay`: Replaces the default day number with custom cell content.
+ * - `slots`: Header, body, and footer slots for each day cell; the header defaults to the day number.
+ * - `renderDay`: Legacy full-cell replacement; takes precedence over `slots`.
  * - `label`: Accessible name of the calendar group; defaults to the localised Calendar label.
  * - `previousMonthLabel`: Accessible name of the previous-month button; defaults to the localised
  * Previous month label.
@@ -130,6 +150,7 @@ export interface CalendarProps
     showAdjacentDays?: boolean;
     weekdayLabels?: readonly string[];
     monthLabels?: readonly string[];
+    slots?: CalendarDaySlots;
     renderDay?: (context: CalendarDayContext) => ReactNode;
     label?: string;
     previousMonthLabel?: string;
@@ -658,6 +679,7 @@ export const Calendar: FC<CalendarProps> = ({
     showAdjacentDays = true,
     weekdayLabels,
     monthLabels,
+    slots,
     renderDay,
     label,
     previousMonthLabel,
@@ -1051,9 +1073,12 @@ export const Calendar: FC<CalendarProps> = ({
                                     };
 
                                     return (
-                                        <div
+                                        <Surface
                                             key={iso}
                                             role="gridcell"
+                                            shape="pill"
+                                            disabled={isDisabled}
+                                            ripple={{ layer: "foreground", trigger: ["hover", "click"] }}
                                             className={cx(
                                                 "calendar__day",
                                                 isOutsideMonth && "calendar__day--outside",
@@ -1074,12 +1099,28 @@ export const Calendar: FC<CalendarProps> = ({
                                                 handleDayFocus(date);
                                             }}
                                         >
-                                            {renderDay === (void 0) ? (
-                                                <span className="calendar__day-number">{date.day}</span>
-                                            ) : (
+                                            {renderDay !== (void 0) ? (
                                                 renderDay(context)
+                                            ) : (
+                                                <>
+                                                    <div className="calendar__day-header">
+                                                        {slots?.header === (void 0) ? (
+                                                            <span className="calendar__day-number">
+                                                                {date.day}
+                                                            </span>
+                                                        ) : (
+                                                            slots.header(context)
+                                                        )}
+                                                    </div>
+                                                    <div className="calendar__day-body">
+                                                        {slots?.body?.(context)}
+                                                    </div>
+                                                    <div className="calendar__day-footer">
+                                                        {slots?.footer?.(context)}
+                                                    </div>
+                                                </>
                                             )}
-                                        </div>
+                                        </Surface>
                                     );
                                 },
                             )}

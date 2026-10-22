@@ -130,7 +130,7 @@ const TextInput: FC<TextInputProps> = ({
                     {error}
                 </p>
             ) : hint !== (void 0) && hint.length > 0 ? (
-                <p className="text-field__hint" id={hintId}>
+                <p className="text-field__hint" id={hintId} key={hint}>
                     {hint}
                 </p>
             ) : null}

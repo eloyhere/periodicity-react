@@ -1,6 +1,6 @@
-import type { ListAdapter } from "../../../../layout/list/adapter";
-import { createListAdapter } from "../../../../layout/list/adapter";
-import type { IconName } from "../../../icon/Icon";
+import type { ListAdapter } from "../../../../../layout/list/adapter";
+import { createListAdapter } from "../../../../../layout/list/adapter";
+import type { IconName } from "../../../../icon/Icon";
 
 /**
  * One choice offered by the select components.

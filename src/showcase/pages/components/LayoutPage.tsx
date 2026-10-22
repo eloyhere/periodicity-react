@@ -40,6 +40,7 @@ import {
     Toolbar,
     Tree,
     VirtualList,
+    VirtualTable,
     VirtualTree,
     WaterfallLayout,
 } from "../../../component";
@@ -174,7 +175,7 @@ const coordinatorCode: string = `<Coordinator
     }
 />`;
 
-const virtualTableCode: string = `<Table    columns={tableColumns}
+const virtualTableCode: string = `<VirtualTable    columns={tableColumns}
     rows={virtualTeamRows}
     rowKey={(row) => row.id}
     caption="Virtual team"
@@ -464,12 +465,11 @@ const LayoutPage: FC = () => {
                 description="The same columns over 120 rows, windowed to the viewport."
                 code={virtualTableCode}
             >
-                <Table
+                <VirtualTable
                     columns={tableColumns}
                     rows={virtualTeamRows}
                     rowKey={(row: TeamRow): string => row.id}
                     caption="Virtual team"
-                    virtual
                     height={240}
                     rowHeight={52}
                     selectedKeys={virtualTableSelection}
