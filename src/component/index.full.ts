@@ -233,6 +233,7 @@ export { default as PeriodicityCalendar } from "./calendar/Calendar";
 export type {
     CalendarDate as PeriodicityCalendarDate,
     CalendarDayContext as PeriodicityCalendarDayContext,
+    CalendarDaySlots as PeriodicityCalendarDaySlots,
     CalendarProps as PeriodicityCalendarProps,
     CalendarValue as PeriodicityCalendarValue,
 } from "./calendar/Calendar";

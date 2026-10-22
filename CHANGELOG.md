@@ -7,6 +7,12 @@ and this project uses British English in its English documentation.
 
 No changes yet.
 
+## [0.1.2] - 2026-10-22
+
+### Fixed
+
+- Export the PeriodicityCalendarDaySlots type alias with the other calendar types.
+
 ## [0.1.1] - 2026-10-22
 
 ### Fixed
