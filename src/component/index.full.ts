@@ -206,7 +206,8 @@ export { default as PeriodicityMessageList } from "../layout/message/normal/Mess
 export { default as PeriodicityVirtualMessageList } from "../layout/message/virtual/VirtualMessageList";
 export { default as PeriodicityChat } from "../layout/chat/normal/Chat";
 export { default as PeriodicityVirtualChat } from "../layout/chat/virtual/VirtualChat";
-export { default as PeriodicityCommentThread } from "./comment/CommentThread";
+export { default as PeriodicityCommentThread } from "./comment/normal/CommentThread";
+export { default as PeriodicityVirtualCommentThread } from "./comment/virtual/VirtualCommentThread";
 export { default as PeriodicityContactContextMenu } from "../layout/contact/ContactContextMenu";
 export { default as PeriodicityMessageContextMenu } from "../layout/message/MessageContextMenu";
 export { default as PeriodicityProjectManager } from "../layout/file/ProjectManager";

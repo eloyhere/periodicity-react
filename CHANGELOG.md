@@ -11,9 +11,14 @@ and this project uses British English in its English documentation.
   selected entry.
 - `TextInput` accepts `rootRef` for its field root, which lets composite fields anchor overlays without an extra
   wrapper element.
-- Pointer-origin focus border animation on the shared input shell: outline fields expand all four edges from the
-  pointer projection on each edge, while fill and standard fields expand the bottom line left and right, using an
-  ease-out curve over one second.
+- Pointer-origin focus border ripple on the shared input shell: a radial wave from the pointer (or keyboard caret)
+  reveals the nearest edge first, and every edge grows outward from its projection point; empty fields start from
+  the centre and the wave eases out over one second.
+- Per-item render slots for the messaging family: `Contact`/`VirtualContact` expose `contact` and `context`,
+  `MessageList`/`VirtualMessageList` expose `message`, `messageContext`, and `avatar`, and `Chat`/`VirtualChat`
+  forward all five. Each slot receives the rendered index and the item.
+- `CommentThread` accepts a `comment` slot that replaces one whole comment item, and the new
+  `VirtualCommentThread` virtualises the flattened thread at a fixed row height.
 
 ### Changed
 
@@ -21,16 +26,25 @@ and this project uses British English in its English documentation.
   with the shared `prefix`, `hint`, `message`, `limitation`, `error`, and `suffix` slots. Mention's former
   below-field `hint` moved to `message`; `hint` is now the floating hint, and `leading`/`trailing` remain aliases
   for `prefix`/`suffix`. Complete no longer adds a wrapper element around the field.
+- The input focus-border wave now plays even when the browser reports `prefers-reduced-motion: reduce`; the hint
+  and background transitions still honour the preference.
+- `PeriodicityNavigationView`'s bottom variant now measures its own width: it stays horizontal and scrolls sideways
+  while at least two destinations fit, and switches to a vertical, scrollable list once only one fits. No manual
+  variant switch is needed for narrow layouts.
+- `PeriodicityCoordinator` now takes vertical wheel gestures over from content that cannot scroll, in the capture
+  phase, so an inner component no longer swallows the gesture. Scrollable main content keeps native scrolling and
+  still syncs the collapse area, header, and app bar; horizontal, Shift, and modified wheel gestures are ignored.
 
 ### Fixed
 
+- `PeriodicityDrawerLayout` no longer consumes pointer events outside its root, so an external AppBar/Toolbar
+  toggle can close and reopen the drawer; the scrim remains the dismiss surface. The layout is now positioned so
+  the scrim stays inside it.
 - Keep focus in `PeriodicityCompleteInput` while its suggestion panel is open, so the focused border stays
   visible and typing keeps filtering the suggestions.
 - Close the `PeriodicityCompleteInput` suggestion panel and blur the field after a selection, instead of letting
   focus restoration reopen the panel.
 - Cover the shared `InputLayout` shell in forced-colors mode, so every six-slot field keeps a system focus ring.
-- Collapse the `PeriodicityCoordinator` hero from vertical wheel input when the main content cannot scroll and no
-  child consumes the event, so short content no longer keeps the collapse area open.
 
 ## [0.1.7] - 2026-10-22
 
@@ -79,7 +93,7 @@ and this project uses British English in its English documentation.
 
 ### Fixed
 
-- Publish generated TypeScript declarations (dist/types) and a CSS module shim, so 	ypes and exports.types resolve for consumers.
+- Publish generated TypeScript declarations (dist/types) and a CSS module shim, so ypes and exports.types resolve for consumers.
 
 ## [0.1.0] - 2026-10-20
 

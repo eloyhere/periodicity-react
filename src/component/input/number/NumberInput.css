@@ -1,5 +1,5 @@
-/* ==========================================================================
-   NumberInput — Material field chrome with stepper adornments.
+﻿/* ==========================================================================
+   NumberInput 鈥?Material field chrome with stepper adornments.
    ========================================================================== */
 
 .number-field {
@@ -66,10 +66,10 @@
     background: transparent;
     color: var(--color-on-surface);
     caret-color: var(--color-primary);
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     font-size: var(--type-body);
     font-variant-numeric: tabular-nums;
-    line-height: var(--leading-normal);
+    line-height: var(--font-leading-current, var(--leading-normal));
     outline: none;
     user-select: text;
     -webkit-user-select: text;
@@ -140,9 +140,9 @@
     max-width: calc(100% - var(--number-field-pad-inline) * 2);
     overflow: hidden;
     color: var(--color-on-surface-variant);
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     font-size: var(--type-body);
-    line-height: var(--leading-snug);
+    line-height: var(--font-leading-current, var(--leading-snug));
     text-overflow: ellipsis;
     white-space: nowrap;
     pointer-events: none;
@@ -160,7 +160,7 @@
     margin: var(--space-2) 0 0;
     padding-left: calc(var(--space-1) / 2);
     font-size: var(--type-label-sm);
-    line-height: var(--leading-normal);
+    line-height: var(--font-leading-current, var(--leading-normal));
 }
 
 .number-field__hint {

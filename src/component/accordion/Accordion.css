@@ -1,4 +1,4 @@
-.accordion {
+﻿.accordion {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -67,8 +67,8 @@
     background: transparent;
     color: inherit;
     cursor: pointer;
-    font-family: var(--font-sans);
-    text-align: left;
+    font-family: var(--font-family-current, var(--font-sans));
+    text-align: var(--font-align-current, left);
     -webkit-tap-highlight-color: transparent;
     appearance: none;
 }
@@ -92,8 +92,8 @@
     min-width: 0;
     color: var(--color-on-surface);
     font-size: var(--type-body-sm);
-    font-weight: var(--weight-semibold);
-    line-height: var(--leading-snug);
+    font-weight: var(--font-weight-current, var(--weight-semibold));
+    line-height: var(--font-leading-current, var(--leading-snug));
 }
 
 .accordion__chevron {
@@ -125,7 +125,7 @@
 .accordion__content {
     color: var(--color-on-surface-variant);
     font-size: var(--type-body-sm);
-    line-height: var(--leading-relaxed);
+    line-height: var(--font-leading-current, var(--leading-relaxed));
     user-select: text;
     -webkit-user-select: text;
 }

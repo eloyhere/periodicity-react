@@ -1,4 +1,4 @@
-.anchor {
+﻿.anchor {
     display: inline-flex;
     align-items: center;
     min-height: 32px;
@@ -28,7 +28,7 @@
 .anchor--active {
     background: var(--color-primary-container);
     color: var(--color-on-primary-container);
-    font-weight: 600;
+    font-weight: var(--font-weight-current, 600);
 }
 
 .anchor--active .anchor__marker {

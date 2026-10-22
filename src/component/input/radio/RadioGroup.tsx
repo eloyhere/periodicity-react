@@ -1,4 +1,5 @@
 import { useId, type FC, type FieldsetHTMLAttributes, type ReactNode, type Ref } from "react";
+import { useInternational, type InternationalContextValue } from "../../../international";
 import cx from "../../foundation/cx";
 import useControllableState from "../../foundation/useControllableState";
 import useField, { type FieldState } from "../../foundation/useField";
@@ -83,6 +84,7 @@ const RadioGroup: FC<RadioGroupProps> = ({
     ref,
     ...rest
 }: RadioGroupProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const field: FieldState = useField({ id, hint, error });
     const generatedName: string = useId();
     const groupName: string = name ?? generatedName;
@@ -129,7 +131,7 @@ const RadioGroup: FC<RadioGroupProps> = ({
                 className="radio-group__options"
                 role="radiogroup"
                 aria-labelledby={hasLabel ? legendId : (void 0)}
-                aria-label={hasLabel ? (void 0) : "Options"}
+                aria-label={hasLabel ? (void 0) : t("options")}
                 aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
                 aria-invalid={field.invalid ? true : (void 0)}
                 aria-disabled={disabled ? true : (void 0)}

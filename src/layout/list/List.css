@@ -1,5 +1,5 @@
-/* ==========================================================================
-   List — adapter-backed list with virtual window and selection
+﻿/* ==========================================================================
+   List 鈥?adapter-backed list with virtual window and selection
    ========================================================================== */
 
 .list {
@@ -77,7 +77,7 @@
     flex: 1 1 auto;
     min-width: 0;
     overflow: hidden;
-    font-size: 14px;
+    font-size: var(--type-body-sm);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -89,8 +89,8 @@
     min-height: 120px;
     padding: var(--space-4);
     color: var(--muted);
-    font-size: 13px;
-    text-align: center;
+    font-size: var(--type-label);
+    text-align: var(--font-align-current, center);
 }
 
 .list--virtual .list__row {

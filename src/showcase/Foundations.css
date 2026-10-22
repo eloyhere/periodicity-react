@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Foundations — token documentation blocks
+﻿/* ==========================================================================
+   Foundations 鈥?token documentation blocks
    ========================================================================== */
 
 /* Colour --------------------------------------------------------------- */
@@ -44,15 +44,15 @@
 
 .foundation-swatch__name {
     color: var(--text);
-    font-size: 13px;
-    font-weight: 500;
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, 500);
 }
 
 .foundation-swatch__token {
     overflow: hidden;
     color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 10px;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -90,14 +90,14 @@
 
 .foundation-type__name {
     color: var(--text);
-    font-size: 13px;
-    font-weight: 500;
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, 500);
 }
 
 .foundation-type__meta code {
     color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 10px;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
 }
 
 /* Spacing -------------------------------------------------------------- */
@@ -120,8 +120,8 @@
     flex: none;
     width: 80px;
     color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 11px;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
 }
 
 .foundation-spacing__bar {
@@ -147,14 +147,14 @@
     align-items: flex-start;
     gap: var(--space-2);
     color: var(--text);
-    font-size: 13px;
+    font-size: var(--type-label);
 }
 
 .foundation-shape__item code,
 .foundation-elevation__item code {
     color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 10px;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
 }
 
 .foundation-shape__box {
@@ -192,7 +192,7 @@
     flex: none;
     width: 80px;
     color: var(--text);
-    font-size: 13px;
+    font-size: var(--type-label);
 }
 
 .foundation-motion__track {
@@ -222,9 +222,9 @@
     flex: none;
     width: 160px;
     color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 10px;
-    text-align: right;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
+    text-align: var(--font-align-current, right);
 }
 
 @keyframes foundation-motion {
@@ -277,14 +277,14 @@
     background: transparent;
     color: var(--text);
     font: inherit;
-    font-size: 14px;
+    font-size: var(--type-body-sm);
     outline: none;
 }
 
 .foundation-icons__count {
     flex: none;
     color: var(--muted);
-    font-size: 12px;
+    font-size: var(--type-label);
 }
 
 .foundation-icons__filters {
@@ -338,8 +338,8 @@
 .foundation-icon__name {
     max-width: 100%;
     overflow: hidden;
-    font-size: 11px;
-    font-weight: 500;
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, 500);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -348,7 +348,7 @@
     max-width: 100%;
     overflow: hidden;
     color: var(--muted);
-    font-size: 9px;
+    font-size: var(--type-label);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -370,8 +370,8 @@
 
 .foundation-icon-size code {
     color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 10px;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
 }
 
 @media (max-width: 720px) {

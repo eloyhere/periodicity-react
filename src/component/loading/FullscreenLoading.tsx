@@ -12,6 +12,7 @@ import {
 } from "react";
 import { createRoot } from "react-dom/client";
 import type { Root } from "react-dom/client";
+import { useInternational, type InternationalContextValue } from "../../international";
 import cx from "../foundation/cx";
 import useControllableState from "../foundation/useControllableState";
 import useMergedRef from "../foundation/useMergedRef";
@@ -84,7 +85,7 @@ const FullscreenLoading: FC<FullscreenLoadingProps> = ({
     open: openProp,
     defaultOpen = false,
     onOpenChange,
-    label = "Loading",
+    label,
     description,
     duration,
     onClose,
@@ -96,6 +97,8 @@ const FullscreenLoading: FC<FullscreenLoadingProps> = ({
     "aria-label": ariaLabel,
     ...rest
 }: FullscreenLoadingProps) => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedLabel: string = label ?? t("loading");
     const dialogRef: RefObject<HTMLDialogElement | null> = useRef<HTMLDialogElement | null>(null);
     const [open, setOpen]: readonly [
         boolean,
@@ -155,15 +158,15 @@ const FullscreenLoading: FC<FullscreenLoadingProps> = ({
                 {...rest}
                 ref={mergedRef}
                 className={cx("fullscreen-loading", className)}
-                aria-label={ariaLabel ?? label}
+                aria-label={ariaLabel ?? resolvedLabel}
                 aria-busy="true"
                 role={role}
                 onCancel={handleCancel}
             >
                 <div className="fullscreen-loading__content">
-                    <CircularProgress size={56} label={label} />
+                    <CircularProgress size={56} label={resolvedLabel} />
                     <Text as="p" variant="h4">
-                        {label}
+                        {resolvedLabel}
                     </Text>
                     {description === (void 0) ? null : (
                         <Text as="p" variant="body-sm" tone="muted">
@@ -220,7 +223,7 @@ export const showFullscreenLoading: (
         root.render(
             <FullscreenLoading
                 open
-                label={options.label ?? "Loading"}
+                label={options.label}
                 description={options.description}
                 duration={options.duration ?? 3000}
                 className={options.className}

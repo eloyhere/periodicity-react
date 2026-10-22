@@ -1,4 +1,4 @@
-.avatar-group {
+﻿.avatar-group {
     --avatar-size: var(--space-8);
 
     display: inline-flex;
@@ -54,11 +54,11 @@
 }
 
 .avatar-group__more-label {
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     font-size: var(--type-label-sm);
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-normal);
-    line-height: var(--leading-tight);
+    font-weight: var(--font-weight-current, var(--weight-semibold));
+    letter-spacing: var(--font-tracking-current, var(--tracking-normal));
+    line-height: var(--font-leading-current, var(--leading-tight));
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }

@@ -1,101 +1,110 @@
 /* Text is the only component whose content may be selected. */
 
 .text {
+    --text-family: var(--font-sans);
+    --text-size: var(--type-body);
+    --text-weight: var(--weight-regular);
+    --text-leading: var(--leading-normal);
+    --text-tracking: var(--tracking-normal);
+    --text-transform: none;
     margin: 0;
-    color: var(--text);
-    font-family: var(--font-sans);
-    font-size: var(--type-body);
-    font-weight: var(--weight-regular);
-    line-height: var(--leading-normal);
+    color: var(--font-color-current, var(--text-tone-color, var(--text)));
+    font-family: var(--font-family-current, var(--text-family));
+    font-size: var(--text-size);
+    font-weight: var(--font-weight-current, var(--text-weight));
+    letter-spacing: var(--font-tracking-current, var(--text-tracking));
+    line-height: var(--font-leading-current, var(--text-leading));
+    text-align: var(--font-align-current, inherit);
+    text-transform: var(--font-transform-current, var(--text-transform));
     user-select: text;
     -webkit-user-select: text;
     text-wrap: pretty;
 }
 
 .text--display {
-    font-family: var(--font-display);
-    font-size: var(--type-display);
-    font-weight: var(--weight-medium);
-    letter-spacing: var(--tracking-tight);
-    line-height: var(--leading-tight);
+    --text-family: var(--font-display);
+    --text-size: var(--type-display);
+    --text-weight: var(--weight-medium);
+    --text-leading: var(--leading-tight);
+    --text-tracking: var(--tracking-tight);
     text-wrap: balance;
 }
 
 .text--h1 {
-    font-family: var(--font-display);
-    font-size: var(--type-h1);
-    font-weight: var(--weight-medium);
-    letter-spacing: -0.025em;
-    line-height: var(--leading-tight);
+    --text-family: var(--font-display);
+    --text-size: var(--type-h1);
+    --text-weight: var(--weight-medium);
+    --text-leading: var(--leading-tight);
+    --text-tracking: -0.025em;
     text-wrap: balance;
 }
 
 .text--h2 {
-    font-family: var(--font-display);
-    font-size: var(--type-h2);
-    font-weight: var(--weight-medium);
-    letter-spacing: -0.02em;
-    line-height: var(--leading-snug);
+    --text-family: var(--font-display);
+    --text-size: var(--type-h2);
+    --text-weight: var(--weight-medium);
+    --text-leading: var(--leading-snug);
+    --text-tracking: -0.02em;
     text-wrap: balance;
 }
 
 .text--h3 {
-    font-family: var(--font-display);
-    font-size: var(--type-h3);
-    font-weight: var(--weight-medium);
-    letter-spacing: -0.015em;
-    line-height: var(--leading-snug);
+    --text-family: var(--font-display);
+    --text-size: var(--type-h3);
+    --text-weight: var(--weight-medium);
+    --text-leading: var(--leading-snug);
+    --text-tracking: -0.015em;
 }
 
 .text--h4 {
-    font-size: var(--type-h4);
-    font-weight: var(--weight-semibold);
-    letter-spacing: -0.01em;
-    line-height: var(--leading-snug);
+    --text-size: var(--type-h4);
+    --text-weight: var(--weight-semibold);
+    --text-leading: var(--leading-snug);
+    --text-tracking: -0.01em;
 }
 
 .text--body {
-    font-size: var(--type-body);
-    line-height: var(--leading-relaxed);
+    --text-size: var(--type-body);
+    --text-leading: var(--leading-relaxed);
 }
 
 .text--body-sm {
-    font-size: var(--type-body-sm);
-    line-height: var(--leading-normal);
+    --text-size: var(--type-body-sm);
+    --text-leading: var(--leading-normal);
 }
 
 .text--label {
-    font-family: var(--font-mono);
-    font-size: var(--type-label-sm);
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-wide);
-    line-height: 1.4;
-    text-transform: uppercase;
+    --text-family: var(--font-mono);
+    --text-size: var(--type-label-sm);
+    --text-weight: var(--weight-semibold);
+    --text-leading: 1.4;
+    --text-tracking: var(--tracking-wide);
+    --text-transform: uppercase;
 }
 
 .text--mono {
-    font-family: var(--font-mono);
-    font-size: var(--type-mono);
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-widest);
-    line-height: 1.4;
-    text-transform: uppercase;
+    --text-family: var(--font-mono);
+    --text-size: var(--type-mono);
+    --text-weight: var(--weight-semibold);
+    --text-leading: 1.4;
+    --text-tracking: var(--tracking-widest);
+    --text-transform: uppercase;
 }
 
 .text--tone-soft {
-    color: var(--text-soft);
+    --text-tone-color: var(--text-soft);
 }
 
 .text--tone-muted {
-    color: var(--muted);
+    --text-tone-color: var(--muted);
 }
 
 .text--tone-accent {
-    color: var(--accent);
+    --text-tone-color: var(--accent);
 }
 
 .text--tone-danger {
-    color: var(--danger);
+    --text-tone-color: var(--danger);
 }
 
 .text--truncate {

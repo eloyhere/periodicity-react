@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Showcase shell — persistent sidebar and per-entry documentation page
+﻿/* ==========================================================================
+   Showcase shell 閳?persistent sidebar and per-entry documentation page
    ========================================================================== */
 
 /* First focusable element in the document; fixed so it never disturbs the
@@ -17,8 +17,8 @@
     background: var(--color-primary);
     color: var(--color-on-primary);
     box-shadow: var(--shadow-sm);
-    font-size: 0.875rem;
-    font-weight: 600;
+    font-size: var(--type-body-sm);
+    font-weight: var(--font-weight-current, 600);
     text-decoration: none;
     white-space: nowrap;
     transform: translateY(calc(-100% - var(--space-4)));
@@ -46,6 +46,8 @@
 }
 
 .showcase-coordinator {
+    flex: 1 1 auto;
+    min-width: 0;
     height: 100vh;
 }
 
@@ -113,7 +115,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
-    line-height: 1.6;
+    line-height: var(--font-leading-current, 1.6);
 }
 
 .showcase-about p {
@@ -122,7 +124,7 @@
 
 .showcase-about h3 {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: var(--type-body-sm);
 }
 
 .showcase-about ul {
@@ -210,8 +212,8 @@
 }
 
 .showcase-page__eyebrow {
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    letter-spacing: var(--font-tracking-current, 0.14em);
+    text-transform: var(--font-transform-current, uppercase);
 }
 
 .showcase-page__title {
@@ -249,8 +251,8 @@
 
 .showcase-page__family-link {
     color: var(--color-primary);
-    font-size: 13px;
-    font-weight: 500;
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, 500);
     text-decoration: none;
     white-space: nowrap;
 }
@@ -287,6 +289,21 @@
 .showcase__field-grid > * {
     flex: 1 1 220px;
     min-width: 0;
+}
+
+.showcase__nav-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--space-5);
+}
+
+.showcase__nav-horizontal {
+    width: 14rem;
+}
+
+.showcase__nav-compact {
+    width: 8rem;
 }
 
 .showcase__text-scale {
@@ -349,8 +366,8 @@
     border-radius: var(--radius-xs);
     background: var(--panel);
     color: var(--text);
-    font-family: var(--font-sans);
-    font-size: 14px;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-body-sm);
 }
 
 .showcase__native-input:focus {
@@ -425,16 +442,16 @@
 
 .showcase__component-section-title {
     margin: 0;
-    font-size: 0.9rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    font-size: var(--type-body-sm);
+    font-weight: var(--font-weight-current, 700);
+    letter-spacing: var(--font-tracking-current, 0.12em);
+    text-transform: var(--font-transform-current, uppercase);
 }
 
 .showcase__component-section-count {
     color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
 }
 
 .showcase__component-grid {
@@ -478,22 +495,22 @@
 }
 
 .showcase__component-card-name {
-    font-size: 0.95rem;
-    font-weight: 650;
+    font-size: var(--type-body-sm);
+    font-weight: var(--font-weight-current, 650);
 }
 
 .showcase__component-card-description {
     color: var(--muted);
-    font-size: 0.82rem;
-    line-height: 1.45;
+    font-size: var(--type-label);
+    line-height: var(--font-leading-current, 1.45);
 }
 
 .showcase__component-card-meta {
     color: var(--color-primary);
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
+    letter-spacing: var(--font-tracking-current, 0.08em);
+    text-transform: var(--font-transform-current, uppercase);
 }
 
 .showcase__icon-catalogue {
@@ -541,8 +558,8 @@
 
 .showcase__icon-count {
     color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
     white-space: nowrap;
 }
 
@@ -566,16 +583,16 @@
 }
 
 .showcase__icon-group-card .card__title {
-    font-size: 0.82rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, 700);
+    letter-spacing: var(--font-tracking-current, 0.08em);
+    text-transform: var(--font-transform-current, uppercase);
 }
 
 .showcase__icon-group-count {
     color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
 }
 
 .showcase__icon-grid {
@@ -595,7 +612,7 @@
     border: 1px solid var(--line);
     border-radius: var(--radius-sm);
     background: var(--color-surface);
-    text-align: center;
+    text-align: var(--font-align-current, center);
     gap: 2px;
 }
 
@@ -606,17 +623,17 @@
 
 .showcase__icon-name {
     max-width: 100%;
-    font-size: 0.7rem;
-    font-weight: 600;
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, 600);
     overflow-wrap: anywhere;
 }
 
 .showcase__icon-category {
     color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 0.6rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
+    letter-spacing: var(--font-tracking-current, 0.06em);
+    text-transform: var(--font-transform-current, uppercase);
 }
 
 .showcase__layout-cell {

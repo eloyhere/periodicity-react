@@ -1,4 +1,4 @@
-.toast-region {
+﻿.toast-region {
     position: fixed;
     right: var(--space-6);
     bottom: var(--space-6);
@@ -79,7 +79,7 @@
 
 .toast .toast__title {
     color: var(--color-on-surface);
-    font-weight: var(--weight-semibold);
+    font-weight: var(--font-weight-current, var(--weight-semibold));
 }
 
 .toast .toast__description {

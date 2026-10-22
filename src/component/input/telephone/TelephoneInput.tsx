@@ -11,11 +11,13 @@ import {
     type SetStateAction,
 } from "react";
 import TextInput, { type TextInputProps } from "../text/TextInput";
+import { useInternational, type InternationalContextValue } from "../../../international";
 import {
     TelephonePatternSource,
     sanitiseTelephoneText,
     validateTelephone,
     type SanitisedTelephoneText,
+    type TelephoneValidationMessages,
 } from "./telephone";
 
 /**
@@ -117,6 +119,13 @@ const TelephoneInput: FC<TelephoneInputProps> = ({
     onInvalid,
     ...rest
 }: TelephoneInputProps) => {
+    const { t }: InternationalContextValue = useInternational();
+    const validationMessages: TelephoneValidationMessages = {
+        required: t("telephoneRequired"),
+        shape: t("telephoneShape"),
+        parentheses: t("telephoneParentheses"),
+        digits: t("telephoneDigits"),
+    };
     const [touched, setTouched]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false);
     const [internalError, setInternalError]: [string | void, Dispatch<SetStateAction<string | void>>] =
         useState<string | void>((void 0));
@@ -133,21 +142,25 @@ const TelephoneInput: FC<TelephoneInputProps> = ({
         onChange?.(event);
 
         if (touched) {
-            setInternalError(validateTelephone(sanitised.value, required));
+            setInternalError(validateTelephone(sanitised.value, required, validationMessages));
         }
     };
 
     const handleBlur: FocusEventHandler<HTMLInputElement> = (event: FocusEvent<HTMLInputElement>): void => {
         if (!event.currentTarget.disabled && !event.currentTarget.readOnly) {
             setTouched(true);
-            setInternalError(validateTelephone(event.currentTarget.value, required));
+            setInternalError(validateTelephone(event.currentTarget.value, required, validationMessages));
         }
 
         onBlur?.(event);
     };
 
     const handleInvalid: FormEventHandler<HTMLInputElement> = (event: FormEvent<HTMLInputElement>): void => {
-        const message: string | void = validateTelephone(event.currentTarget.value, required);
+        const message: string | void = validateTelephone(
+            event.currentTarget.value,
+            required,
+            validationMessages,
+        );
 
         if (!event.currentTarget.disabled && !event.currentTarget.readOnly && message !== (void 0)) {
             event.preventDefault();

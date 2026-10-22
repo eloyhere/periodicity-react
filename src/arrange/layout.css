@@ -140,15 +140,9 @@
 }
 
 .arrange-columns-3 > * {
-    flex-basis: calc(
-        (100% - var(--arrange-columns-gap) - var(--arrange-columns-gap)) / 3
-    );
+    flex-basis: calc((100% - var(--arrange-columns-gap) - var(--arrange-columns-gap)) / 3);
 }
 
 .arrange-columns-4 > * {
-    flex-basis: calc(
-        (100% - var(--arrange-columns-gap) - var(--arrange-columns-gap) -
-                var(--arrange-columns-gap)) /
-            4
-    );
+    flex-basis: calc((100% - var(--arrange-columns-gap) - var(--arrange-columns-gap) - var(--arrange-columns-gap)) / 4);
 }

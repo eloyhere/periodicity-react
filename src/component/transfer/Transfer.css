@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Transfer — two-pane Material selection list
+﻿/* ==========================================================================
+   Transfer 鈥?two-pane Material selection list
    ========================================================================== */
 
 .transfer {
@@ -35,9 +35,9 @@
 .transfer__title {
     margin: 0;
     color: var(--text);
-    font-family: var(--font-sans);
-    font-size: 14px;
-    font-weight: 500;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-body-sm);
+    font-weight: var(--font-weight-current, 500);
 }
 
 .transfer__count {
@@ -46,9 +46,9 @@
     border-radius: var(--radius-pill);
     background: var(--panel-strong);
     color: var(--muted);
-    font-size: 11px;
-    line-height: 18px;
-    text-align: center;
+    font-size: var(--type-label);
+    line-height: var(--font-leading-current, 18px);
+    text-align: var(--font-align-current, center);
 }
 
 .transfer__search {
@@ -70,7 +70,7 @@
     background: transparent;
     color: var(--text);
     font: inherit;
-    font-size: 13px;
+    font-size: var(--type-label);
     outline: none;
 }
 
@@ -157,8 +157,8 @@
 
 .transfer__label {
     overflow: hidden;
-    font-size: 14px;
-    line-height: 1.4;
+    font-size: var(--type-body-sm);
+    line-height: var(--font-leading-current, 1.4);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -166,8 +166,8 @@
 .transfer__description {
     overflow: hidden;
     color: var(--muted);
-    font-size: 12px;
-    line-height: 1.4;
+    font-size: var(--type-label);
+    line-height: var(--font-leading-current, 1.4);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -180,8 +180,8 @@
     min-height: 120px;
     padding: var(--space-4);
     color: var(--muted);
-    font-size: 13px;
-    text-align: center;
+    font-size: var(--type-label);
+    text-align: var(--font-align-current, center);
 }
 
 .transfer__controls {

@@ -19,6 +19,9 @@ import type { ListEntry } from "../../list/adapter";
 import type { MessageAction, MessageAdapter, MessageItem } from "../../message/adapter";
 import type { ChatAdapter } from "../adapter";
 import { conversationMessages, createChatAdapter } from "../adapter";
+import type { ChatSlots } from "../slots";
+import type { ContactSlots } from "../../contact/slots";
+import type { MessageSlots } from "../../message/slots";
 import { useInternational, type InternationalContextValue } from "../../../international";
 import "../Chat.css";
 
@@ -29,8 +32,8 @@ import "../Chat.css";
  * onContactAction, onMessageAction, onQuote, onForward, onDelete, onRecall, onFavourite,
  * onCopyMessage, onSend, onDraftChange, onQuoteCancel, currentUser, contactsTitle,
  * contactsLabel, conversationLabel, empty, messageEmpty, placeholder, composerLabel, sendLabel,
- * contactsLoading, loading, sending, disabled, className, ref, plus native div attributes and
- * events.
+ * contactsLoading, loading, sending, disabled, slots, className, ref, plus native div attributes
+ * and events.
  * @example
  * <Chat contacts={contacts} messages={messages} onSend={sendMessage} />
  */
@@ -74,6 +77,8 @@ export interface ChatProps extends Omit<HTMLAttributes<HTMLDivElement>, "childre
     loading?: boolean;
     sending?: boolean;
     disabled?: boolean;
+    /** Contact and message render slots; forwarded to the contact pane and transcript. */
+    slots?: ChatSlots;
     className?: string;
     ref?: Ref<HTMLDivElement>;
 }
@@ -117,6 +122,7 @@ const Chat: (props: ChatProps) => ReactNode = ({
     loading = false,
     sending = false,
     disabled = false,
+    slots,
     className = "",
     "aria-label": ariaLabel,
     ref,
@@ -223,6 +229,14 @@ const Chat: (props: ChatProps) => ReactNode = ({
                     listLabel={resolvedContactsLabel}
                     loading={contactsLoading}
                     disabled={disabled}
+                    slots={
+                        slots === (void 0)
+                            ? (void 0)
+                            : {
+                                  contact: slots.contact,
+                                  context: slots.contactContext,
+                              } satisfies ContactSlots
+                    }
                 />
             </aside>
             <section className="chat__main" aria-label={resolvedConversationLabel}>
@@ -264,6 +278,15 @@ const Chat: (props: ChatProps) => ReactNode = ({
                                 onRecall={onRecall}
                                 onFavourite={onFavourite}
                                 onCopyMessage={onCopyMessage}
+                                slots={
+                                    slots === (void 0)
+                                        ? (void 0)
+                                        : {
+                                              message: slots.message,
+                                              messageContext: slots.messageContext,
+                                              avatar: slots.avatar,
+                                          } satisfies MessageSlots
+                                }
                             />
                         </div>
 

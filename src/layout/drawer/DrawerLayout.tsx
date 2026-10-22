@@ -373,10 +373,12 @@ const DrawerLayout: FC<DrawerLayoutProps> = ({
                 return;
             }
 
-            if (rootRef.current !== null && !rootRef.current.contains(target)) {
-                event.preventDefault();
-                event.stopPropagation();
-                setSideOpen(openSide, false);
+            const root: HTMLDivElement | null = rootRef.current;
+
+            // The scrim is the dismiss surface. Anything outside the layout —
+            // such as an AppBar menu button — belongs to the caller and must
+            // keep its normal pointer and click behaviour.
+            if (root === null || !root.contains(target)) {
                 return;
             }
 

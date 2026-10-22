@@ -23,6 +23,7 @@ import type { ListEntry } from "../../list/adapter";
 import type { ContactAction, ContactAdapter, ContactItem, ContactPresence } from "../adapter";
 import { createContactAdapter } from "../adapter";
 import ContactContextMenu from "../ContactContextMenu";
+import type { ContactSlots } from "../slots";
 import { focusListOption } from "../keyboard";
 import { useInternational, type InternationalContextValue } from "../../../international";
 import "../Contact.css";
@@ -33,7 +34,7 @@ import "../Contact.css";
  * Fields: contacts, adapter, value, defaultValue, onValueChange, onSelect, onContactAction,
  * onContactMenuOpenChange, title, titleText, searchable, searchPlaceholder, searchLabel,
  * onSearchChange, listLabel, height, itemHeight, loading, loadingLabel, disabled, empty,
- * emptySearch, className, ref, plus native section attributes and events.
+ * emptySearch, slots, className, ref, plus native section attributes and events.
  * @example
  * <VirtualContact contacts={contacts} height={320} itemHeight={60} />
  */
@@ -67,6 +68,8 @@ export interface VirtualContactProps
     /** Empty-state content; defaults to the localised No contacts label. */
     empty?: ReactNode;
     emptySearch?: ReactNode;
+    /** Per-row and per-menu render slots; each receives the row index and the contact. */
+    slots?: ContactSlots;
     className?: string;
     ref?: Ref<HTMLElement>;
 }
@@ -101,6 +104,7 @@ const VirtualContact: (props: VirtualContactProps) => ReactNode = ({
     disabled = false,
     empty,
     emptySearch,
+    slots,
     className = "",
     "aria-label": ariaLabel,
     onKeyDown,
@@ -268,8 +272,9 @@ const VirtualContact: (props: VirtualContactProps) => ReactNode = ({
                     <div className="contact__spacer" style={spacerStyle}>
                         {visible.map((contact: ContactItem, index: number): ReactNode => {
                             const contactDisabled: boolean = disabled || contact.disabled === true;
+                            const rowIndex: number = start + index;
                             const rowStyle: CSSProperties = {
-                                top: (start + index) * itemHeight,
+                                top: rowIndex * itemHeight,
                                 height: itemHeight,
                             };
 
@@ -279,6 +284,7 @@ const VirtualContact: (props: VirtualContactProps) => ReactNode = ({
                                     contact={contact}
                                     onAction={act}
                                     disabled={contactDisabled}
+                                    menu={slots?.context?.(rowIndex, contact)}
                                     onOpenChange={(open: boolean): void =>
                                         onContactMenuOpenChange?.(open, contact)
                                     }
@@ -314,24 +320,32 @@ const VirtualContact: (props: VirtualContactProps) => ReactNode = ({
                                             event: ReactKeyboardEvent<HTMLDivElement>,
                                         ): void => handleKeyDown(event, contact)}
                                     >
-                                        <Avatar
-                                            name={contact.name}
-                                            src={contact.avatar}
-                                            size="sm"
-                                        />
-                                        <span className="contact__copy">
-                                            <span className="contact__name">{contact.name}</span>
-                                            {contact.description === (void 0) ? null : (
-                                                <span className="contact__description">
-                                                    {contact.description}
+                                        {slots?.contact === (void 0) ? (
+                                            <>
+                                                <Avatar
+                                                    name={contact.name}
+                                                    src={contact.avatar}
+                                                    size="sm"
+                                                />
+                                                <span className="contact__copy">
+                                                    <span className="contact__name">
+                                                        {contact.name}
+                                                    </span>
+                                                    {contact.description === (void 0) ? null : (
+                                                        <span className="contact__description">
+                                                            {contact.description}
+                                                        </span>
+                                                    )}
                                                 </span>
-                                            )}
-                                        </span>
-                                        <span
-                                            className="contact__presence"
-                                            data-presence={contact.presence ?? "offline"}
-                                            aria-label={contact.presence ?? t("offline")}
-                                        />
+                                                <span
+                                                    className="contact__presence"
+                                                    data-presence={contact.presence ?? "offline"}
+                                                    aria-label={contact.presence ?? t("offline")}
+                                                />
+                                            </>
+                                        ) : (
+                                            slots.contact(rowIndex, contact)
+                                        )}
                                     </Surface>
                                 </ContactContextMenu>
                             );

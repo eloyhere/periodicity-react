@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Snackbar — Material transient notification at the viewport edge
+﻿/* ==========================================================================
+   Snackbar 鈥?Material transient notification at the viewport edge
    ========================================================================== */
 
 .snackbar {
@@ -59,15 +59,15 @@
     flex: 1 1 auto;
     min-width: 0;
     color: inherit;
-    font-size: 14px;
-    line-height: 1.4;
+    font-size: var(--type-body-sm);
+    line-height: var(--font-leading-current, 1.4);
 }
 
 .snackbar__surface .snackbar__action .button__control {
     min-height: 32px;
     padding: 0 var(--space-2);
     color: #90caf9;
-    font-weight: 500;
+    font-weight: var(--font-weight-current, 500);
 }
 
 .snackbar__surface .snackbar__close .button__control {

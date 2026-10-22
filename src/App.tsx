@@ -76,6 +76,10 @@ const readTheme: () => Theme = (): Theme => {
         // Storage can be unavailable in private windows; fall back to the media query.
     }
 
+    if (typeof window.matchMedia !== "function") {
+        return "dark";
+    }
+
     const prefersLight: boolean = window.matchMedia("(prefers-color-scheme: light)").matches;
 
     return prefersLight ? "light" : "dark";
@@ -296,19 +300,27 @@ const App: FC = () => {
                                     const isActive: boolean = item.id === activeNav;
 
                                     return (
-                                        <button
+                                        <Surface
                                             key={item.id}
-                                            type="button"
-                                            className={`nav__item ${isActive ? "is-active" : ""}`.trim()}
-                                            aria-current={isActive ? "page" : (void 0)}
-                                            onClick={(): void => setActiveNav(item.id)}
+                                            className="nav__item-surface"
+                                            ripple={{
+                                                layer: "foreground",
+                                                trigger: ["hover", "click"],
+                                            }}
                                         >
-                                            <Icon name={item.icon} size={17} />
-                                            <span className="nav__label">{item.label}</span>
-                                            {item.id === "rituals" ? (
-                                                <span className="nav__count">{openCount}</span>
-                                            ) : null}
-                                        </button>
+                                            <button
+                                                type="button"
+                                                className={`nav__item ${isActive ? "is-active" : ""}`.trim()}
+                                                aria-current={isActive ? "page" : (void 0)}
+                                                onClick={(): void => setActiveNav(item.id)}
+                                            >
+                                                <Icon name={item.icon} size={17} />
+                                                <span className="nav__label">{item.label}</span>
+                                                {item.id === "rituals" ? (
+                                                    <span className="nav__count">{openCount}</span>
+                                                ) : null}
+                                            </button>
+                                        </Surface>
                                     );
                                 })}
                             </Stack>

@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Photo picker — Base64 preview tile inside a labelled picker field
+﻿/* ==========================================================================
+   Photo picker 鈥?Base64 preview tile inside a labelled picker field
    ========================================================================== */
 
 .photo-picker .picker-field__control {
@@ -39,7 +39,6 @@
 
 .photo-picker__trigger:disabled {
     cursor: not-allowed;
-    opacity: var(--state-disabled-opacity);
 }
 
 .photo-picker__image {
@@ -55,15 +54,15 @@
     align-items: center;
     justify-content: center;
     padding: var(--space-4);
-    text-align: center;
+    text-align: var(--font-align-current, center);
     gap: var(--space-2);
 }
 
 .photo-picker__empty-label {
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     font-size: var(--type-label);
-    font-weight: var(--weight-medium);
-    line-height: var(--leading-snug);
+    font-weight: var(--font-weight-current, var(--weight-medium));
+    line-height: var(--font-leading-current, var(--leading-snug));
 }
 
 .photo-picker__badge {

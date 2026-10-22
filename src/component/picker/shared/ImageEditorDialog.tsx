@@ -1,4 +1,5 @@
 import {
+    useEffect,
     useRef,
     useState,
     type ChangeEventHandler,
@@ -24,10 +25,7 @@ import {
     type CropTransform,
     type CroppedImage,
 } from "./imageCrop";
-import {
-    DefaultImagePickerLabels,
-    type ImagePickerLabels,
-} from "./imagePickerLabels";
+import type { ImagePickerLabels } from "./imagePickerLabels";
 import "./ImageEditorDialog.css";
 
 /**
@@ -56,9 +54,11 @@ export interface ImageCropSlotContext {
 
 /**
  * Props for the modal image editor shared by the photo and avatar pickers.
+ * The crop slot is the `Dialog` component's children slot: pass a node or a render
+ * function to replace the built-in crop stage, or omit it for the default editor.
  * Type: interface.
  * Fields: open, src, fileName, mimeType, aspect, shape, outputWidth, title, alt, labels,
- * renderCrop, onDone, onUseOriginal, onAbort.
+ * children, onDone, onUseOriginal, onAbort.
  * @example
  * <ImageEditorDialog open={open} src={dataUrl} fileName="photo.jpg" mimeType="image/jpeg" aspect={1} shape="rect" outputWidth={1600} title="Edit photo" onDone={handleDone} onUseOriginal={useOriginal} onAbort={abort} />
  */
@@ -73,7 +73,8 @@ export interface ImageEditorDialogProps {
     title: string;
     alt?: string;
     labels?: Partial<ImagePickerLabels>;
-    renderCrop?: (context: ImageCropSlotContext) => ReactNode;
+    /** Dialog body slot; receives the crop context when passed as a function. */
+    children?: ReactNode | ((context: ImageCropSlotContext) => ReactNode);
     onDone: (result: CroppedImage) => void;
     onUseOriginal: () => void;
     onAbort: () => void;
@@ -83,7 +84,7 @@ export interface ImageEditorDialogProps {
  * Renders the crop editor with a live preview, zoom, rotation, and reset controls.
  * `Done` renders the crop, `Cancel` keeps the original image, and every other close
  * path (header button, Escape, backdrop) abandons the selection through `onAbort`.
- * A `renderCrop` slot replaces the built-in crop stage and toolbar while keeping the
+ * A crop slot (`children`) replaces the built-in crop stage and toolbar while keeping the
  * footer semantics.
  * @param props - Source image, crop shape, copy overrides, crop slot, and close handlers.
  * @example
@@ -101,7 +102,7 @@ const ImageEditorDialog: FC<ImageEditorDialogProps> = ({
     title,
     alt,
     labels,
-    renderCrop: renderCropSlot,
+    children,
     onDone,
     onUseOriginal,
     onAbort,
@@ -111,16 +112,46 @@ const ImageEditorDialog: FC<ImageEditorDialogProps> = ({
         useState<CropTransform>(InitialCropTransform);
     const [busy, setBusy]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false);
     const workingRef: RefObject<boolean> = useRef<boolean>(false);
+    const cancelledRef: RefObject<boolean> = useRef<boolean>(false);
+    const committedRef: RefObject<boolean> = useRef<boolean>(false);
     const ripple: RippleHandlers = useRipple({
         trigger: "both",
         disabled: busy,
     });
     const resolved: ImagePickerLabels = {
-        ...DefaultImagePickerLabels,
-        ...labels,
+        choose: labels?.choose ?? t("choosePhoto"),
+        edit: labels?.edit ?? t("editPhoto"),
+        done: labels?.done ?? t("confirm"),
         cancel: labels?.cancel ?? t("cancel"),
         close: labels?.close ?? t("close"),
+        zoom: labels?.zoom ?? t("zoom"),
+        rotateLeft: labels?.rotateLeft ?? t("rotateLeft"),
+        rotateRight: labels?.rotateRight ?? t("rotateRight"),
         reset: labels?.reset ?? t("reset"),
+        cropArea: labels?.cropArea ?? t("cropArea"),
+        hint: labels?.hint ?? t("cropHint"),
+    };
+
+    useEffect((): (() => void) => {
+        cancelledRef.current = false;
+
+        return (): void => {
+            // A late crop render must not publish a selection the user closed.
+            cancelledRef.current = true;
+        };
+    }, []);
+
+    /**
+     * Abandons the selection without emitting a change, including while a crop
+     * render is still in flight.
+     * @example
+     * handleAbort();
+     * @returns Nothing.
+     */
+    const handleAbort: () => void = (): void => {
+        cancelledRef.current = true;
+        workingRef.current = false;
+        onAbort();
     };
 
     /**
@@ -130,7 +161,7 @@ const ImageEditorDialog: FC<ImageEditorDialogProps> = ({
      * @returns Nothing.
      */
     const finishCrop: () => Promise<void> = async (): Promise<void> => {
-        if (busy || workingRef.current) {
+        if (busy || workingRef.current || cancelledRef.current || committedRef.current) {
             return;
         }
 
@@ -155,6 +186,12 @@ const ImageEditorDialog: FC<ImageEditorDialogProps> = ({
         }
 
         workingRef.current = false;
+
+        if (cancelledRef.current) {
+            return;
+        }
+
+        committedRef.current = true;
         setBusy(false);
 
         if (result === null) {
@@ -173,6 +210,21 @@ const ImageEditorDialog: FC<ImageEditorDialogProps> = ({
      */
     const handleDoneClick: () => void = (): void => {
         void finishCrop();
+    };
+
+    /**
+     * Keeps the original image unless the dialog already aborted.
+     * @example
+     * <Button onClick={handleUseOriginalClick}>Cancel</Button>
+     * @returns Nothing.
+     */
+    const handleUseOriginalClick: () => void = (): void => {
+        if (cancelledRef.current || committedRef.current) {
+            return;
+        }
+
+        committedRef.current = true;
+        onUseOriginal();
     };
 
     /**
@@ -227,7 +279,7 @@ const ImageEditorDialog: FC<ImageEditorDialogProps> = ({
 
     const footer: ReactNode = (
         <>
-            <Button variant="ghost" onClick={onUseOriginal} disabled={busy}>
+            <Button variant="ghost" onClick={handleUseOriginalClick} disabled={busy}>
                 {resolved.cancel}
             </Button>
             <Button
@@ -251,81 +303,81 @@ const ImageEditorDialog: FC<ImageEditorDialogProps> = ({
         disabled: busy,
     };
 
-    const cropContent: ReactNode =
-        renderCropSlot === (void 0) ? (
-            <>
-                <ImageCropper
-                    key={src}
-                    src={src}
-                    aspect={aspect}
-                    shape={shape}
-                    transform={transform}
-                    onTransformChange={setTransform}
-                    alt={alt ?? title}
-                    labels={resolved}
-                    disabled={busy}
-                />
-                <div className="image-editor__toolbar">
-                    <div className="image-editor__zoom">
-                        <Icon name="Zoom" size={16} />
-                        <input
-                            className="image-editor__range"
-                            type="range"
-                            min={MinCropZoom}
-                            max={MaxCropZoom}
-                            step={0.01}
-                            value={transform.zoom}
-                            aria-label={resolved.zoom}
-                            onChange={handleZoomChange}
-                            disabled={controlsDisabled}
-                        />
-                    </div>
-                    <div className="image-editor__actions">
-                        <button
-                            type="button"
-                            className="image-editor__action"
-                            aria-label={resolved.rotateLeft}
-                            title={resolved.rotateLeft}
-                            disabled={controlsDisabled}
-                            onPointerDown={ripple.onPointerDown}
-                            onPointerEnter={ripple.onPointerEnter}
-                            onKeyDown={ripple.onKeyDown}
-                            onClick={(): void => rotateBy(-90)}
-                        >
-                            <Icon name="RotateLeft" size={18} />
-                        </button>
-                        <button
-                            type="button"
-                            className="image-editor__action"
-                            aria-label={resolved.rotateRight}
-                            title={resolved.rotateRight}
-                            disabled={controlsDisabled}
-                            onPointerDown={ripple.onPointerDown}
-                            onPointerEnter={ripple.onPointerEnter}
-                            onKeyDown={ripple.onKeyDown}
-                            onClick={(): void => rotateBy(90)}
-                        >
-                            <Icon name="RotateRight" size={18} />
-                        </button>
-                        <button
-                            type="button"
-                            className="image-editor__action"
-                            aria-label={resolved.reset}
-                            title={resolved.reset}
-                            disabled={controlsDisabled}
-                            onPointerDown={ripple.onPointerDown}
-                            onPointerEnter={ripple.onPointerEnter}
-                            onKeyDown={ripple.onKeyDown}
-                            onClick={resetCrop}
-                        >
-                            <Icon name="Refresh" size={18} />
-                        </button>
-                    </div>
+    const defaultCrop: ReactNode = (
+        <div className="image-editor">
+            <ImageCropper
+                src={src}
+                aspect={aspect}
+                shape={shape}
+                transform={transform}
+                onTransformChange={setTransform}
+                alt={alt ?? title}
+                labels={resolved}
+                disabled={busy}
+            />
+            <div className="image-editor__toolbar">
+                <div className="image-editor__zoom">
+                    <Icon name="Search" size={16} />
+                    <input
+                        className="image-editor__range"
+                        type="range"
+                        min={MinCropZoom}
+                        max={MaxCropZoom}
+                        step={0.01}
+                        value={transform.zoom}
+                        aria-label={resolved.zoom}
+                        onChange={handleZoomChange}
+                        disabled={controlsDisabled}
+                    />
                 </div>
-            </>
-        ) : (
-            renderCropSlot(cropContext)
-        );
+                <div className="image-editor__actions">
+                    <button
+                        type="button"
+                        className="image-editor__action"
+                        aria-label={resolved.rotateLeft}
+                        title={resolved.rotateLeft}
+                        disabled={controlsDisabled}
+                        onPointerDown={ripple.onPointerDown}
+                        onPointerEnter={ripple.onPointerEnter}
+                        onKeyDown={ripple.onKeyDown}
+                        onClick={(): void => rotateBy(-90)}
+                    >
+                        <Icon name="RotateLeft" size={18} />
+                    </button>
+                    <button
+                        type="button"
+                        className="image-editor__action"
+                        aria-label={resolved.rotateRight}
+                        title={resolved.rotateRight}
+                        disabled={controlsDisabled}
+                        onPointerDown={ripple.onPointerDown}
+                        onPointerEnter={ripple.onPointerEnter}
+                        onKeyDown={ripple.onKeyDown}
+                        onClick={(): void => rotateBy(90)}
+                    >
+                        <Icon name="RotateRight" size={18} />
+                    </button>
+                    <button
+                        type="button"
+                        className="image-editor__action"
+                        aria-label={resolved.reset}
+                        title={resolved.reset}
+                        disabled={controlsDisabled}
+                        onPointerDown={ripple.onPointerDown}
+                        onPointerEnter={ripple.onPointerEnter}
+                        onKeyDown={ripple.onKeyDown}
+                        onClick={resetCrop}
+                    >
+                        <Icon name="Refresh" size={18} />
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+
+    const hasCropSlot: boolean = children !== (void 0);
+    const cropSlot: ReactNode =
+        typeof children === "function" ? children(cropContext) : children;
 
     return (
         <Dialog
@@ -333,11 +385,11 @@ const ImageEditorDialog: FC<ImageEditorDialogProps> = ({
             title={title}
             size="md"
             closeLabel={resolved.close}
-            onClose={onAbort}
+            onClose={handleAbort}
             footer={footer}
             className="image-editor-dialog"
         >
-            <div className="image-editor">{cropContent}</div>
+            {hasCropSlot ? cropSlot : defaultCrop}
         </Dialog>
     );
 };

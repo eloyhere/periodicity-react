@@ -67,8 +67,8 @@
 
 .comment__author {
     color: var(--text);
-    font-size: 14px;
-    font-weight: 500;
+    font-size: var(--type-body-sm);
+    font-weight: var(--font-weight-current, 500);
 }
 
 .comment__you {
@@ -76,16 +76,16 @@
     border-radius: var(--radius-pill);
     background: var(--color-primary-container);
     color: var(--color-on-primary-container);
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.04em;
-    line-height: 16px;
-    text-transform: uppercase;
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, 500);
+    letter-spacing: var(--font-tracking-current, 0.04em);
+    line-height: var(--font-leading-current, 16px);
+    text-transform: var(--font-transform-current, uppercase);
 }
 
 .comment__time {
     color: var(--faint);
-    font-size: 12px;
+    font-size: var(--type-label);
 }
 
 .comment__resolved {
@@ -94,8 +94,8 @@
     gap: 4px;
     margin-left: auto;
     color: var(--color-primary);
-    font-size: 12px;
-    font-weight: 500;
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, 500);
 }
 
 .comment__parent {
@@ -106,7 +106,7 @@
     background: transparent;
     color: var(--color-primary);
     font: inherit;
-    font-size: 12px;
+    font-size: var(--type-label);
     cursor: pointer;
 }
 
@@ -116,8 +116,8 @@
 
 .comment__content {
     color: var(--text);
-    font-size: 14px;
-    line-height: 1.55;
+    font-size: var(--type-body-sm);
+    line-height: var(--font-leading-current, 1.55);
     white-space: pre-wrap;
     overflow-wrap: anywhere;
 }
@@ -132,7 +132,7 @@
 
 .comment__references-label {
     color: var(--faint);
-    font-size: 11px;
+    font-size: var(--type-label);
 }
 
 .comment__reference {
@@ -142,8 +142,8 @@
     background: var(--panel-strong);
     color: var(--color-primary);
     font: inherit;
-    font-size: 11px;
-    line-height: 20px;
+    font-size: var(--type-label);
+    line-height: var(--font-leading-current, 20px);
     cursor: pointer;
 }
 
@@ -168,8 +168,8 @@
     background: transparent;
     color: var(--muted);
     font: inherit;
-    font-size: 12px;
-    font-weight: 500;
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, 500);
     cursor: pointer;
 }
 
@@ -207,7 +207,7 @@
     background: var(--panel);
     color: var(--text);
     font: inherit;
-    font-size: 14px;
+    font-size: var(--type-body-sm);
     resize: vertical;
 }
 
@@ -227,7 +227,7 @@
     bottom: -18px;
     left: calc(var(--space-3) + 32px);
     color: var(--faint);
-    font-size: 11px;
+    font-size: var(--type-label);
 }
 
 .comment-thread__header,
@@ -256,6 +256,23 @@
     border: 1px dashed var(--color-outline-variant);
     border-radius: var(--radius-xs);
     color: var(--muted);
-    font-size: 13px;
-    text-align: center;
+    font-size: var(--type-label);
+    text-align: var(--font-align-current, center);
+}
+
+/* Virtual thread keeps fixed-height rows mounted inside a scrolling window. */
+.comment-thread__viewport {
+    position: relative;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.comment-thread__spacer {
+    position: relative;
+    width: 100%;
+}
+
+.comment--virtual {
+    overflow: hidden;
 }

@@ -1,4 +1,4 @@
-.empty {
+﻿.empty {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -6,7 +6,7 @@
     gap: var(--space-4);
     min-height: var(--space-11);
     padding: var(--space-9) var(--space-6);
-    text-align: center;
+    text-align: var(--font-align-current, center);
 }
 
 .empty__icon {

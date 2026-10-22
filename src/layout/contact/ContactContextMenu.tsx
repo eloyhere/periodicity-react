@@ -50,7 +50,7 @@ const ContactActionDefinitions: Record<ContactAction, ContactActionDefinition> =
  * Props for the contact context-menu wrapper.
  * Type: interface.
  * Fields: contact, onAction, actions, disabled, open, defaultOpen, onOpenChange, longPress,
- * longPressDelay, header, empty, closeOnSelect, className, menuClassName, ariaLabel, children,
+ * longPressDelay, menu, header, empty, closeOnSelect, className, menuClassName, ariaLabel, children,
  * ref, plus native div attributes and events.
  * @example
  * <ContactContextMenu contact={contact} onAction={act}>...</ContactContextMenu>
@@ -66,6 +66,8 @@ export interface ContactContextMenuProps
     onOpenChange?: (open: boolean) => void;
     longPress?: boolean;
     longPressDelay?: number;
+    /** Replaces the default action menu contents. */
+    menu?: ReactNode;
     header?: ReactNode;
     empty?: ReactNode;
     closeOnSelect?: boolean;
@@ -93,6 +95,7 @@ const ContactContextMenu: FC<ContactContextMenuProps> = ({
     onOpenChange,
     longPress = true,
     longPressDelay,
+    menu,
     header,
     empty,
     closeOnSelect,
@@ -108,7 +111,7 @@ const ContactContextMenu: FC<ContactContextMenuProps> = ({
     const available: readonly ContactAction[] = ContactActionOrder.filter(
         (action: ContactAction): boolean => actions.includes(action),
     );
-    const menu: ReactNode =
+    const defaultMenu: ReactNode =
         available.length === 0
             ? (void 0)
             : available.map((action: ContactAction): ReactNode => {
@@ -132,7 +135,7 @@ const ContactContextMenu: FC<ContactContextMenuProps> = ({
             ref={ref}
             className={cx("contact-menu-zone", className)}
             menuClassName={cx("contact-menu", menuClassName)}
-            menu={menu}
+            menu={menu ?? defaultMenu}
             header={header ?? contact.name}
             empty={empty}
             disabled={disabled}

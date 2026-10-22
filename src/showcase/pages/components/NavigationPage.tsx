@@ -143,6 +143,25 @@ const navigationCode: string = `<NavigationView
     ariaLabel="Bottom navigation demo"
 />`;
 
+const wrappingNavigationCode: string = `<div className="showcase__nav-wrap">
+    <NavigationView
+        className="showcase__nav-horizontal"
+        items={navigationItems}
+        value={navValue}
+        onValueChange={setNavValue}
+        variant="bottom"
+        ariaLabel="Horizontal with scrolling"
+    />
+    <NavigationView
+        className="showcase__nav-compact"
+        items={navigationItems}
+        value={navValue}
+        onValueChange={setNavValue}
+        variant="bottom"
+        ariaLabel="Vertical when only one fits"
+    />
+</div>`;
+
 /**
  * Documents breadcrumbs, tabs, accordions, pagination, steppers, and navigation views.
  * @example
@@ -346,6 +365,31 @@ const NavigationPage: FC = () => {
                         ariaLabel="Bottom navigation demo"
                     />
                 </DemoGroup>
+            </Demo>
+
+            <Demo
+                title="Navigation width modes"
+                description="A bottom navigation stays horizontal and scrolls sideways while at least two destinations fit; once only one fits it switches to a vertical, scrollable list."
+                code={wrappingNavigationCode}
+            >
+                <div className="showcase__nav-wrap">
+                    <NavigationView
+                        className="showcase__nav-horizontal"
+                        items={navigationItems}
+                        value={navValue}
+                        onValueChange={setNavValue}
+                        variant="bottom"
+                        ariaLabel="Horizontal with scrolling"
+                    />
+                    <NavigationView
+                        className="showcase__nav-compact"
+                        items={navigationItems}
+                        value={navValue}
+                        onValueChange={setNavValue}
+                        variant="bottom"
+                        ariaLabel="Vertical when only one fits"
+                    />
+                </div>
             </Demo>
         </>
     );

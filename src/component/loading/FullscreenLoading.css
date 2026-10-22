@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Fullscreen loading — native dialog promoted to the top layer
+﻿/* ==========================================================================
+   Fullscreen loading 鈥?native dialog promoted to the top layer
    ========================================================================== */
 
 dialog.fullscreen-loading {
@@ -31,7 +31,7 @@ dialog.fullscreen-loading::backdrop {
     align-items: center;
     max-width: 320px;
     padding: var(--space-6);
-    text-align: center;
+    text-align: var(--font-align-current, center);
     gap: var(--space-3);
 }
 

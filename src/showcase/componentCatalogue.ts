@@ -136,7 +136,7 @@ const createSection: (
 });
 
 /**
- * Every UI component, grouped into the sidebar sections that keep a 119-item
+ * Every UI component, grouped into the sidebar sections that keep a 120-item
  * list navigable. The order is deliberate: everyday controls come first and
  * infrastructure comes last.
  * Type: constant.
@@ -333,6 +333,12 @@ export const uiComponentSections: readonly ComponentSection[] = [
             family: "text",
             demo: "Type scale",
             description: "The typographic scale rendered through one polymorphic component.",
+        },
+        {
+            name: "Font",
+            family: "text",
+            demo: "Font scope",
+            description: "Scoped hierarchy, family, size, colour, weight, and spacing for a slot of components.",
         },
         {
             name: "Card",
@@ -841,6 +847,32 @@ export const uiComponentSections: readonly ComponentSection[] = [
             description: "Two-pane transfer list with search and a virtual mode.",
         },
     ]),
+    createSection("charts", "Charts", [
+        {
+            name: "BarChart",
+            family: "charts",
+            demo: "Bar chart",
+            description: "Grouped and stacked canvas and WebGL bars with linear value axes.",
+        },
+        {
+            name: "PieChart",
+            family: "charts",
+            demo: "Pie chart",
+            description: "Pie and donut chart with percentage labels and an accessible value table.",
+        },
+        {
+            name: "LineChart",
+            family: "charts",
+            demo: "Line chart",
+            description: "Multi-series canvas and WebGL line chart with optional areas and points.",
+        },
+        {
+            name: "ScatterChart",
+            family: "charts",
+            demo: "Scatter chart",
+            description: "Multi-series scatter plot on linear x and y axes.",
+        },
+    ]),
     createSection("messaging", "Messaging", [
         {
             name: "Contact",
@@ -883,6 +915,12 @@ export const uiComponentSections: readonly ComponentSection[] = [
             family: "discussion",
             demo: "Threaded comments",
             description: "Threaded comments with replies, references, and mentions.",
+        },
+        {
+            name: "VirtualCommentThread",
+            family: "discussion",
+            demo: "Virtual threaded comments",
+            description: "Fixed-row virtualised comments for long discussions.",
         },
         {
             name: "ContactContextMenu",
@@ -1025,6 +1063,7 @@ export const nonUiExportGroups: readonly NonUiExportGroup[] = [
             "usePrefersReducedMotion",
             "useToast",
             "useFilePick",
+            "useFont",
         ],
     },
     {

@@ -95,7 +95,7 @@ const showcaseCategories: readonly ShowcaseCategory[] = [
         id: "data",
         label: "数据组件",
         labelEn: "Data",
-        options: componentOptions(["data", "messaging", "files"]),
+        options: componentOptions(["data", "charts", "messaging", "files"]),
     },
     {
         id: "layout",
@@ -327,9 +327,10 @@ const Showcase: FC = () => {
                     >
                         {shell.skip}
                     </Link>
-                    <Coordinator
-                        className="showcase-coordinator"
-                        height="100vh"
+                    <div className="showcase-shell">
+                        <Coordinator
+                            className="showcase-coordinator"
+                            height="100vh"
                         collapseHeight={100}
                         collapse={
                             <div className="showcase-filters">
@@ -488,6 +489,7 @@ const Showcase: FC = () => {
                     </main>
                 }
             />
+                    </div>
                     <Dialog
                         open={aboutOpen}
                         size="sm"

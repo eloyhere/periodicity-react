@@ -18,6 +18,7 @@ import {
     type SetStateAction,
 } from "react";
 import Button from "../../button/Button";
+import { useInternational, type InternationalContextValue } from "../../../international";
 import cx from "../../foundation/cx";
 import useMergedRef from "../../foundation/useMergedRef";
 import Icon from "../../icon/Icon";
@@ -295,6 +296,7 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
     ref,
     ...rest
 }: CyclePickerProps<T>): ReactNode => {
+    const { t }: InternationalContextValue = useInternational();
     const generatedId: string = useId();
     const pickerId: string = id ?? generatedId;
     const wheelRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
@@ -1061,7 +1063,7 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
                                 className="cycle-picker__suggestions cycle-picker__suggestions--empty"
                                 role="status"
                             >
-                                No matches
+                                {t("noMatches")}
                             </div>
                         ) : (
                             <div
@@ -1118,7 +1120,7 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
                     size="sm"
                     variant="ghost"
                     className="number-picker__step"
-                    aria-label={`Previous ${label}`}
+                    aria-label={t("previousLabel", { label })}
                     disabled={!canStep}
                     onClick={(): void => commitDelta(-1)}
                 >
@@ -1150,7 +1152,7 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
                 >
                     {items.length === 0 ? (
                         <p className="cycle-picker__empty" role="status">
-                            No options
+                            {t("noOptions")}
                         </p>
                     ) : (
                         rows.map((row: CycleRow): ReactNode => (
@@ -1182,7 +1184,7 @@ const CyclePicker: <T>(props: CyclePickerProps<T>) => ReactNode = <T,>({
                     size="sm"
                     variant="ghost"
                     className="number-picker__step"
-                    aria-label={`Next ${label}`}
+                    aria-label={t("nextLabel", { label })}
                     disabled={!canStep}
                     onClick={(): void => commitDelta(1)}
                 >

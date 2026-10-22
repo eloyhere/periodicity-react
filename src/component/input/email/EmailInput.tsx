@@ -11,7 +11,14 @@ import {
     type SetStateAction,
 } from "react";
 import TextInput, { type TextInputProps } from "../text/TextInput";
-import { EmailPatternSource, sanitiseEmailText, validateEmail, type SanitisedEmailText } from "./email";
+import { useInternational, type InternationalContextValue } from "../../../international";
+import {
+    EmailPatternSource,
+    sanitiseEmailText,
+    validateEmail,
+    type EmailValidationMessages,
+    type SanitisedEmailText,
+} from "./email";
 
 /**
  * Props for the email field.
@@ -112,6 +119,11 @@ const EmailInput: FC<EmailInputProps> = ({
     onInvalid,
     ...rest
 }: EmailInputProps) => {
+    const { t }: InternationalContextValue = useInternational();
+    const validationMessages: EmailValidationMessages = {
+        required: t("emailRequired"),
+        invalid: t("emailInvalid"),
+    };
     const [touched, setTouched]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false);
     const [internalError, setInternalError]: [string | void, Dispatch<SetStateAction<string | void>>] =
         useState<string | void>((void 0));
@@ -128,21 +140,25 @@ const EmailInput: FC<EmailInputProps> = ({
         onChange?.(event);
 
         if (touched) {
-            setInternalError(validateEmail(sanitised.value, required));
+            setInternalError(validateEmail(sanitised.value, required, validationMessages));
         }
     };
 
     const handleBlur: FocusEventHandler<HTMLInputElement> = (event: FocusEvent<HTMLInputElement>): void => {
         if (!event.currentTarget.disabled && !event.currentTarget.readOnly) {
             setTouched(true);
-            setInternalError(validateEmail(event.currentTarget.value, required));
+            setInternalError(validateEmail(event.currentTarget.value, required, validationMessages));
         }
 
         onBlur?.(event);
     };
 
     const handleInvalid: FormEventHandler<HTMLInputElement> = (event: FormEvent<HTMLInputElement>): void => {
-        const message: string | void = validateEmail(event.currentTarget.value, required);
+        const message: string | void = validateEmail(
+            event.currentTarget.value,
+            required,
+            validationMessages,
+        );
 
         if (!event.currentTarget.disabled && !event.currentTarget.readOnly && message !== (void 0)) {
             event.preventDefault();

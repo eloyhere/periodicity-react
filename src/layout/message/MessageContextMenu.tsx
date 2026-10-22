@@ -61,7 +61,7 @@ const MessageActionDefinitions: Record<MessageAction, MessageActionDefinition> =
  * Props for the message context-menu wrapper.
  * Type: interface.
  * Fields: message, self, onAction, actions, disabled, open, defaultOpen, onOpenChange, longPress,
- * longPressDelay, header, empty, closeOnSelect, className, menuClassName, ariaLabel, children,
+ * longPressDelay, menu, header, empty, closeOnSelect, className, menuClassName, ariaLabel, children,
  * ref, plus native div attributes and events.
  * @example
  * <MessageContextMenu message={message} self={false} onAction={act}>...</MessageContextMenu>
@@ -78,6 +78,8 @@ export interface MessageContextMenuProps
     onOpenChange?: (open: boolean) => void;
     longPress?: boolean;
     longPressDelay?: number;
+    /** Replaces the default action menu contents. */
+    menu?: ReactNode;
     header?: ReactNode;
     empty?: ReactNode;
     closeOnSelect?: boolean;
@@ -106,6 +108,7 @@ const MessageContextMenu: FC<MessageContextMenuProps> = ({
     onOpenChange,
     longPress = true,
     longPressDelay,
+    menu,
     header,
     empty,
     closeOnSelect,
@@ -122,7 +125,7 @@ const MessageContextMenu: FC<MessageContextMenuProps> = ({
         (action: MessageAction): boolean =>
             actions.includes(action) && (action !== "recall" || self),
     );
-    const menu: ReactNode =
+    const defaultMenu: ReactNode =
         available.length === 0
             ? (void 0)
             : available.map((action: MessageAction): ReactNode => {
@@ -146,7 +149,7 @@ const MessageContextMenu: FC<MessageContextMenuProps> = ({
             ref={ref}
             className={cx("message-menu-zone", className)}
             menuClassName={cx("message-menu", menuClassName)}
-            menu={menu}
+            menu={menu ?? defaultMenu}
             header={header ?? (self ? t("yourMessage") : t("message"))}
             empty={empty}
             disabled={disabled}

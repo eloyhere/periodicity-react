@@ -8,6 +8,7 @@ import {
 } from "./componentCatalogue";
 import ButtonsPage from "./pages/components/ButtonsPage";
 import CardsPage from "./pages/components/CardsPage";
+import ChartsPage from "./pages/components/ChartsPage";
 import ChoicesPage from "./pages/components/ChoicesPage";
 import DialogsPage from "./pages/components/DialogsPage";
 import DiscussionPage from "./pages/components/DiscussionPage";
@@ -160,6 +161,13 @@ const familyRecords: readonly FamilyRecord[] = [
         title: "Pickers",
         description: "Time, date-time, number, colour, cycle, variant, file, and image selection.",
         page: PickersPage,
+    },
+    {
+        id: "charts",
+        label: "Charts",
+        title: "Charts",
+        description: "Canvas and WebGL statistical charts scheduled through the shared task queue.",
+        page: ChartsPage,
     },
     {
         id: "choices",
@@ -490,6 +498,12 @@ const aliasEntries: ReadonlyArray<readonly [string, string]> = [
     ["buttons", "button"],
     ["text-fields", "text-input"],
     ["pickers", "time-picker"],
+    ["charts", "bar-chart"],
+    ["chart", "bar-chart"],
+    ["barchart", "bar-chart"],
+    ["piechart", "pie-chart"],
+    ["linechart", "line-chart"],
+    ["scatterchart", "scatter-chart"],
     ["choices", "checkbox"],
     ["discussion", "comment-thread"],
     ["messaging", "contact"],

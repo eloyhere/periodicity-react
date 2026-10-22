@@ -3,12 +3,15 @@ import {
     useEffect,
     useImperativeHandle,
     useRef,
+    useState,
+    type Dispatch,
     type FC,
     type HTMLAttributes,
     type MouseEvent as ReactMouseEvent,
     type ReactNode,
     type Ref,
     type RefObject,
+    type SetStateAction,
 } from "react";
 import Surface from "../../component/surface/Surface";
 import Icon, { type IconName } from "../../component/icon/Icon";
@@ -56,11 +59,48 @@ export interface NavigationItem {
 export type NavigationVariant = "sidebar" | "rail" | "bottom";
 
 /**
+ * Threshold used before `--navigation-view-compact-width` resolves; matches two default items.
+ * Type: constant.
+ * @example
+ * const width = CompactWidthFallback;
+ */
+const CompactWidthFallback: number = 192;
+
+/**
+ * Reads the compact-mode threshold from the navigation's CSS custom property.
+ * Accepts `rem` and `px` so themes and tokens can retune the switch point.
+ * @param element - Navigation root that declares `--navigation-view-compact-width`.
+ * @example
+ * const threshold = readCompactWidth(nav);
+ * @returns The threshold in CSS pixels.
+ */
+const readCompactWidth: (element: HTMLElement) => number = (element: HTMLElement): number => {
+    const declared: string = window
+        .getComputedStyle(element)
+        .getPropertyValue("--navigation-view-compact-width")
+        .trim();
+    const rem: RegExpMatchArray | null = /^([\d.]+)rem$/.exec(declared);
+    const px: RegExpMatchArray | null = /^([\d.]+)px$/.exec(declared);
+
+    if (rem !== null) {
+        const rootFontSize: number = Number.parseFloat(
+            window.getComputedStyle(document.documentElement).fontSize,
+        );
+
+        return Number.parseFloat(rem[1]) * (Number.isFinite(rootFontSize) ? rootFontSize : 16);
+    }
+
+    return px === null ? CompactWidthFallback : Number.parseFloat(px[1]);
+};
+
+/**
  * Props for the Material navigation view.
  * Type: interface.
  * Fields: items, value, defaultValue, onValueChange, onItemClick, header, footer,
  * variant, ariaLabel, disabled, className, ref, plus native landmark attributes and events.
- * Scroll events are observed on the scrolling destination list.
+ * Scroll events are observed on the scrolling destination list. The bottom variant measures
+ * its own width: it stays horizontal and scrolls sideways while two destinations fit, and
+ * switches to a vertical, scrollable list when only one fits.
  * @example
  * <NavigationView items={items} defaultValue="today" data-testid="primary-navigation" />
  */
@@ -118,6 +158,8 @@ const NavigationView: FC<NavigationViewProps> = ({
         defaultValue: defaultValue ?? fallback,
     });
     const navRef: RefObject<HTMLElement | null> = useRef<HTMLElement | null>(null);
+    const [compact, setCompact]: [boolean, Dispatch<SetStateAction<boolean>>] =
+        useState<boolean>(false);
     const notifyTimerRef: RefObject<number | null> = useRef<number | null>(null);
     const pendingValueRef: RefObject<string | null> = useRef<string | null>(null);
     const resolvedAriaLabel: string = ariaLabel ?? ariaLabelAttribute ?? "Navigation";
@@ -141,6 +183,30 @@ const NavigationView: FC<NavigationViewProps> = ({
             pendingValueRef.current = null;
         }
     }, [value]);
+
+    useEffect((): (() => void) | void => {
+        const element: HTMLElement | null = navRef.current;
+
+        if (element === null || typeof ResizeObserver === "undefined") {
+            return;
+        }
+
+        const threshold: number = readCompactWidth(element);
+        const observer: ResizeObserver = new ResizeObserver(
+            (entries: ResizeObserverEntry[]): void => {
+                const width: number = entries[0]?.contentRect.width ?? element.clientWidth;
+                const next: boolean = width > 0 && width < threshold;
+
+                setCompact((current: boolean): boolean => (current === next ? current : next));
+            },
+        );
+
+        observer.observe(element);
+
+        return (): void => {
+            observer.disconnect();
+        };
+    }, []);
 
     const select: (next: string) => void = useCallback(
         (next: string): void => {
@@ -187,6 +253,7 @@ const NavigationView: FC<NavigationViewProps> = ({
             className={cx("navigation-view", `navigation-view--${variant}`, className)}
             aria-label={resolvedAriaLabel}
             aria-disabled={disabled ? true : (void 0)}
+            data-compact={compact ? "true" : "false"}
             data-disabled={disabled ? "true" : "false"}
         >
             {header === (void 0) ? null : <div className="navigation-view__header">{header}</div>}

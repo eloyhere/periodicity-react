@@ -6,7 +6,7 @@ import {
     type SetStateAction,
 } from "react";
 import { Inline } from "../../../arrange/layout";
-import { Badge, CommentThread, Mention } from "../../../component";
+import { Badge, CommentThread, Mention, VirtualCommentThread } from "../../../component";
 import Text from "../../../component/text/Text";
 import { useToast } from "../../../component/toast/ToastContext";
 import type { ToastApi } from "../../../component/toast/ToastContext";
@@ -63,6 +63,13 @@ const mentionCode: string = `<Mention
 />`;
 
 const emptyCode: string = `<CommentThread comments={[]} empty="No comments yet — the empty slot." />`;
+
+const virtualThreadCode: string = `<VirtualCommentThread
+    comments={commentData}
+    currentUser="Mira Chen"
+    height={360}
+    itemHeight={150}
+/>`;
 
 /**
  * Documents threaded comments, references, and the mention input.
@@ -153,6 +160,19 @@ const DiscussionPage: FC = () => {
                         }}
                     />
                 </DemoGroup>
+            </Demo>
+
+            <Demo
+                title="Virtual threaded comments"
+                description="The same thread flattened into fixed-height rows, so long discussions only mount the visible comments."
+                code={virtualThreadCode}
+            >
+                <VirtualCommentThread
+                    comments={commentData}
+                    currentUser="Mira Chen"
+                    height={360}
+                    itemHeight={150}
+                />
             </Demo>
 
             <Demo title="Empty thread" description="The empty slot is part of the contract." code={emptyCode}>

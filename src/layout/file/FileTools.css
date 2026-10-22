@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    File preview and CodeMirror editor
    ========================================================================== */
 
@@ -29,9 +29,9 @@
 .file-editor__name {
     overflow: hidden;
     color: var(--text);
-    font-family: var(--font-sans);
-    font-size: 13px;
-    font-weight: 600;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, 600);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -40,8 +40,8 @@
 .file-editor__meta {
     margin-right: auto;
     color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 10px;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
 }
 
 .file-preview__actions,
@@ -70,18 +70,18 @@
     overflow: visible;
     background: transparent;
     color: var(--text);
-    font-family: var(--font-mono);
-    font-size: 12px;
-    line-height: 1.6;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
+    line-height: var(--font-leading-current, 1.6);
     white-space: pre;
 }
 
 .file-preview__html {
     padding: var(--space-4);
     color: var(--text);
-    font-family: var(--font-sans);
-    font-size: 13px;
-    line-height: 1.65;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-label);
+    line-height: var(--font-leading-current, 1.65);
 }
 
 .file-preview__html > :first-child {
@@ -97,8 +97,8 @@
 .file-preview__html h3,
 .file-preview__html h4 {
     margin: 1.2em 0 0.45em;
-    font-weight: 600;
-    line-height: 1.25;
+    font-weight: var(--font-weight-current, 600);
+    line-height: var(--font-leading-current, 1.25);
 }
 
 .file-preview__html p {
@@ -116,13 +116,13 @@
     overflow: auto;
     border-radius: var(--radius-xs);
     background: var(--color-surface-container-low);
-    font-family: var(--font-mono);
-    font-size: 12px;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
 }
 
 .file-preview__html code {
-    font-family: var(--font-mono);
-    font-size: 0.92em;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-body-sm);
 }
 
 /* ==========================================================================
@@ -148,8 +148,8 @@
     padding: 0 var(--space-3);
     border-top: 1px solid var(--line);
     color: var(--muted);
-    font-family: var(--font-sans);
-    font-size: 10px;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-label);
     gap: var(--space-2);
 }
 
@@ -195,7 +195,7 @@
 
 .tok-heading,
 .tok-strong {
-    font-weight: 600;
+    font-weight: var(--font-weight-current, 600);
 }
 
 @media (max-width: 720px) {
@@ -224,8 +224,8 @@
     border-radius: var(--radius-pill);
     background: var(--color-surface-container);
     color: var(--muted);
-    font-family: var(--font-sans);
-    font-size: 10px;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-label);
 }
 
 .file-structure__tree,
@@ -252,10 +252,10 @@
     flex: none;
     min-width: 58px;
     color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 9px;
-    letter-spacing: 0.03em;
-    text-transform: capitalize;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
+    letter-spacing: var(--font-tracking-current, 0.03em);
+    text-transform: var(--font-transform-current, capitalize);
 }
 
 .file-structure__row[data-kind="function"] .file-structure__kind,
@@ -278,8 +278,8 @@
     min-width: 0;
     overflow: hidden;
     color: var(--text);
-    font-family: var(--font-mono);
-    font-size: 11px;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -287,15 +287,15 @@
 .file-structure__line {
     margin-left: auto;
     color: var(--faint);
-    font-family: var(--font-mono);
-    font-size: 9px;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
 }
 
 .file-structure__empty {
     margin: var(--space-3) 0 0;
     color: var(--muted);
-    font-family: var(--font-sans);
-    font-size: 12px;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-label);
 }
 
 /* Use the browser's native selection painting inside CodeMirror. It handles
@@ -339,8 +339,8 @@
 
 .code-mirror .cm-tooltip-autocomplete > ul {
     max-height: 240px;
-    font-family: var(--font-mono);
-    font-size: 12px;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
 }
 
 .code-mirror .cm-tooltip-autocomplete > ul > li {
@@ -358,12 +358,12 @@
 }
 
 .code-mirror .cm-completionLabel {
-    font-family: var(--font-mono);
+    font-family: var(--font-family-current, var(--font-mono));
 }
 
 .code-mirror .cm-completionDetail {
     margin-left: auto;
     color: var(--muted);
-    font-family: var(--font-sans);
-    font-size: 9px;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-label);
 }

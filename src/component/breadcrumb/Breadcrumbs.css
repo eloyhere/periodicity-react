@@ -1,4 +1,4 @@
-.breadcrumbs {
+﻿.breadcrumbs {
     display: flex;
     max-width: 100%;
     min-width: 0;
@@ -50,7 +50,7 @@
     background: transparent;
     color: var(--color-on-surface-variant);
     cursor: pointer;
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     text-decoration: none;
     -webkit-tap-highlight-color: transparent;
     appearance: none;

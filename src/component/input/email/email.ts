@@ -1,20 +1,26 @@
 /**
- * Message shown when an email address is incomplete or malformed.
- * Type: constant.
- * Fields: none.
+ * Localisable validation messages for email fields.
+ * Type: interface.
+ * Fields: required, invalid.
  * @example
- * const message = EmailInvalidMessage;
+ * const messages: EmailValidationMessages = { required: "Required", invalid: "Invalid" };
  */
-const EmailInvalidMessage: string = "Enter a complete email address, for example name@example.com.";
+export interface EmailValidationMessages {
+    required: string;
+    invalid: string;
+}
 
 /**
- * Message shown when a required email field is left empty.
+ * Default messages used when a caller does not supply localised copy.
  * Type: constant.
- * Fields: none.
+ * Fields: required, invalid.
  * @example
- * const message = EmailRequiredMessage;
+ * const message = DefaultEmailValidationMessages.required;
  */
-const EmailRequiredMessage: string = "Enter an email address, for example name@example.com.";
+const DefaultEmailValidationMessages: EmailValidationMessages = {
+    required: "Enter an email address, for example name@example.com.",
+    invalid: "Enter a complete email address, for example name@example.com.",
+};
 
 /**
  * Characters accepted in the local part: the RFC 5322 dot-atom text characters.
@@ -242,35 +248,41 @@ export const sanitiseEmailInput: (value: string) => string = (value: string): st
  * An empty optional value is accepted; an empty required value returns a required message.
  * @param value - Email value to validate.
  * @param required - Whether an empty value should be reported as an error.
+ * @param messages - Localised validation messages.
  * @example
- * const error = validateEmail("name@example.com");
+ * const error = validateEmail("name@example.com", false, messages);
  * @returns An error message, or (void 0) when the value is acceptable.
  */
-export const validateEmail: (value: string, required?: boolean) => string | void = (
+export const validateEmail: (
+    value: string,
+    required?: boolean,
+    messages?: EmailValidationMessages,
+) => string | void = (
     value: string,
     required: boolean = false,
+    messages: EmailValidationMessages = DefaultEmailValidationMessages,
 ): string | void => {
     if (value.length === 0) {
-        return required ? EmailRequiredMessage : (void 0);
+        return required ? messages.required : (void 0);
     }
 
     if (WhitespacePattern.test(value)) {
-        return EmailInvalidMessage;
+        return messages.invalid;
     }
 
     const atIndex: number = value.indexOf("@");
     const lastAtIndex: number = value.lastIndexOf("@");
 
     if (atIndex !== lastAtIndex || atIndex <= 0) {
-        return EmailInvalidMessage;
+        return messages.invalid;
     }
 
     const localPart: string = value.slice(0, atIndex);
     const domainPart: string = value.slice(atIndex + 1);
 
     if (localPart.length > 64 || domainPart.length > 253 || value.length > 254) {
-        return EmailInvalidMessage;
+        return messages.invalid;
     }
 
-    return EmailPattern.test(value) ? (void 0) : EmailInvalidMessage;
+    return EmailPattern.test(value) ? (void 0) : messages.invalid;
 };

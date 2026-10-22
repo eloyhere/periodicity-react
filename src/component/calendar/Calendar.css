@@ -1,13 +1,13 @@
-.calendar {
+﻿.calendar {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
     width: 100%;
     min-width: 0;
     color: var(--color-on-surface);
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     font-size: var(--type-body-sm);
-    line-height: var(--leading-normal);
+    line-height: var(--font-leading-current, var(--leading-normal));
 }
 
 .calendar__header {
@@ -22,10 +22,10 @@
     min-width: 0;
     color: var(--color-on-surface);
     font-size: var(--type-body-lg);
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-tight);
-    line-height: var(--leading-snug);
-    text-align: center;
+    font-weight: var(--font-weight-current, var(--weight-semibold));
+    letter-spacing: var(--font-tracking-current, var(--tracking-tight));
+    line-height: var(--font-leading-current, var(--leading-snug));
+    text-align: var(--font-align-current, center);
 }
 
 .calendar__nav {
@@ -97,11 +97,11 @@
     padding: var(--space-1) 0;
     color: var(--color-on-surface-variant);
     font-size: var(--type-label-sm);
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-wide);
-    line-height: var(--leading-snug);
-    text-align: center;
-    text-transform: uppercase;
+    font-weight: var(--font-weight-current, var(--weight-semibold));
+    letter-spacing: var(--font-tracking-current, var(--tracking-wide));
+    line-height: var(--font-leading-current, var(--leading-snug));
+    text-align: var(--font-align-current, center);
+    text-transform: var(--font-transform-current, uppercase);
 }
 
 .calendar__day {
@@ -120,12 +120,12 @@
     background: transparent;
     color: var(--color-on-surface);
     cursor: pointer;
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     font-size: var(--type-body-sm);
     font-variant-numeric: tabular-nums;
-    font-weight: var(--weight-medium);
-    line-height: 1;
-    text-align: center;
+    font-weight: var(--font-weight-current, var(--weight-medium));
+    line-height: var(--font-leading-current, 1);
+    text-align: var(--font-align-current, center);
     gap: 1px;
     transition:
         background-color var(--duration-fast) var(--ease-standard),
@@ -144,7 +144,7 @@
     justify-content: center;
     width: 100%;
     min-width: 0;
-    line-height: 1;
+    line-height: var(--font-leading-current, 1);
 }
 
 .calendar__day-header:empty,
@@ -156,7 +156,7 @@
 .calendar__day-body,
 .calendar__day-footer {
     font-size: var(--type-label-sm);
-    font-weight: var(--weight-regular);
+    font-weight: var(--font-weight-current, var(--weight-regular));
 }
 
 .calendar__day:hover:not(.calendar__day--disabled):not(.calendar__day--selected) {
@@ -190,7 +190,7 @@
 
 .calendar__day--today {
     border-color: var(--color-primary);
-    font-weight: var(--weight-semibold);
+    font-weight: var(--font-weight-current, var(--weight-semibold));
 }
 
 .calendar__day--selected,
@@ -198,7 +198,7 @@
     border-color: var(--color-primary);
     background: var(--color-primary);
     color: var(--color-on-primary);
-    font-weight: var(--weight-semibold);
+    font-weight: var(--font-weight-current, var(--weight-semibold));
 }
 
 .calendar__day--selected:focus-visible {

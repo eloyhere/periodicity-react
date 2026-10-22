@@ -18,6 +18,7 @@ import {
     type RefObject,
 } from "react";
 import Dropdown, { DropdownItem } from "../dropdown/Dropdown";
+import { useInternational, type InternationalContextValue } from "../../international";
 import Spinner from "../progress/Spinner";
 import cx from "../foundation/cx";
 import useMergedRef from "../foundation/useMergedRef";
@@ -886,6 +887,7 @@ const Mention: FC<MentionProps> = ({
     ref,
     ...rest
 }: MentionProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const generatedId: string = useId();
     const inputId: string = id ?? generatedId;
     const labelId: string = `${inputId}-label`;
@@ -960,12 +962,15 @@ const Mention: FC<MentionProps> = ({
     const editorStyle: CSSProperties = { "--mention-rows": `${rows}` } as CSSProperties;
     const status: string = open
         ? loading
-            ? "Searching for people."
+            ? t("searchingForPeople")
             : items.length === 0
-              ? `No matches for ${trigger}${query}.`
+              ? t("noMatchesFor", { query: `${trigger}${query}` })
               : activeIndex >= 0 && activeIndex < items.length
-                ? `${items.length} suggestions. ${items[activeIndex].label} selected.`
-                : `${items.length} suggestions.`
+                ? t("suggestionSelected", {
+                      count: items.length,
+                      label: items[activeIndex].label,
+                  })
+                : t("suggestionsCount", { count: items.length })
         : "";
 
     useLayoutEffect((): void => {
@@ -1934,7 +1939,7 @@ const Mention: FC<MentionProps> = ({
                         {loading ? (
                             <>
                                 <Spinner size="sm" />
-                                Searching people…
+                                {t("searchingPeople")}
                             </>
                         ) : (
                             `No matches for ${trigger}${query}`

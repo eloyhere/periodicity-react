@@ -1,5 +1,5 @@
-/* ==========================================================================
-   RadioGroup — native radio inputs coordinated through context.
+﻿/* ==========================================================================
+   RadioGroup 鈥?native radio inputs coordinated through context.
    ========================================================================== */
 
 .radio-group {
@@ -18,12 +18,12 @@
     gap: var(--space-1);
     padding: 0;
     color: var(--color-on-surface-variant);
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     font-size: var(--type-label-sm);
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-wide);
-    line-height: var(--leading-snug);
-    text-transform: uppercase;
+    font-weight: var(--font-weight-current, var(--weight-semibold));
+    letter-spacing: var(--font-tracking-current, var(--tracking-wide));
+    line-height: var(--font-leading-current, var(--leading-snug));
+    text-transform: var(--font-transform-current, uppercase);
     transition: color var(--duration-fast) var(--ease-standard);
 }
 
@@ -52,7 +52,7 @@
 .radio-group__hint,
 .radio-group__error {
     font-size: var(--type-label-sm);
-    line-height: var(--leading-normal);
+    line-height: var(--font-leading-current, var(--leading-normal));
 }
 
 .radio-group__hint {

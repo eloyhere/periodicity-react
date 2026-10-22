@@ -189,9 +189,10 @@ stretching the button to fill its parent.
 Text inputs use six slots: `prefix`, floating `hint`, `message`, `limitation`, `error`, and `suffix`. The hint is a
 pointer-inert placeholder that rests vertically centred and animates to the top-left on focus or when filled. The
 message is replaced by `error`; `limitation` sits under the suffix and reports the current, minimum, and maximum
-character counts. Input surfaces and buttons both use hover and click ripples. On focus, the border grows from the
-pointer: outline fields expand all four edges from their nearest point on each edge, while fill and standard fields
-expand the bottom line left and right, easing out over one second.
+character counts. Input surfaces and buttons both use hover and click ripples. On focus, the border is revealed by
+a radial wave from the pointer, or from the text caret when focus arrives by keyboard: the nearest edge appears
+first, and every edge grows outward from its projection point. Empty fields start from the centre, and the wave
+eases out over one second.
 
 ```tsx
 <PeriodicityButton prefix="Plus" content="Add" suffix="ArrowRight" />
@@ -412,13 +413,16 @@ import {
     PeriodicityCommentThread,
     PeriodicityContact,
     PeriodicityMessageList,
+    PeriodicityVirtualCommentThread,
 } from "periodicity-react";
 ```
 
 `PeriodicityContact` supports search, virtualisation, selection, and a contact context menu. `PeriodicityMessageList`
 supports message selection, copy, quote, forward, delete, recall, retry, and a message context menu.
 `PeriodicityChat` combines the contact list, conversation, composer, and message actions. `PeriodicityCommentThread`
-supports replies, mentions, references, resolving, and deletion.
+supports replies, mentions, references, resolving, and deletion. Both threads accept a `comment` slot for whole-item
+rendering; the contact, message, and chat components expose `contact`, `context`, `message`, `messageContext`, and
+`avatar` slots that receive the rendered index and the item.
 
 ## Files and previews
 

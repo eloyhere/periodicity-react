@@ -7,6 +7,7 @@ import {
     type Ref,
 } from "react";
 import { createListAdapter, type ListAdapter, type ListEntry } from "../../layout/list/adapter";
+import { useInternational, type InternationalContextValue } from "../../international";
 import cx from "../foundation/cx";
 import useControllableState from "../foundation/useControllableState";
 import VisuallyHidden from "../foundation/VisuallyHidden";
@@ -89,6 +90,7 @@ const Stepper: FC<StepperProps> = ({
     "aria-label": ariaLabelAttribute,
     ...rest
 }: StepperProps): ReactNode => {
+    const { t }: InternationalContextValue = useInternational();
     const adapter: ListAdapter<StepItem> = useMemo<ListAdapter<StepItem>>(
         () => createListAdapter<StepItem>(steps, { getKey: (step: StepItem): string => step.value }),
         [steps],
@@ -107,7 +109,7 @@ const Stepper: FC<StepperProps> = ({
     const activeIndex: number =
         steps.length === 0 ? -1 : Math.min(Math.max(0, safeCurrent), steps.length - 1);
     const isInteractive: boolean = onStepClick !== (void 0) && !disabled;
-    const resolvedAriaLabel: string = ariaLabel ?? ariaLabelAttribute ?? "Progress";
+    const resolvedAriaLabel: string = ariaLabel ?? ariaLabelAttribute ?? t("progress");
 
     const handleStepClick: (
         index: number,
@@ -157,11 +159,11 @@ const Stepper: FC<StepperProps> = ({
                             <span className="stepper__marker" aria-hidden="true">
                                 {markerNode}
                             </span>
-                            {isCompleted ? <VisuallyHidden>Completed</VisuallyHidden> : null}
+                            {isCompleted ? <VisuallyHidden>{t("completed")}</VisuallyHidden> : null}
                             <span className="stepper__text">
                                 <span className="stepper__label-row">
                                     <span className="stepper__label">{step.label}</span>
-                                    {step.optional ? <span className="stepper__optional">Optional</span> : null}
+                                    {step.optional ? <span className="stepper__optional">{t("optional")}</span> : null}
                                 </span>
                                 {descriptionNode}
                             </span>

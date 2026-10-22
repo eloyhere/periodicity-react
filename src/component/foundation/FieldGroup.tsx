@@ -1,4 +1,5 @@
 import type { FC, ReactNode } from "react";
+import { useInternational, type InternationalContextValue } from "../../international";
 import cx from "./cx";
 import "./Field.css";
 
@@ -47,6 +48,7 @@ const FieldGroup: FC<FieldGroupProps> = ({
     errorId,
     className = "",
 }: FieldGroupProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const hasError: boolean = invalid && error !== (void 0) && error !== null && error !== false;
     const hasHint: boolean = hint !== (void 0) && hint !== null && hint !== false;
 
@@ -63,7 +65,7 @@ const FieldGroup: FC<FieldGroupProps> = ({
                         *
                     </span>
                 ) : null}
-                {optional ? <span className="field__optional">Optional</span> : null}
+                {optional ? <span className="field__optional">{t("optional")}</span> : null}
             </legend>
 
             <div className="field__control">{children}</div>

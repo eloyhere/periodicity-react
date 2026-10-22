@@ -11,6 +11,7 @@ import {
     type RefObject,
     type SetStateAction,
 } from "react";
+import { useInternational, type InternationalContextValue } from "../../../international";
 import cx from "../../foundation/cx";
 import useMergedRef from "../../foundation/useMergedRef";
 import { useRipple, type RippleHandlers } from "../../foundation/useRipple";
@@ -60,7 +61,7 @@ export interface PhotoPickerPreviewSlotContext {
  * Type: interface.
  * @param pick - Replaces the empty trigger contents.
  * @param preview - Replaces the image preview inside the trigger.
- * @param crop - Replaces the crop stage and controls in the editor.
+ * @param crop - Replaces the crop stage inside the editor Dialog; rendered as the Dialog body.
  * Keep pick and preview content presentational because it renders inside the trigger button.
  * @example
  * <PhotoPicker
@@ -155,6 +156,7 @@ const PhotoPicker: FC<PhotoPickerProps> = ({
     "aria-describedby": ariaDescribedBy,
     ...rest
 }: PhotoPickerProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const generatedId: string = useId();
     const rootRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
     const inputRef: RefObject<HTMLInputElement | null> = useRef<HTMLInputElement | null>(null);
@@ -169,8 +171,8 @@ const PhotoPicker: FC<PhotoPickerProps> = ({
     const errorId: string = `${triggerId}-error`;
     const invalid: boolean = error !== (void 0) && error.length > 0;
     const safeAspect: number = Number.isFinite(aspect) && aspect > 0 ? aspect : DefaultPhotoAspect;
-    const chooseLabel: string = labels?.choose ?? "Choose photo";
-    const editLabel: string = labels?.edit ?? "Edit photo";
+    const chooseLabel: string = labels?.choose ?? t("choosePhoto");
+    const editLabel: string = labels?.edit ?? t("editPhoto");
     const [preview, setPreview]: [string | void, Dispatch<SetStateAction<string | void>>] =
         useState<string | void>(defaultValue);
     const [draft, setDraft]: [ImageDraft | null, Dispatch<SetStateAction<ImageDraft | null>>] =
@@ -340,7 +342,10 @@ const PhotoPicker: FC<PhotoPickerProps> = ({
                     )}
                     style={triggerStyle}
                     disabled={disabled}
-                    aria-label={`${label}: ${shown === (void 0) ? chooseLabel : editLabel}`}
+                    aria-label={t("imagePickerAria", {
+                        label,
+                        action: shown === (void 0) ? chooseLabel : editLabel,
+                    })}
                     aria-invalid={invalid ? "true" : (void 0)}
                     aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
                     onPointerDown={ripple.onPointerDown}
@@ -373,12 +378,13 @@ const PhotoPicker: FC<PhotoPickerProps> = ({
                     outputWidth={outputWidth}
                     title={editLabel}
                     labels={labels}
-                    renderCrop={slots?.crop}
                     alt={alt ?? label}
                     onDone={handleDone}
                     onUseOriginal={handleUseOriginal}
                     onAbort={handleAbort}
-                />
+                >
+                    {slots?.crop}
+                </ImageEditorDialog>
             )}
         </div>
     );

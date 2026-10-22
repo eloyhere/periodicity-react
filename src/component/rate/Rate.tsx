@@ -244,7 +244,9 @@ const Rate: FC<RateProps> = ({
                                 style={style}
                                 role="radio"
                                 aria-checked={rating === index + 1}
-                                aria-label={`${index + 1} ${index === 0 ? "star" : "stars"}`}
+                                aria-label={t(index === 0 ? "rateStar" : "rateStars", {
+                                    count: index + 1,
+                                })}
                                 tabIndex={readOnly ? -1 : index === 0 ? 0 : -1}
                                 disabled={disabled}
                                 onPointerMove={(

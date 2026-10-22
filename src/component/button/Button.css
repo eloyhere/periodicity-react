@@ -1,4 +1,4 @@
-.button {
+﻿.button {
     --button-radius: var(--radius-xs);
 
     position: relative;
@@ -39,11 +39,11 @@
     background: transparent;
     color: inherit;
     cursor: pointer;
-    font-family: var(--font-sans);
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    line-height: 1.2;
-    text-align: center;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-weight: var(--font-weight-current, 600);
+    letter-spacing: var(--font-tracking-current, 0.01em);
+    line-height: var(--font-leading-current, 1.2);
+    text-align: var(--font-align-current, center);
     text-decoration: none;
     white-space: nowrap;
     -webkit-tap-highlight-color: transparent;
@@ -73,21 +73,21 @@
     min-height: 32px;
     padding: 0 10px;
     gap: 6px;
-    font-size: 12px;
+    font-size: var(--type-label);
 }
 
 .button--md .button__control {
     min-height: 42px;
     padding: 0 14px;
     gap: 8px;
-    font-size: 13.5px;
+    font-size: var(--type-label);
 }
 
 .button--lg .button__control {
     min-height: 52px;
     padding: 0 18px;
     gap: 9px;
-    font-size: 15px;
+    font-size: var(--type-body-sm);
 }
 
 .button--solid {
@@ -180,7 +180,7 @@
 }
 
 /* ==========================================================================
-   Material theme — Android Material button treatment
+   Material theme 鈥?Android Material button treatment
    ========================================================================== */
 
 :root .button {
@@ -237,22 +237,22 @@
     min-height: 32px;
     padding: 0 12px;
     gap: 6px;
-    font-size: 13px;
+    font-size: var(--type-label);
 }
 
 :root .button--md .button__control {
     min-height: 36px;
     padding: 0 18px;
     gap: 8px;
-    font-size: 14px;
-    font-weight: 500;
+    font-size: var(--type-body-sm);
+    font-weight: var(--font-weight-current, 500);
 }
 
 :root .button--lg .button__control {
     min-height: 42px;
     padding: 0 20px;
     gap: 9px;
-    font-size: 15px;
+    font-size: var(--type-body-sm);
 }
 
 :root .button:has(.button__control:focus-visible) {

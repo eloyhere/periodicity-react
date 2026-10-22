@@ -16,7 +16,7 @@ import { useRipple, type RippleHandlers } from "../../foundation/useRipple";
 import Icon from "../../icon/Icon";
 import { useInternational, type InternationalContextValue } from "../../../international";
 import { useFilePick, resolveFileAccept, type FilePickAccept } from "./useFilePick";
-import { DefaultFilePickerLabels, type FilePickerLabels } from "./filePickerLabels";
+import type { FilePickerLabels } from "./filePickerLabels";
 import PickerField from "../shared/PickerField";
 import type { PickerDataAttributes } from "../shared/native";
 import { dispatchChange } from "../shared/dispatchChange";
@@ -135,7 +135,7 @@ const FilePicker: FC<FilePickerProps> = ({
     const [picking, setPicking]: [boolean, Dispatch<SetStateAction<boolean>>] =
         useState<boolean>(false);
     const files: readonly File[] = value ?? selected;
-    const chooseLabel: string = labels?.choose ?? DefaultFilePickerLabels.choose;
+    const chooseLabel: string = labels?.choose ?? t("chooseFile");
     const emptyLabel: string = labels?.empty ?? t("noFileSelected");
     const summary: string =
         files.length === 0
@@ -221,7 +221,11 @@ const FilePicker: FC<FilePickerProps> = ({
                     type="button"
                     className="file-picker__trigger"
                     disabled={disabled || picking}
-                    aria-label={`${label}: ${summary}`}
+                    aria-label={t("filePickerAria", {
+                        label,
+                        summary,
+                        choose: chooseLabel,
+                    })}
                     aria-invalid={invalid ? "true" : (void 0)}
                     aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
                     onPointerDown={ripple.onPointerDown}

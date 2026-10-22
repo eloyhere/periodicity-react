@@ -8,18 +8,23 @@
 
 - 用例页面新增组件搜索：筛选栏中的 `CompleteInput` 会列出所有组件，选中后打开对应条目。
 - `TextInput` 新增 `rootRef`，复合输入框无需额外包裹节点即可把浮层锚定到字段根节点。
-- 共享输入框壳新增指针起点聚焦边框动画：outline 的四条边分别从鼠标在各边上的投影点向两端展开，fill/standard 的底部边线从鼠标位置向左右展开，使用 1 秒的先快后慢缓动。
+- 共享输入框壳新增指针起点聚焦边框波纹：以鼠标位置（键盘聚焦时用文本光标，空输入框用字段中心）为圆心做径向波纹，最近的边先出现，每条边从鼠标在该边上的投影点向两端生长，整体使用 1 秒的先快后慢缓动。
+- 消息相关组件新增逐项渲染插槽：`Contact`/`VirtualContact` 提供 `contact` 与 `context`，`MessageList`/`VirtualMessageList` 提供 `message`、`messageContext` 与 `avatar`，`Chat`/`VirtualChat` 透传全部五个；每个插槽都会收到渲染索引与对应数据项。
+- `CommentThread` 新增 `comment` 插槽，可替换整条评论；新增 `VirtualCommentThread`，按固定行高对扁平化后的评论线程做虚拟滚动。
 
 ### 变更
 
 - `PeriodicityCompleteInput` 与 `PeriodicityMention` 现在和 `TextInput` 使用同一个 `InputLayout` 字段壳，共用 `prefix`、`hint`、`message`、`limitation`、`error`、`suffix` 六个插槽。Mention 原来的下方说明文字从 `hint` 改为 `message`；`hint` 现在表示浮动提示，`leading`/`trailing` 仍作为 `prefix`/`suffix` 的别名。Complete 不再额外包裹一层容器。
+- 浏览器报告 `prefers-reduced-motion: reduce` 时，输入框聚焦边框波纹仍会播放；`hint` 与背景过渡仍遵守该偏好。
+- `PeriodicityNavigationView` 的 bottom 变体会测量自身宽度：能放下至少两个导航项时保持水平并支持横向滚动，窄到只放得下一个时自动切换为可纵向滚动的竖排列表，无需手动切换 variant。
+- `PeriodicityCoordinator` 现在会在捕获阶段从无法滚动的内容手里接管竖直滚轮手势，内部组件不再吞掉该手势。可滚动的主内容仍走原生滚动，并照常同步折叠区、头部和 AppBar；横向、Shift 和带修饰键的滚轮手势不受影响。
 
 ### 修复
 
+- `PeriodicityDrawerLayout` 不再拦截根节点之外的指针事件，外部 AppBar/Toolbar 的开关按钮可以正常关闭和重新打开抽屉；scrim 仍是点击关闭区域。布局根节点现在会定位，scrim 保持在布局内部。
 - `PeriodicityCompleteInput` 打开建议面板时焦点保持在输入框，聚焦边框持续显示，输入也会继续过滤建议。
 - `PeriodicityCompleteInput` 选中建议后关闭下拉框并移除输入框焦点，不再因焦点恢复而重新打开面板。
 - 强制颜色模式下覆盖共享的 `InputLayout` 字段壳，所有六槽输入框都保留系统焦点环。
-- 主内容无法滚动且没有子元素消费滚轮事件时，`PeriodicityCoordinator` 会消费垂直滚轮并收缩折叠区域，短内容不再让折叠区域一直展开。
 
 ## [0.1.7] - 2026-10-22
 
@@ -68,7 +73,7 @@
 
 ### 修复
 
-- 发布生成的 TypeScript 声明（dist/types）和 CSS 模块声明 shim，使 	ypes 与 exports.types 能被消费者解析。
+- 发布生成的 TypeScript 声明（dist/types）和 CSS 模块声明 shim，使 ypes 与 exports.types 能被消费者解析。
 
 ## [0.1.0] - 2026-10-20
 

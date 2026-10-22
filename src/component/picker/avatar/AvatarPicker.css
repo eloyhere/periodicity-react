@@ -36,7 +36,6 @@
 
 .avatar-picker__trigger:disabled {
     cursor: not-allowed;
-    opacity: var(--state-disabled-opacity);
 }
 
 .avatar-picker__ripple {

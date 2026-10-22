@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    Material UI component surface treatment
    Kept in one place so every component follows the same shape, elevation and
    type rules. Higher specificity than the component stylesheets.
@@ -27,7 +27,8 @@
     border-radius: var(--radius-xs);
     background: var(--panel);
     box-shadow:
-        0 11px 15px -7px rgba(0, 0, 0, 0.2), 0 24px 38px 3px rgba(0, 0, 0, 0.14),
+        0 11px 15px -7px rgba(0, 0, 0, 0.2),
+        0 24px 38px 3px rgba(0, 0, 0, 0.14),
         0 9px 46px 8px rgba(0, 0, 0, 0.12);
 }
 
@@ -36,7 +37,8 @@
     border-radius: 0;
     background: var(--panel);
     box-shadow:
-        0 8px 10px -5px rgba(0, 0, 0, 0.2), 0 16px 24px 2px rgba(0, 0, 0, 0.14),
+        0 8px 10px -5px rgba(0, 0, 0, 0.2),
+        0 16px 24px 2px rgba(0, 0, 0, 0.14),
         0 6px 30px 5px rgba(0, 0, 0, 0.12);
 }
 
@@ -48,7 +50,8 @@
     border-radius: var(--radius-xs);
     background: var(--panel);
     box-shadow:
-        0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14),
+        0 5px 5px -3px rgba(0, 0, 0, 0.2),
+        0 8px 10px 1px rgba(0, 0, 0, 0.14),
         0 3px 14px 2px rgba(0, 0, 0, 0.12);
 }
 
@@ -56,14 +59,14 @@
 :root .menu__item {
     min-height: 36px;
     border-radius: var(--radius-xs);
-    font-size: 14px;
+    font-size: var(--type-body-sm);
 }
 
 :root .tooltip__bubble {
     border-radius: var(--radius-xs);
     background: var(--colourTooltipPaper);
     color: var(--colourOnInverse);
-    font-size: 12px;
+    font-size: var(--type-label);
 }
 
 /* Snackbars ------------------------------------------------------------ */
@@ -106,7 +109,7 @@
     border-radius: 16px;
     background: var(--panel-strong);
     color: var(--text);
-    font-size: 13px;
+    font-size: var(--type-label);
 }
 
 :root .chip--selected {
@@ -135,10 +138,10 @@
 /* Tabs ----------------------------------------------------------------- */
 :root .tabs__tab {
     color: var(--color-on-surface-variant);
-    font-size: 14px;
-    font-weight: 500;
-    letter-spacing: 0.02857em;
-    text-transform: uppercase;
+    font-size: var(--type-body-sm);
+    font-weight: var(--font-weight-current, 500);
+    letter-spacing: var(--font-tracking-current, 0.02857em);
+    text-transform: var(--font-transform-current, uppercase);
 }
 
 :root .tabs__tab[aria-selected="true"] {
@@ -199,7 +202,8 @@
     border-radius: 0;
     background: var(--panel);
     box-shadow:
-        0 8px 10px -5px rgba(0, 0, 0, 0.2), 0 16px 24px 2px rgba(0, 0, 0, 0.14),
+        0 8px 10px -5px rgba(0, 0, 0, 0.2),
+        0 16px 24px 2px rgba(0, 0, 0, 0.14),
         0 6px 30px 5px rgba(0, 0, 0, 0.12);
     color: var(--color-on-surface);
 }
@@ -308,7 +312,7 @@
 }
 
 /* ==========================================================================
-   Forced colours — shape, focus, and state without decorative colour
+   Forced colours 鈥?shape, focus, and state without decorative colour
 
    background-image, box-shadow, and author colours are dropped by the user
    agent, so every rule below supplies a system-colour border, outline, or
@@ -365,7 +369,8 @@
         border: 1px solid ButtonText;
     }
 
-    :root :is(input, select, textarea):not(
+    :root
+        :is(input, select, textarea):not(
             .field__input,
             .text-field__input,
             .text-area__field,

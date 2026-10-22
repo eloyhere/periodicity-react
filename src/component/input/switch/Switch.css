@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Switch — labelled control on a Surface track.
+﻿/* ==========================================================================
+   Switch 鈥?labelled control on a Surface track.
    ========================================================================== */
 
 .switch-field {
@@ -20,10 +20,10 @@
 
 .switch-field__label {
     color: var(--color-on-surface);
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     font-size: var(--type-body);
-    font-weight: var(--weight-medium);
-    line-height: var(--leading-normal);
+    font-weight: var(--font-weight-current, var(--weight-medium));
+    line-height: var(--font-leading-current, var(--leading-normal));
     cursor: pointer;
 }
 
@@ -43,13 +43,13 @@
 .switch-field__description {
     color: var(--color-on-surface-variant);
     font-size: var(--type-body-sm);
-    line-height: var(--leading-normal);
+    line-height: var(--font-leading-current, var(--leading-normal));
 }
 
 .switch-field__error {
     color: var(--color-error);
     font-size: var(--type-body-sm);
-    line-height: var(--leading-normal);
+    line-height: var(--font-leading-current, var(--leading-normal));
 }
 
 .switch-field[data-disabled="true"] {

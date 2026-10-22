@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Range — painted rail and thumb above a transparent native range input.
+﻿/* ==========================================================================
+   Range 鈥?painted rail and thumb above a transparent native range input.
    ========================================================================== */
 
 .range {
@@ -18,12 +18,12 @@
 
 .range__label {
     color: var(--color-on-surface-variant);
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     font-size: var(--type-label-sm);
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-wide);
-    line-height: var(--leading-snug);
-    text-transform: uppercase;
+    font-weight: var(--font-weight-current, var(--weight-semibold));
+    letter-spacing: var(--font-tracking-current, var(--tracking-wide));
+    line-height: var(--font-leading-current, var(--leading-snug));
+    text-transform: var(--font-transform-current, uppercase);
     cursor: pointer;
     transition: color var(--duration-fast) var(--ease-standard);
 }
@@ -35,10 +35,10 @@
 .range__value {
     flex: none;
     color: var(--color-on-surface);
-    font-family: var(--font-mono);
+    font-family: var(--font-family-current, var(--font-mono));
     font-size: var(--type-label);
     font-variant-numeric: tabular-nums;
-    letter-spacing: var(--tracking-wide);
+    letter-spacing: var(--font-tracking-current, var(--tracking-wide));
 }
 
 .range__surface {
@@ -133,7 +133,7 @@
     margin: var(--space-2) 0 0;
     padding-left: calc(var(--space-1) / 2);
     font-size: var(--type-label-sm);
-    line-height: var(--leading-normal);
+    line-height: var(--font-leading-current, var(--leading-normal));
 }
 
 .range__hint {

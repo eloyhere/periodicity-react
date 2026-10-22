@@ -9,6 +9,7 @@ import {
     type RefObject,
 } from "react";
 import cx from "../foundation/cx";
+import { useInternational, type InternationalContextValue } from "../../international";
 import Portal from "../foundation/Portal";
 import CircularProgress from "../progress/CircularProgress";
 import "./ElementLoading.css";
@@ -57,12 +58,14 @@ export interface ElementLoadingProps
 const ElementLoading: FC<ElementLoadingProps> = ({
     loading,
     target,
-    label = "Loading",
+    label,
     className = "",
     ref,
     style,
     ...rest
 }: ElementLoadingProps) => {
+    const { t }: InternationalContextValue = useInternational();
+    const resolvedLabel: string = label ?? t("loading");
     const [rect, setRect]: [LoadingRect | null, (next: LoadingRect | null) => void] =
         useState<LoadingRect | null>(null);
     const frameRef: RefObject<number | null> = useRef<number | null>(null);
@@ -145,10 +148,10 @@ const ElementLoading: FC<ElementLoadingProps> = ({
                     height: rect.height,
                 }}
                 role="status"
-                aria-label={label}
+                aria-label={resolvedLabel}
                 aria-live="polite"
             >
-                <CircularProgress size={40} label={label} />
+                <CircularProgress size={40} label={resolvedLabel} />
             </div>
         </Portal>
     );

@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Cycle picker — cyclic variant of the Android-style number wheel
+﻿/* ==========================================================================
+   Cycle picker 鈥?cyclic variant of the Android-style number wheel
    ========================================================================== */
 
 .cycle-picker .number-picker {
@@ -26,7 +26,7 @@
 
 .cycle-picker.number-picker-field .number-picker__item {
     flex: 0 0 32px;
-    line-height: 32px;
+    line-height: var(--font-leading-current, 32px);
     overflow: hidden;
     padding: 0 10px;
     text-overflow: ellipsis;
@@ -40,8 +40,8 @@
 .cycle-picker.number-picker-field .number-picker__item--selected,
 .cycle-picker.number-picker-field .number-picker__item--selected:hover {
     color: var(--color-primary);
-    font-size: 20px;
-    font-weight: 600;
+    font-size: var(--type-h4);
+    font-weight: var(--font-weight-current, 600);
     opacity: 1;
 }
 
@@ -52,9 +52,9 @@
     justify-content: center;
     margin: 0;
     color: var(--muted);
-    font-family: var(--font-sans);
-    font-size: 13px;
-    line-height: 1.4;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-label);
+    line-height: var(--font-leading-current, 1.4);
 }
 
 /* --------------------------------------------------------------------------
@@ -75,10 +75,10 @@
     border-bottom: 1px solid var(--line);
     background: transparent;
     color: var(--text);
-    font-family: var(--font-sans);
-    font-size: 12px;
-    line-height: 32px;
-    text-align: center;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-label);
+    line-height: var(--font-leading-current, 32px);
+    text-align: var(--font-align-current, center);
     appearance: none;
     outline: none;
 }
@@ -117,9 +117,9 @@
 .cycle-picker__suggestions--empty {
     padding: 10px;
     color: var(--muted);
-    font-family: var(--font-sans);
-    font-size: 12px;
-    text-align: center;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-label);
+    text-align: var(--font-align-current, center);
 }
 
 .cycle-picker__suggestion {
@@ -130,10 +130,10 @@
     border: 0;
     background: transparent;
     color: var(--text);
-    font-family: var(--font-sans);
-    font-size: 12px;
-    line-height: 28px;
-    text-align: left;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-label);
+    line-height: var(--font-leading-current, 28px);
+    text-align: var(--font-align-current, left);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -147,5 +147,5 @@
 }
 
 .cycle-picker__suggestion--selected {
-    font-weight: 600;
+    font-weight: var(--font-weight-current, 600);
 }

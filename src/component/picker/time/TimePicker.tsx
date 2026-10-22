@@ -331,14 +331,14 @@ const TimePicker: FC<TimePickerProps> = ({
                 anchorRef={anchorRef}
                 placement="bottom-start"
                 className={popupClassName}
-                ariaLabel={`${label} picker`}
+                ariaLabel={t("pickerAria", { label })}
             >
                 <div
                     ref={panelRef}
                     id={panelId}
                     className="time-picker__panel"
                     role="dialog"
-                    aria-label={`${label} picker`}
+                    aria-label={t("pickerAria", { label })}
                     onKeyDown={handlePanelKeyDown}
                 >
                     <div className="time-picker__wheels">

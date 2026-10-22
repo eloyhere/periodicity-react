@@ -23,6 +23,7 @@ import {
     type UIEvent,
     type UIEventHandler,
 } from "react";
+import { useInternational, type InternationalContextValue } from "../../international";
 import cx from "../foundation/cx";
 import useMergedRef from "../foundation/useMergedRef";
 import "./Scrollbar.css";
@@ -225,6 +226,7 @@ const Scrollbar: FC<ScrollbarProps> = ({
     onBlur,
     ...rest
 }: ScrollbarProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const generatedId: string = useId();
     const viewportId: string = viewportProps?.id ?? `scrollbar-viewport${generatedId}`;
     const rootNodeRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
@@ -656,9 +658,9 @@ const Scrollbar: FC<ScrollbarProps> = ({
     const viewportTabIndex: number =
         viewportProps?.tabIndex ??
         (keyboardTarget === "viewport" && scrollable ? 0 : -1);
-    const verticalLabel: string = scrollbarLabel ?? "Vertical scrollbar";
-    const horizontalLabel: string = scrollbarLabel ?? "Horizontal scrollbar";
-    const slotLabel: string = scrollbarLabel ?? "Scrollbar";
+    const verticalLabel: string = scrollbarLabel ?? t("verticalScrollbar");
+    const horizontalLabel: string = scrollbarLabel ?? t("horizontalScrollbar");
+    const slotLabel: string = scrollbarLabel ?? t("scrollbar");
     const slotAxisName: ScrollbarAxisName = vertical.visible ? "vertical" : "horizontal";
     const slotAxis: ScrollbarAxisMetrics = vertical.visible ? vertical : horizontal;
     const slotState: ScrollbarState = {

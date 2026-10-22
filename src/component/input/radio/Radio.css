@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Radio — one option rendered on a Surface with a painted indicator.
+﻿/* ==========================================================================
+   Radio 鈥?one option rendered on a Surface with a painted indicator.
    ========================================================================== */
 
 .radio {
@@ -104,15 +104,15 @@
 
 .radio__text {
     color: var(--color-on-surface);
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     font-size: var(--type-body);
-    line-height: var(--leading-normal);
+    line-height: var(--font-leading-current, var(--leading-normal));
 }
 
 .radio__description {
     color: var(--color-on-surface-variant);
     font-size: var(--type-body-sm);
-    line-height: var(--leading-normal);
+    line-height: var(--font-leading-current, var(--leading-normal));
 }
 
 .radio__native:focus-visible + .radio__label .radio__indicator {

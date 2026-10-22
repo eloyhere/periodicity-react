@@ -716,18 +716,18 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
                 anchorRef={anchorRef}
                 placement="bottom-start"
                 className={popupClassName}
-                ariaLabel={`${label} picker`}
+                ariaLabel={t("pickerAria", { label })}
             >
                 <div
                     id={panelId}
                     className="date-time-picker__panel"
                     role="dialog"
-                    aria-label={`${label} picker`}
+                    aria-label={t("pickerAria", { label })}
                     onKeyDown={handlePanelKeyDown}
                 >
                     <div className="date-time-picker__header">
                         <label htmlFor={yearId}>
-                            Year
+                            {t("year")}
                             <input
                                 id={yearId}
                                 type="number"
@@ -739,7 +739,7 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
                             />
                         </label>
                         <label htmlFor={monthId}>
-                            Month
+                            {t("month")}
                             <input
                                 id={monthId}
                                 type="number"
@@ -837,7 +837,7 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
 
                     <div className="date-time-picker__time">
                         <label htmlFor={hourId}>
-                            Hour
+                            {t("hour")}
                             <input
                                 id={hourId}
                                 type="number"
@@ -851,7 +851,7 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
                             />
                         </label>
                         <label htmlFor={minuteId}>
-                            Minute
+                            {t("minute")}
                             <input
                                 id={minuteId}
                                 type="number"
@@ -882,7 +882,7 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
                                 triggerRef.current?.focus({ preventScroll: true });
                             }}
                         >
-                            Clear
+                            {t("clear")}
                         </Button>
                         <Button
                             size="sm"
@@ -892,7 +892,7 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
                                 triggerRef.current?.focus({ preventScroll: true });
                             }}
                         >
-                            Apply
+                            {t("apply")}
                         </Button>
                     </footer>
                 </div>

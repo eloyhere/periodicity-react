@@ -5,6 +5,7 @@ import {
     type ResolvedMessages,
 } from "./messages";
 import { defaultLocale, resolveLocaleCode, type LocaleCode } from "./locales";
+import { extraMessages, type ExtraMessages } from "./extraMessages";
 
 /**
  * Vocabulary keys that every built-in dictionary provides.
@@ -193,7 +194,7 @@ export type CommonMessages = MessageDictionary & Readonly<Record<CommonMessageKe
  * @example
  * const english: MessageDictionary = builtInMessages["en-GB"];
  */
-export type BuiltInMessages = Readonly<Record<LocaleCode, CommonMessages>>;
+export type BuiltInMessages = Readonly<Record<LocaleCode, CommonMessages & ExtraMessages>>;
 
 /**
  * British English source dictionary and final translation fallback.
@@ -2436,18 +2437,18 @@ const ptBrMessages: CommonMessages = {
  */
 /* eslint-disable @typescript-eslint/naming-convention -- BCP 47 locale tags are hyphenated keys by definition. */
 export const builtInMessages: BuiltInMessages = {
-    "en-GB": enGbMessages,
-    "en-US": enUsMessages,
-    "zh-CN": zhCnMessages,
-    "zh-SG": zhSgMessages,
-    "zh-HK": zhHkMessages,
-    "zh-TW": zhTwMessages,
-    "ja-JP": jaJpMessages,
-    "ko-KR": koKrMessages,
-    "es-ES": esEsMessages,
-    "es-MX": esMxMessages,
-    "pt-PT": ptPtMessages,
-    "pt-BR": ptBrMessages,
+    "en-GB": { ...enGbMessages, ...extraMessages["en-GB"] },
+    "en-US": { ...enUsMessages, ...extraMessages["en-US"] },
+    "zh-CN": { ...zhCnMessages, ...extraMessages["zh-CN"] },
+    "zh-SG": { ...zhSgMessages, ...extraMessages["zh-SG"] },
+    "zh-HK": { ...zhHkMessages, ...extraMessages["zh-HK"] },
+    "zh-TW": { ...zhTwMessages, ...extraMessages["zh-TW"] },
+    "ja-JP": { ...jaJpMessages, ...extraMessages["ja-JP"] },
+    "ko-KR": { ...koKrMessages, ...extraMessages["ko-KR"] },
+    "es-ES": { ...esEsMessages, ...extraMessages["es-ES"] },
+    "es-MX": { ...esMxMessages, ...extraMessages["es-MX"] },
+    "pt-PT": { ...ptPtMessages, ...extraMessages["pt-PT"] },
+    "pt-BR": { ...ptBrMessages, ...extraMessages["pt-BR"] },
 };
 /* eslint-enable @typescript-eslint/naming-convention */
 

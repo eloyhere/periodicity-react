@@ -1,8 +1,10 @@
-/* ==========================================================================
-   Navigation view — Material sidebar / rail / bottom navigation
+﻿/* ==========================================================================
+   Navigation view 鈥?Material sidebar / rail / bottom navigation
    ========================================================================== */
 
 .navigation-view {
+    --navigation-view-item-min: 6rem;
+    --navigation-view-compact-width: 12rem;
     display: flex;
     flex-direction: column;
     min-width: 0;
@@ -59,9 +61,9 @@
     background: transparent;
     color: inherit;
     font: inherit;
-    font-size: 14px;
-    font-weight: 500;
-    text-align: left;
+    font-size: var(--type-body-sm);
+    font-weight: var(--font-weight-current, 500);
+    text-align: var(--font-align-current, left);
     cursor: pointer;
     gap: var(--space-3);
 }
@@ -114,7 +116,7 @@
 .navigation-view__badge {
     flex: none;
     color: var(--muted);
-    font-size: 12px;
+    font-size: var(--type-label);
 }
 
 .navigation-view--rail .navigation-view__button {
@@ -127,7 +129,7 @@
 
 .navigation-view--rail .navigation-view__label {
     flex: none;
-    font-size: 11px;
+    font-size: var(--type-label);
 }
 
 .navigation-view--rail .navigation-view__indicator {
@@ -140,33 +142,39 @@
     border-radius: 3px 3px 0 0;
 }
 
-.navigation-view--bottom .navigation-view__list {
-    flex-direction: row;
-    justify-content: space-around;
+/* Horizontal while at least two destinations fit; the list scrolls sideways. */
+.navigation-view--bottom:not([data-compact="true"]) .navigation-view__list {
+    flex-flow: row nowrap;
+    justify-content: flex-start;
     padding: 0;
-    overflow: visible;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
 }
 
-.navigation-view--bottom .navigation-view__item {
-    flex: 1 1 0;
+.navigation-view--bottom:not([data-compact="true"]) .navigation-view__item {
+    flex: 1 1 var(--navigation-view-item-min);
+    min-width: var(--navigation-view-item-min);
     border-radius: 0;
 }
 
-.navigation-view--bottom .navigation-view__button {
+.navigation-view--bottom:not([data-compact="true"]) .navigation-view__button {
     flex-direction: column;
     justify-content: center;
     min-height: 56px;
     padding: 6px 8px;
-    text-align: center;
+    text-align: var(--font-align-current, center);
     gap: 2px;
 }
 
-.navigation-view--bottom .navigation-view__label {
+.navigation-view--bottom:not([data-compact="true"]) .navigation-view__label {
     flex: none;
-    font-size: 11px;
+    max-width: 100%;
+    font-size: var(--type-label);
 }
 
-.navigation-view--bottom .navigation-view__indicator {
+.navigation-view--bottom:not([data-compact="true"]) .navigation-view__indicator {
     top: 0;
     right: 16px;
     bottom: auto;

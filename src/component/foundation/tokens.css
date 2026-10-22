@@ -22,19 +22,31 @@
     --space-11: 80px;
 
     /* ------------------------------------------------------------------
-       Typography
+       Typography — one hierarchy, smallest step 1rem (16px)
        ------------------------------------------------------------------ */
-    --type-display: clamp(2.4rem, 4.6vw, 3.9rem);
-    --type-h1: clamp(2rem, 3.2vw, 2.75rem);
-    --type-h2: clamp(1.55rem, 2.4vw, 2rem);
-    --type-h3: clamp(1.25rem, 1.8vw, 1.55rem);
-    --type-h4: 1.1rem;
-    --type-body-lg: 1.0625rem;
-    --type-body: 0.95rem;
-    --type-body-sm: 0.85rem;
-    --type-label: 0.8125rem;
-    --type-label-sm: 0.75rem;
-    --type-mono: 0.625rem;
+    --type-base-display: 4rem;
+    --type-base-h1: 3rem;
+    --type-base-h2: 2rem;
+    --type-base-h3: 1.5rem;
+    --type-base-h4: 1.25rem;
+    --type-base-body-lg: 1.1875rem;
+    --type-base-body: 1.125rem;
+    --type-base-body-sm: 1.0625rem;
+    --type-base-label: 1rem;
+    --type-base-label-sm: 1rem;
+    --type-base-mono: 1rem;
+
+    --type-display: var(--type-base-display);
+    --type-h1: var(--type-base-h1);
+    --type-h2: var(--type-base-h2);
+    --type-h3: var(--type-base-h3);
+    --type-h4: var(--type-base-h4);
+    --type-body-lg: var(--type-base-body-lg);
+    --type-body: var(--type-base-body);
+    --type-body-sm: var(--type-base-body-sm);
+    --type-label: var(--type-base-label);
+    --type-label-sm: var(--type-base-label-sm);
+    --type-mono: var(--type-base-mono);
 
     --weight-regular: 400;
     --weight-medium: 500;
@@ -267,7 +279,6 @@
 /* ==========================================================================
    Light theme adjustments for the additive layer
    ========================================================================== */
-
 
 /* ==========================================================================
    Utilities

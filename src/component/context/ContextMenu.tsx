@@ -454,7 +454,7 @@ const ContextMenu: FC<ContextMenuProps> = ({
                                     {menu}
                                 </ContextMenuContext.Provider>
                             ) : (
-                                <div className="context-menu__empty">{empty ?? "No actions"}</div>
+                                <div className="context-menu__empty">{empty ?? t("noActions")}</div>
                             )}
                         </div>
 

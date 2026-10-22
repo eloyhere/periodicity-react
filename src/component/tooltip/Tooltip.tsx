@@ -5,7 +5,9 @@ import {
     useId,
     useLayoutEffect,
     useRef,
+    useState,
     type CSSProperties,
+    type Dispatch,
     type FC,
     type FocusEventHandler,
     type HTMLAttributes,
@@ -16,6 +18,7 @@ import {
     type Ref,
     type RefCallback,
     type RefObject,
+    type SetStateAction,
 } from "react";
 import Portal from "../foundation/Portal";
 import cx from "../foundation/cx";
@@ -76,6 +79,15 @@ export interface TooltipProps extends Omit<HTMLAttributes<HTMLSpanElement>, "con
     /** Ref for the native trigger wrapper. */
     ref?: Ref<HTMLSpanElement>;
 }
+
+/**
+ * Time the tooltip stays mounted after closing so the fade-out can finish.
+ * Matches `--duration-fast`, which drives the exit animation in `Tooltip.css`.
+ * Type: constant.
+ * @example
+ * const exit = TooltipExitDuration;
+ */
+const TooltipExitDuration: number = 250;
 
 /**
  * Merges ARIA id lists without repeating an id.
@@ -152,6 +164,10 @@ const Tooltip: FC<TooltipProps> = ({
     const focusedRef: MutableRefObject<boolean> = useRef<boolean>(false);
     const tooltipId: string = useId();
     const visible: boolean = open && !disabled;
+    const [present, setPresent]: [boolean, Dispatch<SetStateAction<boolean>>] =
+        useState<boolean>(visible);
+    const [closing, setClosing]: [boolean, Dispatch<SetStateAction<boolean>>] =
+        useState<boolean>(false);
     const { style, placement: resolvedPlacement, update }: AnchoredPositionResult = useAnchoredPosition(
         triggerRef,
         floatingRef,
@@ -225,6 +241,32 @@ const Tooltip: FC<TooltipProps> = ({
         onBlur?.(event);
     };
 
+    // Keep the tooltip mounted for one exit beat so the fade-out can finish.
+    /* eslint-disable react-hooks/set-state-in-effect */
+    useEffect((): (() => void) | void => {
+        if (visible) {
+            setPresent(true);
+            setClosing(false);
+
+            return;
+        }
+
+        if (!present) {
+            return;
+        }
+
+        setClosing(true);
+        const timeout: number = window.setTimeout((): void => {
+            setPresent(false);
+            setClosing(false);
+        }, TooltipExitDuration);
+
+        return (): void => {
+            window.clearTimeout(timeout);
+        };
+    }, [visible, present]);
+    /* eslint-enable react-hooks/set-state-in-effect */
+
     useEffect((): (() => void) | void => {
         if (!visible || !closeOnEscape) {
             return;
@@ -288,7 +330,7 @@ const Tooltip: FC<TooltipProps> = ({
             onBlur={handleBlur}
         >
             {trigger}
-            {visible ? (
+            {visible || present ? (
                 <Portal>
                     <div
                         ref={floatingRef}
@@ -296,6 +338,7 @@ const Tooltip: FC<TooltipProps> = ({
                         className="tooltip"
                         style={tooltipStyle}
                         data-placement={resolvedPlacement}
+                        data-state={closing ? "closing" : "open"}
                         role="tooltip"
                     >
                         <Surface className="tooltip__bubble" elevation={2} shape="sm">

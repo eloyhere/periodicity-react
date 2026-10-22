@@ -5,3 +5,4 @@ export type { MessageContextMenuProps } from "./MessageContextMenu";
 export type { MessageListProps } from "./normal/MessageList";
 export type { VirtualMessageListProps } from "./virtual/VirtualMessageList";
 export * from "./adapter";
+export type { MessageSlots } from "./slots";

@@ -10,6 +10,14 @@ import type { VirtualTableProps } from "../layout/table/VirtualTable";
 
 import BasePeriodicityTag from "./tag/Tag";
 export const PeriodicityTag = withStandardEvents(BasePeriodicityTag);
+import BasePeriodicityBarChart from "./chart/bar/BarChart";
+export const PeriodicityBarChart = withStandardEvents(BasePeriodicityBarChart);
+import BasePeriodicityPieChart from "./chart/pie/PieChart";
+export const PeriodicityPieChart = withStandardEvents(BasePeriodicityPieChart);
+import BasePeriodicityLineChart from "./chart/line/LineChart";
+export const PeriodicityLineChart = withStandardEvents(BasePeriodicityLineChart);
+import BasePeriodicityScatterChart from "./chart/scatter/ScatterChart";
+export const PeriodicityScatterChart = withStandardEvents(BasePeriodicityScatterChart);
 import BasePeriodicityTextInput from "./input/text/TextInput";
 export const PeriodicityTextInput = withStandardEvents(BasePeriodicityTextInput);
 import BasePeriodicityButton from "./button/Button";
@@ -90,8 +98,51 @@ export type {
 export type { ImageSelection as PeriodicityImageSelection } from "./picker/shared/imageSelection";
 export type { ImagePickerLabels as PeriodicityImagePickerLabels } from "./picker/shared/imagePickerLabels";
 export type { ImageCropSlotContext as PeriodicityImageCropSlotContext } from "./picker/shared/ImageEditorDialog";
+export type { CropTransform as PeriodicityCropTransform } from "./picker/shared/imageCrop";
+export type { ImageCropperShape as PeriodicityImageCropperShape } from "./picker/shared/ImageCropper";
+export type {
+    BarChartProps as PeriodicityBarChartProps,
+    BarChartSeries as PeriodicityBarChartSeries,
+} from "./chart/bar/BarChart";
+export type {
+    PieChartProps as PeriodicityPieChartProps,
+    PieChartDatum as PeriodicityPieChartDatum,
+} from "./chart/pie/PieChart";
+export type {
+    LineChartProps as PeriodicityLineChartProps,
+    LineChartPoint as PeriodicityLineChartPoint,
+    LineChartSeries as PeriodicityLineChartSeries,
+} from "./chart/line/LineChart";
+export type {
+    ScatterChartProps as PeriodicityScatterChartProps,
+    ScatterPoint as PeriodicityScatterPoint,
+    ScatterSeries as PeriodicityScatterSeries,
+} from "./chart/scatter/ScatterChart";
+export type {
+    ChartBaseProps as PeriodicityChartBaseProps,
+    ChartLegendItem as PeriodicityChartLegendItem,
+    ChartPalette as PeriodicityChartPalette,
+    ChartRenderMode as PeriodicityChartRenderMode,
+    ChartRenderer as PeriodicityChartRenderer,
+    ChartSurface as PeriodicityChartSurface,
+} from "./chart/shared/types";
 import BasePeriodicityText from "./text/Text";
 export const PeriodicityText = withStandardEvents(BasePeriodicityText);
+import BasePeriodicityFont from "./font/Font";
+export const PeriodicityFont = withStandardEvents(BasePeriodicityFont);
+export { useFont } from "./font/useFont";
+export type { FontInfo as PeriodicityFontInfo } from "./font/useFont";
+export type {
+    FontAlign as PeriodicityFontAlign,
+    FontElement as PeriodicityFontElement,
+    FontFamily as PeriodicityFontFamily,
+    FontLevel as PeriodicityFontLevel,
+    FontLetterSpacing as PeriodicityFontLetterSpacing,
+    FontLineHeight as PeriodicityFontLineHeight,
+    FontProps as PeriodicityFontProps,
+    FontTransform as PeriodicityFontTransform,
+    FontWeight as PeriodicityFontWeight,
+} from "./font";
 import BasePeriodicityCard from "./card/Card";
 export const PeriodicityCard = withStandardEvents(BasePeriodicityCard);
 import BasePeriodicityIcon from "./icon/Icon";
@@ -280,8 +331,12 @@ import BasePeriodicityChat from "../layout/chat/normal/Chat";
 export const PeriodicityChat = withStandardEvents(BasePeriodicityChat);
 import BasePeriodicityVirtualChat from "../layout/chat/virtual/VirtualChat";
 export const PeriodicityVirtualChat = withStandardEvents(BasePeriodicityVirtualChat);
-import BasePeriodicityCommentThread from "./comment/CommentThread";
+import BasePeriodicityCommentThread from "./comment/normal/CommentThread";
 export const PeriodicityCommentThread = withStandardEvents(BasePeriodicityCommentThread);
+import BasePeriodicityVirtualCommentThread from "./comment/virtual/VirtualCommentThread";
+export const PeriodicityVirtualCommentThread = withStandardEvents(
+    BasePeriodicityVirtualCommentThread,
+);
 import BasePeriodicityContactContextMenu from "../layout/contact/ContactContextMenu";
 export const PeriodicityContactContextMenu = withStandardEvents(BasePeriodicityContactContextMenu);
 import BasePeriodicityMessageContextMenu from "../layout/message/MessageContextMenu";

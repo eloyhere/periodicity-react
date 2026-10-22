@@ -1,4 +1,4 @@
-.link {
+﻿.link {
     position: relative;
     display: inline-flex;
     align-items: baseline;
@@ -25,7 +25,7 @@
 
 .link--accent {
     color: var(--color-primary);
-    font-weight: 600;
+    font-weight: var(--font-weight-current, 600);
 }
 
 .link--inherit {

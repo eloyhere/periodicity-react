@@ -1,4 +1,4 @@
-.input-layout {
+﻿.input-layout {
     --input-layout-pad: 16px;
     --input-layout-height: 56px;
     --input-hint-rest-top: 50%;
@@ -12,7 +12,7 @@
     flex-direction: column;
     min-width: 0;
     color: var(--color-on-surface);
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
 }
 
 .input-layout--sm {
@@ -57,6 +57,7 @@
 
 .input-layout__edge {
     position: absolute;
+    display: block;
     background: var(--color-primary);
     pointer-events: none;
     will-change: transform;
@@ -138,7 +139,7 @@
     background: transparent;
     color: inherit;
     font: inherit;
-    line-height: 1.35;
+    line-height: var(--font-leading-current, 1.35);
     outline: none;
     caret-color: var(--color-primary);
 }
@@ -160,7 +161,7 @@
     overflow: hidden;
     color: var(--color-on-surface-variant);
     font-size: var(--type-body);
-    line-height: 1.2;
+    line-height: var(--font-leading-current, 1.2);
     text-overflow: ellipsis;
     white-space: nowrap;
     pointer-events: none;
@@ -204,7 +205,7 @@
         padding: var(--input-hint-float-padding);
         background: var(--input-hint-float-background);
         color: var(--color-primary);
-        font-size: 11px;
+        font-size: var(--type-label);
         transform: translateY(-50%);
     }
 }
@@ -217,7 +218,7 @@
     padding: var(--input-hint-float-padding);
     background: var(--input-hint-float-background);
     color: var(--color-primary);
-    font-size: 11px;
+    font-size: var(--type-label);
     transform: translateY(-50%);
 }
 
@@ -350,10 +351,10 @@
     z-index: 2;
     overflow: hidden;
     color: var(--faint);
-    font-family: var(--font-mono);
-    font-size: 10px;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
     font-variant-numeric: tabular-nums;
-    line-height: 1;
+    line-height: var(--font-leading-current, 1);
     pointer-events: none;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -367,8 +368,8 @@
 .input-layout__message {
     margin: 5px 0 0;
     padding-left: 2px;
-    font-size: 12px;
-    line-height: 1.4;
+    font-size: var(--type-label);
+    line-height: var(--font-leading-current, 1.4);
 }
 
 .input-layout__message {
@@ -379,11 +380,11 @@
     color: var(--color-error);
 }
 
+/* The focus-border wave is a local, thin-line reveal rather than large-area
+   motion, so it stays available when the OS asks for reduced motion. */
 @media (prefers-reduced-motion: reduce) {
     .input-layout__hint,
-    .input-layout__background,
-    .input-layout__edge,
-    .input-layout__control:focus-within .input-layout__edge {
+    .input-layout__background {
         transition: none;
         animation: none;
     }

@@ -79,6 +79,18 @@ const wheelDelta: (event: WheelEvent, pageHeight: number) => number = (
 };
 
 /**
+ * Reports whether a wheel gesture is a vertical scroll.
+ * Trackpads report both axes, so the dominant axis decides; Shift turns the
+ * wheel horizontal on most platforms and is left to the content.
+ * @param event - Native wheel event.
+ * @example
+ * const vertical = isVerticalWheel(event);
+ * @returns `true` when the gesture scrolls vertically.
+ */
+const isVerticalWheel: (event: WheelEvent) => boolean = (event: WheelEvent): boolean =>
+    !event.shiftKey && Math.abs(event.deltaY) > Math.abs(event.deltaX);
+
+/**
  * Reports whether a scroll container can still move in a wheel direction.
  * @param element - Element that owns the scroll range.
  * @param delta - Vertical wheel distance; positive scrolls down.
@@ -179,9 +191,10 @@ export interface CoordinatorProps extends Omit<HTMLAttributes<HTMLDivElement>, "
 
 /**
  * Hosts a collapsing area above a fixed header and one scrollable main slot.
- * The collapse area shrinks from `collapseHeight` to zero as the main viewport
- * scrolls. When the content cannot scroll, unconsumed vertical wheel input
- * collapses or restores it instead; the header remains in place.
+ * While the main content can scroll, native scrolling shrinks the collapse area
+ * and reports progress to the header. When it cannot scroll, the coordinator
+ * takes vertical wheel input over from the content and collapses or restores
+ * the area itself; horizontal and modified wheel gestures are left alone.
  * @param props - Collapse, header, main, heights, and native container attributes.
  * @example
  * <Coordinator
@@ -266,14 +279,21 @@ const Coordinator: FC<CoordinatorProps> = ({
         }
 
         /**
-         * Shrinks or restores the collapse area from unconsumed wheel input.
-         * @param event - Native wheel event bubbling through the coordinator.
+         * Let the main viewport scroll natively while it has range; otherwise take the
+         * vertical wheel over from the content and shrink or restore the collapse area.
+         * The listener runs in the capture phase so a component that cannot scroll no
+         * longer consumes the gesture first.
+         * @param event - Native wheel event captured at the coordinator root.
          * @example
-         * root.addEventListener("wheel", handleWheel, { passive: false });
+         * root.addEventListener("wheel", handleWheel, { capture: true, passive: false });
          * @returns Nothing.
          */
         const handleWheel: (event: WheelEvent) => void = (event: WheelEvent): void => {
-            if (event.defaultPrevented || event.ctrlKey || event.altKey || event.metaKey) {
+            if (!isVerticalWheel(event) || event.defaultPrevented) {
+                return;
+            }
+
+            if (event.ctrlKey || event.altKey || event.metaKey) {
                 return;
             }
 
@@ -285,6 +305,7 @@ const Coordinator: FC<CoordinatorProps> = ({
 
             const delta: number = wheelDelta(event, viewport.clientHeight);
 
+            // Native scrolling keeps the collapse area and header in sync through onScroll.
             if (delta === 0 || canScroll(viewport, delta)) {
                 return;
             }
@@ -303,12 +324,13 @@ const Coordinator: FC<CoordinatorProps> = ({
             wheelOffsetRef.current = next;
             setWheelOffset(next);
             event.preventDefault();
+            event.stopPropagation();
         };
 
-        root.addEventListener("wheel", handleWheel, { passive: false });
+        root.addEventListener("wheel", handleWheel, { capture: true, passive: false });
 
         return (): void => {
-            root.removeEventListener("wheel", handleWheel);
+            root.removeEventListener("wheel", handleWheel, { capture: true });
         };
     }, [collapseHeight, collapsible]);
 

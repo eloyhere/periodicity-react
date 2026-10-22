@@ -23,6 +23,7 @@ import type { ListEntry } from "../../list/adapter";
 import type { MessageAction, MessageAdapter, MessageItem } from "../adapter";
 import { createMessageAdapter } from "../adapter";
 import MessageContextMenu from "../MessageContextMenu";
+import type { MessageSlots } from "../slots";
 import { useMessageSelection, type MessageSelection } from "../useMessageSelection";
 import { useInternational, type InternationalContextValue } from "../../../international";
 import "../Message.css";
@@ -33,7 +34,7 @@ import "../Message.css";
  * Fields: messages, adapter, currentUser, autoScroll, onMessageAction, onQuote, onForward,
  * onDelete, onRecall, onFavourite, onCopyMessage, copyToClipboard, onRetry, onMessageClick,
  * onMessageMenuOpenChange, selectMode, defaultSelectMode, onSelectModeChange, selectedIds,
- * defaultSelectedIds, onSelectionChange, empty, loading, loadingLabel, disabled, className,
+ * defaultSelectedIds, onSelectionChange, empty, loading, loadingLabel, disabled, slots, className,
  * ref, plus native div attributes and events.
  * @example
  * <MessageList messages={messages} currentUser="Mira" />
@@ -66,6 +67,8 @@ export interface MessageListProps extends Omit<HTMLAttributes<HTMLDivElement>, "
     /** Accessible loading label; defaults to the localised Loading messages label. */
     loadingLabel?: string;
     disabled?: boolean;
+    /** Per-message avatar, bubble, and context-menu render slots. */
+    slots?: MessageSlots;
     className?: string;
     ref?: Ref<HTMLDivElement>;
 }
@@ -103,6 +106,7 @@ const MessageList: (props: MessageListProps) => ReactNode = ({
     loading = false,
     loadingLabel,
     disabled = false,
+    slots,
     className = "",
     "aria-label": ariaLabel,
     "aria-live": ariaLive,
@@ -258,7 +262,7 @@ const MessageList: (props: MessageListProps) => ReactNode = ({
             ) : rows.length === 0 ? (
                 <div className="message-list__empty">{resolvedEmpty}</div>
             ) : (
-                rows.map((message: MessageItem): ReactNode => {
+                rows.map((message: MessageItem, index: number): ReactNode => {
                     const self: boolean = message.self === true || message.author === currentUser;
                     const messageDisabled: boolean = disabled || message.disabled === true;
 
@@ -309,7 +313,11 @@ const MessageList: (props: MessageListProps) => ReactNode = ({
                                     />
                                 </span>
                             ) : null}
-                            <Avatar name={message.author} src={message.avatar} size="sm" />
+                            {slots?.avatar === (void 0) ? (
+                                <Avatar name={message.author} src={message.avatar} size="sm" />
+                            ) : (
+                                slots.avatar(index, message)
+                            )}
                             <div className="message__body">
                                 {self ? null : (
                                     <span className="message__author">{message.author}</span>
@@ -319,6 +327,7 @@ const MessageList: (props: MessageListProps) => ReactNode = ({
                                     self={self}
                                     onAction={act}
                                     disabled={messageDisabled}
+                                    menu={slots?.messageContext?.(index, message)}
                                     onOpenChange={(open: boolean): void =>
                                         onMessageMenuOpenChange?.(open, message)
                                     }
@@ -330,7 +339,9 @@ const MessageList: (props: MessageListProps) => ReactNode = ({
                                             trigger: ["hover", "click"],
                                         }}
                                     >
-                                        {message.content}
+                                        {slots?.message === (void 0)
+                                            ? message.content
+                                            : slots.message(index, message)}
                                     </Surface>
                                 </MessageContextMenu>
                                 <div className="message__meta">

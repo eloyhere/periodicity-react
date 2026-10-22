@@ -3,6 +3,7 @@
    ========================================================================== */
 
 .drawer-layout {
+    position: relative;
     display: flex;
     width: 100%;
     min-width: 0;
@@ -58,7 +59,6 @@
     overflow: auto;
     background: var(--colourBackground);
 }
-
 
 /* Invisible event shield outside the open pane. */
 .drawer-layout__scrim {

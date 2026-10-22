@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Timeline — vertical events with tone markers and connector line
+﻿/* ==========================================================================
+   Timeline 鈥?vertical events with tone markers and connector line
    ========================================================================== */
 
 .timeline {
@@ -97,24 +97,24 @@
 
 .timeline__title {
     color: var(--text);
-    font-family: var(--font-sans);
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1.35;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, 600);
+    line-height: var(--font-leading-current, 1.35);
 }
 
 .timeline__time {
     flex: none;
     color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 10px;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
 }
 
 .timeline__description {
     margin-top: 3px;
     color: var(--muted);
-    font-size: 12px;
-    line-height: 1.45;
+    font-size: var(--type-label);
+    line-height: var(--font-leading-current, 1.45);
 }
 
 .timeline__item[data-tone="danger"] .timeline__title {

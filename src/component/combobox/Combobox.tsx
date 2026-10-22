@@ -21,6 +21,7 @@ import type {
 } from "react";
 import { createListAdapter } from "../../layout/list/adapter";
 import type { ListAdapter, ListEntry } from "../../layout/list/adapter";
+import { useInternational, type InternationalContextValue } from "../../international";
 import Dropdown, { DropdownItem } from "../dropdown/Dropdown";
 import cx from "../foundation/cx";
 import useControllableState from "../foundation/useControllableState";
@@ -202,6 +203,7 @@ const Combobox: FC<ComboboxProps> = ({
     ref,
     ...rest
 }: ComboboxProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const fieldState: FieldState = useField({ id, label, hint, error });
     const controlId: string = fieldState.controlId;
     const labelId: string = `${controlId}-label`;
@@ -315,8 +317,9 @@ const Combobox: FC<ComboboxProps> = ({
             ? filteredAdapter.getItem(effectiveActiveIndex)
             : (void 0);
     const displayText: string = editing ? inputText : selectedLabel;
-    const emptyMessage: string = query.trim().length > 0 ? "No matching options" : "No options";
-    const emptyState: string = loading ? "Loading…" : emptyMessage;
+    const emptyMessage: string =
+        query.trim().length > 0 ? t("noMatchingOptions") : t("noOptions");
+    const emptyState: string = loading ? `${t("loading")}…` : emptyMessage;
 
     useLayoutEffect((): void => {
         if (!virtual || !isOpen || !attached) {

@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Time picker — custom trigger with paired Android-style number wheels
+﻿/* ==========================================================================
+   Time picker 鈥?custom trigger with paired Android-style number wheels
    ========================================================================== */
 
 .time-picker {
@@ -31,10 +31,10 @@
     border: 0;
     background: transparent;
     color: var(--text);
-    font-family: var(--font-sans);
-    font-size: 14px;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-body-sm);
     font-variant-numeric: tabular-nums;
-    text-align: left;
+    text-align: var(--font-align-current, left);
     cursor: pointer;
     outline: none;
     -webkit-tap-highlight-color: transparent;

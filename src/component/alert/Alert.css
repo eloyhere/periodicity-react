@@ -1,4 +1,4 @@
-.alert {
+﻿.alert {
     position: relative;
     border: 1px solid var(--color-outline-variant);
     border-radius: var(--radius-md);
@@ -85,14 +85,14 @@
 .alert__title {
     color: var(--color-on-surface);
     font-size: var(--type-label);
-    font-weight: var(--weight-semibold);
-    line-height: var(--leading-snug);
+    font-weight: var(--font-weight-current, var(--weight-semibold));
+    line-height: var(--font-leading-current, var(--leading-snug));
 }
 
 .alert__description {
     color: var(--color-on-surface-variant);
     font-size: var(--type-body-sm);
-    line-height: var(--leading-normal);
+    line-height: var(--font-leading-current, var(--leading-normal));
 }
 
 .alert__action {

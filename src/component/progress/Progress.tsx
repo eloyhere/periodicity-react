@@ -1,4 +1,5 @@
 import type { CSSProperties, FC, HTMLAttributes, Ref } from "react";
+import { useInternational, type InternationalContextValue } from "../../international";
 import cx from "../foundation/cx";
 import "./Progress.css";
 
@@ -62,6 +63,7 @@ const Progress: FC<ProgressProps> = ({
     ref,
     ...rest
 }: ProgressProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const safeMax: number = max > 0 ? max : 100;
     const numericValue: number = typeof value === "number" ? value : 0;
     const boundedValue: number = Math.min(Math.max(numericValue, 0), safeMax);
@@ -72,9 +74,9 @@ const Progress: FC<ProgressProps> = ({
         ? formatValue === (void 0)
             ? defaultText
             : formatValue(boundedValue, safeMax)
-        : "Loading";
+        : t("loading");
     const hasLabel: boolean = label !== (void 0) && label.length > 0;
-    const accessibleName: string = label !== (void 0) && label.length > 0 ? label : "Progress";
+    const accessibleName: string = label !== (void 0) && label.length > 0 ? label : t("progress");
     const fillStyle: CSSProperties = { width: `${percent}%` };
     const hasMeta: boolean = hasLabel || showValue;
 

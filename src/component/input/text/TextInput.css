@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Text field — Material outline / fill / standard with floating label
+﻿/* ==========================================================================
+   Text field 鈥?Material outline / fill / standard with floating label
    ========================================================================== */
 
 .text-field {
@@ -97,9 +97,9 @@
     border: 0;
     background: transparent;
     color: var(--text);
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     font-size: var(--type-body);
-    line-height: 1.2;
+    line-height: var(--font-leading-current, 1.2);
     outline: none;
     caret-color: var(--color-primary);
 }
@@ -118,9 +118,9 @@
     padding: 0;
     overflow: hidden;
     color: var(--muted);
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     font-size: var(--type-body);
-    line-height: 1.2;
+    line-height: var(--font-leading-current, 1.2);
     text-overflow: ellipsis;
     white-space: nowrap;
     pointer-events: none;
@@ -146,8 +146,8 @@
 .text-field__error {
     margin-top: 6px;
     padding-left: 2px;
-    font-size: 12px;
-    line-height: 1.4;
+    font-size: var(--type-label);
+    line-height: var(--font-leading-current, 1.4);
 }
 
 .text-field__hint {
@@ -206,7 +206,7 @@
     padding: 0 5px;
     background: var(--color-surface);
     color: var(--color-primary);
-    font-size: 12px;
+    font-size: var(--type-label);
     transform: translateY(-50%);
 }
 
@@ -258,7 +258,7 @@
     padding: 0;
     background: transparent;
     color: var(--color-primary);
-    font-size: 12px;
+    font-size: var(--type-label);
     transform: none;
 }
 
@@ -309,7 +309,7 @@
     padding: 0;
     background: transparent;
     color: var(--color-primary);
-    font-size: 12px;
+    font-size: var(--type-label);
     transform: none;
 }
 
@@ -345,21 +345,18 @@
 }
 
 .text-field--leading.text-field--outline:focus-within .text-field__label,
-.text-field--leading.text-field--outline:has(.text-field__input:not(:placeholder-shown))
-    .text-field__label {
+.text-field--leading.text-field--outline:has(.text-field__input:not(:placeholder-shown)) .text-field__label {
     left: calc(var(--text-field-pad-inline) - 4px);
 }
 
 .text-field--leading.text-field--fill:focus-within .text-field__label,
-.text-field--leading.text-field--fill:has(.text-field__input:not(:placeholder-shown))
-    .text-field__label {
+.text-field--leading.text-field--fill:has(.text-field__input:not(:placeholder-shown)) .text-field__label {
     left: var(--text-field-pad-inline);
 }
 
 .text-field--leading.text-field--standard .text-field__label,
 .text-field--leading.text-field--standard:focus-within .text-field__label,
-.text-field--leading.text-field--standard:has(.text-field__input:not(:placeholder-shown))
-    .text-field__label {
+.text-field--leading.text-field--standard:has(.text-field__input:not(:placeholder-shown)) .text-field__label {
     left: 0;
 }
 
@@ -388,7 +385,7 @@
 .text-field--fill .text-field__input,
 .text-field--standard .text-field__input {
     height: calc(var(--text-field-height) - 24px);
-    line-height: 1.4;
+    line-height: var(--font-leading-current, 1.4);
 }
 
 /* The resting label doubles as the placeholder; keep the two from overlapping. */

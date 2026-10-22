@@ -132,7 +132,10 @@ const TransferRow: FC<TransferRowProps> = ({
     disabled,
     onToggle,
     renderItem,
-}: TransferRowProps) => (
+}: TransferRowProps) => {
+    const { t }: InternationalContextValue = useInternational();
+
+    return (
     <div
         className="transfer__item"
         role="option"
@@ -171,7 +174,7 @@ const TransferRow: FC<TransferRowProps> = ({
                     checked={checked}
                     disabled={disabled}
                     onCheckedChange={onToggle}
-                    label={<span className="visually-hidden">Select {labelText(item.label) || item.key}</span>}
+                    label={<span className="visually-hidden">{t("selectItem", { item: labelText(item.label) || item.key })}</span>}
                 />
             </span>
             {item.icon === (void 0) ? null : <Icon name={item.icon} size={16} />}
@@ -185,7 +188,8 @@ const TransferRow: FC<TransferRowProps> = ({
             </span>
         </Surface>
     </div>
-);
+    );
+};
 
 /**
  * Moves selected keys between two Material transfer panes.
@@ -202,12 +206,12 @@ const Transfer: FC<TransferProps> = ({
     value,
     defaultValue,
     onChange,
-    titles = ["Available", "Selected"],
+    titles,
     searchable = true,
     disabled = false,
     loading = false,
-    emptySource = "Nothing available",
-    emptyTarget = "Nothing selected",
+    emptySource,
+    emptyTarget,
     renderItem,
     virtual = false,
     listHeight = 260,
@@ -218,6 +222,9 @@ const Transfer: FC<TransferProps> = ({
     ...rest
 }: TransferProps) => {
     const { t }: InternationalContextValue = useInternational();
+    const resolvedTitles: readonly [string, string] = titles ?? [t("available"), t("selected")];
+    const resolvedEmptySource: ReactNode = emptySource ?? t("nothingAvailable");
+    const resolvedEmptyTarget: ReactNode = emptyTarget ?? t("nothingSelected");
     const [selectedKeys, setSelectedKeys]: readonly [
         readonly string[],
         (next: readonly string[] | ((previous: readonly string[]) => readonly string[])) => void,
@@ -397,7 +404,7 @@ const Transfer: FC<TransferProps> = ({
             <section className="transfer__pane" aria-labelledby={sourceHeaderId}>
                 <header className="transfer__header">
                     <h3 className="transfer__title" id={sourceHeaderId}>
-                        {titles[0]}
+                        {resolvedTitles[0]}
                     </h3>
                     <span className="transfer__count">{sourceRows.length}</span>
                 </header>
@@ -440,7 +447,7 @@ const Transfer: FC<TransferProps> = ({
                             <Spinner size="sm" />
                         </div>
                     ) : sourceRows.length === 0 ? (
-                        <div className="transfer__empty">{emptySource}</div>
+                        <div className="transfer__empty">{resolvedEmptySource}</div>
                     ) : (
                         <>
                             {virtual && sourceStart > 0 ? (
@@ -481,7 +488,7 @@ const Transfer: FC<TransferProps> = ({
                 <Button
                     variant="outline"
                     size="sm"
-                    aria-label={`Move selected to ${titles[1]}`}
+                    aria-label={t("moveSelectedTo", { target: resolvedTitles[1] })}
                     disabled={disabled || sourceChecked.size === 0}
                     onClick={moveRight}
                 >
@@ -490,7 +497,7 @@ const Transfer: FC<TransferProps> = ({
                 <Button
                     variant="outline"
                     size="sm"
-                    aria-label={`Move selected to ${titles[0]}`}
+                    aria-label={t("moveSelectedTo", { target: resolvedTitles[0] })}
                     disabled={disabled || targetChecked.size === 0}
                     onClick={moveLeft}
                 >
@@ -499,27 +506,27 @@ const Transfer: FC<TransferProps> = ({
                 <Button
                     variant="ghost"
                     size="sm"
-                    aria-label={`Move all to ${titles[1]}`}
+                    aria-label={t("moveAllTo", { target: resolvedTitles[1] })}
                     disabled={disabled || sourceRows.length === 0}
                     onClick={moveAllRight}
                 >
-                    All
+                    {t("all")}
                 </Button>
                 <Button
                     variant="ghost"
                     size="sm"
-                    aria-label={`Move all to ${titles[0]}`}
+                    aria-label={t("moveAllTo", { target: resolvedTitles[0] })}
                     disabled={disabled || targetRows.length === 0}
                     onClick={moveAllLeft}
                 >
-                    None
+                    {t("none")}
                 </Button>
             </div>
 
             <section className="transfer__pane" aria-labelledby={targetHeaderId}>
                 <header className="transfer__header">
                     <h3 className="transfer__title" id={targetHeaderId}>
-                        {titles[1]}
+                        {resolvedTitles[1]}
                     </h3>
                     <span className="transfer__count">{targetRows.length}</span>
                 </header>
@@ -542,7 +549,7 @@ const Transfer: FC<TransferProps> = ({
                     onScroll={virtual ? onTargetScroll : (void 0)}
                 >
                     {targetRows.length === 0 ? (
-                        <div className="transfer__empty">{emptyTarget}</div>
+                        <div className="transfer__empty">{resolvedEmptyTarget}</div>
                     ) : (
                         <>
                             {virtual && targetStart > 0 ? (

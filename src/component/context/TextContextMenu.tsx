@@ -12,6 +12,7 @@ import Icon from "../icon/Icon";
 import Portal from "../foundation/Portal";
 import Surface from "../surface/Surface";
 import useDismiss from "../foundation/useDismiss";
+import { useInternational, type InternationalContextValue } from "../../international";
 import "./TextContextMenu.css";
 
 interface TextTarget {
@@ -71,6 +72,7 @@ const resolveTarget: (element: Element) => TextTarget | null = (
  * @returns A singleton document-level text menu.
  */
 const TextContextMenu: FC = () => {
+    const { t }: InternationalContextValue = useInternational();
     const panelRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
     const timerRef: RefObject<number | null> = useRef<number | null>(null);
     const pressRef: RefObject<PressState | null> = useRef<PressState | null>(null);
@@ -333,7 +335,7 @@ const TextContextMenu: FC = () => {
                 tone="neutral"
                 role="menu"
                 tabIndex={-1}
-                aria-label="Text actions"
+                aria-label={t("textActions")}
                 onKeyDown={(event: ReactKeyboardEvent<HTMLDivElement>): void => {
                     if (event.key === "Escape") {
                         event.preventDefault();
@@ -341,7 +343,7 @@ const TextContextMenu: FC = () => {
                     }
                 }}
             >
-                <div className="context-menu__header">Text</div>
+                <div className="context-menu__header">{t("text")}</div>
                 <div className="context-menu__item">
                     <button
                         type="button"
@@ -352,7 +354,7 @@ const TextContextMenu: FC = () => {
                         <span className="context-menu__item-icon">
                             <Icon name="Clipboard" size={15} />
                         </span>
-                        <span className="context-menu__item-label">Copy</span>
+                        <span className="context-menu__item-label">{t("copy")}</span>
                     </button>
                 </div>
                 <div className="context-menu__item">
@@ -368,7 +370,7 @@ const TextContextMenu: FC = () => {
                         <span className="context-menu__item-icon">
                             <Icon name="Clipboard" size={15} />
                         </span>
-                        <span className="context-menu__item-label">Paste</span>
+                        <span className="context-menu__item-label">{t("paste")}</span>
                     </button>
                 </div>
                 <div className="context-menu__item">
@@ -381,7 +383,7 @@ const TextContextMenu: FC = () => {
                         <span className="context-menu__item-icon">
                             <Icon name="Select" size={15} />
                         </span>
-                        <span className="context-menu__item-label">Select</span>
+                        <span className="context-menu__item-label">{t("select")}</span>
                     </button>
                 </div>
             </Surface>

@@ -1,4 +1,5 @@
 import type { CSSProperties, FC, HTMLAttributes, Ref } from "react";
+import { useInternational, type InternationalContextValue } from "../../international";
 import cx from "../foundation/cx";
 import "./ProgressRing.css";
 
@@ -40,6 +41,7 @@ const ProgressRing: FC<ProgressRingProps> = ({
     ref,
     ...rest
 }: ProgressRingProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const clampedValue: number = Math.min(100, Math.max(0, Number.isFinite(value) ? value : 0));
     const center: number = size / 2;
     const radius: number = Math.max((size - stroke) / 2, 1);
@@ -64,7 +66,7 @@ const ProgressRing: FC<ProgressRingProps> = ({
             aria-valuemax={100}
             aria-valuenow={percent}
             aria-valuetext={percentLabel}
-            aria-label={hasLabel ? label : "Progress"}
+            aria-label={hasLabel ? label : t("progress")}
             {...rest}
         >
             <svg

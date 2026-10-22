@@ -10,10 +10,10 @@ const typeScale: ReadonlyArray<readonly [TextVariant, string, string]> = [
     ["h2", "Heading 2", "32 / 600"],
     ["h3", "Heading 3", "24 / 600"],
     ["h4", "Heading 4", "20 / 600"],
-    ["body", "Body", "16 / 400"],
-    ["body-sm", "Body small", "14 / 400"],
-    ["label", "Label", "12 / 500"],
-    ["mono", "Mono", "12 / 500"],
+    ["body", "Body", "18 / 400"],
+    ["body-sm", "Body small", "17 / 400"],
+    ["label", "Label", "16 / 500"],
+    ["mono", "Mono", "16 / 500"],
 ];
 
 const typographyCode: string = `<Text variant="display">The quick brown fox</Text>

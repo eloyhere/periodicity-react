@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Project manager — files, views, pager, dependencies, and project I/O
+﻿/* ==========================================================================
+   Project manager 鈥?files, views, pager, dependencies, and project I/O
    ========================================================================== */
 
 .project-manager {
@@ -69,9 +69,9 @@
 .project-manager__project-name {
     overflow: hidden;
     color: var(--text);
-    font-family: var(--font-sans);
-    font-size: 13px;
-    font-weight: 600;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, 600);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -79,7 +79,7 @@
 .project-manager__project-meta {
     overflow: hidden;
     color: var(--muted);
-    font-size: 10px;
+    font-size: var(--type-label);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -113,7 +113,7 @@
 
 .project-manager__file-name {
     overflow: hidden;
-    font-size: 12px;
+    font-size: var(--type-label);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -147,9 +147,9 @@
 .project-manager__eyebrow {
     overflow: hidden;
     color: var(--text);
-    font-family: var(--font-sans);
-    font-size: 14px;
-    font-weight: 600;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-body-sm);
+    font-weight: var(--font-weight-current, 600);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -157,8 +157,8 @@
 .project-manager__path {
     overflow: hidden;
     color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 10px;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -220,15 +220,15 @@
 
 .project-manager__stat-value {
     color: var(--text);
-    font-family: var(--font-sans);
-    font-size: 24px;
-    font-weight: 600;
-    line-height: 1;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-h3);
+    font-weight: var(--font-weight-current, 600);
+    line-height: var(--font-leading-current, 1);
 }
 
 .project-manager__stat-label {
     color: var(--muted);
-    font-size: 11px;
+    font-size: var(--type-label);
 }
 
 .project-manager__file-summary {
@@ -253,24 +253,24 @@
 .project-manager__facts dt {
     flex: 0 0 110px;
     color: var(--muted);
-    font-size: 11px;
+    font-size: var(--type-label);
 }
 
 .project-manager__facts dd {
     flex: 1 1 calc(100% - 110px);
     margin: 0;
     color: var(--text);
-    font-family: var(--font-mono);
-    font-size: 11px;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
     overflow-wrap: anywhere;
 }
 
 .project-manager__prose {
     max-width: 720px;
     color: var(--text);
-    font-family: var(--font-serif);
-    font-size: 15px;
-    line-height: 1.75;
+    font-family: var(--font-family-current, var(--font-serif));
+    font-size: var(--type-body-sm);
+    line-height: var(--font-leading-current, 1.75);
     white-space: pre-wrap;
 }
 
@@ -282,9 +282,9 @@
     border-radius: var(--radius-xs);
     background: var(--color-surface-container-low);
     color: var(--text);
-    font-family: var(--font-mono);
-    font-size: 12px;
-    line-height: 1.6;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
+    line-height: var(--font-leading-current, 1.6);
     white-space: pre;
 }
 
@@ -296,9 +296,9 @@
     border-radius: var(--radius-xs);
     background: var(--color-surface);
     color: var(--text);
-    font-family: var(--font-mono);
-    font-size: 12px;
-    line-height: 1.6;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
+    line-height: var(--font-leading-current, 1.6);
     outline: none;
     resize: vertical;
 }
@@ -334,11 +334,11 @@
 .project-manager__layer-title {
     margin: 0 0 var(--space-2);
     color: var(--muted);
-    font-family: var(--font-sans);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, 600);
+    letter-spacing: var(--font-tracking-current, 0.05em);
+    text-transform: var(--font-transform-current, uppercase);
 }
 
 .project-manager__node-card {
@@ -352,8 +352,8 @@
     background: transparent;
     color: var(--text);
     font: inherit;
-    font-size: 12px;
-    text-align: left;
+    font-size: var(--type-label);
+    text-align: var(--font-align-current, left);
     cursor: pointer;
     gap: 6px;
 }
@@ -365,7 +365,7 @@
 .project-manager__node-count {
     margin-left: auto;
     color: var(--muted);
-    font-size: 10px;
+    font-size: var(--type-label);
 }
 
 .project-manager__dependency-grid {
@@ -397,8 +397,8 @@
     padding: 0 var(--space-2);
     border-bottom: 1px solid var(--line);
     color: var(--text);
-    font-family: var(--font-mono);
-    font-size: 11px;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
     overflow-wrap: anywhere;
     gap: 6px;
 }
@@ -406,8 +406,8 @@
 .project-manager__muted {
     margin-left: auto;
     color: var(--muted);
-    font-family: var(--font-sans);
-    font-size: 10px;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-label);
 }
 
 .project-manager__relationship-kind {
@@ -416,9 +416,9 @@
     border-radius: var(--radius-xs);
     background: var(--color-surface-container);
     color: var(--muted);
-    font-family: var(--font-sans);
-    font-size: 9px;
-    text-transform: uppercase;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-label);
+    text-transform: var(--font-transform-current, uppercase);
 }
 
 .project-manager__link {
@@ -428,7 +428,7 @@
     background: transparent;
     color: var(--color-primary);
     font: inherit;
-    font-size: 10px;
+    font-size: var(--type-label);
     text-decoration: underline;
     cursor: pointer;
 }
@@ -437,7 +437,7 @@
     margin: 0;
     padding: var(--space-4);
     color: var(--muted);
-    font-size: 12px;
+    font-size: var(--type-label);
 }
 
 @media (max-width: 1080px) {
@@ -551,17 +551,17 @@
     border-radius: var(--radius-xs);
     background: var(--color-surface-container);
     color: var(--muted);
-    font-family: var(--font-sans);
-    font-size: 9px;
-    text-transform: uppercase;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-label);
+    text-transform: var(--font-transform-current, uppercase);
 }
 
 .project-manager__outline-label {
     min-width: 0;
     overflow: hidden;
     color: var(--text);
-    font-family: var(--font-mono);
-    font-size: 11px;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -569,8 +569,8 @@
 .project-manager__outline-line {
     margin-left: auto;
     color: var(--faint);
-    font-family: var(--font-mono);
-    font-size: 9px;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
 }
 
 @media (max-width: 900px) {
@@ -592,9 +592,9 @@
 .project-manager__html {
     max-width: 760px;
     color: var(--text);
-    font-family: var(--font-sans);
-    font-size: 14px;
-    line-height: 1.7;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-body-sm);
+    line-height: var(--font-leading-current, 1.7);
     overflow-wrap: anywhere;
 }
 
@@ -606,20 +606,20 @@
 .project-manager__html h6 {
     margin: 1.1em 0 0.45em;
     color: var(--text);
-    font-family: var(--font-display);
-    line-height: 1.25;
+    font-family: var(--font-family-current, var(--font-display));
+    line-height: var(--font-leading-current, 1.25);
 }
 
 .project-manager__html h1 {
-    font-size: 28px;
+    font-size: var(--type-h3);
 }
 
 .project-manager__html h2 {
-    font-size: 22px;
+    font-size: var(--type-h4);
 }
 
 .project-manager__html h3 {
-    font-size: 18px;
+    font-size: var(--type-body);
 }
 
 .project-manager__html p {
@@ -653,14 +653,14 @@
 .project-manager__html table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 12px;
+    font-size: var(--type-label);
 }
 
 .project-manager__html th,
 .project-manager__html td {
     padding: 6px 10px;
     border: 1px solid var(--line);
-    text-align: left;
+    text-align: var(--font-align-current, left);
 }
 
 .project-manager__code .token-comment,
@@ -677,7 +677,7 @@
 .project-manager__code .token-keyword,
 .project-manager__html .token-keyword {
     color: #7b1fa2;
-    font-weight: 600;
+    font-weight: var(--font-weight-current, 600);
 }
 
 .project-manager__code .token-number,

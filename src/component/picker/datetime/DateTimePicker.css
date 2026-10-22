@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Date-time picker — custom panel with editable year and month
+﻿/* ==========================================================================
+   Date-time picker 鈥?custom panel with editable year and month
    ========================================================================== */
 
 .date-time-picker {
@@ -30,9 +30,9 @@
     border: 0;
     background: transparent;
     color: var(--text);
-    font-family: var(--font-sans);
-    font-size: 14px;
-    text-align: left;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-body-sm);
+    text-align: var(--font-align-current, left);
     cursor: pointer;
     outline: none;
     -webkit-tap-highlight-color: transparent;
@@ -66,7 +66,7 @@
     flex: 1 1 0;
     flex-direction: column;
     color: var(--muted);
-    font-size: 11px;
+    font-size: var(--type-label);
     gap: 3px;
 }
 
@@ -80,7 +80,7 @@
     background: var(--color-surface);
     color: var(--text);
     font: inherit;
-    font-size: 13px;
+    font-size: var(--type-label);
 }
 
 .date-time-picker__weekdays,
@@ -92,10 +92,10 @@
 .date-time-picker__weekdays span {
     flex: 0 0 calc(100% / 7);
     color: var(--muted);
-    font-size: 10px;
-    font-weight: 600;
-    line-height: 24px;
-    text-align: center;
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, 600);
+    line-height: var(--font-leading-current, 24px);
+    text-align: var(--font-align-current, center);
 }
 
 .date-time-picker__days {
@@ -128,7 +128,7 @@
     background: transparent;
     color: var(--text);
     font: inherit;
-    font-size: 13px;
+    font-size: var(--type-label);
     cursor: pointer;
 }
 

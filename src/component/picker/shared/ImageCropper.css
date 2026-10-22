@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Image cropper — fixed crop window over a pannable, zoomable image
+﻿/* ==========================================================================
+   Image cropper 鈥?fixed crop window over a pannable, zoomable image
    ========================================================================== */
 
 .image-cropper {
@@ -76,10 +76,10 @@
     max-width: 42ch;
     margin: 0;
     color: var(--muted);
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     font-size: var(--type-label-sm);
-    line-height: var(--leading-normal);
-    text-align: center;
+    line-height: var(--font-leading-current, var(--leading-normal));
+    text-align: var(--font-align-current, center);
 }
 
 @media (prefers-reduced-motion: reduce) {

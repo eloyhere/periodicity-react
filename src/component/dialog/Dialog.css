@@ -1,4 +1,4 @@
-.dialog {
+﻿.dialog {
     --dialog-max-height: min(86vh, 760px);
 
     position: fixed;
@@ -84,21 +84,21 @@
 
 .dialog__eyebrow {
     color: var(--color-primary);
-    font-family: var(--font-mono);
+    font-family: var(--font-family-current, var(--font-mono));
     font-size: var(--type-mono);
-    font-weight: var(--weight-medium);
-    letter-spacing: var(--tracking-widest);
-    line-height: var(--leading-snug);
-    text-transform: uppercase;
+    font-weight: var(--font-weight-current, var(--weight-medium));
+    letter-spacing: var(--font-tracking-current, var(--tracking-widest));
+    line-height: var(--font-leading-current, var(--leading-snug));
+    text-transform: var(--font-transform-current, uppercase);
 }
 
 .dialog__title {
     color: var(--color-on-surface);
-    font-family: var(--font-display);
+    font-family: var(--font-family-current, var(--font-display));
     font-size: var(--type-h3);
-    font-weight: var(--weight-medium);
-    letter-spacing: var(--tracking-tight);
-    line-height: var(--leading-tight);
+    font-weight: var(--font-weight-current, var(--weight-medium));
+    letter-spacing: var(--font-tracking-current, var(--tracking-tight));
+    line-height: var(--font-leading-current, var(--leading-tight));
     text-wrap: balance;
 }
 
@@ -115,7 +115,7 @@
     background: var(--color-surface-container-lowest);
     color: var(--color-on-surface-variant);
     font-size: var(--type-h4);
-    line-height: 1;
+    line-height: var(--font-leading-current, 1);
     cursor: pointer;
     touch-action: manipulation;
     transition:
@@ -150,14 +150,14 @@
     overscroll-behavior: contain;
     color: var(--text-soft);
     font-size: var(--type-body);
-    line-height: var(--leading-relaxed);
+    line-height: var(--font-leading-current, var(--leading-relaxed));
     gap: var(--space-4);
 }
 
 .dialog__description {
     color: var(--text-soft);
     font-size: var(--type-body);
-    line-height: var(--leading-relaxed);
+    line-height: var(--font-leading-current, var(--leading-relaxed));
 }
 
 .dialog__footer {

@@ -1,41 +1,30 @@
 /**
- * Message shown when the parentheses in a telephone value are unbalanced.
- * Type: constant.
- * Fields: none.
+ * Localisable validation messages for telephone fields.
+ * Type: interface.
+ * Fields: required, shape, parentheses, digits.
  * @example
- * const message = TelephoneParenthesesMessage;
+ * const messages: TelephoneValidationMessages = { required: "Required", shape: "Digits only", parentheses: "Close parentheses", digits: "5-15 digits" };
  */
-const TelephoneParenthesesMessage: string =
-    "Close the parentheses in the telephone number, for example +1 (555) 123-4567.";
+export interface TelephoneValidationMessages {
+    required: string;
+    shape: string;
+    parentheses: string;
+    digits: string;
+}
 
 /**
- * Message shown when a telephone value contains unsupported characters or punctuation.
+ * Default messages used when a caller does not supply localised copy.
  * Type: constant.
- * Fields: none.
+ * Fields: required, shape, parentheses, digits.
  * @example
- * const message = TelephoneShapeMessage;
+ * const message = DefaultTelephoneValidationMessages.required;
  */
-const TelephoneShapeMessage: string =
-    "Use only digits, spaces, hyphens, and parentheses, with an optional leading +.";
-
-/**
- * Message shown when a telephone value has an unsuitable number of digits.
- * Type: constant.
- * Fields: none.
- * @example
- * const message = TelephoneDigitsMessage;
- */
-const TelephoneDigitsMessage: string =
-    "Enter a telephone number with 5 to 15 digits, for example +44 7700 900000.";
-
-/**
- * Message shown when a required telephone field is left empty.
- * Type: constant.
- * Fields: none.
- * @example
- * const message = TelephoneRequiredMessage;
- */
-const TelephoneRequiredMessage: string = "Enter a telephone number, for example +44 7700 900000.";
+const DefaultTelephoneValidationMessages: TelephoneValidationMessages = {
+    required: "Enter a telephone number, for example +44 7700 900000.",
+    shape: "Use only digits, spaces, hyphens, and parentheses, with an optional leading +.",
+    parentheses: "Close the parentheses in the telephone number, for example +1 (555) 123-4567.",
+    digits: "Enter a telephone number with 5 to 15 digits, for example +44 7700 900000.",
+};
 
 /**
  * Whitespace recognised by the telephone filter.
@@ -286,29 +275,35 @@ export const sanitiseTelephoneInput: (value: string) => string = (value: string)
  * An empty optional value is accepted; an empty required value returns a required message.
  * @param value - Telephone value to validate.
  * @param required - Whether an empty value should be reported as an error.
+ * @param messages - Localised validation messages.
  * @example
- * const error = validateTelephone("+44 7700 900000");
+ * const error = validateTelephone("+44 7700 900000", false, messages);
  * @returns An error message, or (void 0) when the value is acceptable.
  */
-export const validateTelephone: (value: string, required?: boolean) => string | void = (
+export const validateTelephone: (
+    value: string,
+    required?: boolean,
+    messages?: TelephoneValidationMessages,
+) => string | void = (
     value: string,
     required: boolean = false,
+    messages: TelephoneValidationMessages = DefaultTelephoneValidationMessages,
 ): string | void => {
     if (value.length === 0) {
-        return required ? TelephoneRequiredMessage : (void 0);
+        return required ? messages.required : (void 0);
     }
 
     if (/[\r\n\u2028\u2029]/.test(value)) {
-        return TelephoneShapeMessage;
+        return messages.shape;
     }
 
     if (!TelephoneParenthesesPattern.test(value)) {
-        return TelephoneParenthesesMessage;
+        return messages.parentheses;
     }
 
     if (!TelephoneShapePattern.test(value)) {
-        return TelephoneShapeMessage;
+        return messages.shape;
     }
 
-    return TelephoneDigitPattern.test(value) ? (void 0) : TelephoneDigitsMessage;
+    return TelephoneDigitPattern.test(value) ? (void 0) : messages.digits;
 };

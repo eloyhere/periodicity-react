@@ -1,4 +1,4 @@
-.coordinator {
+﻿.coordinator {
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -122,10 +122,10 @@
     display: flex;
     flex-direction: column;
     color: var(--color-on-primary);
-    font-size: clamp(24px, 4vw, 36px);
-    font-weight: 700;
-    line-height: 1.08;
-    letter-spacing: -0.02em;
+    font-size: var(--type-h2);
+    font-weight: var(--font-weight-current, 700);
+    line-height: var(--font-leading-current, 1.08);
+    letter-spacing: var(--font-tracking-current, -0.02em);
     pointer-events: none;
     transition:
         opacity 80ms linear,
@@ -134,9 +134,9 @@
 
 .collapse__subtitle {
     margin-top: 4px;
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.01em;
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, 500);
+    letter-spacing: var(--font-tracking-current, 0.01em);
     opacity: 0.8;
 }
 
@@ -181,8 +181,8 @@
 .toolbar .toolbar__navigation .button__slot {
     padding: 0;
     color: inherit;
-    font-size: 18px;
-    line-height: 1;
+    font-size: var(--type-body);
+    line-height: var(--font-leading-current, 1);
 }
 
 .toolbar .toolbar__navigation:hover {
@@ -200,13 +200,13 @@
     flex-direction: column;
     min-width: 0;
     padding: 0 4px;
-    line-height: 1.2;
+    line-height: var(--font-leading-current, 1.2);
 }
 
 .toolbar__title {
     overflow: hidden;
-    font-size: 18px;
-    font-weight: 600;
+    font-size: var(--type-body);
+    font-weight: var(--font-weight-current, 600);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -214,7 +214,7 @@
 .toolbar__subtitle {
     overflow: hidden;
     margin-top: 2px;
-    font-size: 11px;
+    font-size: var(--type-label);
     opacity: 0.8;
     text-overflow: ellipsis;
     white-space: nowrap;

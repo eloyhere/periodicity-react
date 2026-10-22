@@ -9,6 +9,11 @@ import type { LocaleCode } from "../international";
 type WordMap = Readonly<Record<string, string>>;
 
 const zh: WordMap = {
+    BarChart: "柱状统计图",
+    PieChart: "饼状统计图",
+    LineChart: "折线统计图",
+    ScatterChart: "散点统计图",
+    Chart: "图表",
     Button: "按钮",
     Text: "文本",
     Input: "输入",
@@ -105,6 +110,11 @@ const zh: WordMap = {
 };
 
 const ja: WordMap = {
+    BarChart: "棒グラフ",
+    PieChart: "円グラフ",
+    LineChart: "折れ線グラフ",
+    ScatterChart: "散布図",
+    Chart: "チャート",
     Button: "ボタン",
     Text: "テキスト",
     Input: "入力",
@@ -201,6 +211,11 @@ const ja: WordMap = {
 };
 
 const ko: WordMap = {
+    BarChart: "막대형 차트",
+    PieChart: "원형 차트",
+    LineChart: "꺾은선 차트",
+    ScatterChart: "산점도 차트",
+    Chart: "차트",
     Button: "버튼",
     Text: "텍스트",
     Input: "입력",
@@ -297,6 +312,11 @@ const ko: WordMap = {
 };
 
 const es: WordMap = {
+    BarChart: "gráfico de barras",
+    PieChart: "gráfico circular",
+    LineChart: "gráfico de líneas",
+    ScatterChart: "gráfico de dispersión",
+    Chart: "gráfico",
     Button: "Botón",
     Text: "Texto",
     Input: "Entrada",
@@ -393,6 +413,11 @@ const es: WordMap = {
 };
 
 const pt: WordMap = {
+    BarChart: "gráfico de barras",
+    PieChart: "gráfico de pizza",
+    LineChart: "gráfico de linhas",
+    ScatterChart: "gráfico de dispersão",
+    Chart: "gráfico",
     Button: "Botão",
     Text: "Texto",
     Input: "Entrada",
@@ -527,6 +552,13 @@ export const localizeComponentName: (name: string, locale: LocaleCode) => string
 
     if (Object.keys(map).length === 0) {
         return name;
+    }
+
+    const bare: string = name.replace(/^Periodicity/, "");
+    const direct: string | void = map[bare];
+
+    if (direct !== (void 0)) {
+        return `${bare} ${direct}`;
     }
 
     const words: string[] = splitName(name);

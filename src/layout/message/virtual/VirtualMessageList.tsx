@@ -24,6 +24,7 @@ import type { ListEntry } from "../../list/adapter";
 import type { MessageAction, MessageAdapter, MessageItem } from "../adapter";
 import { createMessageAdapter } from "../adapter";
 import MessageContextMenu from "../MessageContextMenu";
+import type { MessageSlots } from "../slots";
 import { useMessageSelection, type MessageSelection } from "../useMessageSelection";
 import { useInternational, type InternationalContextValue } from "../../../international";
 import "../Message.css";
@@ -35,7 +36,7 @@ import "../Message.css";
  * onDelete, onRecall, onFavourite, onCopyMessage, copyToClipboard, onRetry, onMessageClick,
  * onMessageMenuOpenChange, selectMode, defaultSelectMode, onSelectModeChange, selectedIds,
  * defaultSelectedIds, onSelectionChange, height, itemHeight, empty, loading, loadingLabel,
- * disabled, className, ref, plus native div attributes and events.
+ * disabled, slots, className, ref, plus native div attributes and events.
  * @example
  * <VirtualMessageList messages={messages} height={360} itemHeight={84} />
  */
@@ -70,6 +71,8 @@ export interface VirtualMessageListProps
     /** Accessible loading label; defaults to the localised Loading messages label. */
     loadingLabel?: string;
     disabled?: boolean;
+    /** Per-message avatar, bubble, and context-menu render slots. */
+    slots?: MessageSlots;
     className?: string;
     ref?: Ref<HTMLDivElement>;
 }
@@ -109,6 +112,7 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
     loading = false,
     loadingLabel,
     disabled = false,
+    slots,
     className = "",
     style,
     "aria-label": ariaLabel,
@@ -344,8 +348,9 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
                         const self: boolean =
                             message.self === true || message.author === currentUser;
                         const messageDisabled: boolean = disabled || message.disabled === true;
+                        const rowIndex: number = start + index;
                         const rowStyle: CSSProperties = {
-                            top: (start + index) * itemHeight,
+                            top: rowIndex * itemHeight,
                             height: itemHeight,
                         };
 
@@ -397,11 +402,11 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
                                         />
                                     </span>
                                 ) : null}
-                                <Avatar
-                                    name={message.author}
-                                    src={message.avatar}
-                                    size="sm"
-                                />
+                                {slots?.avatar === (void 0) ? (
+                                    <Avatar name={message.author} src={message.avatar} size="sm" />
+                                ) : (
+                                    slots.avatar(rowIndex, message)
+                                )}
                                 <div className="message__body">
                                     {self ? null : (
                                         <span className="message__author">{message.author}</span>
@@ -411,6 +416,7 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
                                         self={self}
                                         onAction={act}
                                         disabled={messageDisabled}
+                                        menu={slots?.messageContext?.(rowIndex, message)}
                                         onOpenChange={(open: boolean): void =>
                                             onMessageMenuOpenChange?.(open, message)
                                         }
@@ -422,7 +428,9 @@ const VirtualMessageList: (props: VirtualMessageListProps) => ReactNode = ({
                                                 trigger: ["hover", "click"],
                                             }}
                                         >
-                                            {message.content}
+                                            {slots?.message === (void 0)
+                                                ? message.content
+                                                : slots.message(rowIndex, message)}
                                         </Surface>
                                     </MessageContextMenu>
                                     <div className="message__meta">

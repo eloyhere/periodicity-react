@@ -1,4 +1,4 @@
-.divider {
+﻿.divider {
     display: flex;
     flex: none;
     align-items: center;
@@ -36,12 +36,12 @@
 .divider__label {
     flex: none;
     color: var(--color-on-surface-variant);
-    font-family: var(--font-mono);
+    font-family: var(--font-family-current, var(--font-mono));
     font-size: var(--type-mono);
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-widest);
-    line-height: var(--leading-snug);
-    text-transform: uppercase;
+    font-weight: var(--font-weight-current, var(--weight-semibold));
+    letter-spacing: var(--font-tracking-current, var(--tracking-widest));
+    line-height: var(--font-leading-current, var(--leading-snug));
+    text-transform: var(--font-transform-current, uppercase);
     white-space: nowrap;
 }
 

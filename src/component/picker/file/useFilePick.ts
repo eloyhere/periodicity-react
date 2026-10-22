@@ -61,6 +61,15 @@ export const resolveFileAccept: (accept?: FilePickAccept) => string = (
 const canPickFiles: () => boolean = (): boolean =>
     typeof document !== "undefined" && typeof window !== "undefined";
 
+/** Poll interval that notices a native selection if `change` is delayed. */
+const FileCheckInterval: number = 150;
+
+/** Delay before a returning window focus is treated as a cancellation. */
+const FocusSettleDelay: number = 500;
+
+/** Delay before a native `cancel` settles, so a selection change can win. */
+const CancelSettleDelay: number = 100;
+
 /**
  * Opens a native file input and resolves with the chosen files.
  * The hook drives the `input[type="file"]` supplied through `inputRef`, which is
@@ -111,6 +120,8 @@ export const useFilePick: (accept?: FilePickAccept, options?: UseFilePickOptions
             const input: HTMLInputElement = provided ?? document.createElement("input");
             let settled: boolean = false;
             let focusTimer: number | null = null;
+            let cancelTimer: number | null = null;
+            let pollTimer: number | null = null;
             let detach: () => void = (): void => {};
 
             const settlePending: () => void = (): void => {
@@ -145,7 +156,15 @@ export const useFilePick: (accept?: FilePickAccept, options?: UseFilePickOptions
 
             const handleCancel: (event: Event) => void = (event: Event): void => {
                 event.stopPropagation();
-                settle([]);
+                // Some engines report a cancel around the same moment as the
+                // selection change; give a queued change the chance to win.
+                cancelTimer = window.setTimeout((): void => {
+                    cancelTimer = null;
+
+                    if (!settled) {
+                        settle(Array.from(input.files ?? []));
+                    }
+                }, CancelSettleDelay);
             };
 
             const handleInputClick: (event: Event) => void = (event: Event): void => {
@@ -155,16 +174,32 @@ export const useFilePick: (accept?: FilePickAccept, options?: UseFilePickOptions
             };
 
             const handleWindowFocus: () => void = (): void => {
-                // Older browsers do not emit `cancel`; the returning window focus
-                // is the fallback signal. The timeout lets the pending `change`
-                // event settle first.
+                // Focus can arrive before `change`; wait long enough for the
+                // native change (or the file poll) to deliver the selection
+                // before treating an empty input as a cancellation.
+                if (focusTimer !== null) {
+                    window.clearTimeout(focusTimer);
+                }
+
                 focusTimer = window.setTimeout((): void => {
                     focusTimer = null;
 
-                    if (!settled && (input.files === null || input.files.length === 0)) {
-                        settle([]);
+                    if (!settled) {
+                        settle(Array.from(input.files ?? []));
                     }
-                }, 0);
+                }, FocusSettleDelay);
+            };
+
+            const handleFilePoll: () => void = (): void => {
+                if (settled) {
+                    return;
+                }
+
+                const chosen: FileList | null = input.files;
+
+                if (chosen !== null && chosen.length > 0) {
+                    settle(Array.from(chosen));
+                }
             };
 
             detach = (): void => {
@@ -177,7 +212,21 @@ export const useFilePick: (accept?: FilePickAccept, options?: UseFilePickOptions
                     window.clearTimeout(focusTimer);
                     focusTimer = null;
                 }
+
+                if (cancelTimer !== null) {
+                    window.clearTimeout(cancelTimer);
+                    cancelTimer = null;
+                }
+
+                if (pollTimer !== null) {
+                    window.clearInterval(pollTimer);
+                    pollTimer = null;
+                }
             };
+
+            if (owned) {
+                input.type = "file";
+            }
 
             input.accept = acceptValue;
             input.multiple = multiple;
@@ -187,7 +236,6 @@ export const useFilePick: (accept?: FilePickAccept, options?: UseFilePickOptions
             }
 
             if (owned) {
-                input.type = "file";
                 input.tabIndex = -1;
                 input.setAttribute("aria-hidden", "true");
                 input.setAttribute("data-file-pick", "true");
@@ -212,6 +260,7 @@ export const useFilePick: (accept?: FilePickAccept, options?: UseFilePickOptions
             input.addEventListener("cancel", handleCancel);
             window.addEventListener("focus", handleWindowFocus);
             pendingRef.current = settlePending;
+            pollTimer = window.setInterval(handleFilePoll, FileCheckInterval);
 
             if (owned && body !== null) {
                 body.appendChild(input);

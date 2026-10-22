@@ -155,8 +155,8 @@ Button 使用 `prefix`、`content`、`suffix` 三个内容自适应 flex 插槽�
 文本输入框使用六个插槽：`prefix`、浮动 `hint`、`message`、`limitation`、`error`、`suffix`。`hint` 是不接收
 指针事件的占位文本，未聚焦时垂直居中，聚焦或有内容时动画缩小并移到左上角；`message` 会被 `error` 替换；
 `limitation` 位于 suffix 下方，显示当前/最小/最大字符数。输入框与按钮都支持悬浮和点击 ripple。聚焦时，边框以
-指针位置为起点展开：outline 的四条边分别从各自线段上的指针投影点向两端展开，fill/standard 只让底部边线从指针
-位置向左右展开，并采用 1 秒的先快后慢缓动。
+鼠标位置为圆心（键盘聚焦时用文本光标，空输入框用字段中心）做径向波纹展示：最近的边先出现，每条边从鼠标在该边
+上的投影点向两端生长，整体使用 1 秒的先快后慢缓动。
 
 ```tsx
 <PeriodicityButton prefix="Plus" content="添加" suffix="ArrowRight" />
@@ -354,10 +354,11 @@ import {
     PeriodicityCommentThread,
     PeriodicityContact,
     PeriodicityMessageList,
+    PeriodicityVirtualCommentThread,
 } from "periodicity-react";
 ```
 
-`PeriodicityContact` 支持搜索、虚拟化、选择和联系人菜单。`PeriodicityMessageList` 支持消息选择、复制、引用、转发、删除、撤回、重试和消息菜单。`PeriodicityChat` 组合联系人列表、会话、输入框和消息操作。`PeriodicityCommentThread` 支持回复、Mention、引用、解决和删除。
+`PeriodicityContact` 支持搜索、虚拟化、选择和联系人菜单。`PeriodicityMessageList` 支持消息选择、复制、引用、转发、删除、撤回、重试和消息菜单。`PeriodicityChat` 组合联系人列表、会话、输入框和消息操作。`PeriodicityCommentThread` 支持回复、Mention、引用、解决和删除。两个评论组件都支持 `comment` slot 整项渲染；联系人、消息和聊天组件提供 `contact`、`context`、`message`、`messageContext`、`avatar` slot，参数为渲染索引与对应数据项。
 
 ## 文件与预览
 

@@ -1,4 +1,4 @@
-.chip {
+﻿.chip {
     --chip-border: var(--color-outline-variant);
     --chip-background: var(--color-surface-container-low);
     --chip-color: var(--color-on-surface);
@@ -35,11 +35,11 @@
     border-radius: inherit;
     background: transparent;
     color: inherit;
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     font-size: var(--type-label);
-    font-weight: var(--weight-medium);
-    line-height: var(--leading-snug);
-    text-align: start;
+    font-weight: var(--font-weight-current, var(--weight-medium));
+    line-height: var(--font-leading-current, var(--leading-snug));
+    text-align: var(--font-align-current, start);
     white-space: nowrap;
     -webkit-tap-highlight-color: transparent;
 }

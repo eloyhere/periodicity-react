@@ -1,0 +1,57 @@
+/* ==========================================================================
+   Font — a scoped typography hierarchy
+   ========================================================================== */
+
+.font {
+    color: var(--font-color-current, inherit);
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-body);
+    font-style: var(--font-style-current, inherit);
+    font-weight: var(--font-weight-current, var(--weight-regular));
+    letter-spacing: var(--font-tracking-current, var(--tracking-normal));
+    line-height: var(--font-leading-current, var(--leading-normal));
+    text-align: var(--font-align-current, inherit);
+    text-transform: var(--font-transform-current, inherit);
+}
+
+.font--level-display {
+    font-size: var(--type-display);
+}
+
+.font--level-h1 {
+    font-size: var(--type-h1);
+}
+
+.font--level-h2 {
+    font-size: var(--type-h2);
+}
+
+.font--level-h3 {
+    font-size: var(--type-h3);
+}
+
+.font--level-h4 {
+    font-size: var(--type-h4);
+}
+
+.font--level-body {
+    font-size: var(--type-body);
+}
+
+.font--level-body-sm {
+    font-size: var(--type-body-sm);
+}
+
+.font--level-label {
+    font-size: var(--type-label);
+}
+
+.font--level-mono {
+    font-size: var(--type-mono);
+}
+
+.font--truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

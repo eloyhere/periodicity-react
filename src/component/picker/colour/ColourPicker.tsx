@@ -11,6 +11,7 @@ import {
     type RefObject,
 } from "react";
 import cx from "../../foundation/cx";
+import { useInternational, type InternationalContextValue } from "../../../international";
 import useControllableState from "../../foundation/useControllableState";
 import useMergedRef from "../../foundation/useMergedRef";
 import { composeEventHandlers } from "../shared/composeEventHandlers";
@@ -104,6 +105,7 @@ const ColourPicker: FC<ColourPickerProps> = ({
     ref,
     ...rest
 }: ColourPickerProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const generatedId: string = useId();
     const inputRef: RefObject<HTMLInputElement | null> = useRef<HTMLInputElement | null>(null);
     const mergedRef: RefCallback<HTMLInputElement> = useMergedRef<HTMLInputElement>(inputRef, ref);
@@ -208,7 +210,7 @@ const ColourPicker: FC<ColourPickerProps> = ({
                 value={currentColour}
                 disabled={disabled}
                 readOnly={readOnly}
-                aria-label={ariaLabel ?? `${label} colour`}
+                aria-label={ariaLabel ?? t("colourPickerAria", { label })}
                 aria-invalid={invalid ? "true" : (void 0)}
                 aria-readonly={readOnly ? "true" : (void 0)}
                 aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}

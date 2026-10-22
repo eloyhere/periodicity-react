@@ -24,6 +24,7 @@ import {
 } from "react";
 import Button from "../../button/Button";
 import Icon from "../../icon/Icon";
+import { useInternational, type InternationalContextValue } from "../../../international";
 import cx from "../../foundation/cx";
 import useControllableState from "../../foundation/useControllableState";
 import useMergedRef from "../../foundation/useMergedRef";
@@ -212,6 +213,7 @@ const NumberPicker: FC<NumberPickerProps> = ({
     ref,
     ...rest
 }: NumberPickerProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const generatedId: string = useId();
     const pickerId: string = id ?? generatedId;
     const invalid: boolean = error !== (void 0) && error.length > 0;
@@ -957,7 +959,7 @@ const NumberPicker: FC<NumberPickerProps> = ({
                     size="sm"
                     variant="ghost"
                     className="number-picker__step"
-                    aria-label={`Increase ${label}`}
+                    aria-label={t("increaseLabel", { label })}
                     disabled={!canIncrease}
                     onClick={increase}
                 >
@@ -1052,7 +1054,7 @@ const NumberPicker: FC<NumberPickerProps> = ({
                         required={required}
                         readOnly={readOnly}
                         role="combobox"
-                        aria-label={`Edit ${label}`}
+                        aria-label={t("editLabel", { label })}
                         aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
                         aria-invalid={invalid ? "true" : (void 0)}
                         aria-autocomplete="list"
@@ -1078,7 +1080,7 @@ const NumberPicker: FC<NumberPickerProps> = ({
                             className="number-picker__suggestions"
                             id={suggestionsId}
                             role="listbox"
-                            aria-label={`${label} suggestions`}
+                            aria-label={t("suggestionsLabel", { label })}
                             onPointerDown={(event: ReactPointerEvent<HTMLUListElement>): void => {
                                 event.stopPropagation();
                             }}
@@ -1111,7 +1113,7 @@ const NumberPicker: FC<NumberPickerProps> = ({
                     size="sm"
                     variant="ghost"
                     className="number-picker__step"
-                    aria-label={`Decrease ${label}`}
+                    aria-label={t("decreaseLabel", { label })}
                     disabled={!canDecrease}
                     onClick={decrease}
                 >

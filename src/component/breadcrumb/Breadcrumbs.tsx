@@ -148,7 +148,7 @@ const Breadcrumbs: FC<BreadcrumbsProps> = ({
     };
 
     return (
-        <nav ref={ref} className={cx("breadcrumbs", className)} aria-label="Breadcrumb" {...rest}>
+        <nav ref={ref} className={cx("breadcrumbs", className)} aria-label={t("breadcrumb")} {...rest}>
             <ol className="breadcrumbs__list">
                 {slots.map((slot: BreadcrumbSlot, slotIndex: number): ReactNode => {
                     const isLast: boolean = slotIndex === slots.length - 1;

@@ -1,6 +1,8 @@
 export { default as International } from "./International";
 export type { InternationalProps } from "./International";
 export type { BuiltInMessages, CommonMessageKey, CommonMessages } from "./builtInMessages";
+export type { ExtraMessageKey, ExtraMessages } from "./extraMessages";
+export { extraMessages } from "./extraMessages";
 export { builtInMessages, resolveLocaleMessages } from "./builtInMessages";
 export {
     DefaultInternationalContext,

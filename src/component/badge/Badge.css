@@ -1,4 +1,4 @@
-.badge {
+﻿.badge {
     --badge-border: var(--color-outline-variant);
     --badge-background: var(--color-surface-container);
     --badge-color: var(--color-on-surface-variant);
@@ -15,12 +15,12 @@
     border-radius: var(--radius-pill);
     background: var(--badge-background);
     color: var(--badge-color);
-    font-family: var(--font-mono);
+    font-family: var(--font-family-current, var(--font-mono));
     font-size: var(--type-mono);
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-wide);
-    line-height: var(--leading-tight);
-    text-transform: uppercase;
+    font-weight: var(--font-weight-current, var(--weight-semibold));
+    letter-spacing: var(--font-tracking-current, var(--tracking-wide));
+    line-height: var(--font-leading-current, var(--leading-tight));
+    text-transform: var(--font-transform-current, uppercase);
     vertical-align: middle;
     white-space: nowrap;
 }
@@ -71,8 +71,8 @@
     min-width: var(--space-5);
     padding: 0 var(--space-1);
     font-variant-numeric: tabular-nums;
-    letter-spacing: var(--tracking-normal);
-    text-transform: none;
+    letter-spacing: var(--font-tracking-current, var(--tracking-normal));
+    text-transform: var(--font-transform-current, none);
 }
 
 .badge--disabled {

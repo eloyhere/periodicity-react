@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Table — semantic Material data table with adapter-backed rows
+﻿/* ==========================================================================
+   Table 鈥?semantic Material data table with adapter-backed rows
    ========================================================================== */
 
 .table {
@@ -22,18 +22,18 @@
     width: 100%;
     border-collapse: collapse;
     color: var(--color-on-surface);
-    font-family: var(--font-sans);
-    font-size: 14px;
-    text-align: left;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-body-sm);
+    text-align: var(--font-align-current, left);
 }
 
 .table__caption {
     padding: var(--space-3) var(--space-4);
     border-bottom: 1px solid var(--line);
     color: var(--color-on-surface-variant);
-    font-size: 12px;
-    font-weight: 500;
-    text-align: left;
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, 500);
+    text-align: var(--font-align-current, left);
 }
 
 .table__element thead th {
@@ -45,10 +45,10 @@
     border-bottom: 1px solid var(--line);
     background: var(--color-surface);
     color: var(--color-on-surface-variant);
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, 500);
+    letter-spacing: var(--font-tracking-current, 0.03em);
+    text-transform: var(--font-transform-current, uppercase);
     white-space: nowrap;
 }
 
@@ -58,23 +58,23 @@
     border-bottom: 1px solid var(--line);
     background: transparent;
     color: var(--color-on-surface);
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: normal;
-    text-align: left;
-    text-transform: none;
+    font-size: var(--type-body-sm);
+    font-weight: var(--font-weight-current, 600);
+    letter-spacing: var(--font-tracking-current, normal);
+    text-align: var(--font-align-current, left);
+    text-transform: var(--font-transform-current, none);
     vertical-align: middle;
     white-space: normal;
 }
 
 .table__element thead th.table__cell--center,
 .table__element tbody th.table__cell--center {
-    text-align: center;
+    text-align: var(--font-align-current, center);
 }
 
 .table__element thead th.table__cell--end,
 .table__element tbody th.table__cell--end {
-    text-align: right;
+    text-align: var(--font-align-current, right);
 }
 
 .table__element td {
@@ -96,11 +96,11 @@
 }
 
 .table__cell--center {
-    text-align: center;
+    text-align: var(--font-align-current, center);
 }
 
 .table__cell--end {
-    text-align: right;
+    text-align: var(--font-align-current, right);
 }
 
 .table__selection {
@@ -137,7 +137,7 @@
 .table__state {
     height: 120px !important;
     color: var(--color-on-surface-variant);
-    text-align: center;
+    text-align: var(--font-align-current, center);
 }
 
 .table__state .spinner {

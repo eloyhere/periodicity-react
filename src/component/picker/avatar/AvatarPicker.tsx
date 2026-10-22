@@ -10,6 +10,7 @@ import {
     type RefObject,
     type SetStateAction,
 } from "react";
+import { useInternational, type InternationalContextValue } from "../../../international";
 import cx from "../../foundation/cx";
 import useMergedRef from "../../foundation/useMergedRef";
 import { useRipple, type RippleHandlers } from "../../foundation/useRipple";
@@ -46,7 +47,7 @@ export interface AvatarPickerSlotContext {
  * Replaceable avatar picker UI.
  * Type: interface.
  * @param avatar - Replaces the default Avatar preview.
- * @param crop - Replaces the crop stage and controls in the editor.
+ * @param crop - Replaces the crop stage inside the editor Dialog; rendered as the Dialog body.
  * Keep avatar content presentational because it renders inside the trigger button.
  * @example
  * <AvatarPicker
@@ -138,6 +139,7 @@ const AvatarPicker: FC<AvatarPickerProps> = ({
     "aria-describedby": ariaDescribedBy,
     ...rest
 }: AvatarPickerProps) => {
+    const { t }: InternationalContextValue = useInternational();
     const generatedId: string = useId();
     const rootRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
     const inputRef: RefObject<HTMLInputElement | null> = useRef<HTMLInputElement | null>(null);
@@ -151,8 +153,8 @@ const AvatarPicker: FC<AvatarPickerProps> = ({
     const hintId: string = `${triggerId}-hint`;
     const errorId: string = `${triggerId}-error`;
     const invalid: boolean = error !== (void 0) && error.length > 0;
-    const chooseLabel: string = labels?.choose ?? "Choose avatar";
-    const editLabel: string = labels?.edit ?? "Edit avatar";
+    const chooseLabel: string = labels?.choose ?? t("chooseAvatar");
+    const editLabel: string = labels?.edit ?? t("editAvatar");
     const displayName: string = name ?? label;
     const [preview, setPreview]: [string | void, Dispatch<SetStateAction<string | void>>] =
         useState<string | void>(defaultValue);
@@ -318,7 +320,10 @@ const AvatarPicker: FC<AvatarPickerProps> = ({
                     type="button"
                     className="avatar-picker__trigger"
                     disabled={disabled}
-                    aria-label={`${label}: ${shown === (void 0) ? chooseLabel : editLabel}`}
+                    aria-label={t("imagePickerAria", {
+                        label,
+                        action: shown === (void 0) ? chooseLabel : editLabel,
+                    })}
                     aria-invalid={invalid ? "true" : (void 0)}
                     aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
                     onClick={openPicker}
@@ -354,12 +359,13 @@ const AvatarPicker: FC<AvatarPickerProps> = ({
                     outputWidth={outputWidth}
                     title={editLabel}
                     labels={labels}
-                    renderCrop={slots?.crop}
                     alt={displayName}
                     onDone={handleDone}
                     onUseOriginal={handleUseOriginal}
                     onAbort={handleAbort}
-                />
+                >
+                    {slots?.crop}
+                </ImageEditorDialog>
             )}
         </div>
     );

@@ -179,7 +179,7 @@ describe("Coordinator wheel fallback", (): void => {
         expect(collapse.style.height).toBe("120px");
     });
 
-    it("leaves a wheel event that a child already prevented", (): void => {
+    it("takes vertical wheel input over from a component when the content cannot scroll", (): void => {
         const { container } = render(
             <Coordinator
                 height={480}
@@ -194,8 +194,48 @@ describe("Coordinator wheel fallback", (): void => {
 
         setMetrics(viewport, { clientHeight: 300, scrollHeight: 240 });
 
-        fireEvent.wheel(consumer, { deltaY: 80 });
+        expect(fireEvent.wheel(consumer, { deltaY: 80 })).toBe(false);
+        expect(collapse.style.height).toBe("120px");
+    });
+
+    it("ignores horizontal and shift-modified wheel gestures", (): void => {
+        const { container } = render(
+            <Coordinator
+                height={480}
+                collapseHeight={200}
+                collapse={<div />}
+                main={<p>Short content</p>}
+            />,
+        );
+        const viewport: HTMLElement = getViewport(container);
+        const collapse: HTMLElement = getCollapse(container);
+
+        setMetrics(viewport, { clientHeight: 300, scrollHeight: 240 });
+
+        expect(fireEvent.wheel(viewport, { deltaX: 90, deltaY: 20 })).toBe(true);
         expect(collapse.style.height).toBe("200px");
+
+        expect(fireEvent.wheel(viewport, { deltaY: 80, shiftKey: true })).toBe(true);
+        expect(collapse.style.height).toBe("200px");
+    });
+
+    it("syncs the collapse area with native scrolling", (): void => {
+        const { container } = render(
+            <Coordinator
+                height={480}
+                collapseHeight={200}
+                collapse={<div />}
+                main={<p>Long content</p>}
+            />,
+        );
+        const viewport: HTMLElement = getViewport(container);
+        const collapse: HTMLElement = getCollapse(container);
+
+        setMetrics(viewport, { clientHeight: 300, scrollHeight: 600 });
+        viewport.scrollTop = 120;
+        fireEvent.scroll(viewport);
+
+        expect(collapse.style.height).toBe("80px");
     });
 
     it("feeds wheel collapse progress into a nested app bar", (): void => {

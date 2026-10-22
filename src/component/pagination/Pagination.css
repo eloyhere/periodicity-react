@@ -1,4 +1,4 @@
-.pagination {
+﻿.pagination {
     display: flex;
     max-width: 100%;
     min-width: 0;
@@ -46,11 +46,11 @@
     background: transparent;
     color: var(--color-on-surface-variant);
     cursor: pointer;
-    font-family: var(--font-mono);
+    font-family: var(--font-family-current, var(--font-mono));
     font-size: var(--type-body-sm);
     font-variant-numeric: tabular-nums;
-    font-weight: var(--weight-semibold);
-    line-height: 1;
+    font-weight: var(--font-weight-current, var(--weight-semibold));
+    line-height: var(--font-leading-current, 1);
     -webkit-tap-highlight-color: transparent;
     appearance: none;
 }
@@ -82,7 +82,7 @@
 
 .pagination__surface--current .pagination__button {
     color: var(--color-primary);
-    font-weight: var(--weight-bold);
+    font-weight: var(--font-weight-current, var(--weight-bold));
 }
 
 .pagination__surface--current .pagination__button:hover:not(:disabled) {
@@ -105,9 +105,9 @@
     min-width: var(--control-sm);
     min-height: var(--control-sm);
     color: var(--color-on-surface-variant);
-    font-family: var(--font-mono);
+    font-family: var(--font-family-current, var(--font-mono));
     font-size: var(--type-body-sm);
-    line-height: 1;
+    line-height: var(--font-leading-current, 1);
 }
 
 @media (pointer: coarse) {

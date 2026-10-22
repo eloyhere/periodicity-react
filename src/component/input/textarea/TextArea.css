@@ -1,5 +1,5 @@
-/* ==========================================================================
-   TextArea — multi-line Material field with floating label and counter.
+﻿/* ==========================================================================
+   TextArea 鈥?multi-line Material field with floating label and counter.
    ========================================================================== */
 
 .text-area {
@@ -64,9 +64,9 @@
     background: transparent;
     color: var(--color-on-surface);
     caret-color: var(--color-primary);
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     font-size: var(--type-body);
-    line-height: var(--leading-normal);
+    line-height: var(--font-leading-current, var(--leading-normal));
     outline: none;
     resize: vertical;
     user-select: text;
@@ -100,9 +100,9 @@
     max-width: calc(100% - var(--text-area-pad-inline) * 2);
     overflow: hidden;
     color: var(--color-on-surface-variant);
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     font-size: var(--type-body);
-    line-height: var(--leading-snug);
+    line-height: var(--font-leading-current, var(--leading-snug));
     text-overflow: ellipsis;
     white-space: nowrap;
     pointer-events: none;
@@ -139,7 +139,7 @@
 .text-area__error,
 .text-area__counter {
     font-size: var(--type-label-sm);
-    line-height: var(--leading-normal);
+    line-height: var(--font-leading-current, var(--leading-normal));
 }
 
 .text-area__hint {
@@ -153,10 +153,10 @@
 .text-area__counter {
     flex: none;
     color: var(--faint);
-    font-family: var(--font-mono);
+    font-family: var(--font-family-current, var(--font-mono));
     font-size: var(--type-mono);
     font-variant-numeric: tabular-nums;
-    letter-spacing: var(--tracking-wide);
+    letter-spacing: var(--font-tracking-current, var(--tracking-wide));
 }
 
 /* ---- outline ------------------------------------------------------------ */
@@ -168,7 +168,7 @@
     padding: 0 5px;
     background: var(--text-area-label-bg);
     color: var(--color-primary);
-    font-size: 12px;
+    font-size: var(--type-label);
     transform: translateY(-50%);
 }
 
@@ -225,7 +225,7 @@
     padding: 0;
     background: transparent;
     color: var(--color-primary);
-    font-size: 12px;
+    font-size: var(--type-label);
     transform: none;
 }
 
@@ -284,7 +284,7 @@
     padding: 0;
     background: transparent;
     color: var(--color-primary);
-    font-size: 12px;
+    font-size: var(--type-label);
     transform: none;
 }
 

@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Picker field — Material outlined shell for native picker controls
+﻿/* ==========================================================================
+   Picker field 鈥?Material outlined shell for native picker controls
    ========================================================================== */
 
 .picker-field {
@@ -11,11 +11,11 @@
 .picker-field__label {
     padding: 0 4px;
     color: var(--color-on-surface-variant);
-    font-family: var(--font-sans);
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    line-height: 1.2;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, 500);
+    letter-spacing: var(--font-tracking-current, 0.02em);
+    line-height: var(--font-leading-current, 1.2);
 }
 
 .picker-field__required {
@@ -58,8 +58,8 @@
     border: 0;
     background: transparent;
     color: var(--text);
-    font-family: var(--font-sans);
-    font-size: 14px;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-body-sm);
     outline: none;
 }
 
@@ -72,8 +72,8 @@
 .picker-field__error {
     margin-top: 4px;
     padding-left: 2px;
-    font-size: 12px;
-    line-height: 1.4;
+    font-size: var(--type-label);
+    line-height: var(--font-leading-current, 1.4);
 }
 
 .picker-field__hint {

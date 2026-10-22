@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Field — label / hint / error chrome shared by every form control.
+﻿/* ==========================================================================
+   Field 鈥?label / hint / error chrome shared by every form control.
    Inputs may override `.field__background` / `.field__edge` in their own CSS.
    ========================================================================== */
 
@@ -29,12 +29,12 @@
     align-items: center;
     gap: var(--space-1);
     color: var(--text-soft);
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     font-size: var(--type-label-sm);
-    font-weight: var(--weight-semibold);
-    letter-spacing: 0.065em;
-    line-height: 1.35;
-    text-transform: uppercase;
+    font-weight: var(--font-weight-current, var(--weight-semibold));
+    letter-spacing: var(--font-tracking-current, 0.065em);
+    line-height: var(--font-leading-current, 1.35);
+    text-transform: var(--font-transform-current, uppercase);
     transition: color var(--duration-fast) var(--ease-standard);
 }
 
@@ -44,10 +44,10 @@
 
 .field__optional {
     color: var(--faint);
-    font-size: 0.7em;
-    font-weight: var(--weight-regular);
-    letter-spacing: 0.04em;
-    text-transform: none;
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, var(--weight-regular));
+    letter-spacing: var(--font-tracking-current, 0.04em);
+    text-transform: var(--font-transform-current, none);
 }
 
 .field__control {
@@ -72,8 +72,8 @@
 .field__hint,
 .field__error,
 .field__counter {
-    font-size: 0.77rem;
-    line-height: 1.45;
+    font-size: var(--type-label);
+    line-height: var(--font-leading-current, 1.45);
 }
 
 .field__hint {
@@ -87,10 +87,10 @@
 .field__counter {
     flex: none;
     color: var(--faint);
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
     font-variant-numeric: tabular-nums;
-    letter-spacing: 0.08em;
+    letter-spacing: var(--font-tracking-current, 0.08em);
 }
 
 .field:focus-within .field__label {
@@ -146,9 +146,9 @@
     background: transparent;
     color: var(--text);
     caret-color: var(--accent);
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     font-size: var(--type-body);
-    line-height: var(--leading-normal);
+    line-height: var(--font-leading-current, var(--leading-normal));
     outline: none;
 }
 

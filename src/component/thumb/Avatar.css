@@ -1,4 +1,4 @@
-.avatar {
+﻿.avatar {
     --avatar-size: var(--space-8);
 
     position: relative;
@@ -76,12 +76,12 @@
 }
 
 .avatar__initials {
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     font-size: var(--type-label-sm);
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-wide);
-    line-height: var(--leading-tight);
-    text-transform: uppercase;
+    font-weight: var(--font-weight-current, var(--weight-semibold));
+    letter-spacing: var(--font-tracking-current, var(--tracking-wide));
+    line-height: var(--font-leading-current, var(--leading-tight));
+    text-transform: var(--font-transform-current, uppercase);
 }
 
 .avatar--lg .avatar__initials,
@@ -119,7 +119,6 @@
     background: var(--color-warning);
     transform: rotate(45deg);
 }
-
 
 .avatar--disabled {
     cursor: not-allowed;

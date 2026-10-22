@@ -3,3 +3,4 @@ export { default as VirtualChat } from "./virtual/VirtualChat";
 export type { ChatProps } from "./normal/Chat";
 export type { VirtualChatProps } from "./virtual/VirtualChat";
 export * from "./adapter";
+export type { ChatSlots } from "./slots";

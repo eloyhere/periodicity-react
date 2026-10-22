@@ -1,4 +1,4 @@
-.tabs {
+﻿.tabs {
     display: flex;
     flex-direction: column;
     min-width: 0;
@@ -105,9 +105,9 @@
     background: transparent;
     color: inherit;
     cursor: pointer;
-    font-family: var(--font-sans);
-    font-weight: var(--weight-semibold);
-    line-height: var(--leading-tight);
+    font-family: var(--font-family-current, var(--font-sans));
+    font-weight: var(--font-weight-current, var(--weight-semibold));
+    line-height: var(--font-leading-current, var(--leading-tight));
     white-space: nowrap;
     -webkit-tap-highlight-color: transparent;
     appearance: none;
@@ -181,11 +181,11 @@
     border-radius: var(--radius-pill);
     background: var(--color-primary-container);
     color: var(--color-primary);
-    font-family: var(--font-mono);
+    font-family: var(--font-family-current, var(--font-mono));
     font-size: var(--type-label-sm);
     font-variant-numeric: tabular-nums;
-    font-weight: var(--weight-semibold);
-    line-height: 1;
+    font-weight: var(--font-weight-current, var(--weight-semibold));
+    line-height: var(--font-leading-current, 1);
 }
 
 .tabs__surface--selected .tabs__badge {

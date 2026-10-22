@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Rate — Material star rating with half-star clipping
+﻿/* ==========================================================================
+   Rate 鈥?Material star rating with half-star clipping
    ========================================================================== */
 
 .rate-field {
@@ -11,11 +11,11 @@
 
 .rate-field__label {
     color: var(--color-on-surface-variant);
-    font-family: var(--font-sans);
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    line-height: 1.2;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, 500);
+    letter-spacing: var(--font-tracking-current, 0.02em);
+    line-height: var(--font-leading-current, 1.2);
 }
 
 .rate-field__stars {
@@ -112,8 +112,8 @@
 .rate-field__error {
     margin: 0;
     padding-left: 2px;
-    font-size: 12px;
-    line-height: 1.4;
+    font-size: var(--type-label);
+    line-height: var(--font-leading-current, 1.4);
 }
 
 .rate-field__hint {

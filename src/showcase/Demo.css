@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Demo and code block — the repeating unit of every documentation page
+﻿/* ==========================================================================
+   Demo and code block 鈥?the repeating unit of every documentation page
    ========================================================================== */
 
 .demo {
@@ -111,11 +111,11 @@
 
 .code-block__language {
     color: var(--color-on-surface-variant);
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, 700);
+    letter-spacing: var(--font-tracking-current, 0.14em);
+    text-transform: var(--font-transform-current, uppercase);
 }
 
 .code-block__pre {
@@ -124,9 +124,9 @@
     margin: 0;
     overflow-x: auto;
     color: var(--color-on-surface);
-    font-family: var(--font-mono);
-    font-size: 12.5px;
-    line-height: 1.65;
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
+    line-height: var(--font-leading-current, 1.65);
     tab-size: 4;
     user-select: none;
     -webkit-user-select: none;
@@ -168,7 +168,7 @@
 
     .code-block__pre {
         padding: var(--space-3) var(--space-4);
-        font-size: 11.5px;
+        font-size: var(--type-label);
     }
 
     .demo__group .input-layout,

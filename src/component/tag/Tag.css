@@ -1,4 +1,4 @@
-.tag {
+﻿.tag {
     --tag-background: var(--color-surface-container);
     --tag-border: var(--color-outline-variant);
     --tag-color: var(--color-on-surface-variant);
@@ -18,7 +18,7 @@
     border-radius: var(--radius-pill);
     background: var(--tag-background);
     color: var(--tag-color);
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     vertical-align: middle;
     user-select: none;
     -webkit-user-select: none;
@@ -32,7 +32,7 @@ button.tag {
     padding: 0;
     border: 1px solid var(--tag-border);
     font: inherit;
-    text-align: start;
+    text-align: var(--font-align-current, start);
     cursor: pointer;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
@@ -62,11 +62,11 @@ button.tag {
     border-radius: inherit;
     background: transparent;
     color: inherit;
-    font-family: var(--font-sans);
+    font-family: var(--font-family-current, var(--font-sans));
     font-size: var(--tag-font-size);
-    font-weight: var(--weight-medium);
-    line-height: var(--leading-snug);
-    text-align: start;
+    font-weight: var(--font-weight-current, var(--weight-medium));
+    line-height: var(--font-leading-current, var(--leading-snug));
+    text-align: var(--font-align-current, start);
     white-space: nowrap;
     -webkit-tap-highlight-color: transparent;
     user-select: none;

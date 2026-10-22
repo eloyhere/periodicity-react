@@ -103,7 +103,6 @@ export function useLoad<T>(
                     open
                     duration={first}
                     onClose={close}
-                    label="Loading"
                 />
             ),
         );
@@ -114,7 +113,7 @@ export function useLoad<T>(
     if (first instanceof Promise) {
         const host: Host = createHost(
             (close: () => void): ReactNode => (
-                <FullscreenLoading open onClose={close} label="Loading" />
+                <FullscreenLoading open onClose={close} />
             ),
         );
 
@@ -128,7 +127,7 @@ export function useLoad<T>(
     const targetRef: RefObject<HTMLElement | null> =
         target instanceof HTMLElement ? { current: target } : target;
     const host: Host = createHost(
-        (): ReactNode => <ElementLoading loading target={targetRef} label="Loading" />,
+        (): ReactNode => <ElementLoading loading target={targetRef} />,
     );
     const timer: number = window.setTimeout(host.close, wait);
 
