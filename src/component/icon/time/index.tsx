@@ -82,9 +82,9 @@ export const timeIcons: Record<TimeIconName, Icon> = {
     Countdown: createIcon(
         "Countdown",
         <>
-            <circle cx="12" cy="11" r="7" />
-            <path d="M12 7.6v3.5l2.4 1.4" />
-            <path d="M12 18.5v3M9.7 19.5 12 21.8l2.3-2.3" />
+            <circle cx="12" cy="10.2" r="6.6" />
+            <path d="M12 6.8v3.5l2.3 1.3" />
+            <path d="M12 17.6v3.8M9.4 19.2 12 21.8l2.6-2.6" />
         </>,
     ),
 };

@@ -36,7 +36,6 @@ import { dynamicExtraIcons } from "../component/icon/dynamic-extra";
 import { computerIcons } from "../component/icon/computer";
 import { programmingIcons } from "../component/icon/programming";
 import { electronicsIcons } from "../component/icon/electronics";
-import { animalExtraIcons } from "../component/icon/animal-extra";
 import { plantIcons } from "../component/icon/plant";
 /**
  * One searchable entry in the icon catalogue.
@@ -95,7 +94,6 @@ export const iconCatalog: IconCatalogEntry[] = [
     ...Object.keys(computerIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "Computer" })),
     ...Object.keys(programmingIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "Programming" })),
     ...Object.keys(electronicsIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "Electronics" })),
-    ...Object.keys(animalExtraIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "AnimalExtra" })),
     ...Object.keys(plantIcons).map((name: string): IconCatalogEntry => ({ name: name as IconName, category: "Plant" })),
 ];
 
@@ -162,7 +160,7 @@ export const iconGroups: readonly IconGroup[] = [
     {
         id: "animal",
         label: "Animal",
-        categories: ["Animal", "AnimalExtra"],
+        categories: ["Animal"],
     },
     {
         id: "plant",

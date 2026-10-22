@@ -36,9 +36,9 @@ export const educationIcons: Record<EducationIconName, Icon> = {
     Notebook: createIcon(
         "Notebook",
         <>
-            <rect x="5.5" y="3" width="14" height="18" rx="2" />
-            <path d="M2.5 7.5h3M2.5 12h3M2.5 16.5h3" />
-            <path d="M10 8h6M10 12h6M10 16h4" />
+            <path d="M2 6h4m-4 4h4m-4 4h4m-4 4h4" />
+            <rect x="4" y="2" width="16" height="20" rx="2" />
+            <path d="M9.5 8h5m-5 4H16m-6.5 4H14" />
         </>,
     ),
     Calculator: createIcon(
@@ -107,10 +107,9 @@ export const educationIcons: Record<EducationIconName, Icon> = {
     Telescope: createIcon(
         "Telescope",
         <>
-            <path d="M3.2 13.6 17.2 3.6 19.8 7.4 5.8 17.4Z" />
-            <path d="M16.4 4.6 18.7 7.8" />
-            <path d="M11.8 13.1v3.4" />
-            <path d="M11.8 16.5 8 21M11.8 16.5l3.8 4.5M11.8 16.5V21" />
+            <path d="m10.065 12.493l-6.18 1.318a.934.934 0 0 1-1.108-.702l-.537-2.15a1.07 1.07 0 0 1 .691-1.265l13.504-4.44m-2.875 6.493l4.332-.924M16 21l-3.105-6.21" />
+            <path d="M16.485 5.94a2 2 0 0 1 1.455-2.425l1.09-.272a1 1 0 0 1 1.212.727l1.515 6.06a1 1 0 0 1-.727 1.213l-1.09.272a2 2 0 0 1-2.425-1.455zM6.158 8.633l1.114 4.456M8 21l3.105-6.21" />
+            <circle cx="12" cy="13" r="2" />
         </>,
     ),
 };

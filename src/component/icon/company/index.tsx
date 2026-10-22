@@ -40,7 +40,8 @@ export type CompanyIconName =
     | "Mastercard"
     | "Stripe"
     | "Shopify"
-    | "X";
+    | "X"
+    | "HighFlyer";
 
 export const companyIcons: Record<CompanyIconName, Icon> = {
     Google: createIcon(
@@ -61,7 +62,12 @@ export const companyIcons: Record<CompanyIconName, Icon> = {
     ),
     Alphabet: createIcon(
         "Alphabet",
-        <path d="M5 19 12 5l7 14M8.4 14h7.2" fill="currentColor" stroke="none" />,
+        <path
+            d="M12 3.4 21 20.6h-3.4l-1.7-3.6H8.1l-1.7 3.6H3L12 3.4Zm-2.5 11.2h5L12 7.6Z"
+            fill="currentColor"
+            fillRule="evenodd"
+            stroke="none"
+        />,
     ),
     AppleLogo: createIcon(
         "AppleLogo",
@@ -202,5 +208,14 @@ export const companyIcons: Record<CompanyIconName, Icon> = {
     X: createIcon(
         "X",
         <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" fill="currentColor" stroke="none" />,
+    ),
+    // High-Flyer (幻方量化): a bold H whose two counters are squares, after the magic square in the name.
+    HighFlyer: createIcon(
+        "HighFlyer",
+        <>
+            <rect x="4.4" y="3.4" width="4.4" height="17.2" rx="1.4" fill="currentColor" stroke="none" />
+            <rect x="15.2" y="3.4" width="4.4" height="17.2" rx="1.4" fill="currentColor" stroke="none" />
+            <rect x="8.6" y="9.8" width="6.8" height="4.4" fill="currentColor" stroke="none" />
+        </>,
     ),
 };

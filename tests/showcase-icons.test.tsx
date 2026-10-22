@@ -1,9 +1,16 @@
 /* eslint-disable @typescript-eslint/typedef -- Test fixtures are intentionally concise. */
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { ToastProvider } from "../src/component/toast";
 import { International } from "../src/international";
 import PrimitivesPage from "../src/showcase/pages/components/PrimitivesPage";
-import { iconCatalog, iconGroups, type IconGroup } from "../src/showcase/iconCatalog";
+import IconsPage from "../src/showcase/pages/foundations/IconsPage";
+import {
+    iconCatalog,
+    iconGroups,
+    type IconCatalogEntry,
+    type IconGroup,
+} from "../src/showcase/iconCatalog";
 
 describe("Icon component page", (): void => {
     it("shows every icon inside its broad group card", (): void => {
@@ -31,6 +38,33 @@ describe("Icon component page", (): void => {
         expect(labels).toContain("Dynamic");
         expect(labels).toContain("Agent");
         expect(container.textContent).toContain("Sum");
+    });
+
+    it("keeps every icon name unique across categories", (): void => {
+        const names: string[] = iconCatalog.map((entry): string => entry.name);
+
+        expect(new Set<string>(names).size).toBe(names.length);
+    });
+
+    it("forces motion playback for the SVG-animated catalogue icons", (): void => {
+        const { container } = render(
+            <ToastProvider>
+                <IconsPage />
+            </ToastProvider>,
+        );
+        const animatedCategories: Set<string> = new Set<string>(["Dynamic", "DynamicExtra"]);
+        const animated: IconCatalogEntry[] = iconCatalog.filter((entry: IconCatalogEntry): boolean =>
+            animatedCategories.has(entry.category),
+        );
+
+        expect(container.querySelectorAll('[data-icon-motion="always"]')).toHaveLength(
+            animated.length,
+        );
+        expect(
+            container.querySelectorAll(
+                '[data-icon-motion="always"] animate, [data-icon-motion="always"] animateTransform',
+            ).length,
+        ).toBeGreaterThan(0);
     });
 
     it("filters icons with the search box", (): void => {

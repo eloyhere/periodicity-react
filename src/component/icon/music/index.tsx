@@ -41,40 +41,11 @@ export const musicIcons: Record<MusicIconName, Icon> = {
     ),
     Piano: createIcon(
         "Piano",
-        <>
-            <rect x="2.5" y="6" width="19" height="12" rx="1.5" />
-            <path d="M7.5 6v12M12 6v12M16.5 6v12" />
-            <rect x="8.9" y="6" width="2.2" height="6" rx="0.3" fill="currentColor" stroke="none" />
-            <rect
-                x="13.4"
-                y="6"
-                width="2.2"
-                height="6"
-                rx="0.3"
-                fill="currentColor"
-                stroke="none"
-            />
-            <rect
-                x="17.9"
-                y="6"
-                width="2.2"
-                height="6"
-                rx="0.3"
-                fill="currentColor"
-                stroke="none"
-            />
-        </>,
+        <path d="M10 13v4m4-4v4m4-4v4M2 13h20m0-1.5A3.5 3.5 0 0 0 18.5 8a3.52 3.52 0 0 1-3.173-2A7 7 0 0 0 2 9v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2zM6 13v4" />,
     ),
     Guitar: createIcon(
         "Guitar",
-        <>
-            <path d="M8.4 18.2c0 2.3 1.6 4.1 3.6 4.1s3.6-1.8 3.6-4.1c0-1.5-.9-2.7-2.2-3.3.9-.7 1.5-1.8 1.5-3 0-2-1.3-3.6-2.9-3.6s-2.9 1.6-2.9 3.6c0 1.2.6 2.3 1.5 3-1.3.6-2.2 1.8-2.2 3.3Z" />
-            <path d="M10.7 8.8V3h2.6v5.8" />
-            <rect x="10.3" y="1.2" width="3.4" height="1.8" rx="0.4" />
-            <path d="M10.3 2.1H8.6M13.7 2.1h1.7" />
-            <circle cx="12" cy="16.4" r="1.6" />
-            <path d="M9.6 19.9h4.8" />
-        </>,
+        <path d="m11.9 12.1l4.514-4.514M20.1 2.3a1 1 0 0 0-1.4 0l-1.114 1.114A2 2 0 0 0 17 4.828v1.344a2 2 0 0 1-.586 1.414A2 2 0 0 1 17.828 7h1.344a2 2 0 0 0 1.414-.586L21.7 5.3a1 1 0 0 0 0-1.4zM6 16l2 2m.23-8.15A3 3 0 0 1 11 8a5 5 0 0 1 5 5a3 3 0 0 1-1.85 2.77l-.92.38A2 2 0 0 0 12 18a4 4 0 0 1-4 4a6 6 0 0 1-6-6a4 4 0 0 1 4-4a2 2 0 0 0 1.85-1.23z" />,
     ),
     Saxophone: createIcon(
         "Saxophone",

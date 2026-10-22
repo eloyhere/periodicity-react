@@ -125,7 +125,16 @@ const IconsPage: FC = () => {
                                 onClick={(): void => copyIcon(entry.name)}
                             >
                                 <span className="foundation-icon__glyph">
-                                    <Icon name={entry.name} size={22} />
+                                    <Icon
+                                        name={entry.name}
+                                        size={22}
+                                        motion={
+                                            entry.category === "Dynamic" ||
+                                            entry.category === "DynamicExtra"
+                                                ? "always"
+                                                : "auto"
+                                        }
+                                    />
                                 </span>
                                 <span className="foundation-icon__name">{entry.name}</span>
                                 <span className="foundation-icon__category">{entry.category}</span>

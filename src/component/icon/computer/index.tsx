@@ -3,14 +3,14 @@ import { createIcon, type Icon } from "../types";
 
 const specs = [
     ["Workstation", "M3 4h18v12H3zM8 20h8M12 16v4"],
-    ["Notebook", "M5 5h14v10H5zM3 19h18l-2-4H5l-2 4Z"],
+    ["NotebookDevice", "M5 5h14v10H5zM3 19h18l-2-4H5l-2 4Z"],
     ["Server", "M4 4h16v6H4zM4 14h16v6H4zM8 7h.01M8 17h.01"],
     ["Database", "M12 3c4 0 7 1.3 7 3s-3 3-7 3-7-1.3-7-3 3-3 7-3ZM5 6v6c0 1.7 3 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3 3 7 3s7-1.3 7-3v-6"],
     ["CloudService", "M7 18a4 4 0 0 1 0-8 6 6 0 0 1 11.5 1.5A3.5 3.5 0 0 1 18 18H7Z"],
     ["Terminal", "M3 4h18v16H3zM6 9l3 3-3 3M12 15h6"],
     ["Code", "M8 6 3 12l5 6M16 6l5 6-5 6M14 4l-4 16"],
     ["BugReport", "M8 8h8v8H8zM9 8V6M15 8V6M9 16v2M15 16v2M8 11H5M8 14H5M16 11h3M16 14h3M12 5v3M12 16v3"],
-    ["Chip", "M7 7h10v10H7zM9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"],
+    ["Microchip", "M7 7h10v10H7zM9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"],
     ["Motherboard", "M4 4h16v16H4zM8 8h4v4H8zM15 7h2M15 11h2M8 15h8M15 15h2"],
     ["KeyboardDevice", "M3 7h18v10H3zM6 10h.01M9 10h.01M12 10h.01M15 10h.01M18 10h.01M7 14h10"],
     ["MouseDevice", "M12 3a5 5 0 0 1 5 5v8a5 5 0 0 1-10 0V8a5 5 0 0 1 5-5ZM12 3v7"],

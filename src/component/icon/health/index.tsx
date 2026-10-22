@@ -2,7 +2,7 @@ import { createIcon, type Icon } from "../types";
 
 export type HealthIconName =
     | "Heart"
-    | "Pulse"
+    | "HeartRate"
     | "Medical"
     | "Pill"
     | "Stethoscope"
@@ -19,7 +19,7 @@ export const healthIcons: Record<HealthIconName, Icon> = {
         "Heart",
         <path d="M19 13.9c1.4-1.4 2.8-3.1 2.8-5.4A5.3 5.3 0 0 0 16.5 3c-1.7 0-2.9.5-4.5 2.1C10.4 3.5 9.2 3 7.5 3A5.3 5.3 0 0 0 2.2 8.5c0 2.3 1.4 4 2.8 5.4l7 6.8Z" />,
     ),
-    Pulse: createIcon("Pulse", <path d="M2.5 12h3.8l2-5.2 3.4 10.4 2.5-5.2h5.3" />),
+    HeartRate: createIcon("HeartRate", <path d="M2.5 12h3.8l2-5.2 3.4 10.4 2.5-5.2h5.3" />),
     Medical: createIcon(
         "Medical",
         <>
@@ -37,9 +37,9 @@ export const healthIcons: Record<HealthIconName, Icon> = {
     Stethoscope: createIcon(
         "Stethoscope",
         <>
-            <path d="M4.5 3v5.5a4.5 4.5 0 0 0 9 0V3" />
-            <path d="M9 13v2.5a4 4 0 0 0 8 0v-1.5" />
-            <circle cx="17" cy="11.7" r="2.3" />
+            <path d="M11 2v2M5 2v2m0-1H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1" />
+            <path d="M8 15a6 6 0 0 0 12 0v-3" />
+            <circle cx="20" cy="10" r="2" />
         </>,
     ),
     Hospital: createIcon(

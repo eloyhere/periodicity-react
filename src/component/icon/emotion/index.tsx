@@ -146,7 +146,11 @@ export const emotionIcons: Record<EmotionIconName, Icon> = {
             <circle cx="8.8" cy="10.2" r="1.1" />
             <circle cx="15.2" cy="10.2" r="1.1" />
             <path d="M8.6 16c1 .7 2-.6 3.4 0s2.2.5 3.4-.1" />
-            <path d="M19.9 6.2c-.8 1.1-.7 2 .2 2.3.9-.3 1-1.2.2-2.3l-.2-.4Z" />
+            <path
+                d="M20.9 3c-.7.9-1.1 1.6-1.1 2.1a1.1 1.1 0 0 0 2.2 0c0-.5-.4-1.2-1.1-2.1Z"
+                fill="currentColor"
+                stroke="none"
+            />
         </>,
     ),
     Calm: createIcon(

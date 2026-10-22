@@ -45,7 +45,6 @@ import { dynamicExtraIcons, type DynamicExtraIconName } from "./dynamic-extra";
 import { computerIcons, type ComputerIconName } from "./computer";
 import { programmingIcons, type ProgrammingIconName } from "./programming";
 import { electronicsIcons, type ElectronicsIconName } from "./electronics";
-import { animalExtraIcons, type AnimalExtraIconName } from "./animal-extra";
 import { plantIcons, type PlantIconName } from "./plant";
 import type { Icon as IconDefinition } from "./types";
 import "./Icon.css";
@@ -88,7 +87,6 @@ export type IconName =
     | ComputerIconName
     | ProgrammingIconName
     | ElectronicsIconName
-    | AnimalExtraIconName
     | PlantIconName;
 
 const glyphs: Record<IconName, IconDefinition> = {
@@ -129,7 +127,6 @@ const glyphs: Record<IconName, IconDefinition> = {
     ...computerIcons,
     ...programmingIcons,
     ...electronicsIcons,
-    ...animalExtraIcons,
     ...plantIcons,
 };
 
