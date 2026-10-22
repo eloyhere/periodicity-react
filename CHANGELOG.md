@@ -5,6 +5,16 @@ and this project uses British English in its English documentation.
 
 ## [Unreleased]
 
+## [0.1.9] - 2026-10-22
+
+### Fixed
+
+- Dropdown and popover panels now opt out of Electron window dragging with
+  `-webkit-app-region: no-drag`, so a menu that overlaps a `-webkit-app-region: drag` app bar or
+  collapsing hero still receives hover, click, and keyboard input across its whole surface.
+
+## [0.1.8] - 2026-10-22
+
 ### Added
 
 - Showcase component search: a `CompleteInput` in the filter bar suggests every documented component and opens the
@@ -19,6 +29,14 @@ and this project uses British English in its English documentation.
   forward all five. Each slot receives the rendered index and the item.
 - `CommentThread` accepts a `comment` slot that replaces one whole comment item, and the new
   `VirtualCommentThread` virtualises the flattened thread at a fixed row height.
+- `useFilePick` plus `FilePicker`, `PhotoPicker`, and `AvatarPicker`: native hidden file inputs, Base64 previews,
+  an in-dialog cropper, pick/preview/avatar/crop slots, hover and click ripples, and one `change` event per
+  completed selection. Photo and avatar edits emit on Confirm or Cancel, while closing the dialog aborts silently.
+- `BarChart`, `PieChart`, `LineChart`, and `ScatterChart`: a responsive canvas and WebGL chart family with a
+  WebGL-to-canvas fallback, device-pixel-ratio rendering, legends, screen-reader data tables, configurable
+  palettes, and redraws scheduled through the shared task priority queue.
+- `Font` and `useFont`: scoped typography levels, families, weights, line heights, letter spacing, transforms, and
+  alignment, exposed through a nested font context.
 
 ### Changed
 
@@ -34,6 +52,12 @@ and this project uses British English in its English documentation.
 - `PeriodicityCoordinator` now takes vertical wheel gestures over from content that cannot scroll, in the capture
   phase, so an inner component no longer swallows the gesture. Scrollable main content keeps native scrolling and
   still syncs the collapse area, header, and app bar; horizontal, Shift, and modified wheel gestures are ignored.
+- Remaining hard-coded component copy now reads from `useInternational().t()`. A new typed `extraMessages` catalogue
+  covers charts, pickers, comments, transfer, date-time, mention, rate, progress, radio, scrollbar, context menu,
+  combobox, loading, and email/telephone validation copy for all 12 built-in locales.
+- The showcase drops its left sidebar in favour of the top category filters and component search, adds a Charts
+  page, keeps native + English labels in the language picker, and opts out of browser auto-translation so the
+  authored language remains visible.
 
 ### Fixed
 
@@ -45,6 +69,13 @@ and this project uses British English in its English documentation.
 - Close the `PeriodicityCompleteInput` suggestion panel and blur the field after a selection, instead of letting
   focus restoration reopen the panel.
 - Cover the shared `InputLayout` shell in forced-colors mode, so every six-slot field keeps a system focus ring.
+- `useFilePick` no longer treats a returning window focus as an immediate cancellation. It keeps listening for the
+  native change event, polls the input files briefly, and only settles an empty selection after a short delay, so
+  choosing an image reliably opens the crop dialog even when focus arrives before `change`.
+- Canvas and WebGL chart colours resolve aliased CSS custom properties (`--color-primary: var(--accent)`) through
+  computed styles, so theme palettes render correctly instead of falling back to black.
+- Email and telephone fields pass localised validation messages into `validateEmail` and `validateTelephone`; both
+  validators accept message overrides for callers that validate outside React.
 
 ## [0.1.7] - 2026-10-22
 

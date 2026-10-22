@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+## [0.1.9] - 2026-10-22
+
+### 修复
+
+- Dropdown 与 Popover 弹层显式设置 `-webkit-app-region: no-drag`：当菜单覆盖在 Electron 的
+  `-webkit-app-region: drag` 应用栏或折叠 Hero 上时，整个弹层仍能接收 hover、点击和键盘事件。
+
+## [0.1.8] - 2026-10-22
+
 ### 新增
 
 - 用例页面新增组件搜索：筛选栏中的 `CompleteInput` 会列出所有组件，选中后打开对应条目。
@@ -11,6 +20,9 @@
 - 共享输入框壳新增指针起点聚焦边框波纹：以鼠标位置（键盘聚焦时用文本光标，空输入框用字段中心）为圆心做径向波纹，最近的边先出现，每条边从鼠标在该边上的投影点向两端生长，整体使用 1 秒的先快后慢缓动。
 - 消息相关组件新增逐项渲染插槽：`Contact`/`VirtualContact` 提供 `contact` 与 `context`，`MessageList`/`VirtualMessageList` 提供 `message`、`messageContext` 与 `avatar`，`Chat`/`VirtualChat` 透传全部五个；每个插槽都会收到渲染索引与对应数据项。
 - `CommentThread` 新增 `comment` 插槽，可替换整条评论；新增 `VirtualCommentThread`，按固定行高对扁平化后的评论线程做虚拟滚动。
+- 新增 `useFilePick` 以及 `FilePicker`、`PhotoPicker`、`AvatarPicker`：内部使用原生隐藏 file 输入，支持 Base64 预览、Dialog 内裁剪、pick/preview/avatar/crop 插槽、悬浮与点击 ripple，并在每次完成选择时触发一次 `change`。图片与头像在点击确认或取消时触发，关闭弹窗则不触发。
+- 新增 `BarChart`、`PieChart`、`LineChart`、`ScatterChart`：基于 canvas 与 WebGL 的响应式统计图组件，支持 WebGL 回退到 canvas、DPR 渲染、图例、屏幕阅读器数据表、可配置色板，并通过共享 task 优先级队列调度重绘。
+- 新增 `Font` 与 `useFont`：提供作用域内的字号层级、字体、字重、行高、字距、大小写转换与对齐设置，并通过嵌套字体上下文共享。
 
 ### 变更
 
@@ -18,6 +30,8 @@
 - 浏览器报告 `prefers-reduced-motion: reduce` 时，输入框聚焦边框波纹仍会播放；`hint` 与背景过渡仍遵守该偏好。
 - `PeriodicityNavigationView` 的 bottom 变体会测量自身宽度：能放下至少两个导航项时保持水平并支持横向滚动，窄到只放得下一个时自动切换为可纵向滚动的竖排列表，无需手动切换 variant。
 - `PeriodicityCoordinator` 现在会在捕获阶段从无法滚动的内容手里接管竖直滚轮手势，内部组件不再吞掉该手势。可滚动的主内容仍走原生滚动，并照常同步折叠区、头部和 AppBar；横向、Shift 和带修饰键的滚轮手势不受影响。
+- 组件中剩余的硬编码文案全部改为通过 `useInternational().t()` 读取；新增类型化 `extraMessages` 目录，为 12 个内置 locale 补齐图表、选择器、评论、Transfer、日期时间、Mention、评分、进度、单选、滚动条、右键菜单、Combobox、Loading 以及邮箱/电话校验文案。
+- 用例页面移除左侧导航，改用顶部分类筛选和组件搜索；新增 Charts 页面；语言菜单保留“原生名称 · 英文名称”格式；同时禁用浏览器自动翻译，避免页面语言被外部翻译器改写。
 
 ### 修复
 
@@ -25,6 +39,9 @@
 - `PeriodicityCompleteInput` 打开建议面板时焦点保持在输入框，聚焦边框持续显示，输入也会继续过滤建议。
 - `PeriodicityCompleteInput` 选中建议后关闭下拉框并移除输入框焦点，不再因焦点恢复而重新打开面板。
 - 强制颜色模式下覆盖共享的 `InputLayout` 字段壳，所有六槽输入框都保留系统焦点环。
+- `useFilePick` 不再把返回的窗口 focus 直接当成取消：继续等待原生 `change`，短暂轮询输入文件，并在延迟后才结算空选择，避免 focus 早于 `change` 时丢掉已选图片、导致裁剪弹窗不出现。
+- canvas/WebGL 图表颜色通过计算样式解析 `--color-primary: var(--accent)` 这类 CSS 变量别名，主题色不再回退为黑色。
+- 邮箱与电话组件把本地化校验文案传给 `validateEmail` / `validateTelephone`，两个校验函数也接受调用方覆盖文案。
 
 ## [0.1.7] - 2026-10-22
 
