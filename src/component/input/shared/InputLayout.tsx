@@ -1,12 +1,16 @@
-import type {
-    CSSProperties,
-    FC,
-    HTMLAttributes,
-    MouseEvent as ReactMouseEvent,
-    PointerEvent as ReactPointerEvent,
-    ReactNode,
-    Ref,
+import {
+    useRef,
+    type CSSProperties,
+    type FC,
+    type FocusEvent as ReactFocusEvent,
+    type HTMLAttributes,
+    type MouseEvent as ReactMouseEvent,
+    type PointerEvent as ReactPointerEvent,
+    type ReactNode,
+    type Ref,
+    type RefObject,
 } from "react";
+import { readCaretPoint } from "../../../gesture/core/caret";
 import cx from "../../foundation/cx";
 import Icon, { type IconName } from "../../icon/Icon";
 import Surface from "../../surface/Surface";
@@ -14,6 +18,62 @@ import "./InputLayout.css";
 
 export type InputLayoutVariant = "outline" | "fill" | "standard";
 export type InputLayoutSize = "sm" | "md" | "lg";
+
+/**
+ * Stores the projection origin and the per-edge distance ratios used by the
+ * radial focus-border wave.
+ * @param control - Control element that owns the field bounds.
+ * @param clientX - Pointer or caret client x.
+ * @param clientY - Pointer or caret client y.
+ * @example
+ * applyEdgeOrigin(control, event.clientX, event.clientY);
+ * @returns Nothing.
+ */
+const applyEdgeOrigin: (control: HTMLElement, clientX: number, clientY: number) => void = (
+    control: HTMLElement,
+    clientX: number,
+    clientY: number,
+): void => {
+    const rect: DOMRect = control.getBoundingClientRect();
+    const x: number = Math.min(Math.max(clientX - rect.left, 0), rect.width);
+    const y: number = Math.min(Math.max(clientY - rect.top, 0), rect.height);
+    const xPercent: number = rect.width > 0 ? (x / rect.width) * 100 : 50;
+    const yPercent: number = rect.height > 0 ? (y / rect.height) * 100 : 50;
+    const top: number = y;
+    const right: number = Math.max(0, rect.width - x);
+    const bottom: number = Math.max(0, rect.height - y);
+    const left: number = x;
+    const maxRadius: number = Math.max(
+        Math.hypot(left, top),
+        Math.hypot(right, top),
+        Math.hypot(left, bottom),
+        Math.hypot(right, bottom),
+    );
+    const ratio: (distance: number) => number = (distance: number): number =>
+        maxRadius > 0 ? distance / maxRadius : 0;
+
+    control.style.setProperty("--input-activation-x", `${xPercent}%`);
+    control.style.setProperty("--input-activation-y", `${yPercent}%`);
+    control.style.setProperty("--input-distance-top", `${ratio(top)}`);
+    control.style.setProperty("--input-distance-right", `${ratio(right)}`);
+    control.style.setProperty("--input-distance-bottom", `${ratio(bottom)}`);
+    control.style.setProperty("--input-distance-left", `${ratio(left)}`);
+};
+
+/**
+ * Reports whether a focused control is empty, so keyboard focus falls back to the field centre.
+ * @param target - Focused control.
+ * @example
+ * const blank = isBlankControl(input);
+ * @returns `true` for an empty input, textarea, or contenteditable.
+ */
+const isBlankControl: (target: HTMLElement) => boolean = (target: HTMLElement): boolean => {
+    if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
+        return target.value.length === 0;
+    }
+
+    return target.isContentEditable && (target.textContent ?? "").length === 0;
+};
 
 /**
  * Props for the six-slot input shell.
@@ -101,6 +161,7 @@ const InputLayout: FC<InputLayoutProps> = ({
     const hasMessage: boolean = hasContent(message);
     const hasHint: boolean = hasContent(hint);
     const hasLimitation: boolean = hasContent(limitation);
+    const pointerOriginPendingRef: RefObject<boolean> = useRef<boolean>(false);
     const handlePointerDown: (event: ReactPointerEvent<HTMLDivElement>) => void = (
         event: ReactPointerEvent<HTMLDivElement>,
     ): void => {
@@ -115,6 +176,16 @@ const InputLayout: FC<InputLayoutProps> = ({
             target.closest(
                 "input, textarea, button, a, select, label, [contenteditable='true'], [data-input-layout-control]",
             ) !== null;
+        const control: HTMLElement | null = root.querySelector<HTMLElement>(
+            ".input-layout__control",
+        );
+
+        // Resolve the wave origin before focusing: the focus transition reads
+        // these variables as soon as :focus-within turns on.
+        if (control !== null) {
+            applyEdgeOrigin(control, event.clientX, event.clientY);
+            pointerOriginPendingRef.current = true;
+        }
 
         if (!interactive) {
             event.preventDefault();
@@ -127,16 +198,49 @@ const InputLayout: FC<InputLayoutProps> = ({
                 field.focus({ preventScroll: true });
             }
         }
+    };
+    const handleFocusCapture: (event: ReactFocusEvent<HTMLDivElement>) => void = (
+        event: ReactFocusEvent<HTMLDivElement>,
+    ): void => {
+        const related: EventTarget | null = event.relatedTarget;
 
-        const control: HTMLElement | null = root.querySelector<HTMLElement>(
+        if (related instanceof Node && event.currentTarget.contains(related)) {
+            return;
+        }
+
+        if (pointerOriginPendingRef.current) {
+            pointerOriginPendingRef.current = false;
+            return;
+        }
+
+        const target: EventTarget | null = event.target;
+
+        if (!(target instanceof HTMLElement)) {
+            return;
+        }
+
+        const control: HTMLElement | null = event.currentTarget.querySelector<HTMLElement>(
             ".input-layout__control",
         );
 
-        if (control !== null) {
-            const rect: DOMRect = control.getBoundingClientRect();
+        if (control === null) {
+            return;
+        }
 
-            control.style.setProperty("--input-activation-x", `${event.clientX - rect.left}px`);
-            control.style.setProperty("--input-activation-y", `${event.clientY - rect.top}px`);
+        const rect: DOMRect = control.getBoundingClientRect();
+        const point: { x: number; y: number } = isBlankControl(target)
+            ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+            : readCaretPoint(target);
+
+        applyEdgeOrigin(control, point.x, point.y);
+    };
+    const handleBlurCapture: (event: ReactFocusEvent<HTMLDivElement>) => void = (
+        event: ReactFocusEvent<HTMLDivElement>,
+    ): void => {
+        const related: EventTarget | null = event.relatedTarget;
+
+        if (!(related instanceof Node) || !event.currentTarget.contains(related)) {
+            pointerOriginPendingRef.current = false;
         }
     };
     const handleFieldClick: (event: ReactMouseEvent<HTMLDivElement>) => void = (
@@ -172,6 +276,8 @@ const InputLayout: FC<InputLayoutProps> = ({
             ref={ref}
             onPointerDownCapture={handlePointerDown}
             onClick={handleFieldClick}
+            onFocusCapture={handleFocusCapture}
+            onBlurCapture={handleBlurCapture}
             className={cx(
                 "input-layout",
                 `input-layout--${variant}`,
@@ -194,7 +300,20 @@ const InputLayout: FC<InputLayoutProps> = ({
                 <Surface
                     className="input-layout__surface"
                     background={<span className="input-layout__background" />}
-                    foreground={<span className="input-layout__edge" />}
+                    foreground={
+                        <>
+                            {variant === "outline" ? (
+                                <span className="input-layout__edge input-layout__edge--top" />
+                            ) : null}
+                            {variant === "outline" ? (
+                                <span className="input-layout__edge input-layout__edge--right" />
+                            ) : null}
+                            <span className="input-layout__edge input-layout__edge--bottom" />
+                            {variant === "outline" ? (
+                                <span className="input-layout__edge input-layout__edge--left" />
+                            ) : null}
+                        </>
+                    }
                     ripple={{ layer: "foreground", trigger: ["hover", "click"] }}
                     disabled={disabled}
                 >

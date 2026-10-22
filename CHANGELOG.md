@@ -11,6 +11,9 @@ and this project uses British English in its English documentation.
   selected entry.
 - `TextInput` accepts `rootRef` for its field root, which lets composite fields anchor overlays without an extra
   wrapper element.
+- Pointer-origin focus border animation on the shared input shell: outline fields expand all four edges from the
+  pointer projection on each edge, while fill and standard fields expand the bottom line left and right, using an
+  ease-out curve over one second.
 
 ### Changed
 

@@ -1,0 +1,90 @@
+/* ==========================================================================
+   Image cropper — fixed crop window over a pannable, zoomable image
+   ========================================================================== */
+
+.image-cropper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+    gap: var(--space-2);
+}
+
+.image-cropper__viewport {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    overflow: hidden;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-container-lowest);
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.image-cropper__viewport:active {
+    cursor: grabbing;
+}
+
+.image-cropper__viewport:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
+.image-cropper__viewport[data-disabled="true"] {
+    cursor: not-allowed;
+    opacity: var(--state-disabled-opacity);
+}
+
+.image-cropper__image {
+    position: absolute;
+    display: block;
+    max-width: none;
+    max-height: none;
+    transform-origin: center;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+}
+
+.image-cropper__image--loading {
+    inset: 0;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    margin: auto;
+}
+
+.image-cropper__frame {
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(255, 255, 255, 0.92);
+    box-shadow:
+        0 0 0 9999px rgba(0, 0, 0, 0.55),
+        inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+    pointer-events: none;
+}
+
+.image-cropper--circle .image-cropper__frame {
+    border-radius: 50%;
+}
+
+.image-cropper__hint {
+    max-width: 42ch;
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--font-sans);
+    font-size: var(--type-label-sm);
+    line-height: var(--leading-normal);
+    text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .image-cropper__viewport,
+    .image-cropper__image {
+        transition: none;
+    }
+}

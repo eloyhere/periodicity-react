@@ -158,7 +158,7 @@ const familyRecords: readonly FamilyRecord[] = [
         id: "pickers",
         label: "Pickers",
         title: "Pickers",
-        description: "Time, date-time, number, colour, cycle, and variant selection.",
+        description: "Time, date-time, number, colour, cycle, variant, file, and image selection.",
         page: PickersPage,
     },
     {

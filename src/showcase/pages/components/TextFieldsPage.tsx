@@ -260,7 +260,7 @@ const TextFieldsPage: FC = () => {
         <>
             <Demo
                 title="Field variants"
-                description="Material outline, fill, and standard variants with resting or floating labels."
+                description="Material outline, fill, and standard variants with resting or floating labels. Focus a field to see its border ripple out from the pointer."
                 code={variantsCode}
             >
                 <div className="showcase__field-grid">

@@ -61,6 +61,35 @@ import BasePeriodicityColourPicker from "./picker/colour/ColourPicker";
 export const PeriodicityColourPicker = withStandardEvents(BasePeriodicityColourPicker);
 import BasePeriodicityVariantPicker from "./picker/variant/VariantPicker";
 export const PeriodicityVariantPicker = withStandardEvents(BasePeriodicityVariantPicker);
+import BasePeriodicityFilePicker from "./picker/file/FilePicker";
+export const PeriodicityFilePicker = withStandardEvents(BasePeriodicityFilePicker);
+import BasePeriodicityPhotoPicker from "./picker/photo/PhotoPicker";
+export const PeriodicityPhotoPicker = withStandardEvents(BasePeriodicityPhotoPicker);
+import BasePeriodicityAvatarPicker from "./picker/avatar/AvatarPicker";
+export const PeriodicityAvatarPicker = withStandardEvents(BasePeriodicityAvatarPicker);
+export { useFilePick } from "./picker/file/useFilePick";
+export type { FilePick, FilePickAccept, UseFilePickOptions } from "./picker/file/useFilePick";
+export type { FilePickerProps as PeriodicityFilePickerProps } from "./picker/file/FilePicker";
+export type { FilePickerSlotContext as PeriodicityFilePickerSlotContext } from "./picker/file/FilePicker";
+export type { FilePickerLabels as PeriodicityFilePickerLabels } from "./picker/file/filePickerLabels";
+export type {
+    PhotoPickerProps as PeriodicityPhotoPickerProps,
+} from "./picker/photo/PhotoPicker";
+export type {
+    PhotoPickerSlotContext as PeriodicityPhotoPickerSlotContext,
+    PhotoPickerPreviewSlotContext as PeriodicityPhotoPickerPreviewSlotContext,
+    PhotoPickerSlots as PeriodicityPhotoPickerSlots,
+} from "./picker/photo/PhotoPicker";
+export type {
+    AvatarPickerProps as PeriodicityAvatarPickerProps,
+} from "./picker/avatar/AvatarPicker";
+export type {
+    AvatarPickerSlotContext as PeriodicityAvatarPickerSlotContext,
+    AvatarPickerSlots as PeriodicityAvatarPickerSlots,
+} from "./picker/avatar/AvatarPicker";
+export type { ImageSelection as PeriodicityImageSelection } from "./picker/shared/imageSelection";
+export type { ImagePickerLabels as PeriodicityImagePickerLabels } from "./picker/shared/imagePickerLabels";
+export type { ImageCropSlotContext as PeriodicityImageCropSlotContext } from "./picker/shared/ImageEditorDialog";
 import BasePeriodicityText from "./text/Text";
 export const PeriodicityText = withStandardEvents(BasePeriodicityText);
 import BasePeriodicityCard from "./card/Card";

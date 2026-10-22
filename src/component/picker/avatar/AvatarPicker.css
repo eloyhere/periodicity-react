@@ -1,0 +1,66 @@
+/* ==========================================================================
+   Avatar picker — circular preview and camera affordance
+   ========================================================================== */
+
+.avatar-picker .picker-field__control {
+    min-height: 0;
+    padding: var(--space-2) 0;
+    border: 0;
+    background: transparent;
+}
+
+.avatar-picker .picker-field:focus-within .picker-field__control {
+    box-shadow: none;
+}
+
+.avatar-picker .picker-field[data-invalid="true"] .picker-field__control {
+    background: transparent;
+}
+
+.avatar-picker__trigger {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.avatar-picker__trigger:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
+.avatar-picker__trigger:disabled {
+    cursor: not-allowed;
+    opacity: var(--state-disabled-opacity);
+}
+
+.avatar-picker__ripple {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    border-radius: var(--radius-pill);
+}
+
+.avatar-picker__badge {
+    position: absolute;
+    right: calc(var(--space-1) * -1);
+    bottom: calc(var(--space-1) * -1);
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--space-6);
+    height: var(--space-6);
+    border: 1px solid var(--color-surface);
+    border-radius: var(--radius-pill);
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: var(--elevation-1);
+    pointer-events: none;
+}

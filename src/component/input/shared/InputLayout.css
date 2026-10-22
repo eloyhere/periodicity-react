@@ -57,16 +57,46 @@
 
 .input-layout__edge {
     position: absolute;
-    inset: 0;
-    border: 2px solid var(--color-primary);
-    border-radius: inherit;
-    opacity: 0;
+    background: var(--color-primary);
     pointer-events: none;
-    transform: scale(0.985);
-    transition:
-        opacity 180ms var(--ease-decelerate),
-        transform 180ms var(--ease-decelerate),
-        border-color 140ms var(--ease-standard);
+    will-change: transform;
+    transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.input-layout__edge--top,
+.input-layout__edge--bottom {
+    left: 0;
+    width: 100%;
+    height: 2px;
+    transform: scaleX(0);
+}
+
+.input-layout__edge--top {
+    top: 0;
+    transform-origin: var(--input-activation-x, 50%) 0;
+}
+
+.input-layout__edge--bottom {
+    bottom: 0;
+    transform-origin: var(--input-activation-x, 50%) 100%;
+}
+
+.input-layout__edge--left,
+.input-layout__edge--right {
+    top: 0;
+    width: 2px;
+    height: 100%;
+    transform: scaleY(0);
+}
+
+.input-layout__edge--left {
+    left: 0;
+    transform-origin: 0 var(--input-activation-y, 50%);
+}
+
+.input-layout__edge--right {
+    right: 0;
+    transform-origin: 100% var(--input-activation-y, 50%);
 }
 
 .input-layout__row {
@@ -206,16 +236,6 @@
     background: var(--color-surface-container);
 }
 
-.input-layout--fill .input-layout__edge,
-.input-layout--standard .input-layout__edge {
-    border: 0;
-    border-bottom: 2px solid var(--color-primary);
-    border-radius: 0;
-    opacity: 1;
-    transform: scaleX(0);
-    transform-origin: center;
-}
-
 .input-layout--fill .input-layout__row,
 .input-layout--standard .input-layout__row {
     padding-top: 0;
@@ -238,9 +258,55 @@
     background: transparent;
 }
 
-.input-layout__control:focus-within .input-layout__edge {
-    opacity: 1;
-    transform: scale(1);
+.input-layout__control:focus-within .input-layout__edge--top,
+.input-layout__control:focus-within .input-layout__edge--bottom {
+    transform: scaleX(1);
+}
+
+.input-layout__control:focus-within .input-layout__edge--left,
+.input-layout__control:focus-within .input-layout__edge--right {
+    transform: scaleY(1);
+}
+
+/* Spread the four outline edges like a wave: the nearest edge starts first,
+   and every edge still finishes within the overall one-second window. */
+.input-layout__control:focus-within .input-layout__edge--top {
+    transition-delay: calc(var(--input-distance-top, 0) * 400ms);
+    transition-duration: calc(var(--duration-slower) - var(--input-distance-top, 0) * 400ms);
+    transition-timing-function: var(--ease-decelerate);
+}
+
+.input-layout__control:focus-within .input-layout__edge--right {
+    transition-delay: calc(var(--input-distance-right, 0) * 400ms);
+    transition-duration: calc(var(--duration-slower) - var(--input-distance-right, 0) * 400ms);
+    transition-timing-function: var(--ease-decelerate);
+}
+
+.input-layout__control:focus-within .input-layout__edge--bottom {
+    transition-delay: calc(var(--input-distance-bottom, 0) * 400ms);
+    transition-duration: calc(var(--duration-slower) - var(--input-distance-bottom, 0) * 400ms);
+    transition-timing-function: var(--ease-decelerate);
+}
+
+.input-layout__control:focus-within .input-layout__edge--left {
+    transition-delay: calc(var(--input-distance-left, 0) * 400ms);
+    transition-duration: calc(var(--duration-slower) - var(--input-distance-left, 0) * 400ms);
+    transition-timing-function: var(--ease-decelerate);
+}
+
+/* A bottom-only field has no wave to wait for: grow it immediately from the
+   pointer projection. */
+.input-layout--fill .input-layout__control:focus-within .input-layout__edge--bottom,
+.input-layout--standard .input-layout__control:focus-within .input-layout__edge--bottom {
+    transition-delay: 0ms;
+    transition-duration: var(--duration-slower);
+}
+
+/* The strips leave the rounded outline corners to the 1px base border; hand
+   those corners over to the primary colour as the strips finish. */
+.input-layout--outline:not(.input-layout--invalid) .input-layout__control:focus-within .input-layout__background {
+    border-color: var(--color-primary);
+    transition-delay: calc(var(--duration-slower) - var(--duration-fast)), 0s;
 }
 
 .input-layout--invalid .input-layout__background {
@@ -248,9 +314,18 @@
 }
 
 .input-layout--invalid .input-layout__edge {
-    border-color: var(--color-error);
-    opacity: 1;
-    transform: scale(1);
+    background: var(--color-error);
+    transition: none;
+}
+
+.input-layout--invalid .input-layout__edge--top,
+.input-layout--invalid .input-layout__edge--bottom {
+    transform: scaleX(1);
+}
+
+.input-layout--invalid .input-layout__edge--left,
+.input-layout--invalid .input-layout__edge--right {
+    transform: scaleY(1);
 }
 
 .input-layout--invalid .input-layout__hint,
@@ -307,7 +382,8 @@
 @media (prefers-reduced-motion: reduce) {
     .input-layout__hint,
     .input-layout__background,
-    .input-layout__edge {
+    .input-layout__edge,
+    .input-layout__control:focus-within .input-layout__edge {
         transition: none;
         animation: none;
     }

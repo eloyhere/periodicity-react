@@ -303,6 +303,24 @@ export const uiComponentSections: readonly ComponentSection[] = [
             description: "Radio-style chips for picking a variant swatch by name.",
         },
         {
+            name: "FilePicker",
+            family: "pickers",
+            demo: "File and image pickers",
+            description: "Native file dialog in a labelled field, with multiple selection, a change event, and a default slot.",
+        },
+        {
+            name: "PhotoPicker",
+            family: "pickers",
+            demo: "File and image pickers",
+            description: "Photo selection with a Base64 preview, a crop editor, and pick, preview, and crop slots.",
+        },
+        {
+            name: "AvatarPicker",
+            family: "pickers",
+            demo: "File and image pickers",
+            description: "Avatar selection with a circular Base64 preview, a square crop editor, and avatar and crop slots.",
+        },
+        {
             name: "Calendar",
             family: "pickers",
             demo: "Calendar",
@@ -1000,7 +1018,14 @@ export const nonUiExportGroups: readonly NonUiExportGroup[] = [
     {
         kind: "Hooks",
         reason: "Called from a component, never rendered as JSX.",
-        names: ["useTheme", "useInternational", "useAnimation", "usePrefersReducedMotion", "useToast"],
+        names: [
+            "useTheme",
+            "useInternational",
+            "useAnimation",
+            "usePrefersReducedMotion",
+            "useToast",
+            "useFilePick",
+        ],
     },
     {
         kind: "Factories and adapters",

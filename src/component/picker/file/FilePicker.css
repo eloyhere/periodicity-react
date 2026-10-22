@@ -1,0 +1,95 @@
+/* ==========================================================================
+   File picker — labelled field around an imperative native file dialog
+   ========================================================================== */
+
+.file-picker .picker-field__control {
+    padding: 0;
+}
+
+.file-picker__trigger {
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    min-height: var(--touch-target);
+    padding: 0 var(--space-3);
+    overflow: hidden;
+    border: 0;
+    border-radius: inherit;
+    background: transparent;
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: var(--type-body-sm);
+    text-align: start;
+    cursor: pointer;
+    gap: var(--space-2);
+    touch-action: manipulation;
+    transition:
+        background-color var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard);
+}
+
+.file-picker__trigger:hover:not(:disabled) {
+    background: var(--color-primary-container);
+    color: var(--color-on-primary-container);
+}
+
+.file-picker__trigger:active:not(:disabled) {
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+.file-picker__trigger:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: calc(var(--focus-ring-offset) * -1);
+    border-radius: inherit;
+}
+
+.file-picker__trigger:disabled {
+    cursor: not-allowed;
+    opacity: var(--state-disabled-opacity);
+}
+
+.file-picker__icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+}
+
+.file-picker__trigger:disabled .file-picker__icon {
+    color: inherit;
+}
+
+.file-picker__value {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-picker__value--empty {
+    color: var(--muted);
+}
+
+.file-picker__action {
+    flex: none;
+    color: var(--color-primary);
+    font-size: var(--type-label);
+    font-weight: var(--weight-medium);
+}
+
+.file-picker__trigger:hover:not(:disabled) .file-picker__action,
+.file-picker__trigger:active:not(:disabled) .file-picker__action {
+    color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .file-picker__trigger {
+        transition: none;
+    }
+}

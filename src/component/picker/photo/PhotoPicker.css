@@ -1,0 +1,90 @@
+/* ==========================================================================
+   Photo picker — Base64 preview tile inside a labelled picker field
+   ========================================================================== */
+
+.photo-picker .picker-field__control {
+    justify-content: center;
+    padding: 0;
+    overflow: hidden;
+}
+
+.photo-picker__trigger {
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 320px;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: inherit;
+    background: var(--color-surface-container-lowest);
+    color: var(--color-on-surface-variant);
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.photo-picker__trigger:hover:not(:disabled) {
+    background: var(--color-primary-container);
+    color: var(--color-on-primary-container);
+}
+
+.photo-picker__trigger:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+.photo-picker__trigger:disabled {
+    cursor: not-allowed;
+    opacity: var(--state-disabled-opacity);
+}
+
+.photo-picker__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-picker__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+    text-align: center;
+    gap: var(--space-2);
+}
+
+.photo-picker__empty-label {
+    font-family: var(--font-sans);
+    font-size: var(--type-label);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-snug);
+}
+
+.photo-picker__badge {
+    position: absolute;
+    right: var(--space-2);
+    bottom: var(--space-2);
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--space-7);
+    height: var(--space-7);
+    border-radius: var(--radius-pill);
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: var(--elevation-1);
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .photo-picker__trigger {
+        transition: none;
+    }
+}

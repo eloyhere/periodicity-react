@@ -5,13 +5,18 @@ import {
     type SetStateAction,
 } from "react";
 import {
+    AvatarPicker,
     Calendar,
     ColourPicker,
     CyclePicker,
     DateTimePicker,
+    FilePicker,
     NumberPicker,
+    PhotoPicker,
+    Text,
     TimePicker,
     VariantPicker,
+    type ImageSelection,
 } from "../../../component";
 import { useInternational, type InternationalContextValue } from "../../../international";
 import Demo from "../../Demo";
@@ -64,8 +69,27 @@ const calendarCode: string = `<Calendar
     firstDayOfWeek={1}
 />`;
 
+const filePickersCode: string = `<div className="showcase__field-grid">
+    <FilePicker
+        label="Attachment"
+        accept={[".pdf", ".png", ".jpg"]}
+        multiple
+        onChange={(files) => log(files.map((file) => file.name).join(", "))}
+    />
+    <PhotoPicker
+        label="Cover photo"
+        onChange={(selection) => log("photo", selection.dataUrl, selection.cropped)}
+    />
+    <AvatarPicker
+        label="Profile photo"
+        name="Mira Chen"
+        onChange={(selection) => log("avatar", selection.dataUrl, selection.cropped)}
+    />
+</div>`;
+
 /**
- * Documents time, date-time, number, colour, variant pickers, and the month calendar.
+ * Documents time, date-time, number, colour, variant, file, and image pickers,
+ * plus the month calendar.
  * @example
  * <PickersPage />
  * @returns The Pickers entry.
@@ -86,6 +110,8 @@ const PickersPage: FC = () => {
         useState<string>("blue");
     const [calendarValue, setCalendarValue]: [string, Dispatch<SetStateAction<string>>] =
         useState<string>("2026-10-20");
+    const [selectionSummary, setSelectionSummary]: [string, Dispatch<SetStateAction<string>>] =
+        useState<string>("No selection yet");
 
     return (
         <>
@@ -137,6 +163,48 @@ const PickersPage: FC = () => {
                 />
             </div>
         </Demo>
+
+            <Demo
+                title="File and image pickers"
+                description="A native file dialog, a cropped photo preview, and a circular avatar editor, each emitting change when the selection is confirmed."
+                code={filePickersCode}
+            >
+                <div className="showcase__field-grid">
+                    <FilePicker
+                        label="Attachment"
+                        accept={[".pdf", ".png", ".jpg"]}
+                        multiple
+                        hint="Any number of PDF or image files"
+                        onChange={(files: File[]): void => {
+                            setSelectionSummary(
+                                files.map((file: File): string => file.name).join(", "),
+                            );
+                        }}
+                    />
+                    <PhotoPicker
+                        label="Cover photo"
+                        hint="Crop to a four by three cover"
+                        onChange={(selection: ImageSelection): void => {
+                            setSelectionSummary(
+                                `${selection.cropped ? "Cropped" : "Original"} photo · ${selection.file.name}`,
+                            );
+                        }}
+                    />
+                    <AvatarPicker
+                        label="Profile photo"
+                        name="Mira Chen"
+                        hint="Cropped to a square avatar"
+                        onChange={(selection: ImageSelection): void => {
+                            setSelectionSummary(
+                                `${selection.cropped ? "Cropped" : "Original"} avatar · ${selection.file.name}`,
+                            );
+                        }}
+                    />
+                </div>
+                <Text variant="body-sm" tone="muted" aria-live="polite">
+                    {selectionSummary}
+                </Text>
+            </Demo>
 
             <Demo
                 title="Calendar"

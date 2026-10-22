@@ -189,7 +189,9 @@ stretching the button to fill its parent.
 Text inputs use six slots: `prefix`, floating `hint`, `message`, `limitation`, `error`, and `suffix`. The hint is a
 pointer-inert placeholder that rests vertically centred and animates to the top-left on focus or when filled. The
 message is replaced by `error`; `limitation` sits under the suffix and reports the current, minimum, and maximum
-character counts. Input surfaces and buttons both use hover and click ripples.
+character counts. Input surfaces and buttons both use hover and click ripples. On focus, the border grows from the
+pointer: outline fields expand all four edges from their nearest point on each edge, while fill and standard fields
+expand the bottom line left and right, easing out over one second.
 
 ```tsx
 <PeriodicityButton prefix="Plus" content="Add" suffix="ArrowRight" />
