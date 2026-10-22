@@ -3,13 +3,17 @@ import { createContext, useContext } from "react";
 /**
  * Scroll state shared by a Coordinator and its collapsing app bar.
  * Type: interface.
- * Fields: offset, maxOffset, viewport, scrollTo.
+ * Fields: offset, maxOffset, collapseOffset, scrollTo.
+ * `offset` follows the main viewport scroll position; `collapseOffset` also
+ * counts wheel input that the content could not consume, so headers collapse
+ * even when the content is too short to scroll.
  * @example
- * const { offset, scrollTo } = useCoordinator();
+ * const { offset, collapseOffset, scrollTo } = useCoordinator();
  */
 export interface CoordinatorContextValue {
     offset: number;
     maxOffset: number;
+    collapseOffset: number;
     scrollTo: (offset: number, behavior?: ScrollBehavior) => void;
 }
 
@@ -26,6 +30,7 @@ export const useCoordinator: () => CoordinatorContextValue = (): CoordinatorCont
     useContext(CoordinatorContext) ?? {
         offset: 0,
         maxOffset: 0,
+        collapseOffset: 0,
         scrollTo: (): void => {},
     };
 

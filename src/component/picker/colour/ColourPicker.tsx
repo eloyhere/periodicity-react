@@ -1,14 +1,18 @@
 import {
     useId,
+    useRef,
     type ChangeEvent,
     type FC,
     type InputHTMLAttributes,
     type MouseEvent as ReactMouseEvent,
     type ReactNode,
     type Ref,
+    type RefCallback,
+    type RefObject,
 } from "react";
 import cx from "../../foundation/cx";
 import useControllableState from "../../foundation/useControllableState";
+import useMergedRef from "../../foundation/useMergedRef";
 import { composeEventHandlers } from "../shared/composeEventHandlers";
 import type { PickerDataAttributes } from "../shared/native";
 import PickerField from "../shared/PickerField";
@@ -101,6 +105,8 @@ const ColourPicker: FC<ColourPickerProps> = ({
     ...rest
 }: ColourPickerProps) => {
     const generatedId: string = useId();
+    const inputRef: RefObject<HTMLInputElement | null> = useRef<HTMLInputElement | null>(null);
+    const mergedRef: RefCallback<HTMLInputElement> = useMergedRef<HTMLInputElement>(inputRef, ref);
     const inputId: string = id ?? `${generatedId}-colour`;
     const hintId: string = `${inputId}-hint`;
     const errorId: string = `${inputId}-error`;
@@ -163,6 +169,23 @@ const ColourPicker: FC<ColourPickerProps> = ({
 
     const currentColour: string = normalizeColour(selectedValue);
 
+    const handleFieldClick: (event: ReactMouseEvent<HTMLDivElement>) => void = (
+        event: ReactMouseEvent<HTMLDivElement>,
+    ): void => {
+        if (disabled || readOnly) {
+            return;
+        }
+
+        const target: HTMLElement = event.target as HTMLElement;
+
+        if (target === inputRef.current || target.closest("button") !== null) {
+            return;
+        }
+
+        event.preventDefault();
+        inputRef.current?.click();
+    };
+
     return (
         <PickerField
             label={label}
@@ -174,10 +197,11 @@ const ColourPicker: FC<ColourPickerProps> = ({
             required={required}
             disabled={disabled}
             className={cx("colour-picker", className)}
+            onClick={handleFieldClick}
         >
             <input
                 {...rest}
-                ref={ref}
+                ref={mergedRef}
                 id={inputId}
                 className="colour-picker__input"
                 type="color"

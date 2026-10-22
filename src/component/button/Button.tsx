@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, CSSProperties, FC, Ref } from "react";
+import type { ButtonHTMLAttributes, CSSProperties, FC, ReactNode, Ref } from "react";
 import Icon, { type IconName } from "../icon/Icon";
 import Surface, { type RippleTrigger } from "../surface/Surface";
 import "./Button.css";
@@ -15,17 +15,26 @@ export type ButtonSize = "sm" | "md" | "lg";
  * `style` target the surrounding surface so layout and theming apply to the visible shape.
  * @param variant - Visual variant.
  * @param size - Control size.
- * @param icon - Optional leading icon.
- * @param trailingIcon - Optional trailing icon.
+ * @param prefix - Leading slot; a string is treated as an icon name.
+ * @param content - Centre slot. Falls back to `children`.
+ * @param suffix - Trailing slot; a string is treated as an icon name.
+ * @param icon - Deprecated leading icon alias for `prefix`.
+ * @param trailingIcon - Deprecated trailing icon alias for `suffix`.
  * @param rippleTrigger - Event that spawns the foreground ripple.
  * @param ref - Ref forwarded to the underlying `button` element.
  * @example
- * <Button variant="outline" icon="Plus" rippleTrigger="click">Add</Button>
+ * <Button variant="outline" prefix="Plus" content="Add" suffix="ArrowRight" />
  */
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps
+    extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "content" | "prefix"> {
     variant?: ButtonVariant;
     size?: ButtonSize;
+    prefix?: ReactNode;
+    content?: ReactNode;
+    suffix?: ReactNode;
+    /** @deprecated Use `prefix`. */
     icon?: IconName;
+    /** @deprecated Use `suffix`. */
     trailingIcon?: IconName;
     rippleTrigger?: RippleTrigger | readonly RippleTrigger[];
     className?: string;
@@ -40,9 +49,44 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
  * <Button rippleTrigger="hover">Hover me</Button>
  * @returns A button element.
  */
+const renderDecoration: (
+    slot: ReactNode,
+    legacyIcon: IconName | undefined,
+    iconSize: number,
+) => ReactNode = (
+    slot: ReactNode,
+    legacyIcon: IconName | undefined,
+    iconSize: number,
+): ReactNode => {
+    if (typeof slot === "string") {
+        return <Icon className="button__icon" name={slot as IconName} size={iconSize} />;
+    }
+
+    if (slot === (void 0) || slot === null) {
+        return legacyIcon === (void 0) ? null : (
+            <Icon className="button__icon" name={legacyIcon} size={iconSize} />
+        );
+    }
+
+    return slot;
+};
+
+const hasSlotContent: (slot: ReactNode) => boolean = (slot: ReactNode): boolean =>
+    slot !== (void 0) && slot !== null && slot !== false && slot !== "";
+
+/**
+ * Renders a button with prefix, content, and suffix slots.
+ * @param props - Variant, size, slots, ripple trigger, class name, style, and native button attributes.
+ * @example
+ * <Button prefix="Plus" content="Add" suffix="ArrowRight" />
+ * @returns A button element.
+ */
 const Button: FC<ButtonProps> = ({
     variant = "solid",
     size = "md",
+    prefix,
+    content,
+    suffix,
     icon,
     trailingIcon,
     rippleTrigger = ["hover", "click"],
@@ -55,6 +99,9 @@ const Button: FC<ButtonProps> = ({
     ...rest
 }: ButtonProps) => {
     const iconSize: number = size === "sm" ? 15 : size === "lg" ? 19 : 17;
+    const prefixNode: ReactNode = renderDecoration(prefix, icon, iconSize);
+    const suffixNode: ReactNode = renderDecoration(suffix, trailingIcon, iconSize);
+    const contentNode: ReactNode = content === (void 0) ? children : content;
 
     return (
         <Surface
@@ -64,10 +111,14 @@ const Button: FC<ButtonProps> = ({
             ripple={{ layer: "foreground", trigger: rippleTrigger }}
         >
             <button ref={ref} className="button__control" type={type} disabled={disabled} {...rest}>
-                {icon ? <Icon className="button__icon" name={icon} size={iconSize} /> : null}
-                <span className="button__label">{children}</span>
-                {trailingIcon ? (
-                    <Icon className="button__icon" name={trailingIcon} size={iconSize} />
+                {hasSlotContent(prefixNode) ? (
+                    <span className="button__slot button__slot--prefix">{prefixNode}</span>
+                ) : null}
+                {hasSlotContent(contentNode) ? (
+                    <span className="button__slot button__slot--content">{contentNode}</span>
+                ) : null}
+                {hasSlotContent(suffixNode) ? (
+                    <span className="button__slot button__slot--suffix">{suffixNode}</span>
                 ) : null}
             </button>
         </Surface>

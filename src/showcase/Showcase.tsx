@@ -1,5 +1,6 @@
 import {
     useEffect,
+    useMemo,
     useRef,
     useState,
     type Dispatch,
@@ -12,6 +13,7 @@ import {
     Anchor,
     AppBar,
     Button,
+    CompleteInput,
     Coordinator,
     Dialog,
     International,
@@ -25,6 +27,7 @@ import {
     themePresets,
 } from "../component";
 import type {
+    CompleteOption,
     LocaleCode,
     LocaleOption,
     ThemePreset,
@@ -38,6 +41,7 @@ import {
     findGroup,
     findSection,
     resolveEntryId,
+    showcaseEntries,
     type ShowcaseEntry,
     type ShowcaseGroup,
     type ShowcaseSection,
@@ -205,6 +209,8 @@ const Showcase: FC = () => {
     const pageTitleRef: RefObject<HTMLElement | null> = useRef<HTMLElement | null>(null);
     const [aboutOpen, setAboutOpen]: [boolean, Dispatch<SetStateAction<boolean>>] =
         useState<boolean>(false);
+    const [searchValue, setSearchValue]: [string, Dispatch<SetStateAction<string>>] =
+        useState<string>("");
     const [themePreset, setThemePreset]: [
         ThemePresetId,
         Dispatch<SetStateAction<ThemePresetId>>,
@@ -235,7 +241,31 @@ const Showcase: FC = () => {
             label: `${option.nativeLabel} · ${option.label}`,
         }),
     );
+    const searchOptions: readonly ShowcaseOption[] = useMemo<readonly ShowcaseOption[]>(
+        () =>
+            showcaseEntries.map(
+                (entry: ShowcaseEntry): ShowcaseOption => ({
+                    value: entry.id,
+                    label: localizeComponentName(entry.label, locale),
+                }),
+            ),
+        [locale],
+    );
     const previousEntryIdRef: RefObject<string> = useRef<string>(entry.id);
+
+    /**
+     * Clears the search box and opens the selected component.
+     * @param option - The committed autocomplete suggestion.
+     * @example
+     * <CompleteInput onSelect={handleSearchSelect} />
+     * @returns Nothing.
+     */
+    const handleSearchSelect: (option: CompleteOption) => void = (
+        option: CompleteOption,
+    ): void => {
+        setSearchValue("");
+        navigate(option.value);
+    };
 
     /**
      * Moves focus to the main landmark without changing the hash.
@@ -335,6 +365,17 @@ const Showcase: FC = () => {
                                             </div>
                                         );
                                     })}
+                                    <div className="showcase-filter showcase-filter--search">
+                                        <CompleteInput
+                                            className="showcase-search"
+                                            label={shell.search}
+                                            prefix="Search"
+                                            options={searchOptions}
+                                            value={searchValue}
+                                            onChange={setSearchValue}
+                                            onSelect={handleSearchSelect}
+                                        />
+                                    </div>
                                 </LinearLayout>
                             </div>
                         }

@@ -7,10 +7,12 @@ import {
     type FC,
     type ReactNode,
     type Ref,
+    type RefCallback,
     type RefObject,
 } from "react";
 import Dropdown, { DropdownItem } from "../../dropdown/Dropdown";
 import useControllableState from "../../foundation/useControllableState";
+import useMergedRef from "../../foundation/useMergedRef";
 import TextInput, { type TextInputProps } from "../text/TextInput";
 import { useInternational, type InternationalContextValue } from "../../../international";
 import "./CompleteInput.css";
@@ -32,21 +34,26 @@ export interface CompleteOption {
  * Type: interface.
  * Native input attributes are forwarded to the underlying text field; `className` and `style` apply to the field root.
  * Fields: label, value, defaultValue, options, onChange, onSelect, open, defaultOpen, onOpenChange,
- * hint, error, disabled, readOnly, placeholder, minChars, className, id, ref, and native input attributes.
- * @param label - Floating label.
+ * prefix, hint, message, limitation, error, suffix, disabled, readOnly, placeholder, minChars,
+ * className, id, ref, and native input attributes.
+ * @param label - Accessible label; also the default floating hint.
  * @param value - Controlled text value.
  * @param defaultValue - Initial text value when uncontrolled.
  * @param options - Strings or options filtered by the typed text.
  * @param onChange - Called with every edited text value.
- * @param onSelect - Called with the committed suggestion.
+ * @param onSelect - Called with the committed suggestion; the panel then closes and the field blurs.
  * @param open - Controlled suggestion panel visibility.
  * @param defaultOpen - Initial panel visibility when uncontrolled.
  * @param onOpenChange - Called when the suggestion panel visibility changes.
- * @param hint - Supporting text shown below the field.
- * @param error - Validation message; replaces the hint and marks the field invalid.
+ * @param prefix - Leading icon slot; a string is treated as an icon name.
+ * @param hint - Floating placeholder shown inside the field until focus or content.
+ * @param message - Supporting message shown below the field.
+ * @param limitation - Character counter shown under the suffix.
+ * @param error - Validation message; replaces the message and marks the field invalid.
+ * @param suffix - Trailing icon slot; a string is treated as an icon name.
  * @param disabled - Disables the field and suggestion panel.
  * @param readOnly - Keeps the value focusable but suppresses edits and selection.
- * @param placeholder - Placeholder text.
+ * @param placeholder - Native placeholder fallback for the floating hint.
  * @param minChars - Query length required before suggestions are shown.
  * @param className - Extra classes for the field root.
  * @param ref - Ref to the underlying input element.
@@ -54,7 +61,10 @@ export interface CompleteOption {
  * <CompleteInput label="Ritual" value={value} options={options} onChange={setValue} />
  */
 export interface CompleteInputProps
-    extends Omit<TextInputProps, "type" | "value" | "defaultValue" | "onChange" | "onSelect" | "className"> {
+    extends Omit<
+        TextInputProps,
+        "type" | "value" | "defaultValue" | "onChange" | "onSelect" | "className" | "rootRef"
+    > {
     label: string;
     value?: string;
     defaultValue?: string;
@@ -83,6 +93,8 @@ const toOption: (value: string | CompleteOption) => CompleteOption = (
 
 /**
  * Renders a Material text field with a filtered suggestion panel.
+ * Focus stays in the field while the panel is open, so the focused border and
+ * typing remain active; selecting a suggestion closes the panel and blurs the field.
  * @param props - Value, suggestions, and selection callback.
  * @example
  * <CompleteInput label="Project" options={["Design", "Research"]} value={value} onChange={setValue} />
@@ -112,7 +124,9 @@ const CompleteInput: FC<CompleteInputProps> = ({
     ...rest
 }: CompleteInputProps) => {
     const { t }: InternationalContextValue = useInternational();
-    const anchorRef: RefObject<HTMLSpanElement | null> = useRef<HTMLSpanElement | null>(null);
+    const fieldRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
+    const inputRef: RefObject<HTMLInputElement | null> = useRef<HTMLInputElement | null>(null);
+    const mergedInputRef: RefCallback<HTMLInputElement> = useMergedRef(ref, inputRef);
     const controlled: boolean = value !== (void 0);
     const [uncontrolledValue, setUncontrolledValue]: [string, (next: string) => void] = useState<string>(
         defaultValue ?? "",
@@ -146,6 +160,7 @@ const CompleteInput: FC<CompleteInputProps> = ({
         onChange(option.value);
         onSelect?.(option);
         setOpen(false);
+        inputRef.current?.blur();
     };
 
     const handleFocus: FocusEventHandler<HTMLInputElement> = (event: FocusEvent<HTMLInputElement>): void => {
@@ -174,10 +189,13 @@ const CompleteInput: FC<CompleteInputProps> = ({
     };
 
     return (
-        <span ref={anchorRef} className={`complete-input ${className}`.trim()} style={style}>
+        <>
             <TextInput
                 {...rest}
-                ref={ref}
+                ref={mergedInputRef}
+                rootRef={fieldRef}
+                className={`complete-input ${className}`.trim()}
+                style={style}
                 label={label}
                 value={currentValue}
                 hint={hint}
@@ -192,12 +210,14 @@ const CompleteInput: FC<CompleteInputProps> = ({
             <Dropdown
                 open={shouldOpen}
                 onOpenChange={setOpen}
-                anchorRef={anchorRef}
+                anchorRef={fieldRef}
                 matchWidth
                 role="listbox"
                 ariaLabel={`${label} suggestions`}
                 isEmpty={visible.length === 0}
                 empty={t("noResults")}
+                autoFocus={false}
+                restoreFocus={false}
             >
                 {visible.map((option: CompleteOption): ReactNode => (
                     <DropdownItem
@@ -210,7 +230,7 @@ const CompleteInput: FC<CompleteInputProps> = ({
                     </DropdownItem>
                 ))}
             </Dropdown>
-        </span>
+        </>
     );
 };
 

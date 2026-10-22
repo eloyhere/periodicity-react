@@ -182,6 +182,21 @@ effect and status variants.
 
 Form controls accept native input attributes and forward events, refs, `aria-*`, and `data-*` attributes.
 
+Buttons use three content-sized flex slots: `prefix`, `content`, and `suffix`. A string in `prefix` or `suffix` is
+treated as an icon name. One icon is centred, two icons share equal width, and content grows naturally without
+stretching the button to fill its parent.
+
+Text inputs use six slots: `prefix`, floating `hint`, `message`, `limitation`, `error`, and `suffix`. The hint is a
+pointer-inert placeholder that rests vertically centred and animates to the top-left on focus or when filled. The
+message is replaced by `error`; `limitation` sits under the suffix and reports the current, minimum, and maximum
+character counts. Input surfaces and buttons both use hover and click ripples.
+
+```tsx
+<PeriodicityButton prefix="Plus" content="Add" suffix="ArrowRight" />
+<PeriodicityButton prefix="Plus" aria-label="Add" />
+<PeriodicityButton prefix="Plus" suffix="ArrowRight" aria-label="Split" />
+```
+
 ```tsx
 import {
     PeriodicityCheckbox,
@@ -258,7 +273,8 @@ Shift+PageUp/PageDown change year, and Enter or Space selects. `showAdjacentDays
 
 Most form and picker components support controlled and uncontrolled values, `disabled`, `readOnly` where relevant,
 and caller-composed native handlers. `PeriodicityMention` adds an asynchronous suggestion list and tokenised chips;
-the caller supplies the loader.
+the caller supplies the loader. It uses the same `prefix`, `hint`, `message`, `limitation`, `error`, and `suffix`
+slots as the other text fields.
 
 ## Collections and data
 
@@ -348,6 +364,8 @@ Layout is flex-first and does not use CSS Grid. Structural components include:
 
 `PeriodicityCoordinator` has exactly three slots: `collapse`, `header`, and `main`. The `collapse` slot shrinks
 from `collapseHeight` to zero as `main` scrolls; `header` is the fixed app bar; `main` is the scroll viewport.
+When `main` cannot scroll, vertical wheel input that no child consumes collapses or restores the slot instead of
+scrolling the page; nested scrollers keep priority.
 
 ```tsx
 <PeriodicityCoordinator
@@ -370,6 +388,13 @@ from `collapseHeight` to zero as `main` scrolls; `header` is the fixed app bar; 
     }
     main={<Notes />}
 />
+```
+
+`PeriodicityToolbar` also accepts `prefix`, `content`, and `suffix` slots. The three slots share the row 1:1:1;
+with only one slot it fills the row, and with two they are 1:1. Strings in `prefix` and `suffix` are icon names.
+
+```tsx
+<PeriodicityToolbar prefix="Menu" content="Explore" suffix="More" />
 ```
 
 `PeriodicityCollapse` remains available for an AppBar-owned hero when the older AppBar composition is preferred.
@@ -496,6 +521,27 @@ element-polymorphic animation wrappers.
 Motion is opt-in through `PeriodicityAnimation` and `PeriodicityAnimated`, and respects the system
 `prefers-reduced-motion` preference. Ripple layers are shared by interactive surfaces and stop when motion is
 disabled.
+
+## Standard events
+
+Every public `Periodicity*` component accepts native React props and the standard event layer without replacing
+each other:
+
+```tsx
+<PeriodicityButton
+    onClick={save}
+    onStandardClick={(event) => console.log(event.count, event.source)}
+    standardEvents={{
+        press: start,
+        drag: reorder,
+        continuous: zoom,
+    }}
+/>
+```
+
+Named listeners are available for `over`, `enter`, `leave`, `wheel`, `click`, `press`, `input`, `continuous`,
+and `drag`. Use `onStandardEvent` for one catch-all listener, or `standardEvents` for per-event handlers and
+thresholds. Native `onClick`, `onWheel`, `onInput`, and `onDrag` remain untouched.
 
 ## Accessibility
 

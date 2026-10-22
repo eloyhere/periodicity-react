@@ -328,6 +328,7 @@
     }
 
     /* Inputs hide the native ring behind a shell; focus the shell instead. */
+    :root .input-layout__surface:focus-within,
     :root .text-field__surface:focus-within,
     :root .text-area__surface:focus-within,
     :root .combobox__surface:focus-within,
@@ -381,6 +382,7 @@
     }
 
     :root .field__background,
+    :root .input-layout .input-layout__background,
     :root .text-field .text-field__background,
     :root .text-area .text-area__background,
     :root .select-field .select-field__background,

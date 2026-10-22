@@ -13,6 +13,7 @@ export type ShellMessageKey =
     | "data"
     | "layout"
     | "auxiliary"
+    | "search"
     | "theme"
     | "language"
     | "about"
@@ -40,6 +41,7 @@ const en: ShellMessages = {
     data: "Data",
     layout: "Layout",
     auxiliary: "Auxiliary",
+    search: "Search components",
     theme: "Theme",
     language: "Language",
     about: "About",
@@ -69,6 +71,7 @@ export const shellMessages: Readonly<Record<LocaleCode, ShellMessages>> = {
         data: "数据组件",
         layout: "布局组件",
         auxiliary: "辅助组件",
+        search: "搜索组件",
         theme: "主题",
         language: "语言",
         about: "关于",
@@ -87,6 +90,7 @@ export const shellMessages: Readonly<Record<LocaleCode, ShellMessages>> = {
         data: "数据组件",
         layout: "布局组件",
         auxiliary: "辅助组件",
+        search: "搜索组件",
         theme: "主题",
         language: "语言",
         about: "关于",
@@ -105,6 +109,7 @@ export const shellMessages: Readonly<Record<LocaleCode, ShellMessages>> = {
         data: "資料元件",
         layout: "佈局元件",
         auxiliary: "輔助元件",
+        search: "搜尋元件",
         theme: "主題",
         language: "語言",
         about: "關於",
@@ -123,6 +128,7 @@ export const shellMessages: Readonly<Record<LocaleCode, ShellMessages>> = {
         data: "資料元件",
         layout: "版面元件",
         auxiliary: "輔助元件",
+        search: "搜尋元件",
         theme: "主題",
         language: "語言",
         about: "關於",
@@ -141,6 +147,7 @@ export const shellMessages: Readonly<Record<LocaleCode, ShellMessages>> = {
         data: "データ",
         layout: "レイアウト",
         auxiliary: "補助",
+        search: "コンポーネントを検索",
         theme: "テーマ",
         language: "言語",
         about: "概要",
@@ -159,6 +166,7 @@ export const shellMessages: Readonly<Record<LocaleCode, ShellMessages>> = {
         data: "데이터",
         layout: "레이아웃",
         auxiliary: "보조",
+        search: "컴포넌트 검색",
         theme: "테마",
         language: "언어",
         about: "정보",
@@ -177,6 +185,7 @@ export const shellMessages: Readonly<Record<LocaleCode, ShellMessages>> = {
         data: "Datos",
         layout: "Diseño",
         auxiliary: "Auxiliares",
+        search: "Buscar componentes",
         theme: "Tema",
         language: "Idioma",
         about: "Acerca de",
@@ -195,6 +204,7 @@ export const shellMessages: Readonly<Record<LocaleCode, ShellMessages>> = {
         data: "Datos",
         layout: "Diseño",
         auxiliary: "Auxiliares",
+        search: "Buscar componentes",
         theme: "Tema",
         language: "Idioma",
         about: "Acerca de",
@@ -213,6 +223,7 @@ export const shellMessages: Readonly<Record<LocaleCode, ShellMessages>> = {
         data: "Dados",
         layout: "Esquema",
         auxiliary: "Auxiliares",
+        search: "Pesquisar componentes",
         theme: "Tema",
         language: "Idioma",
         about: "Sobre",
@@ -231,6 +242,7 @@ export const shellMessages: Readonly<Record<LocaleCode, ShellMessages>> = {
         data: "Dados",
         layout: "Layout",
         auxiliary: "Auxiliares",
+        search: "Pesquisar componentes",
         theme: "Tema",
         language: "Idioma",
         about: "Sobre",

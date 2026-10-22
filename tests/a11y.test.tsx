@@ -11,6 +11,7 @@ import {
     PeriodicityForm,
     PeriodicityFormField,
     PeriodicityList,
+    PeriodicityMention,
     PeriodicitySelect,
     PeriodicityTable,
     PeriodicityTag,
@@ -83,6 +84,19 @@ describe("accessibility smoke tests", (): void => {
                 <PeriodicityToolbar title="Design system" navigationIcon="←" actions={<button type="button">Share</button>} />
                 <PeriodicityCalendar value="2026-10-20" label="Delivery date" />
             </div>,
+        );
+
+        await audit(container);
+    });
+
+    it("audits the mention field", async (): Promise<void> => {
+        const { container }: { container: HTMLElement } = render(
+            <PeriodicityMention
+                label="Reply"
+                prefix="Mention"
+                message="Type @ to mention someone."
+                onChange={(): void => {}}
+            />,
         );
 
         await audit(container);

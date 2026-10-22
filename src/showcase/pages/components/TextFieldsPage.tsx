@@ -59,27 +59,33 @@ const variantsCode: string = `<div className="showcase__field-grid">
     <TextInput
         label="Project"
         variant="outline"
-        placeholder="e.g. Morning pages"
-        hint="Outline · resting label"
-        leading={<Icon name="Search" size={16} />}
+        hint="e.g. Morning pages"
+        message="Outline · resting hint"
+        prefix="Search"
     />
     <TextInput
         label="Ritual name"
         variant="outline"
         value={textValue}
         onChange={(event) => setTextValue(event.target.value)}
-        hint="Outline · floating label"
-        leading={<Icon name="Plan" size={16} />}
+        hint="Ritual name"
+        message="Outline · floating hint"
+        prefix="Plan"
     />
     <TextInput
         label="Email"
         variant="fill"
         type="email"
-        placeholder="mira@example.com"
-        hint="Fill · bottom line"
-        leading={<Icon name="Mail" size={16} />}
+        hint="mira@example.com"
+        message="Fill · bottom line"
+        prefix="Mail"
     />
-    <TextInput label="Standard" variant="standard" placeholder="Type here" hint="Standard · underline only" />
+    <TextInput
+        label="Standard"
+        variant="standard"
+        hint="Type here"
+        message="Standard · underline only"
+    />
 </div>`;
 
 const completeCode: string = `<CompleteInput
@@ -87,21 +93,24 @@ const completeCode: string = `<CompleteInput
     value={completeValue}
     options={completeOptions}
     onChange={setCompleteValue}
-    hint="Free text with suggestions"
+    hint="Design review"
+    message="Free text with suggestions"
 />
 
 <EmailInput
     label="Email"
     value={emailValue}
     onChange={(event) => setEmailValue(event.target.value)}
-    hint="Email keyboard and validation"
+    hint="mira@example.com"
+    message="Email keyboard and validation"
 />
 
 <TelephoneInput
     label="Telephone"
     value={telephoneValue}
     onChange={(event) => setTelephoneValue(event.target.value)}
-    hint="Tel keyboard"
+    hint="+44 7700 900000"
+    message="Tel keyboard"
 />`;
 
 const notesCode: string = `<Columns count={2} gap="lg">
@@ -112,7 +121,8 @@ const notesCode: string = `<Columns count={2} gap="lg">
         rows={3}
         maxLength={120}
         showCount
-        hint="Outline textarea"
+        hint="Write a note"
+        message="Outline textarea"
     />
     <Stack gap="md">
         <Select
@@ -257,9 +267,9 @@ const TextFieldsPage: FC = () => {
                     <TextInput
                         label="Project"
                         variant="outline"
-                        placeholder="e.g. Morning pages"
-                        hint="Outline · resting label"
-                        leading={<Icon name="Search" size={16} />}
+                        hint="e.g. Morning pages"
+                        message="Outline · resting hint"
+                        prefix="Search"
                     />
                     <TextInput
                         label="Ritual name"
@@ -268,22 +278,23 @@ const TextFieldsPage: FC = () => {
                         onChange={(event: ChangeEvent<HTMLInputElement>): void =>
                             setTextValue(event.target.value)
                         }
-                        hint="Outline · floating label"
-                        leading={<Icon name="Plan" size={16} />}
+                        hint="Ritual name"
+                        message="Outline · floating hint"
+                        prefix="Plan"
                     />
                     <TextInput
                         label="Email"
                         variant="fill"
                         type="email"
-                        placeholder="mira@example.com"
-                        hint="Fill · bottom line"
-                        leading={<Icon name="Mail" size={16} />}
+                        hint="mira@example.com"
+                        message="Fill · bottom line"
+                        prefix="Mail"
                     />
                     <TextInput
                         label="Standard"
                         variant="standard"
-                        placeholder="Type here"
-                        hint="Standard · underline only"
+                        hint="Type here"
+                        message="Standard · underline only"
                     />
                 </div>
             </Demo>
@@ -299,7 +310,8 @@ const TextFieldsPage: FC = () => {
                         value={completeValue}
                         options={completeOptions}
                         onChange={setCompleteValue}
-                        hint="Free text with suggestions"
+                        hint="Design review"
+        message="Free text with suggestions"
                     />
                     <EmailInput
                         label="Email"
@@ -307,7 +319,8 @@ const TextFieldsPage: FC = () => {
                         onChange={(event: ChangeEvent<HTMLInputElement>): void =>
                             setEmailValue(event.target.value)
                         }
-                        hint="Email keyboard and validation"
+                        hint="mira@example.com"
+        message="Email keyboard and validation"
                     />
                     <TelephoneInput
                         label="Telephone"
@@ -315,7 +328,8 @@ const TextFieldsPage: FC = () => {
                         onChange={(event: ChangeEvent<HTMLInputElement>): void =>
                             setTelephoneValue(event.target.value)
                         }
-                        hint="Tel keyboard"
+                        hint="+44 7700 900000"
+        message="Tel keyboard"
                     />
                 </div>
             </Demo>
@@ -335,7 +349,8 @@ const TextFieldsPage: FC = () => {
                         rows={3}
                         maxLength={120}
                         showCount
-                        hint="Outline textarea"
+                        hint="Write a note"
+                        message="Outline textarea"
                     />
                     <Stack gap="md">
                         <Select

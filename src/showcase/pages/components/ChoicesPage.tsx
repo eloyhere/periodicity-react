@@ -61,7 +61,7 @@ const radioCode: string = `<RadioGroup
     onChange={setNumberValue}
     min={0}
     max={12}
-    hint="Arrow keys step the value."
+    message="Arrow keys step the value."
 />`;
 
 const wrappersCode: string = `<Field
@@ -189,7 +189,7 @@ const ChoicesPage: FC = () => {
                         onChange={setNumberValue}
                         min={0}
                         max={12}
-                        hint="Arrow keys step the value."
+                        message="Arrow keys step the value."
                     />
                 </Stack>
             </Demo>

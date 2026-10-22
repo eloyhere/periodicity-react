@@ -11,12 +11,12 @@
     min-width: 0;
 }
 
-.mention--sm {
+.mention.input-layout--sm {
     --mention-token-height: 20px;
     --mention-token-font: var(--type-label-sm);
 }
 
-.mention--lg {
+.mention.input-layout--lg {
     --mention-token-height: 24px;
     --mention-token-font: var(--type-label);
 }
@@ -24,7 +24,7 @@
 /* ---- editable surface --------------------------------------------------- */
 
 .mention__editor {
-    --mention-editor-height: calc(var(--text-field-height) - 2px);
+    --mention-editor-height: calc(var(--input-layout-height) - 2px);
 
     display: block;
     flex: 1 1 auto;
@@ -54,17 +54,22 @@
     height: 0;
 }
 
-.text-field--fill .mention__editor,
-.text-field--standard .mention__editor {
-    --mention-editor-height: calc(var(--text-field-height) - 18px);
+.input-layout--fill .mention__editor,
+.input-layout--standard .mention__editor {
+    --mention-editor-height: calc(var(--input-layout-height) - 18px);
 }
 
-.text-field--sm .mention__editor {
+.input-layout--sm .mention__editor {
     font-size: var(--type-body-sm);
 }
 
-.text-field--lg .mention__editor {
+.input-layout--lg .mention__editor {
     font-size: var(--type-body-lg);
+}
+
+.mention.input-layout--multiline .input-layout__row {
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .mention--multiline .mention__editor {
@@ -91,88 +96,15 @@
     opacity: 1;
 }
 
-/* Show the placeholder only after the label has floated out of the way. */
+/* Show the placeholder only after the hint has floated out of the way. */
 .mention--has-label .mention__editor[data-floating="true"]:empty::before {
     opacity: 1;
     transition-delay: var(--duration-medium);
 }
 
-/* ---- floating label, matching TextInput exactly ------------------------- */
-
-/* These values duplicate TextInput.css so the mention field keeps the same
-   top/left/font-size/transform transition when it is focused or filled.
-   The explicit `data-floating` hook mirrors the `mention--focused` and
-   `mention--filled` classes and is applied directly by the component, so the
-   label never depends on `:has()` support. */
-
-.mention .text-field__label {
-    z-index: 4;
-    transform-origin: left center;
-    transition:
-        top var(--duration-medium) var(--ease-decelerate),
-        left var(--duration-medium) var(--ease-decelerate),
-        padding var(--duration-medium) var(--ease-decelerate),
-        background-color var(--duration-fast) var(--ease-standard),
-        color var(--duration-fast) var(--ease-standard),
-        font-size var(--duration-medium) var(--ease-decelerate),
-        transform var(--duration-medium) var(--ease-decelerate);
-}
-
-/* ---- outline ------------------------------------------------------------ */
-
-.mention.text-field--outline .text-field__label[data-floating="true"],
-.mention.text-field--outline.mention--focused .text-field__label,
-.mention.text-field--outline:focus-within .text-field__label {
-    top: 0;
-    left: calc(var(--text-field-pad-inline) - 4px);
-    padding: 0 5px;
-    background: var(--color-surface);
-    color: var(--color-primary);
-    font-size: 12px;
-    transform: translateY(-50%);
-}
-
-/* ---- fill --------------------------------------------------------------- */
-
-.mention.text-field--fill .text-field__label[data-floating="true"],
-.mention.text-field--fill.mention--focused .text-field__label,
-.mention.text-field--fill:focus-within .text-field__label {
-    top: 6px;
-    left: var(--text-field-pad-inline);
-    padding: 0;
-    background: transparent;
-    color: var(--color-primary);
-    font-size: 12px;
-    transform: none;
-}
-
-/* ---- standard ----------------------------------------------------------- */
-
-.mention.text-field--standard .text-field__label[data-floating="true"],
-.mention.text-field--standard.mention--focused .text-field__label,
-.mention.text-field--standard:focus-within .text-field__label {
-    top: 2px;
-    left: 0;
-    padding: 0;
-    background: transparent;
-    color: var(--color-primary);
-    font-size: 12px;
-    transform: none;
-}
-
-/* ---- invalid and disabled ---------------------------------------------- */
-
-.mention.text-field--invalid .text-field__label[data-floating="true"],
-.mention.text-field--invalid.mention--focused .text-field__label,
-.mention.text-field--invalid:focus-within .text-field__label {
+.mention__required {
+    margin-left: 2px;
     color: var(--color-error);
-}
-
-.mention.mention--disabled .text-field__label,
-.mention.mention--disabled .text-field__label[data-floating="true"],
-.mention.mention--disabled.mention--focused .text-field__label,
-.mention.mention--disabled:focus-within .text-field__label {
-    color: var(--faint);
 }
 
 /* ---- mention token ------------------------------------------------------ */
@@ -282,18 +214,8 @@
     cursor: not-allowed;
 }
 
-.mention--disabled .text-field__label {
+.mention.input-layout--disabled .input-layout__hint {
     color: var(--faint);
-}
-
-.mention--disabled .text-field__background {
-    border-color: var(--color-outline-variant);
-    background: var(--color-surface-container);
-}
-
-.mention--disabled.text-field--fill .text-field__background {
-    border-bottom-color: var(--color-outline-variant);
-    background: var(--color-surface-container);
 }
 
 .mention--disabled .mention__token {
@@ -368,9 +290,6 @@
 /* ---- reduced motion ----------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
-    .mention .text-field__label,
-    .mention .text-field__background,
-    .mention .text-field__edge,
     .mention__editor:empty::before,
     .mention__token-remove {
         transition: none;

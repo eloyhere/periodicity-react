@@ -281,7 +281,7 @@ const Contact: (props: ContactProps) => ReactNode = ({
                                     <span
                                         className="contact__presence"
                                         data-presence={contact.presence ?? "offline"}
-                                        aria-label={contact.presence ?? t("offline")}
+                                        aria-label={t(contact.presence ?? "offline")}
                                     />
                                 </Surface>
                             </ContactContextMenu>

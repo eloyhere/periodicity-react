@@ -1,0 +1,26 @@
+.toolbar--slots {
+    width: 100%;
+    gap: 0;
+    padding: 0;
+}
+
+.toolbar__slot {
+    display: flex;
+    flex: 1 1 0;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 56px;
+    padding: 0 12px;
+    overflow: hidden;
+}
+
+.toolbar__slot--content {
+    text-overflow: ellipsis;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toolbar__slot {
+        transition: none;
+    }
+}

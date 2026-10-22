@@ -25,11 +25,13 @@
 
 .button__control {
     position: relative;
-    display: inline-flex;
-    align-items: center;
+    display: flex;
+    align-items: stretch;
     justify-content: center;
     gap: 8px;
-    width: 100%;
+    width: max-content;
+    max-width: 100%;
+    padding: 0 14px;
     min-width: 0;
     margin: 0;
     border: 0;
@@ -48,14 +50,19 @@
     appearance: none;
 }
 
-.button__label {
-    display: inline-block;
+.button__slot {
+    display: flex;
+    flex: 0 1 auto;
+    align-items: center;
+    justify-content: center;
     min-width: 0;
-    overflow: visible;
+    padding: 0;
+    overflow: hidden;
 }
 
-.button__label:empty {
-    display: none;
+.button__slot--content {
+    flex: 0 1 auto;
+    text-overflow: ellipsis;
 }
 
 .button__icon {
@@ -64,21 +71,21 @@
 
 .button--sm .button__control {
     min-height: 32px;
-    padding: 0 13px;
+    padding: 0 10px;
     gap: 6px;
     font-size: 12px;
 }
 
 .button--md .button__control {
     min-height: 42px;
-    padding: 0 18px;
+    padding: 0 14px;
     gap: 8px;
     font-size: 13.5px;
 }
 
 .button--lg .button__control {
     min-height: 52px;
-    padding: 0 24px;
+    padding: 0 18px;
     gap: 9px;
     font-size: 15px;
 }
@@ -228,20 +235,23 @@
 
 :root .button--sm .button__control {
     min-height: 32px;
-    padding: 0 16px;
+    padding: 0 12px;
+    gap: 6px;
     font-size: 13px;
 }
 
 :root .button--md .button__control {
     min-height: 36px;
-    padding: 0 24px;
+    padding: 0 18px;
+    gap: 8px;
     font-size: 14px;
     font-weight: 500;
 }
 
 :root .button--lg .button__control {
     min-height: 42px;
-    padding: 0 32px;
+    padding: 0 20px;
+    gap: 9px;
     font-size: 15px;
 }
 

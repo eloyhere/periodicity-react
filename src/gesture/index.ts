@@ -10,3 +10,5 @@ export type {
 } from "./events/types";
 export { useStandardEvents } from "./react/useStandardEvents";
 export type { StandardEventsResult } from "./react/useStandardEvents";
+export { withStandardEvents } from "./react/withStandardEvents";
+export type { StandardEventProps } from "./react/withStandardEvents";

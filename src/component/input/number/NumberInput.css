@@ -332,3 +332,17 @@
         transition: none;
     }
 }
+
+.number-field__step-surface {
+    display: inline-flex;
+    flex: none;
+    width: var(--control-sm);
+    height: var(--control-sm);
+    border-radius: var(--radius-xs);
+    overflow: hidden;
+}
+
+.number-field__step-surface .number-field__step {
+    width: 100%;
+    height: 100%;
+}

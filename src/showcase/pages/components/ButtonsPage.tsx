@@ -9,9 +9,9 @@ import type { ToastApi } from "../../../component/toast/ToastContext";
 import Demo, { DemoGroup } from "../../Demo";
 
 const rippleCode: string = `<Button>Primary</Button>
-<Button variant="outline" icon="Plus">Outline</Button>
-<Button variant="ghost" trailingIcon="ArrowUpRight">Ghost</Button>
-<Button variant="quiet" icon="Setting" aria-label="Settings" />
+<Button variant="outline" prefix="Plus" content="Outline" />
+<Button variant="ghost" suffix="ArrowUpRight" content="Ghost" />
+<Button variant="quiet" prefix="Setting" aria-label="Settings" />
 
 <Button
     variant="outline"
@@ -37,10 +37,11 @@ const sizesCode: string = `<Button size="sm">Size sm</Button>
 <Button size="md">Size md</Button>
 <Button size="lg">Size lg</Button>`;
 
-const iconsCode: string = `<Button icon="Plus">Leading icon</Button>
-<Button trailingIcon="ArrowUpRight">Trailing icon</Button>
-<Button variant="outline" icon="Search" aria-label="Search" />
-<Button variant="quiet" icon="More" aria-label="More actions" />
+const iconsCode: string = `<Button prefix="Plus" content="Leading icon" />
+<Button suffix="ArrowUpRight" content="Trailing icon" />
+<Button prefix="Plus" content="Both slots" suffix="ArrowUpRight" />
+<Button variant="outline" prefix="Search" aria-label="Search" />
+<Button variant="quiet" prefix="More" aria-label="More actions" />
 <Button disabled>Disabled</Button>`;
 
 const buttonVariants: readonly ButtonVariant[] = ["solid", "outline", "ghost", "quiet"];
@@ -65,13 +66,9 @@ const ButtonsPage: FC = () => {
                 layout="row"
             >
                 <Button>Primary</Button>
-                <Button variant="outline" icon="Plus">
-                    Outline
-                </Button>
-                <Button variant="ghost" trailingIcon="ArrowUpRight">
-                    Ghost
-                </Button>
-                <Button variant="quiet" icon="Setting" aria-label="Settings" />
+                <Button variant="outline" prefix="Plus" content="Outline" />
+                <Button variant="ghost" suffix="ArrowUpRight" content="Ghost" />
+                <Button variant="quiet" prefix="Setting" aria-label="Settings" />
                 <Button
                     rippleTrigger="context"
                     variant="outline"
@@ -108,15 +105,16 @@ const ButtonsPage: FC = () => {
             </Demo>
 
             <Demo
-                title="Icons and states"
-                description="Leading and trailing icon slots, icon-only buttons, and the disabled state."
+                title="Slots and states"
+                description="Prefix, content, and suffix slots; icon-only buttons; and the disabled state."
                 code={iconsCode}
             >
-                <DemoGroup label="Icons and states">
-                    <Button icon="Plus">Leading icon</Button>
-                    <Button trailingIcon="ArrowUpRight">Trailing icon</Button>
-                    <Button variant="outline" icon="Search" aria-label="Search" />
-                    <Button variant="quiet" icon="More" aria-label="More actions" />
+                <DemoGroup label="Slots and states">
+                    <Button prefix="Plus" content="Leading icon" />
+                    <Button suffix="ArrowUpRight" content="Trailing icon" />
+                    <Button prefix="Plus" content="Both slots" suffix="ArrowUpRight" />
+                    <Button variant="outline" prefix="Search" aria-label="Search" />
+                    <Button variant="quiet" prefix="More" aria-label="More actions" />
                     <Button disabled>Disabled</Button>
                 </DemoGroup>
             </Demo>

@@ -7,14 +7,13 @@ import {
     type FC,
     type Ref,
     type RefCallback,
+    type ReactNode,
     type RefObject,
     type TextareaHTMLAttributes,
 } from "react";
-import cx from "../../foundation/cx";
 import useField, { type FieldState } from "../../foundation/useField";
 import useMergedRef from "../../foundation/useMergedRef";
-import Surface from "../../surface/Surface";
-import "./TextArea.css";
+import InputLayout from "../shared/InputLayout";
 
 /**
  * Visual variant of the text area.
@@ -29,14 +28,20 @@ export type TextAreaVariant = "outline" | "fill" | "standard";
  * Props for the TextArea.
  * Type: interface.
  * Native textarea attributes are forwarded to the `<textarea>`; `className` and `style` apply to the field root.
- * Fields: label, value, defaultValue, onChange, hint, error, rows, maxLength, showCount, variant, disabled,
- * readOnly, required, placeholder, autoGrow, className, id, ref, and native textarea attributes.
- * @param label - Floating label.
+ * Fields: label, value, defaultValue, onChange, prefix, hint, message, limitation, error, suffix,
+ * rows, maxLength, minLength, showCount, variant, disabled, readOnly, required, placeholder, autoGrow,
+ * className, id, ref, and native textarea attributes.
+ * @param label - Accessible label.
  * @param value - Controlled text value.
  * @param defaultValue - Initial text value when uncontrolled.
  * @param onChange - Called after every edit with the native change event.
- * @param hint - Supporting text shown below the field.
- * @param error - Validation message; replaces the hint and marks the field invalid.
+ * @param prefix - Leading icon slot; a string is treated as an icon name.
+ * @param hint - Floating placeholder shown inside the field until focus or content.
+ * @param message - Supporting message shown below the field.
+ * @param limitation - Character counter shown under the suffix; defaults to a counter when
+ * `minLength`, `maxLength`, or `showCount` is set.
+ * @param error - Validation message; replaces `message` and marks the field invalid.
+ * @param suffix - Trailing icon slot; a string is treated as an icon name.
  * @param rows - Visible row count.
  * @param maxLength - Maximum accepted character count.
  * @param showCount - Shows the character counter when true.
@@ -50,12 +55,19 @@ export type TextAreaVariant = "outline" | "fill" | "standard";
  * <TextArea label="Notes" rows={4} maxLength={240} showCount />
  */
 export interface TextAreaProps
-    extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "children" | "value" | "onChange"> {
+    extends Omit<
+        TextareaHTMLAttributes<HTMLTextAreaElement>,
+        "children" | "value" | "onChange" | "prefix" | "content"
+    > {
     label: string;
     value?: string;
     defaultValue?: string;
     onChange?: ChangeEventHandler<HTMLTextAreaElement>;
+    prefix?: ReactNode;
+    suffix?: ReactNode;
     hint?: string;
+    message?: ReactNode;
+    limitation?: boolean | ReactNode;
     error?: string;
     rows?: number;
     maxLength?: number;
@@ -92,10 +104,15 @@ const TextArea: FC<TextAreaProps> = ({
     value,
     defaultValue,
     onChange,
+    prefix,
+    suffix,
     hint,
+    message,
+    limitation,
     error,
     rows = 4,
     maxLength,
+    minLength,
     showCount = false,
     variant = "outline",
     disabled = false,
@@ -109,7 +126,7 @@ const TextArea: FC<TextAreaProps> = ({
     ref,
     ...rest
 }: TextAreaProps) => {
-    const field: FieldState = useField({ id, label, hint, error });
+    const field: FieldState = useField({ id, label, error });
     const textAreaRef: RefObject<HTMLTextAreaElement | null> = useRef<HTMLTextAreaElement>(null);
     const mergedRef: RefCallback<HTMLTextAreaElement> = useMergedRef<HTMLTextAreaElement>(
         textAreaRef,
@@ -122,15 +139,30 @@ const TextArea: FC<TextAreaProps> = ({
               ? defaultValue.length
               : 0,
     );
-    const hasHint: boolean = hint !== (void 0) && hint.length > 0;
+    const messageId: string = `${field.controlId}-message`;
+    const hasMessage: boolean = message !== (void 0) && message !== null && message !== false;
     const describedBy: string = [
-        field.invalid ? field.errorId : hasHint ? field.hintId : "",
+        field.invalid ? field.errorId : hasMessage ? messageId : "",
         ariaDescribedBy ?? "",
     ]
         .filter((item: string): boolean => item.length > 0)
         .join(" ");
     const length: number = value === (void 0) ? uncontrolledLength : value.length;
-    const counter: string = maxLength === (void 0) ? `${length}` : `${length}/${maxLength}`;
+    const counter: string =
+        minLength !== (void 0) && maxLength !== (void 0)
+            ? `${length} / ${minLength}–${maxLength}`
+            : maxLength === (void 0)
+              ? `${length}`
+              : `${length} / ${maxLength}`;
+    const limitationVisible: boolean =
+        limitation !== false &&
+        (limitation === true ||
+            limitation !== (void 0) ||
+            showCount ||
+            minLength !== (void 0) ||
+            maxLength !== (void 0));
+    const limitationContent: ReactNode =
+        typeof limitation === "boolean" || limitation === (void 0) ? counter : limitation;
 
     useEffect((): void => {
         const node: HTMLTextAreaElement | null = textAreaRef.current;
@@ -163,67 +195,45 @@ const TextArea: FC<TextAreaProps> = ({
     };
 
     return (
-        <div
-            className={cx(
-                "text-area",
-                `text-area--${variant}`,
-                field.invalid && "text-area--invalid",
-                autoGrow && "text-area--auto-grow",
-                className,
-            )}
+        <InputLayout
+            variant={variant}
+            size="md"
+            prefix={prefix}
+            suffix={suffix}
+            hint={hint ?? placeholder ?? label}
+            message={message}
+            limitation={limitationVisible ? limitationContent : null}
+            error={field.invalid ? error : null}
+            invalid={field.invalid}
+            disabled={disabled}
+            multiline
+            messageId={messageId}
+            errorId={field.errorId}
+            className={["text-area", autoGrow ? "text-area--auto-grow" : "", className]
+                .filter((item: string): boolean => item.length > 0)
+                .join(" ")}
             style={style}
-            data-invalid={field.invalid ? "true" : "false"}
-            data-disabled={disabled ? "true" : "false"}
         >
-            <div className="text-area__control">
-                <Surface
-                    className="text-area__surface"
-                    background={<span className="text-area__background" />}
-                    foreground={<span className="text-area__edge" />}
-                    ripple={{ layer: "foreground", trigger: ["hover", "click"] }}
-                    disabled={disabled}
-                >
-                    <div className="text-area__row">
-                        <textarea
-                            {...rest}
-                            ref={mergedRef}
-                            id={field.controlId}
-                            className="text-area__field"
-                            value={value}
-                            defaultValue={defaultValue}
-                            rows={rows}
-                            maxLength={maxLength}
-                            placeholder={placeholder === (void 0) || placeholder.length === 0 ? " " : placeholder}
-                            disabled={disabled}
-                            aria-invalid={field.invalid ? true : ariaInvalid}
-                            aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
-                            onChange={handleChange}
-                        />
-                    </div>
-                </Surface>
-
-                <label className="text-area__label" htmlFor={field.controlId}>
-                    {label}
-                </label>
-            </div>
-
-            {field.invalid || hasHint || showCount ? (
-                <div className="text-area__support">
-                    <span className="text-area__messages">
-                        {field.invalid ? (
-                            <span className="text-area__error" id={field.errorId} aria-live="polite">
-                                {error}
-                            </span>
-                        ) : hasHint ? (
-                            <span className="text-area__hint" id={field.hintId}>
-                                {hint}
-                            </span>
-                        ) : null}
-                    </span>
-                    {showCount ? <span className="text-area__counter">{counter}</span> : null}
-                </div>
-            ) : null}
-        </div>
+            <textarea
+                {...rest}
+                ref={mergedRef}
+                id={field.controlId}
+                className="text-area__field"
+                value={value}
+                defaultValue={defaultValue}
+                rows={rows}
+                maxLength={maxLength}
+                minLength={minLength}
+                placeholder=" "
+                disabled={disabled}
+                aria-invalid={field.invalid ? true : ariaInvalid}
+                aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
+                onChange={handleChange}
+            />
+            <label className="visually-hidden" htmlFor={field.controlId}>
+                {label}
+            </label>
+        </InputLayout>
     );
 };
 

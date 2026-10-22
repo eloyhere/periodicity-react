@@ -54,7 +54,8 @@ const mentionCode: string = `<Mention
     value={mentionValue}
     onChange={setMentionValue}
     placeholder="Write a note, then type @"
-    hint="The loader is supplied by the caller."
+    prefix="Mention"
+    message="The loader is supplied by the caller."
     onSearch={searchMentionPeople}
     onMention={(item) => {
         toast.show({ title: \`Mentioned \${item.label}\` });
@@ -135,7 +136,7 @@ const DiscussionPage: FC = () => {
 
             <Demo
                 title="Mention input"
-                description="Typing @ opens a searchable mention list; the caller supplies the async loader."
+                description="Typing @ opens a searchable mention list; the field keeps the same prefix, hint, message, limitation, error, and suffix slots as TextInput."
                 code={mentionCode}
             >
                 <DemoGroup label="Mention input">
@@ -144,7 +145,8 @@ const DiscussionPage: FC = () => {
                         value={mentionValue}
                         onChange={setMentionValue}
                         placeholder="Write a note, then type @"
-                        hint="The loader is supplied by the caller."
+                        prefix="Mention"
+                        message="The loader is supplied by the caller."
                         onSearch={searchMentionPeople}
                         onMention={(item: MentionItem): void => {
                             toast.show({ title: `Mentioned ${item.label}` });

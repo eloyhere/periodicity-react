@@ -1,0 +1,336 @@
+.input-layout {
+    --input-layout-pad: 16px;
+    --input-layout-height: 56px;
+    --input-hint-rest-top: 50%;
+    --input-hint-rest-left: var(--input-layout-pad);
+    --input-hint-float-top: 0;
+    --input-hint-float-left: calc(var(--input-layout-pad) - 4px);
+    --input-hint-float-padding: 0 4px;
+    --input-hint-float-background: var(--color-surface);
+
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    color: var(--color-on-surface);
+    font-family: var(--font-sans);
+}
+
+.input-layout--sm {
+    --input-layout-pad: 12px;
+    --input-layout-height: 48px;
+}
+
+.input-layout--lg {
+    --input-layout-pad: 18px;
+    --input-layout-height: 64px;
+}
+
+.input-layout__control {
+    --input-activation-x: 50%;
+    --input-activation-y: 50%;
+
+    position: relative;
+    min-width: 0;
+}
+
+.input-layout__surface {
+    min-height: var(--input-layout-height);
+    border-radius: var(--radius-xs);
+}
+
+.input-layout:not(.input-layout--multiline) .input-layout__surface,
+.input-layout:not(.input-layout--multiline) .input-layout__row {
+    height: var(--input-layout-height);
+    min-height: var(--input-layout-height);
+}
+
+.input-layout__background {
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--color-outline);
+    border-radius: inherit;
+    background: var(--color-surface);
+    transition:
+        border-color var(--duration-fast) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard);
+}
+
+.input-layout__edge {
+    position: absolute;
+    inset: 0;
+    border: 2px solid var(--color-primary);
+    border-radius: inherit;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.985);
+    transition:
+        opacity 180ms var(--ease-decelerate),
+        transform 180ms var(--ease-decelerate),
+        border-color 140ms var(--ease-standard);
+}
+
+.input-layout__row {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    min-height: var(--input-layout-height);
+    padding: 0 var(--input-layout-pad);
+    gap: 8px;
+}
+
+.input-layout--multiline .input-layout__row {
+    align-items: stretch;
+    padding-top: 22px;
+    padding-bottom: 10px;
+}
+
+.input-layout__prefix,
+.input-layout__suffix {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-on-surface-variant);
+}
+
+.input-layout__suffix {
+    gap: 2px;
+}
+
+.input-layout__row > :is(input, textarea) {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    line-height: 1.35;
+    outline: none;
+    caret-color: var(--color-primary);
+}
+
+.input-layout__row > textarea {
+    resize: vertical;
+}
+
+.input-layout__row > :is(input, textarea)::placeholder {
+    color: transparent;
+}
+
+.input-layout__hint {
+    position: absolute;
+    top: var(--input-hint-rest-top);
+    left: var(--input-hint-rest-left);
+    z-index: 3;
+    max-width: calc(100% - var(--input-layout-pad) * 2);
+    overflow: hidden;
+    color: var(--color-on-surface-variant);
+    font-size: var(--type-body);
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translateY(-50%);
+    transform-origin: left center;
+    transition:
+        top 220ms var(--ease-decelerate),
+        left 220ms var(--ease-decelerate),
+        padding 220ms var(--ease-decelerate),
+        color 140ms var(--ease-standard),
+        background-color 140ms var(--ease-standard),
+        font-size 220ms var(--ease-decelerate),
+        transform 220ms var(--ease-decelerate);
+    will-change: top, transform, font-size;
+}
+
+.input-layout--prefix {
+    --input-hint-rest-left: calc(var(--input-layout-pad) + 25px);
+}
+
+.input-layout:has(.input-layout__row > :is(input, textarea):placeholder-shown)
+    .input-layout__control:focus-within
+    .input-layout__hint {
+    animation: input-layout-hint-float 220ms var(--ease-decelerate) both;
+}
+
+@keyframes input-layout-hint-float {
+    from {
+        top: var(--input-hint-rest-top);
+        left: var(--input-hint-rest-left);
+        padding: 0;
+        background: transparent;
+        color: var(--color-on-surface-variant);
+        font-size: var(--type-body);
+        transform: translateY(-50%);
+    }
+
+    to {
+        top: var(--input-hint-float-top);
+        left: var(--input-hint-float-left);
+        padding: var(--input-hint-float-padding);
+        background: var(--input-hint-float-background);
+        color: var(--color-primary);
+        font-size: 11px;
+        transform: translateY(-50%);
+    }
+}
+
+.input-layout[data-hint-floating="true"] .input-layout__hint,
+.input-layout__control:focus-within .input-layout__hint,
+.input-layout:has(.input-layout__row > :is(input, textarea):not(:placeholder-shown)) .input-layout__hint {
+    top: var(--input-hint-float-top);
+    left: var(--input-hint-float-left);
+    padding: var(--input-hint-float-padding);
+    background: var(--input-hint-float-background);
+    color: var(--color-primary);
+    font-size: 11px;
+    transform: translateY(-50%);
+}
+
+.input-layout--fill {
+    --input-hint-rest-top: 50%;
+    --input-hint-float-top: 6px;
+    --input-hint-float-left: var(--input-layout-pad);
+    --input-hint-float-padding: 0;
+    --input-hint-float-background: transparent;
+}
+
+.input-layout--fill .input-layout__background {
+    border: 0;
+    border-bottom: 1px solid var(--color-outline);
+    border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+    background: var(--color-surface-container);
+}
+
+.input-layout--fill .input-layout__edge,
+.input-layout--standard .input-layout__edge {
+    border: 0;
+    border-bottom: 2px solid var(--color-primary);
+    border-radius: 0;
+    opacity: 1;
+    transform: scaleX(0);
+    transform-origin: center;
+}
+
+.input-layout--fill .input-layout__row,
+.input-layout--standard .input-layout__row {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.input-layout--standard {
+    --input-layout-pad: 0;
+    --input-hint-rest-top: 50%;
+    --input-hint-float-top: 2px;
+    --input-hint-float-left: 0;
+    --input-hint-float-padding: 0;
+    --input-hint-float-background: transparent;
+}
+
+.input-layout--standard .input-layout__background {
+    border: 0;
+    border-bottom: 1px solid var(--color-outline);
+    border-radius: 0;
+    background: transparent;
+}
+
+.input-layout__control:focus-within .input-layout__edge {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.input-layout--invalid .input-layout__background {
+    border-color: var(--color-error);
+}
+
+.input-layout--invalid .input-layout__edge {
+    border-color: var(--color-error);
+    opacity: 1;
+    transform: scale(1);
+}
+
+.input-layout--invalid .input-layout__hint,
+.input-layout--invalid .input-layout__prefix,
+.input-layout--invalid .input-layout__suffix {
+    color: var(--color-error);
+}
+
+.input-layout--disabled {
+    opacity: var(--state-disabled-opacity);
+}
+
+.input-layout--disabled .input-layout__row > :is(input, textarea) {
+    color: var(--faint);
+    cursor: not-allowed;
+}
+
+.input-layout__limitation {
+    position: absolute;
+    right: calc(var(--input-layout-pad) + 2px);
+    bottom: 3px;
+    z-index: 2;
+    overflow: hidden;
+    color: var(--faint);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    pointer-events: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.input-layout--limited .input-layout__row {
+    padding-bottom: 0;
+}
+
+.input-layout__error,
+.input-layout__message {
+    margin: 5px 0 0;
+    padding-left: 2px;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.input-layout__message {
+    color: var(--muted);
+}
+
+.input-layout__error {
+    color: var(--color-error);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .input-layout__hint,
+    .input-layout__background,
+    .input-layout__edge {
+        transition: none;
+        animation: none;
+    }
+}
+
+.input-layout,
+.input-layout__control,
+.input-layout__surface,
+.input-layout__row,
+.input-layout__prefix,
+.input-layout__suffix,
+.input-layout__limitation {
+    cursor: text;
+}
+
+.input-layout :is(button, a) {
+    cursor: pointer;
+}
+
+.input-layout--disabled,
+.input-layout--disabled .input-layout__control,
+.input-layout--disabled .input-layout__surface,
+.input-layout--disabled .input-layout__row,
+.input-layout--disabled :is(button, a) {
+    cursor: not-allowed;
+}

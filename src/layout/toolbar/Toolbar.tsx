@@ -7,18 +7,25 @@ import type {
 } from "react";
 import cx from "../../component/foundation/cx";
 import Button from "../../component/button/Button";
+import Icon, { type IconName } from "../../component/icon/Icon";
 import "../coordinator/Coordinator.css";
+import "./Toolbar.css";
 import { useInternational, type InternationalContextValue } from "../../international";
 
 /**
  * Props for a Material toolbar row.
  * Type: interface.
- * Fields: navigationIcon, navigationLabel, onNavigationClick, title, subtitle, actions,
- * children, ariaLabel, className, ref, plus native header attributes.
+ * Fields: prefix, content, suffix, navigationIcon, navigationLabel, onNavigationClick, title,
+ * subtitle, actions, children, ariaLabel, className, ref, plus native header attributes.
+ * When `prefix`, `content`, or `suffix` is supplied, the toolbar uses the three-slot layout.
  * @example
- * <Toolbar title="Explore" navigationIcon="←" actions={<Button>Save</Button>} />
+ * <Toolbar prefix={<Icon name="Menu" />} content="Explore" suffix={<Button>Save</Button>} />
  */
-export interface ToolbarProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
+export interface ToolbarProps
+    extends Omit<HTMLAttributes<HTMLDivElement>, "title" | "prefix" | "content"> {
+    prefix?: ReactNode;
+    content?: ReactNode;
+    suffix?: ReactNode;
     navigationIcon?: ReactNode;
     navigationLabel?: string;
     onNavigationClick?: (event: ReactMouseEvent<HTMLButtonElement>) => void;
@@ -39,7 +46,16 @@ export interface ToolbarProps extends Omit<HTMLAttributes<HTMLDivElement>, "titl
  * <Toolbar title="Explore" navigationIcon="←" actions={<Button>Save</Button>} />
  * @returns A toolbar header.
  */
+const hasSlotContent: (slot: ReactNode) => boolean = (slot: ReactNode): boolean =>
+    slot !== (void 0) && slot !== null && slot !== false && slot !== "";
+
+const renderToolbarDecoration: (slot: ReactNode) => ReactNode = (slot: ReactNode): ReactNode =>
+    typeof slot === "string" ? <Icon name={slot as IconName} size={18} /> : slot;
+
 const Toolbar: FC<ToolbarProps> = ({
+    prefix,
+    content,
+    suffix,
     navigationIcon,
     navigationLabel,
     onNavigationClick,
@@ -54,6 +70,33 @@ const Toolbar: FC<ToolbarProps> = ({
 }: ToolbarProps) => {
     const { t }: InternationalContextValue = useInternational();
     const resolvedNavigationLabel: string = navigationLabel ?? t("back");
+    const slotted: boolean = prefix !== (void 0) || content !== (void 0) || suffix !== (void 0);
+
+    if (slotted) {
+        return (
+            <div
+                {...rest}
+                ref={ref}
+                className={cx("toolbar", "toolbar--slots", className)}
+                role="toolbar"
+                aria-label={ariaLabel ?? (typeof content === "string" ? content : (void 0))}
+            >
+                {hasSlotContent(prefix) ? (
+                    <div className="toolbar__slot toolbar__slot--prefix">
+                        {renderToolbarDecoration(prefix)}
+                    </div>
+                ) : null}
+                {hasSlotContent(content) ? (
+                    <div className="toolbar__slot toolbar__slot--content">{content}</div>
+                ) : null}
+                {hasSlotContent(suffix) ? (
+                    <div className="toolbar__slot toolbar__slot--suffix">
+                        {renderToolbarDecoration(suffix)}
+                    </div>
+                ) : null}
+            </div>
+        );
+    }
 
     return (
         <div

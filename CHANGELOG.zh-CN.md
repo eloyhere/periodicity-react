@@ -4,7 +4,58 @@
 
 ## [Unreleased]
 
-暂无变更。
+### 新增
+
+- 用例页面新增组件搜索：筛选栏中的 `CompleteInput` 会列出所有组件，选中后打开对应条目。
+- `TextInput` 新增 `rootRef`，复合输入框无需额外包裹节点即可把浮层锚定到字段根节点。
+
+### 变更
+
+- `PeriodicityCompleteInput` 与 `PeriodicityMention` 现在和 `TextInput` 使用同一个 `InputLayout` 字段壳，共用 `prefix`、`hint`、`message`、`limitation`、`error`、`suffix` 六个插槽。Mention 原来的下方说明文字从 `hint` 改为 `message`；`hint` 现在表示浮动提示，`leading`/`trailing` 仍作为 `prefix`/`suffix` 的别名。Complete 不再额外包裹一层容器。
+
+### 修复
+
+- `PeriodicityCompleteInput` 打开建议面板时焦点保持在输入框，聚焦边框持续显示，输入也会继续过滤建议。
+- `PeriodicityCompleteInput` 选中建议后关闭下拉框并移除输入框焦点，不再因焦点恢复而重新打开面板。
+- 强制颜色模式下覆盖共享的 `InputLayout` 字段壳，所有六槽输入框都保留系统焦点环。
+- 主内容无法滚动且没有子元素消费滚轮事件时，`PeriodicityCoordinator` 会消费垂直滚轮并收缩折叠区域，短内容不再让折叠区域一直展开。
+
+## [0.1.7] - 2026-10-22
+
+### 修复
+
+- 已聚焦输入框内部点击不再让输入框失焦并重新播放边框动画。
+
+## [0.1.6] - 2026-10-22
+
+### 修复
+
+- 重新将生成的 TypeScript 声明文件包含进发布包。
+
+## [0.1.5] - 2026-10-22
+
+### 修复
+
+- 输入框四条边分别从指针位置扩散，动画时长调整为 1 秒。
+
+## [0.1.4] - 2026-10-22
+
+### 修复
+
+- 输入框整个区域使用编辑光标，内部按钮和链接保持自己的光标。
+
+## [0.1.3] - 2026-10-22
+
+### 新增
+
+- 六槽输入框：prefix、浮动 hint、message、limitation、error、suffix，并支持从点击位置展开的边框动画。
+- 紧凑的 Button prefix/content/suffix 三槽布局和 Toolbar 槽位模式。
+
+### 修复
+
+- 点击输入框任意区域（含 prefix/suffix 图标）都会聚焦输入控件。
+- 数字步进按钮支持 ripple，颜色选择器支持整组点击。
+- 修复 Contact 行布局、CJK 头像首字母和 presence 本地化。
 
 ## [0.1.2] - 2026-10-22
 

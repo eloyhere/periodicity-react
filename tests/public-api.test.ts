@@ -15,4 +15,20 @@ describe("public component surface", (): void => {
         expect("Dialog" in PublicComponents).toBe(false);
         expect("Icon" in PublicComponents).toBe(false);
     });
+
+    it("wraps every public component with standard event support", (): void => {
+        const components: [string, unknown][] = Object.entries(PublicComponents).filter(
+            ([name]: [string, unknown]): boolean => name.startsWith("Periodicity"),
+        );
+
+        expect(components.length).toBeGreaterThan(100);
+
+        for (const [name, component] of components) {
+            expect(typeof component, name).toBe("function");
+            expect(
+                (component as { displayName?: string }).displayName,
+                name,
+            ).toContain("withStandardEvents");
+        }
+    });
 });

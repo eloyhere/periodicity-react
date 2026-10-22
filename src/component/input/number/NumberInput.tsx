@@ -13,12 +13,13 @@ import {
     type KeyboardEventHandler,
     type MouseEvent,
     type MutableRefObject,
+    type ReactNode,
     type Ref,
 } from "react";
-import Icon from "../../icon/Icon";
-import cx from "../../foundation/cx";
+import Icon, { type IconName } from "../../icon/Icon";
 import useField, { type FieldState } from "../../foundation/useField";
 import Surface from "../../surface/Surface";
+import InputLayout from "../shared/InputLayout";
 import { useInternational, type InternationalContextValue } from "../../../international";
 import "./NumberInput.css";
 
@@ -35,8 +36,9 @@ export type NumberInputVariant = "outline" | "fill" | "standard";
  * Props for the NumberInput.
  * Type: interface.
  * Native input attributes are forwarded to the underlying `<input>`; `className` and `style` apply to the field root.
- * Fields: label, value, defaultValue, onChange, min, max, step, precision, hint, error, disabled, readOnly,
- * placeholder, variant, className, id, ref, and native input attributes.
+ * Fields: label, value, defaultValue, onChange, min, max, step, precision, prefix, hint, message,
+ * limitation, error, suffix, disabled, readOnly, placeholder, variant, className, id, ref, and native
+ * input attributes.
  * @param label - Floating label.
  * @param value - Controlled numeric value, or null for an empty field.
  * @param defaultValue - Initial value when the field is uncontrolled.
@@ -45,8 +47,12 @@ export type NumberInputVariant = "outline" | "fill" | "standard";
  * @param max - Upper bound applied to typed and stepped values.
  * @param step - Amount added or removed by the stepper buttons.
  * @param precision - Decimal places kept when formatting; defaults to the step precision.
- * @param hint - Supporting text shown below the field.
- * @param error - Validation message; replaces the hint and marks the field invalid.
+ * @param prefix - Leading icon slot; a string is treated as an icon name.
+ * @param hint - Floating placeholder shown inside the field until focus or content.
+ * @param message - Supporting message shown below the field.
+ * @param limitation - Bounds indicator shown under the suffix.
+ * @param error - Validation message; replaces `message` and marks the field invalid.
+ * @param suffix - Trailing icon slot; a string is treated as an icon name.
  * @param disabled - Disables the field and stepper buttons natively.
  * @param readOnly - Keeps the value visible and focusable but suppresses stepper changes.
  * @param placeholder - Placeholder text.
@@ -59,7 +65,7 @@ export type NumberInputVariant = "outline" | "fill" | "standard";
 export interface NumberInputProps
     extends Omit<
         InputHTMLAttributes<HTMLInputElement>,
-        "value" | "defaultValue" | "onChange" | "type" | "role"
+        "value" | "defaultValue" | "onChange" | "type" | "role" | "prefix" | "content"
     > {
     label: string;
     value?: number | null;
@@ -69,7 +75,11 @@ export interface NumberInputProps
     max?: number;
     step?: number;
     precision?: number;
+    prefix?: ReactNode;
+    suffix?: ReactNode;
     hint?: string;
+    message?: ReactNode;
+    limitation?: boolean | ReactNode;
     error?: string;
     disabled?: boolean;
     readOnly?: boolean;
@@ -212,7 +222,11 @@ const NumberInput: FC<NumberInputProps> = ({
     max,
     step = 1,
     precision,
+    prefix,
+    suffix,
     hint,
+    message,
+    limitation,
     error,
     disabled = false,
     readOnly = false,
@@ -234,7 +248,7 @@ const NumberInput: FC<NumberInputProps> = ({
     ...rest
 }: NumberInputProps) => {
     const { t }: InternationalContextValue = useInternational();
-    const field: FieldState = useField({ id, label, hint, error });
+    const field: FieldState = useField({ id, label, error });
     const controlled: boolean = value !== (void 0);
     const [uncontrolledValue, setUncontrolledValue]: [number | null, (next: number | null) => void] =
         useState<number | null>(defaultValue);
@@ -242,13 +256,19 @@ const NumberInput: FC<NumberInputProps> = ({
     const composingRef: MutableRefObject<boolean> = useRef<boolean>(false);
     const currentValue: number | null = controlled ? (value as number | null) : uncontrolledValue;
     const resolvedPrecision: number = Math.min(Math.max(precision ?? countDecimals(step), 0), 20);
-    const hasHint: boolean = hint !== (void 0) && hint.length > 0;
+    const messageId: string = `${field.controlId}-message`;
+    const hasMessage: boolean = message !== (void 0) && message !== null && message !== false;
     const describedBy: string = [
-        field.invalid ? field.errorId : hasHint ? field.hintId : "",
+        field.invalid ? field.errorId : hasMessage ? messageId : "",
         ariaDescribedBy ?? "",
     ]
         .filter((item: string): boolean => item.length > 0)
         .join(" ");
+    const limitationVisible: boolean = limitation === true || (limitation !== false && limitation !== (void 0));
+    const limitationContent: ReactNode =
+        typeof limitation === "boolean" || limitation === (void 0)
+            ? `${currentValue ?? "—"} / ${min ?? "−∞"}–${max ?? "∞"}`
+            : limitation;
     const displayValue: string = draft ?? formatNumber(currentValue, resolvedPrecision);
     const atMinimum: boolean =
         disabled || readOnly || (currentValue !== null && min !== (void 0) && currentValue <= min);
@@ -369,97 +389,96 @@ const NumberInput: FC<NumberInputProps> = ({
         applyStep(1);
     };
 
-    return (
-        <div
-            className={cx(
-                "number-field",
-                `number-field--${variant}`,
-                field.invalid && "number-field--invalid",
-                disabled && "number-field--disabled",
-                readOnly && "number-field--readonly",
-                className,
-            )}
-            style={style}
-            data-invalid={field.invalid ? "true" : "false"}
-            data-disabled={disabled ? "true" : "false"}
-            data-readonly={readOnly ? "true" : "false"}
-        >
-            <div className="number-field__control">
+    const suffixNode: ReactNode = (
+        <>
+            {typeof suffix === "string" ? <Icon name={suffix as IconName} size={17} /> : suffix}
+            <span className="number-field__steps">
                 <Surface
-                    className="number-field__surface"
-                    background={<span className="number-field__background" />}
-                    foreground={<span className="number-field__edge" />}
+                    className="number-field__step-surface"
+                    shape="sm"
                     ripple={{ layer: "foreground", trigger: ["hover", "click"] }}
-                    disabled={disabled}
+                    disabled={atMinimum}
                 >
-                    <div className="number-field__row">
-                        <input
-                            {...rest}
-                            ref={ref}
-                            id={field.controlId}
-                            className="number-field__input"
-                            type="text"
-                            inputMode={inputMode}
-                            role="spinbutton"
-                            autoComplete={autoComplete}
-                            spellCheck={spellCheck}
-                            value={displayValue}
-                            placeholder={placeholder === (void 0) || placeholder.length === 0 ? " " : placeholder}
-                            disabled={disabled}
-                            readOnly={readOnly}
-                            aria-invalid={field.invalid ? true : ariaInvalid}
-                            aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
-                            aria-valuemin={min}
-                            aria-valuemax={max}
-                            aria-valuenow={currentValue === null ? (void 0) : currentValue}
-                            aria-readonly={readOnly ? true : (void 0)}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            onKeyDown={handleKeyDown}
-                            onCompositionStart={handleCompositionStart}
-                            onCompositionEnd={handleCompositionEnd}
-                        />
-
-                        <span className="number-field__steps">
-                            <button
-                                type="button"
-                                className="number-field__step"
-                                aria-label={t("decreaseValue")}
-                                disabled={atMinimum}
-                                onMouseDown={preventFocusLoss}
-                                onClick={handleDecrease}
-                            >
-                                <Icon name="Subtract" size={14} />
-                            </button>
-                            <button
-                                type="button"
-                                className="number-field__step"
-                                aria-label={t("increaseValue")}
-                                disabled={atMaximum}
-                                onMouseDown={preventFocusLoss}
-                                onClick={handleIncrease}
-                            >
-                                <Icon name="Plus" size={14} />
-                            </button>
-                        </span>
-                    </div>
+                    <button
+                        type="button"
+                        className="number-field__step"
+                        aria-label={t("decreaseValue")}
+                        disabled={atMinimum}
+                        onMouseDown={preventFocusLoss}
+                        onClick={handleDecrease}
+                    >
+                        <Icon name="Subtract" size={14} />
+                    </button>
                 </Surface>
+                <Surface
+                    className="number-field__step-surface"
+                    shape="sm"
+                    ripple={{ layer: "foreground", trigger: ["hover", "click"] }}
+                    disabled={atMaximum}
+                >
+                    <button
+                        type="button"
+                        className="number-field__step"
+                        aria-label={t("increaseValue")}
+                        disabled={atMaximum}
+                        onMouseDown={preventFocusLoss}
+                        onClick={handleIncrease}
+                    >
+                        <Icon name="Plus" size={14} />
+                    </button>
+                </Surface>
+            </span>
+        </>
+    );
 
-                <label className="number-field__label" htmlFor={field.controlId}>
-                    {label}
-                </label>
-            </div>
-
-            {field.invalid ? (
-                <p className="number-field__error" id={field.errorId} aria-live="polite">
-                    {error}
-                </p>
-            ) : hasHint ? (
-                <p className="number-field__hint" id={field.hintId}>
-                    {hint}
-                </p>
-            ) : null}
-        </div>
+    return (
+        <InputLayout
+            variant={variant}
+            size="md"
+            prefix={prefix}
+            suffix={suffixNode}
+            hint={hint ?? placeholder ?? label}
+            message={message}
+            limitation={limitationVisible ? limitationContent : null}
+            error={field.invalid ? error : null}
+            invalid={field.invalid}
+            disabled={disabled}
+            readOnly={readOnly}
+            messageId={messageId}
+            errorId={field.errorId}
+            className={className}
+            style={style}
+        >
+            <input
+                {...rest}
+                ref={ref}
+                id={field.controlId}
+                className="number-field__input"
+                type="text"
+                inputMode={inputMode}
+                role="spinbutton"
+                autoComplete={autoComplete}
+                spellCheck={spellCheck}
+                value={displayValue}
+                placeholder=" "
+                disabled={disabled}
+                readOnly={readOnly}
+                aria-invalid={field.invalid ? true : ariaInvalid}
+                aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
+                aria-valuemin={min}
+                aria-valuemax={max}
+                aria-valuenow={currentValue === null ? (void 0) : currentValue}
+                aria-readonly={readOnly ? true : (void 0)}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                onKeyDown={handleKeyDown}
+                onCompositionStart={handleCompositionStart}
+                onCompositionEnd={handleCompositionEnd}
+            />
+            <label className="visually-hidden" htmlFor={field.controlId}>
+                {label}
+            </label>
+        </InputLayout>
     );
 };
 

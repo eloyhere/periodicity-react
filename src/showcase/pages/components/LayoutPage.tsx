@@ -175,6 +175,8 @@ const coordinatorCode: string = `<Coordinator
     }
 />`;
 
+const slotToolbarCode: string = `<Toolbar prefix="Menu" content="Workspace" suffix="More" />`;
+
 const virtualTableCode: string = `<VirtualTable    columns={tableColumns}
     rows={virtualTeamRows}
     rowKey={(row) => row.id}
@@ -1114,6 +1116,14 @@ const LayoutPage: FC = () => {
                         </Stack>
                     }
                 />
+            </Demo>
+
+            <Demo
+                title="Toolbar slots"
+                description="Prefix, content, and suffix share the row 1:1:1; remove slots to get 1:1 or a single centered slot."
+                code={slotToolbarCode}
+            >
+                <Toolbar prefix="Menu" content="Workspace" suffix="More" />
             </Demo>
         </>
     );

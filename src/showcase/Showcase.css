@@ -77,6 +77,16 @@
     width: 216px;
 }
 
+.showcase-filter--search {
+    flex: 1 1 260px;
+    width: auto;
+}
+
+.showcase-filter--search .complete-input,
+.showcase-filter--search .text-field {
+    width: 100%;
+}
+
 .showcase-filter .select-field {
     width: 100%;
 }

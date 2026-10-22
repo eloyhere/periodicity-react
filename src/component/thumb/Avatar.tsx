@@ -86,7 +86,12 @@ const getInitials: (name: string) => string = (name: string): string => {
     }
 
     const first: string = words[0];
-    const last: string = words.length > 1 ? words[words.length - 1] : first;
+
+    if (words.length === 1) {
+        return first.charAt(0).toUpperCase();
+    }
+
+    const last: string = words[words.length - 1];
 
     return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
 };

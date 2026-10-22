@@ -5,7 +5,66 @@ and this project uses British English in its English documentation.
 
 ## [Unreleased]
 
-No changes yet.
+### Added
+
+- Showcase component search: a `CompleteInput` in the filter bar suggests every documented component and opens the
+  selected entry.
+- `TextInput` accepts `rootRef` for its field root, which lets composite fields anchor overlays without an extra
+  wrapper element.
+
+### Changed
+
+- `PeriodicityCompleteInput` and `PeriodicityMention` now render the same `InputLayout` field shell as `TextInput`,
+  with the shared `prefix`, `hint`, `message`, `limitation`, `error`, and `suffix` slots. Mention's former
+  below-field `hint` moved to `message`; `hint` is now the floating hint, and `leading`/`trailing` remain aliases
+  for `prefix`/`suffix`. Complete no longer adds a wrapper element around the field.
+
+### Fixed
+
+- Keep focus in `PeriodicityCompleteInput` while its suggestion panel is open, so the focused border stays
+  visible and typing keeps filtering the suggestions.
+- Close the `PeriodicityCompleteInput` suggestion panel and blur the field after a selection, instead of letting
+  focus restoration reopen the panel.
+- Cover the shared `InputLayout` shell in forced-colors mode, so every six-slot field keeps a system focus ring.
+- Collapse the `PeriodicityCoordinator` hero from vertical wheel input when the main content cannot scroll and no
+  child consumes the event, so short content no longer keeps the collapse area open.
+
+## [0.1.7] - 2026-10-22
+
+### Fixed
+
+- Keep input focus when clicking inside an already focused field, so the border animation is not replayed.
+
+## [0.1.6] - 2026-10-22
+
+### Fixed
+
+- Include generated TypeScript declarations in the published package again.
+
+## [0.1.5] - 2026-10-22
+
+### Fixed
+
+- Animate all four input border edges independently from the pointer position over one second.
+
+## [0.1.4] - 2026-10-22
+
+### Fixed
+
+- Use an editing cursor across the whole input field, while buttons and links keep their own cursor.
+
+## [0.1.3] - 2026-10-22
+
+### Added
+
+- Six-slot text fields: prefix, floating hint, message, limitation, error, and suffix, with click-origin border animation.
+- Compact prefix/content/suffix Button slots and the slot-based Toolbar mode.
+
+### Fixed
+
+- Focus the active input from anywhere in the field, including prefix and suffix icons.
+- Ripple support on number steppers and whole-field colour picker activation.
+- Contact row layout, CJK avatar initials, and localized presence labels.
 
 ## [0.1.2] - 2026-10-22
 

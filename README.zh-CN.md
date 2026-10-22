@@ -149,6 +149,19 @@ import { PeriodicityTable } from "periodicity-react";
 
 表单组件支持原生 input 属性，并透传事件、`ref`、`aria-*` 和 `data-*` 属性。
 
+Button 使用 `prefix`、`content`、`suffix` 三个内容自适应 flex 插槽。`prefix`/`suffix` 传入字符串时按图标名渲染；
+只有一个图标时居中，两个图标等宽，内容自然增长，不会把按钮撑满父容器。
+
+文本输入框使用六个插槽：`prefix`、浮动 `hint`、`message`、`limitation`、`error`、`suffix`。`hint` 是不接收
+指针事件的占位文本，未聚焦时垂直居中，聚焦或有内容时动画缩小并移到左上角；`message` 会被 `error` 替换；
+`limitation` 位于 suffix 下方，显示当前/最小/最大字符数。输入框与按钮都支持悬浮和点击 ripple。
+
+```tsx
+<PeriodicityButton prefix="Plus" content="添加" suffix="ArrowRight" />
+<PeriodicityButton prefix="Plus" aria-label="添加" />
+<PeriodicityButton prefix="Plus" suffix="ArrowRight" aria-label="拆分" />
+```
+
 ```tsx
 import {
     PeriodicityCheckbox,
@@ -212,7 +225,7 @@ import { PeriodicityCalendar } from "periodicity-react";
 
 每个日期 cell 有 `slots.header`、`slots.body`、`slots.footer` 三行；header 默认显示日期数字。键盘：方向键按天/周移动，Home/End 到本周首尾，PageUp/PageDown 切换月份，Shift+PageUp/PageDown 切换年份，Enter 或 Space 选择。`showAdjacentDays`、`weekdayLabels`、`monthLabels`、`slots`、`renderDay`、`disabled` 和 `readOnly` 可用于定制。
 
-大部分表单和选择器支持受控/非受控值、`disabled`、适当的 `readOnly`，以及调用方与内部事件处理器的组合。`PeriodicityMention` 提供异步建议列表和 Token 化 Chip；加载器由调用方提供。
+大部分表单和选择器支持受控/非受控值、`disabled`、适当的 `readOnly`，以及调用方与内部事件处理器的组合。`PeriodicityMention` 提供异步建议列表和 Token 化 Chip；加载器由调用方提供，并与其它输入框共用 `prefix`、`hint`、`message`、`limitation`、`error`、`suffix` 六个插槽。
 
 ## 集合与数据
 
@@ -295,7 +308,7 @@ import {
 - `PeriodicityScrollbar`
 - `PeriodicityDrag`
 
-`PeriodicityCoordinator` 有三个插槽：`collapse`、`header` 和 `main`。`collapse` 从 `collapseHeight` 开始，随着 `main` 滚动收缩到 0 高度；`header` 是固定 AppBar；`main` 是滚动主内容。
+`PeriodicityCoordinator` 有三个插槽：`collapse`、`header` 和 `main`。`collapse` 从 `collapseHeight` 开始，随着 `main` 滚动收缩到 0 高度；`header` 是固定 AppBar；`main` 是滚动主内容。当 `main` 无法滚动时，没有被子元素消费的垂直滚轮输入会收缩或恢复折叠区域，而不是滚动页面；嵌套滚动容器优先消费滚轮。
 
 ```tsx
 <PeriodicityCoordinator
@@ -318,6 +331,13 @@ import {
     }
     main={<Notes />}
 />
+```
+
+`PeriodicityToolbar` 也支持 `prefix`、`content`、`suffix` 三个插槽：三个插槽按 1:1:1 分享整行；
+只有一个插槽时占满整行，两个时按 1:1 排布。`prefix` 和 `suffix` 传入字符串时会按图标名渲染。
+
+```tsx
+<PeriodicityToolbar prefix="Menu" content="探索" suffix="More" />
 ```
 
 `PeriodicityCollapse` 仍可用于旧式 AppBar 内部的 Hero 组合。
@@ -425,6 +445,26 @@ import { PeriodicityInternational } from "periodicity-react";
 ## 动效
 
 动效通过 `PeriodicityAnimation` 和 `PeriodicityAnimated` 显式启用，并尊重系统的 `prefers-reduced-motion` 设置。交互 Surface 共享 Ripple 层，关闭动效时 Ripple 也会停止。
+
+## 标准事件
+
+所有公开的 `Periodicity*` 组件同时支持原生 React 事件和标准事件层，两者互不替代：
+
+```tsx
+<PeriodicityButton
+    onClick={save}
+    onStandardClick={(event) => console.log(event.count, event.source)}
+    standardEvents={{
+        press: start,
+        drag: reorder,
+        continuous: zoom,
+    }}
+/>
+```
+
+`over`、`enter`、`leave`、`wheel`、`click`、`press`、`input`、`continuous`、`drag` 都有对应的
+`onStandard*` 监听器；也可以用 `onStandardEvent` 接收全部事件，或用 `standardEvents` 配置每个事件及阈值。
+原生 `onClick`、`onWheel`、`onInput`、`onDrag` 保持不变。
 
 ## 可访问性
 

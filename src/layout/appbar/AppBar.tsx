@@ -68,12 +68,12 @@ const AppBar: FC<AppBarProps> = ({
     style,
     ...rest
 }: AppBarProps) => {
-    const { offset }: CoordinatorContextValue = useCoordinator();
+    const { collapseOffset }: CoordinatorContextValue = useCoordinator();
     const range: number = Math.max(1, expandedHeight - collapsedHeight);
     const collapsible: boolean =
         scrollBehaviour === "exitUntilCollapsed" || scrollBehaviour === "enterAlways";
     const progress: number = collapsible
-        ? Math.min(1, Math.max(0, offset / range))
+        ? Math.min(1, Math.max(0, collapseOffset / range))
         : 0;
     const currentHeight: number = expandedHeight - progress * range;
     const lastProgressRef: RefObject<number> = useRef<number>(-1);

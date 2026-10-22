@@ -189,3 +189,14 @@
     outline: none;
     background: var(--color-surface-container-high);
 }
+
+/* Surface content is the row's flex container; the row itself only owns
+   padding, border, and the ripple background. */
+.contact__row > .surface__component {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    gap: var(--space-3);
+}

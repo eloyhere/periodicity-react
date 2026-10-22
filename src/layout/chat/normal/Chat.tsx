@@ -243,7 +243,7 @@ const Chat: (props: ChatProps) => ReactNode = ({
                                 className="chat__presence"
                                 data-presence={activeContact.presence ?? "offline"}
                             >
-                                {activeContact.presence ?? t("offline")}
+                                {t(activeContact.presence ?? "offline")}
                             </span>
                         </header>
 

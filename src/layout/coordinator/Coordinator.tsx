@@ -21,6 +21,139 @@ import { CoordinatorContext, type CoordinatorContextValue } from "./context";
 import "./Coordinator.css";
 
 /**
+ * Wheel delta modes reported by the browser.
+ * Type: const object.
+ * @param pixel - Delta in CSS pixels.
+ * @param line - Delta in text lines.
+ * @param page - Delta in viewport pages.
+ * @example
+ * const lineMode = WheelDeltaMode.line;
+ */
+const WheelDeltaMode: {
+    readonly pixel: number;
+    readonly line: number;
+    readonly page: number;
+} = {
+    pixel: 0,
+    line: 1,
+    page: 2,
+} as const;
+
+/**
+ * Height of one text line used to convert line-mode wheel deltas.
+ * Type: number constant.
+ * @example
+ * const pixels = event.deltaY * WheelLineHeight;
+ */
+const WheelLineHeight: number = 16;
+
+/**
+ * Sub-pixel tolerance used when reading scroll limits.
+ * Type: number constant.
+ * @example
+ * const atEnd = viewport.scrollTop >= range - WheelScrollTolerance;
+ */
+const WheelScrollTolerance: number = 1;
+
+/**
+ * Converts one wheel event into vertical CSS pixels.
+ * @param event - Native wheel event.
+ * @param pageHeight - Viewport height used for page-mode deltas.
+ * @example
+ * const delta = wheelDelta(event, viewport.clientHeight);
+ * @returns The vertical distance in CSS pixels.
+ */
+const wheelDelta: (event: WheelEvent, pageHeight: number) => number = (
+    event: WheelEvent,
+    pageHeight: number,
+): number => {
+    if (event.deltaMode === WheelDeltaMode.line) {
+        return event.deltaY * WheelLineHeight;
+    }
+
+    if (event.deltaMode === WheelDeltaMode.page) {
+        return event.deltaY * Math.max(1, pageHeight);
+    }
+
+    return event.deltaY;
+};
+
+/**
+ * Reports whether a scroll container can still move in a wheel direction.
+ * @param element - Element that owns the scroll range.
+ * @param delta - Vertical wheel distance; positive scrolls down.
+ * @example
+ * const scrollable = canScroll(viewport, 120);
+ * @returns `true` when the container has range left in that direction.
+ */
+const canScroll: (element: HTMLElement, delta: number) => boolean = (
+    element: HTMLElement,
+    delta: number,
+): boolean => {
+    const range: number = element.scrollHeight - element.clientHeight;
+
+    if (range <= WheelScrollTolerance) {
+        return false;
+    }
+
+    return delta > 0
+        ? element.scrollTop < range - WheelScrollTolerance
+        : element.scrollTop > WheelScrollTolerance;
+};
+
+/**
+ * Reports whether an element consumes vertical wheel input itself.
+ * @param element - Element that may be a vertical scroll container.
+ * @param delta - Vertical wheel distance; positive scrolls down.
+ * @example
+ * const consumes = canConsumeWheel(row, 40);
+ * @returns `true` when the element is scrollable and has range left.
+ */
+const canConsumeWheel: (element: HTMLElement, delta: number) => boolean = (
+    element: HTMLElement,
+    delta: number,
+): boolean => {
+    const overflowY: string = window.getComputedStyle(element).overflowY;
+
+    if (overflowY !== "auto" && overflowY !== "scroll" && overflowY !== "overlay") {
+        return false;
+    }
+
+    return canScroll(element, delta);
+};
+
+/**
+ * Reports whether the event target or one of its ancestors consumes a wheel.
+ * @param target - Event target from the native wheel event.
+ * @param boundary - Coordinator root where the ancestor walk stops.
+ * @param delta - Vertical wheel distance; positive scrolls down.
+ * @example
+ * const consumed = wheelTargetCanScroll(event.target, root, 120);
+ * @returns `true` when a nested scroll container owns the wheel input.
+ */
+const wheelTargetCanScroll: (
+    target: EventTarget | null,
+    boundary: HTMLElement,
+    delta: number,
+) => boolean = (
+    target: EventTarget | null,
+    boundary: HTMLElement,
+    delta: number,
+): boolean => {
+    let node: Element | null = target instanceof Element ? target : null;
+
+    while (node !== null && node !== boundary) {
+        if (node instanceof HTMLElement && canConsumeWheel(node, delta)) {
+            return true;
+        }
+
+        node = node.parentElement;
+    }
+
+    return false;
+};
+
+/**
  * Props for the Coordinator scroll host.
  * Type: interface.
  * Fields: collapse, header, main, collapseHeight, height, scrollRef, onScrollChange, className, ref, plus native div attributes.
@@ -47,7 +180,8 @@ export interface CoordinatorProps extends Omit<HTMLAttributes<HTMLDivElement>, "
 /**
  * Hosts a collapsing area above a fixed header and one scrollable main slot.
  * The collapse area shrinks from `collapseHeight` to zero as the main viewport
- * scrolls; the header remains in place.
+ * scrolls. When the content cannot scroll, unconsumed vertical wheel input
+ * collapses or restores it instead; the header remains in place.
  * @param props - Collapse, header, main, heights, and native container attributes.
  * @example
  * <Coordinator
@@ -85,6 +219,12 @@ const Coordinator: FC<CoordinatorProps> = ({
         number,
         Dispatch<SetStateAction<number>>,
     ] = useState<number>(0);
+    const [wheelOffset, setWheelOffset]: [
+        number,
+        Dispatch<SetStateAction<number>>,
+    ] = useState<number>(0);
+    const wheelOffsetRef: RefObject<number> = useRef<number>(0);
+    const collapsible: boolean = collapse !== (void 0) && collapseHeight > 0;
 
     const measure: () => void = useCallback((): void => {
         const viewport: HTMLDivElement | null = viewportRef.current;
@@ -118,6 +258,60 @@ const Coordinator: FC<CoordinatorProps> = ({
         return (): void => observer.disconnect();
     }, [measure]);
 
+    useEffect((): (() => void) => {
+        const root: HTMLDivElement | null = rootRef.current;
+
+        if (root === null || !collapsible) {
+            return (): void => {};
+        }
+
+        /**
+         * Shrinks or restores the collapse area from unconsumed wheel input.
+         * @param event - Native wheel event bubbling through the coordinator.
+         * @example
+         * root.addEventListener("wheel", handleWheel, { passive: false });
+         * @returns Nothing.
+         */
+        const handleWheel: (event: WheelEvent) => void = (event: WheelEvent): void => {
+            if (event.defaultPrevented || event.ctrlKey || event.altKey || event.metaKey) {
+                return;
+            }
+
+            const viewport: HTMLDivElement | null = viewportRef.current;
+
+            if (viewport === null) {
+                return;
+            }
+
+            const delta: number = wheelDelta(event, viewport.clientHeight);
+
+            if (delta === 0 || canScroll(viewport, delta)) {
+                return;
+            }
+
+            if (wheelTargetCanScroll(event.target, root, delta)) {
+                return;
+            }
+
+            const previous: number = Math.min(wheelOffsetRef.current, collapseHeight);
+            const next: number = Math.min(collapseHeight, Math.max(0, previous + delta));
+
+            if (next === previous) {
+                return;
+            }
+
+            wheelOffsetRef.current = next;
+            setWheelOffset(next);
+            event.preventDefault();
+        };
+
+        root.addEventListener("wheel", handleWheel, { passive: false });
+
+        return (): void => {
+            root.removeEventListener("wheel", handleWheel);
+        };
+    }, [collapseHeight, collapsible]);
+
     const scrollTo: (next: number, behavior?: ScrollBehavior) => void = useCallback(
         (next: number, behavior: ScrollBehavior = "smooth"): void => {
             viewportRef.current?.scrollTo({ top: next, behavior });
@@ -140,11 +334,12 @@ const Coordinator: FC<CoordinatorProps> = ({
         height: typeof height === "number" ? `${height}px` : height,
     };
 
+    const collapseOffset: number = offset + Math.min(wheelOffset, collapseHeight);
     const contextValue: CoordinatorContextValue = useMemo<CoordinatorContextValue>(
-        () => ({ offset, maxOffset, scrollTo }),
-        [maxOffset, offset, scrollTo],
+        () => ({ collapseOffset, maxOffset, offset, scrollTo }),
+        [collapseOffset, maxOffset, offset, scrollTo],
     );
-    const currentCollapseHeight: number = Math.max(0, collapseHeight - offset);
+    const currentCollapseHeight: number = Math.max(0, collapseHeight - collapseOffset);
 
     return (
         <CoordinatorContext.Provider value={contextValue}>

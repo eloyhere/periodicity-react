@@ -21,11 +21,8 @@ import Dropdown, { DropdownItem } from "../dropdown/Dropdown";
 import Spinner from "../progress/Spinner";
 import cx from "../foundation/cx";
 import useMergedRef from "../foundation/useMergedRef";
-import Surface from "../surface/Surface";
+import InputLayout from "../input/shared/InputLayout";
 import type { TextInputSize, TextInputVariant } from "../input/text/TextInput";
-// Reuse the TextInput field shell (surface, edge, variants, floating label)
-// instead of maintaining a second field look.
-import "../input/text/TextInput.css";
 import "./Mention.css";
 
 /**
@@ -90,8 +87,8 @@ export interface MentionToken {
  * Type: interface.
  * Native div attributes are forwarded to the field root; the editable editor keeps its combobox semantics.
  * Fields: value, defaultValue, onChange, onSearch, suggestions, onMention, onOpenChange,
- * multiline, rows, label, hint, error, placeholder, disabled, readOnly, trigger,
- * minChars, maxSuggestions, variant, size, leading, trailing, required,
+ * multiline, rows, label, hint, message, limitation, error, placeholder, prefix, suffix,
+ * disabled, readOnly, trigger, minChars, maxSuggestions, variant, size, leading, trailing, required,
  * mentions, onMentionsChange, ariaLabel, className, id, ref, and native div attributes.
  * @param value - Controlled editor text, including committed mention tokens.
  * @param defaultValue - Initial editor text when uncontrolled.
@@ -102,10 +99,14 @@ export interface MentionToken {
  * @param onOpenChange - Called when the suggestion list opens or closes.
  * @param multiline - Allows line breaks when true.
  * @param rows - Minimum visible rows for the multiline editor.
- * @param label - Floating label; also supplies the accessible name.
- * @param hint - Supporting text shown below the field.
- * @param error - Validation message; marks the field invalid.
- * @param placeholder - Placeholder shown after the label floats.
+ * @param label - Accessible label; also the default floating hint.
+ * @param hint - Floating placeholder shown inside the field until focus or content.
+ * @param message - Supporting message shown below the field.
+ * @param limitation - Counter shown under the suffix; `true` displays the character count.
+ * @param error - Validation message; replaces the message and marks the field invalid.
+ * @param placeholder - Placeholder shown after the hint floats.
+ * @param prefix - Leading icon slot; a string is treated as an icon name.
+ * @param suffix - Trailing icon slot; a string is treated as an icon name.
  * @param disabled - Disables editing and the suggestion list.
  * @param readOnly - Keeps the field focusable and copyable while rejecting edits.
  * @param trigger - Character that opens the suggestion list.
@@ -113,13 +114,14 @@ export interface MentionToken {
  * @param maxSuggestions - Maximum number of rendered suggestions.
  * @param variant - Field variant: outline, fill, or standard.
  * @param size - Control size.
- * @param leading - Optional node before the editor.
- * @param trailing - Optional node after the editor.
+ * @param leading - Deprecated alias for `prefix`.
+ * @param trailing - Deprecated alias for `suffix`.
  * @param required - Marks the field as required.
  * @param mentions - Controlled committed token ranges.
  * @param onMentionsChange - Called with the committed token ranges.
  * @param ariaLabel - Accessible name used when no visible label is supplied.
  * @param className - Extra classes for the field root.
+ * @param id - Editor id.
  * @param ref - Ref to the field root.
  * @example
  * <Mention
@@ -133,7 +135,7 @@ export interface MentionToken {
 export interface MentionProps
     extends Omit<
         HTMLAttributes<HTMLDivElement>,
-        "children" | "className" | "contentEditable" | "id" | "onChange" | "role"
+        "children" | "className" | "contentEditable" | "id" | "onChange" | "role" | "prefix"
     > {
     value?: string;
     defaultValue?: string;
@@ -146,8 +148,12 @@ export interface MentionProps
     rows?: number;
     label?: string;
     hint?: string;
+    message?: ReactNode;
+    limitation?: boolean | ReactNode;
     error?: string;
     placeholder?: string;
+    prefix?: ReactNode;
+    suffix?: ReactNode;
     disabled?: boolean;
     readOnly?: boolean;
     trigger?: string;
@@ -155,7 +161,9 @@ export interface MentionProps
     maxSuggestions?: number;
     variant?: MentionVariant;
     size?: MentionSize;
+    /** @deprecated Use `prefix`. */
     leading?: ReactNode;
+    /** @deprecated Use `suffix`. */
     trailing?: ReactNode;
     required?: boolean;
     mentions?: readonly MentionToken[];
@@ -846,8 +854,12 @@ const Mention: FC<MentionProps> = ({
     rows = 2,
     label,
     hint,
+    message,
+    limitation,
     error,
     placeholder,
+    prefix,
+    suffix,
     disabled = false,
     readOnly = false,
     trigger = "@",
@@ -878,7 +890,7 @@ const Mention: FC<MentionProps> = ({
     const inputId: string = id ?? generatedId;
     const labelId: string = `${inputId}-label`;
     const listboxId: string = `${inputId}-listbox`;
-    const hintId: string = `${inputId}-hint`;
+    const messageId: string = `${inputId}-message`;
     const errorId: string = `${inputId}-error`;
     const fieldRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
     const mergedRef: RefCallback<HTMLDivElement> = useMergedRef<HTMLDivElement>(fieldRef, ref);
@@ -906,9 +918,11 @@ const Mention: FC<MentionProps> = ({
     const [loading, setLoading]: [boolean, (next: boolean) => void] = useState<boolean>(false);
     const [activeIndex, setActiveIndex]: [number, (next: number) => void] = useState<number>(-1);
     const hasError: boolean = error !== (void 0) && error.length > 0;
-    const hasHint: boolean = hint !== (void 0) && hint.length > 0;
+    const hasMessage: boolean = message !== (void 0) && message !== null && message !== false;
+    const hintText: string = hint ?? label ?? "";
+    const hasHint: boolean = hintText.length > 0;
     const describedBy: string = [
-        hasError ? errorId : hasHint ? hintId : "",
+        hasError ? errorId : hasMessage ? messageId : "",
         ariaDescribedBy ?? "",
     ]
         .filter((item: string): boolean => item.length > 0)
@@ -916,7 +930,22 @@ const Mention: FC<MentionProps> = ({
     const hasMentions: boolean = mentions !== (void 0) && mentions.length > 0;
     const filled: boolean = currentValue.length > 0 || hasMentions;
     const editable: boolean = !disabled && !readOnly;
-    const floating: boolean = label !== (void 0) && (focused || filled || open);
+    const floating: boolean = hasHint && (focused || filled || open);
+    const prefixSlot: ReactNode = prefix ?? leading;
+    const suffixSlot: ReactNode = suffix ?? trailing;
+    const hintContent: ReactNode =
+        required && hasHint ? (
+            <>
+                {hintText}
+                <span className="mention__required" aria-hidden="true">
+                    *
+                </span>
+            </>
+        ) : (
+            hintText
+        );
+    const limitationContent: ReactNode =
+        limitation === true ? `${currentValue.length}` : limitation === false ? null : limitation;
     const mentionsSignature: string =
         mentions === (void 0)
             ? ""
@@ -1789,150 +1818,102 @@ const Mention: FC<MentionProps> = ({
         }
     };
 
-    /**
-     * Moves focus into the editor when the floating label is pressed.
-     * @param event - Mouse down event from the label.
-     * @example
-     * <label onMouseDown={handleLabelMouseDown} />
-     * @returns Nothing.
-     */
-    const handleLabelMouseDown: (event: ReactMouseEvent<HTMLLabelElement>) => void = (
-        event: ReactMouseEvent<HTMLLabelElement>,
-    ): void => {
-        if (disabled) {
-            return;
-        }
-
-        event.preventDefault();
-        editorRef.current?.focus({ preventScroll: true });
-    };
-
     return (
-        <div
-            {...rest}
-            ref={mergedRef}
-            className={cx(
-                "text-field",
-                `text-field--${variant}`,
-                `text-field--${size}`,
-                "mention",
-                multiline && "mention--multiline",
-                disabled && "mention--disabled",
-                readOnly && "mention--readonly",
-                filled && "mention--filled",
-                focused && "mention--focused",
-                floating && "mention--floating",
-                hasError && "text-field--invalid",
-                leading !== (void 0) && "text-field--leading",
-                label !== (void 0) && "mention--has-label",
-                className,
-            )}
-            style={style}
-            data-invalid={hasError ? "true" : "false"}
-            data-disabled={disabled ? "true" : "false"}
-            data-readonly={readOnly ? "true" : "false"}
-            data-filled={filled ? "true" : "false"}
-            data-floating={floating ? "true" : "false"}
-            data-open={open ? "true" : "false"}
-            onFocus={handleRootFocus}
-            onBlur={handleRootBlur}
-        >
-            <div className="text-field__control">
-                <Surface
-                    className="text-field__surface"
-                    background={<span className="text-field__background" />}
-                    foreground={<span className="text-field__edge" />}
-                >
-                    <div className="text-field__row">
-                        {leading === (void 0) ? null : (
-                            <span className="text-field__leading" aria-hidden="true">
-                                {leading}
-                            </span>
-                        )}
-                        <div
-                            ref={editorRef}
-                            id={inputId}
-                            className="mention__editor"
-                            contentEditable={editable}
-                            suppressContentEditableWarning
-                            role="combobox"
-                            tabIndex={disabled ? -1 : (tabIndex ?? 0)}
-                            spellCheck={spellCheck}
-                            data-placeholder={placeholder}
-                            data-filled={filled ? "true" : "false"}
-                            data-floating={floating ? "true" : "false"}
-                            data-multiline={multiline ? "true" : "false"}
-                            style={multiline ? editorStyle : (void 0)}
-                            aria-autocomplete="list"
-                            aria-expanded={open}
-                            aria-controls={listboxId}
-                            aria-haspopup="listbox"
-                            aria-multiline={multiline}
-                            aria-invalid={hasError ? true : ariaInvalid}
-                            aria-required={required}
-                            aria-disabled={disabled}
-                            aria-readonly={readOnly ? true : (void 0)}
-                            aria-busy={loading}
-                            aria-labelledby={label === (void 0) ? (void 0) : labelId}
-                            aria-label={
-                                label === (void 0) ? (ariaLabel ?? ariaLabelAttribute ?? placeholder) : (void 0)
-                            }
-                            aria-placeholder={placeholder}
-                            aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
-                            onInput={handleInput}
-                            onBeforeInput={handleBeforeInput}
-                            onKeyDown={handleKeyDown}
-                            onKeyUp={rememberCaret}
-                            onFocus={rememberCaret}
-                            onMouseUp={rememberCaret}
-                            onCopy={handleCopy}
-                            onCut={handleCut}
-                            onPaste={handlePaste}
-                            onDrop={handleDrop}
-                            onCompositionStart={handleCompositionStart}
-                            onCompositionEnd={handleCompositionEnd}
-                            onClick={handleEditorClick}
-                            onMouseDown={handleEditorMouseDown}
-                        />
-                        {trailing === (void 0) ? null : (
-                            <span className="text-field__trailing" aria-hidden="true">
-                                {trailing}
-                            </span>
-                        )}
-                    </div>
-                </Surface>
-
+        <>
+            <InputLayout
+                {...rest}
+                ref={mergedRef}
+                variant={variant}
+                size={size}
+                prefix={prefixSlot}
+                suffix={suffixSlot}
+                hint={hintContent}
+                hintFloating={floating}
+                message={message}
+                limitation={limitationContent}
+                error={hasError ? error : null}
+                invalid={hasError}
+                disabled={disabled}
+                readOnly={readOnly}
+                multiline={multiline}
+                messageId={messageId}
+                errorId={errorId}
+                className={cx(
+                    "mention",
+                    multiline && "mention--multiline",
+                    disabled && "mention--disabled",
+                    readOnly && "mention--readonly",
+                    filled && "mention--filled",
+                    focused && "mention--focused",
+                    floating && "mention--floating",
+                    hasHint && "mention--has-label",
+                    className,
+                )}
+                style={style}
+                data-filled={filled ? "true" : "false"}
+                data-floating={floating ? "true" : "false"}
+                data-open={open ? "true" : "false"}
+                onFocus={handleRootFocus}
+                onBlur={handleRootBlur}
+            >
+                <div
+                    ref={editorRef}
+                    id={inputId}
+                    className="mention__editor"
+                    contentEditable={editable}
+                    suppressContentEditableWarning
+                    role="combobox"
+                    tabIndex={disabled ? -1 : (tabIndex ?? 0)}
+                    spellCheck={spellCheck}
+                    data-placeholder={placeholder}
+                    data-input-layout-control="true"
+                    data-filled={filled ? "true" : "false"}
+                    data-floating={floating ? "true" : "false"}
+                    data-multiline={multiline ? "true" : "false"}
+                    style={multiline ? editorStyle : (void 0)}
+                    aria-autocomplete="list"
+                    aria-expanded={open}
+                    aria-controls={listboxId}
+                    aria-haspopup="listbox"
+                    aria-multiline={multiline}
+                    aria-invalid={hasError ? true : ariaInvalid}
+                    aria-required={required}
+                    aria-disabled={disabled}
+                    aria-readonly={readOnly ? true : (void 0)}
+                    aria-busy={loading}
+                    aria-labelledby={label === (void 0) ? (void 0) : labelId}
+                    aria-label={
+                        label === (void 0)
+                            ? (ariaLabel ?? ariaLabelAttribute ?? placeholder ?? hint)
+                            : (void 0)
+                    }
+                    aria-placeholder={placeholder}
+                    aria-describedby={describedBy.length > 0 ? describedBy : (void 0)}
+                    onInput={handleInput}
+                    onBeforeInput={handleBeforeInput}
+                    onKeyDown={handleKeyDown}
+                    onKeyUp={rememberCaret}
+                    onFocus={rememberCaret}
+                    onMouseUp={rememberCaret}
+                    onCopy={handleCopy}
+                    onCut={handleCut}
+                    onPaste={handlePaste}
+                    onDrop={handleDrop}
+                    onCompositionStart={handleCompositionStart}
+                    onCompositionEnd={handleCompositionEnd}
+                    onClick={handleEditorClick}
+                    onMouseDown={handleEditorMouseDown}
+                />
                 {label === (void 0) ? null : (
-                    <label
-                        id={labelId}
-                        className="text-field__label"
-                        htmlFor={inputId}
-                        data-floating={floating ? "true" : "false"}
-                        onMouseDown={handleLabelMouseDown}
-                    >
+                    <label className="visually-hidden" id={labelId} htmlFor={inputId}>
                         {label}
-                        {required ? (
-                            <span className="text-field__required" aria-hidden="true">
-                                *
-                            </span>
-                        ) : null}
+                        {required ? "*" : null}
                     </label>
                 )}
-            </div>
-
-            {hasError ? (
-                <p className="text-field__error" id={errorId} aria-live="polite">
-                    {error}
-                </p>
-            ) : hasHint ? (
-                <p className="text-field__hint" id={hintId} key={hint}>
-                    {hint}
-                </p>
-            ) : null}
-
-            <span className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
-                {status}
-            </span>
+                <span className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
+                    {status}
+                </span>
+            </InputLayout>
 
             <Dropdown
                 open={open}
@@ -1984,7 +1965,7 @@ const Mention: FC<MentionProps> = ({
                     ))}
                 </div>
             </Dropdown>
-        </div>
+        </>
     );
 };
 
