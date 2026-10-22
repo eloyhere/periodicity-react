@@ -3,7 +3,38 @@
 All notable changes to Periodicity React are recorded here. The format follows the spirit of Keep a Changelog,
 and this project uses British English in its English documentation.
 
-## [Unreleased]
+## [0.1.10] - 2026-10-22
+
+### Added
+
+- `HighFlyer` company icon for 幻方量化, and a redrawn `DeepSeek` whale mark for the agent set.
+- Twenty redrawn animal glyphs (`AnimalLion` … `AnimalDolphin`) now live in the `Animal` category, which holds
+  30 icons; the `AnimalExtra` category is gone.
+- The Foundations icon catalogue plays `Dynamic` SVG animations even when the operating system requests reduced
+  motion.
+- `Avatar` accepts an inline SVG (or any React node) as `src` alongside image URLs and base64 data URIs; custom
+  content fills the circular frame and keeps the avatar's accessible name.
+
+### Changed
+
+- Redrew the weakest catalogue glyphs: `Copilot`, `Llama`, `Ernie`, `Yi`, `Alphabet`, `Dog`, `Horse`, `Notebook`,
+  `Telescope`, `Stethoscope`, `Hammer`, `Screwdriver`, `Cup`, `Nervous`, and `Countdown`; `Piano` and `Guitar` now
+  follow their Lucide shapes.
+- Renamed icons whose names collided across categories, where the later definition silently replaced the earlier
+  glyph: `Pulse` → `HeartRate` (Health), `Notebook` → `NotebookDevice` (Computer), and `Chip` → `Microchip`
+  (Computer).
+- The icon catalogue now lists 695 icons across 38 categories.
+
+### Fixed
+
+- Anchored dropdown/select panels, popovers, and tooltips now follow their trigger when layout changes outside
+  scrolling or resizing, such as a `Coordinator` collapsing its hero under wheel input, instead of remaining at the
+  old fixed viewport position.
+- Dropdown/Select panels, popovers, and context menus now also dismiss when the browser window loses focus or the
+  document becomes hidden, so a floating layer no longer stays open after switching to another window or hiding the
+  app.
+- A catalogue test now asserts that every icon name is unique, so two categories can no longer define the same name
+  and render the wrong glyph.
 
 ## [0.1.9] - 2026-10-22
 

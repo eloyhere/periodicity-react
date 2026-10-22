@@ -2,7 +2,26 @@
 
 本文件记录 Periodicity React 的重要变更。格式参考 Keep a Changelog。
 
-## [Unreleased]
+## [0.1.10] - 2026-10-22
+
+### 新增
+
+- 新增 `HighFlyer`（幻方量化）公司图标，并重绘 Agent 分类的 `DeepSeek` 鲸鱼标。
+- 20 个重绘的动物图标（`AnimalLion` … `AnimalDolphin`）并入 `Animal` 分类，该分类现在共 30 个图标；`AnimalExtra` 分类已删除。
+- 图标目录页现在即使系统开启“减少动态”，也会播放 `Dynamic` 分类的 SVG 动画。
+- `Avatar` 的 `src` 除图片 URL 与 base64 data URI 外，还可以接受内联 SVG（或任意 React 节点）；自定义内容会填满圆形头像框，并保留头像的无障碍名称。
+
+### 变更
+
+- 重绘了目录中绘制质量较差的图标：`Copilot`、`Llama`、`Ernie`、`Yi`、`Alphabet`、`Dog`、`Horse`、`Notebook`、`Telescope`、`Stethoscope`、`Hammer`、`Screwdriver`、`Cup`、`Nervous`、`Countdown`；`Piano`、`Guitar` 改用 Lucide 造型。
+- 修复跨分类重名导致的静默覆盖：`Pulse` → `HeartRate`（Health）、`Notebook` → `NotebookDevice`（Computer）、`Chip` → `Microchip`（Computer）。
+- 图标目录现在为 38 个分类、695 个图标。
+
+### 修复
+
+- Dropdown/Select 面板、Popover 与 Tooltip 现在会在锚点因布局变化（例如 `Coordinator` 响应滚轮折叠 Hero）而移动时持续跟随，不再停留在旧的固定视口位置。
+- Dropdown/Select 面板、Popover 和右键菜单等浮层现在会在窗口失去焦点或文档隐藏时自动关闭，切换到其他窗口或隐藏应用后不再残留。
+- 新增目录级测试，确保所有图标名称唯一，避免同名图标互相覆盖后显示错误的字形。
 
 ## [0.1.9] - 2026-10-22
 

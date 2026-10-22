@@ -1,390 +1,180 @@
 # Periodicity React
 
-面向产品界面、管理后台和数据密集型应用的 Material 风格 React 组件库。
+面向产品界面、管理后台和数据密集型应用的 Material 风格 React 19 组件库。
 
-`periodicity-react` 提供 130 个带 `Periodicity` 前缀的组件，覆盖表单、选择器、浮层、导航、集合视图、消息会话、文件工具，以及把它们连接起来的设计系统 Provider。API 以 TypeScript 为先、以 Flex 布局为基础，并尽量贴近浏览器原生行为：在合理的地方透传原生属性、事件、ARIA 和 `ref`。
+`periodicity-react` 提供 **136 个 `Periodicity*` 组件**、四种统计图、文件与图片选择器、作用域排版、设计系统 Provider，以及 **12 个内置语言包**。API 以 TypeScript 为先、以 Flex 布局为基础，并尽量贴近浏览器原生行为：在合理的地方透传原生属性、事件、ARIA 和 `ref`。
 
 - **npm：** [`periodicity-react`](https://www.npmjs.com/package/periodicity-react)
-- **版本：** `0.1.0`
+- **版本：** `0.1.10`
+- **在线示例：** 运行 `npm run dev`；源码见 [`src/showcase`](src/showcase)
 - **源码：** [github.com/eloyhere/periodicity-react](https://github.com/eloyhere/periodicity-react)
-- **要求：** React 19、React DOM 19、现代浏览器
+- **要求：** React 19、React DOM 19
 - **许可证：** Apache 2.0
-
-## 设计理念
-
-Periodicity 遵循五条规则：
-
-- **语义优先于装饰。** 组件只消费 `--colourPrimary`、`--surface`、`--state-hover-opacity` 等主题 token，不硬编码某套品牌色，因此切换主题或色盲配色时，所有组件会一起变化。
-- **Flex 优先布局。** 组件使用 flexbox 组合，不依赖 CSS Grid，可以安全嵌入宿主布局、虚拟列表和滚动容器。
-- **原生行为优先。** 表单仍可提交，链接仍可导航，输入仍走浏览器校验，对话框仍管理焦点，`ref` 指向真实 DOM；ARIA 和 data 属性是在原生语义上的增强。
-- **可组合的表面。** `Surface`、`StateLayer`、`Ripple`、`Icon`、`Text` 和布局原语是共享积木，高层组件保持轻量，并可通过 token 定制。
-- **默认可访问、可国际化。** 焦点环、键盘路径、减少动效、经过对比度审计的配色，以及 12 个内置语言包都属于公共 API，而不是事后补丁。
-
-## 功能地图
-
-| 功能       | 组件                                                                                                                                | 适用场景                         |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| 基础       | `Theme`、`International`、`Surface`、`StateLayer`、`Ripple`、`Text`、`Icon`、`LinearLayout`、`Inline`、`Stack`、`Divider`、`Spacer` | design token、排版、表面与组合。 |
-| 输入       | `Button`、`TextInput`、`TextArea`、`Select`、`Checkbox`、`Switch`、`Range`、`NumberInput`、各种 Picker、`Calendar`                  | 表单、筛选和参数编辑。           |
-| 数据       | `List`、`Table`、`Tree`、`Pagination`、`Scrollbar`、`Badge`、`Tag`、`Chip`、`Avatar`                                                | 密集记录、虚拟集合和身份展示。   |
-| 布局       | `Coordinator`、`AppBar`、`Collapse`、`Toolbar`、`Drawer`、`DrawerLayout`、`Tabs`、`Accordion`                                       | 应用壳、导航和响应式面板。       |
-| 浮层       | `Dialog`、`ConfirmDialog`、`InputDialog`、`MessageDialog`、`Dropdown`、`Menu`、`Tooltip`、`Toast`、`Snackbar`                       | 临时反馈、菜单和模态任务。       |
-| 文件与消息 | `Editor`、`Preview`、`ProjectManager`、`Chat`、`VirtualChat`、`Contact`、`MessageList`                                              | 代码、项目结构、会话和联系人。   |
-| 辅助       | `Link`、`Anchor`、`Progress`、`Skeleton`、`EmptyState`、`Kbd`、`VisuallyHidden`                                                     | 小型可复用交互元素。             |
 
 ## 目录
 
-- [设计理念](#设计理念)
-- [功能地图](#功能地图)
-- [安装](#安装)
+- [0.1.9 包含什么](#019-包含什么)
+- [设计原则](#设计原则)
+- [要求与安装](#要求与安装)
 - [快速开始](#快速开始)
-- [按功能划分的组件](#按功能划分的组件)
-- [组件命名](#组件命名)
-- [表单与选择器](#表单与选择器)
+- [公共导出面](#公共导出面)
+- [主题](#主题)
+- [国际化](#国际化)
+- [统计图](#统计图)
+- [文件与图片选择器](#文件与图片选择器)
+- [表单与输入](#表单与输入)
+- [选择器与日历](#选择器与日历)
 - [集合与数据](#集合与数据)
 - [浮层与反馈](#浮层与反馈)
 - [导航与布局](#导航与布局)
-- [消息与联系人](#消息与联系人)
-- [文件与预览](#文件与预览)
-- [主题](#主题)
-- [国际化](#国际化)
-- [动效](#动效)
+- [消息与评论](#消息与评论)
+- [排版与 Font](#排版与-font)
+- [动效与标准事件](#动效与标准事件)
 - [可访问性](#可访问性)
+- [样式与 Token](#样式与-token)
+- [API 约定](#api-约定)
+- [组件索引](#组件索引)
 - [开发](#开发)
-- [验证](#验证)
 - [更新日志](#更新日志)
 
-## 安装
+## 0.1.9 包含什么
+
+- **Canvas 与 WebGL 统计图。** `BarChart`、`PieChart`、`LineChart`、`ScatterChart` 共用响应式画布框架：WebGL 系列层、canvas 回退、DPR 尺寸、图例、屏幕阅读器数据表，并通过共享的优先级 task 队列调度重绘。
+- **原生文件与图片选择器。** `useFilePick` 驱动 `FilePicker`、`PhotoPicker`、`AvatarPicker` 内部渲染的隐藏原生 file 输入。图片与头像支持 Base64 预览和 Dialog 内裁剪，并区分确认、取消、关闭三种结果。
+- **完整的国际化收尾。** 图表、选择器、评论、Transfer、日期时间、Mention、评分、进度、单选、滚动条、右键菜单、Combobox、Loading，以及邮箱/电话校验文案，都会读取当前语言包；12 个内置 locale 全部覆盖。
+- **作用域排版。** `Font` 与 `useFont` 通过嵌套字体上下文提供字号层级、字体族、字重、行高、字距、大小写转换和对齐方式。
+- **Electron 安全浮层。** Dropdown 与 Popover 面板设置 `-webkit-app-region: no-drag`；菜单覆盖在 Electron 自定义标题栏、应用栏或 Hero 的拖拽区域上时，整个面板仍可点击。
+
+## 设计原则
+
+Periodicity 遵循六条规则：
+
+- **语义优先于装饰。** 组件消费 `--color-primary`、`--color-on-surface`、`--space-4` 等 token，不硬编码某套品牌色。切换主题或色盲配色时，所有组件会一起变化。
+- **Flex 优先布局。** 组件使用 flexbox 组合，不依赖 CSS Grid，可以安全嵌入宿主布局、虚拟列表和滚动容器。
+- **原生行为优先。** 表单仍可提交，链接仍可导航，输入仍走浏览器校验，对话框仍管理焦点，`ref` 指向真实 DOM；ARIA 和 data 属性是在原生语义上的增强。
+- **可组合的表面。** `Surface`、`StateLayer`、`Ripple`、`Icon`、`Text`、`Font` 和布局原语是共享积木；高层组件保持轻量，并可通过 token 定制。
+- **默认可访问、可国际化。** 焦点环、键盘路径、减少动效、经过对比度审计的配色、强制颜色样式，以及 12 个语言包都属于公共 API。
+- **调度而非抖动。** 集合默认支持虚拟化，图表把绘制交给 task 调度器，输入变化时会取消过期的帧。
+
+## 要求与安装
 
 ```bash
 npm install periodicity-react
 ```
 
-`react` 和 `react-dom` 是 peer dependencies。宿主应用需要安装 React 19。
-
-在应用入口引入一次组件样式：
+`react` 和 `react-dom` 是 peer dependencies，宿主应用需要安装 React 19。包内提供 ES Module、TypeScript 声明文件和提取后的样式表。在应用入口引入一次样式：
 
 ```tsx
 import "periodicity-react/styles.css";
 ```
 
-包内提供 ES Module、TypeScript 声明文件和提取后的样式表，适用于 Vite、Next.js、webpack 等构建工具。
+适用于 Vite、Next.js、webpack 等支持 ESM 的构建工具。开发脚本要求 Node.js 20 或更高版本。
 
 ## 快速开始
 
+用主题、国际化和 Toast Provider 包裹应用，然后使用带前缀的组件。
+
 ```tsx
 import { useState } from "react";
-import { PeriodicityButton, PeriodicityTextInput } from "periodicity-react";
+import {
+    PeriodicityButton,
+    PeriodicityInternational,
+    PeriodicityTextInput,
+    PeriodicityTheme,
+    PeriodicityToastProvider,
+} from "periodicity-react";
 import "periodicity-react/styles.css";
 
 export function SignIn() {
     const [email, setEmail] = useState("");
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 360 }}>
-            <PeriodicityTextInput
-                label="邮箱"
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-            />
-            <PeriodicityButton onClick={() => console.log(email)}>继续</PeriodicityButton>
-        </div>
+        <PeriodicityTheme theme="milk" mode="system">
+            <PeriodicityInternational locale="zh-CN">
+                <PeriodicityToastProvider>
+                    <form
+                        onSubmit={(event) => {
+                            event.preventDefault();
+                            console.log(email);
+                        }}
+                    >
+                        <PeriodicityTextInput
+                            label="邮箱"
+                            type="email"
+                            autoComplete="email"
+                            value={email}
+                            onChange={(event) => setEmail(event.target.value)}
+                            hint="这个地址只用于登录。"
+                        />
+                        <PeriodicityButton type="submit">继续</PeriodicityButton>
+                    </form>
+                </PeriodicityToastProvider>
+            </PeriodicityInternational>
+        </PeriodicityTheme>
     );
 }
 ```
 
-需要全局主题或语言切换时，在应用外层包住 Provider：
+## 公共导出面
+
+组件导出只使用 `Periodicity*` 前缀；包根同时导出两个 Hook 和标准事件工具。完整组件清单见[组件索引](#组件索引)。
+
+| 导出分组 | 名称                                                                   |
+| -------- | ---------------------------------------------------------------------- |
+| 组件     | 所有 `Periodicity*` 组件，以及已导出的对应 Props 类型                  |
+| Hooks    | `useFilePick`、`useFont`                                               |
+| 标准事件 | `createStandardEvent`、`useStandardEvents`、`withStandardEvents`       |
+| 类型     | 共享 Props、`PeriodicityStandardEventProps`、图表/选择器/字体/语言类型 |
 
 ```tsx
-<PeriodicityTheme theme="accessible">
-    <PeriodicityInternational locale="ja-JP">{app}</PeriodicityInternational>
-</PeriodicityTheme>
+import { PeriodicityButton, PeriodicityDialog, useFilePick } from "periodicity-react";
 ```
 
-## 按功能划分的组件
-
-- **基础与 token：** `Theme`、`International`、`Surface`、`StateLayer`、`Ripple`、`Text`、`Icon`、`LinearLayout`、`Inline`、`Stack`、`Divider`、`Spacer`、`VisuallyHidden`。
-- **输入与选择器：** `Button`、`TextInput`、`TextArea`、`Select`、`VirtualSelect`、`Checkbox`、`Switch`、`Range`、`NumberInput`、`ColourPicker`、`TimePicker`、`DateTimePicker`、`NumberPicker`、`CyclePicker`、`VariantPicker`、`Calendar`。
-- **数据与身份：** `List`、`VirtualList`、`Table`、`VirtualTable`、`Tree`、`VirtualTree`、`Pagination`、`Scrollbar`、`Badge`、`Tag`、`Chip`、`Avatar`、`AvatarGroup`。
-- **导航与布局：** `Coordinator`、`AppBar`、`Collapse`、`Toolbar`、`Drawer`、`DrawerLayout`、`Tabs`、`Accordion`。
-- **浮层与反馈：** `Dialog`、`ConfirmDialog`、`InputDialog`、`MessageDialog`、`Dropdown`、`Menu`、`Tooltip`、`Toast`、`Snackbar`、`Progress`、`Skeleton`、`EmptyState`。
-- **文件与消息：** `Editor`、`Preview`、`ProjectManager`、`Chat`、`VirtualChat`、`Contact`、`VirtualContact`、`MessageList`、`VirtualMessageList`。
-- **辅助：** `Link`、`Anchor`、`Kbd`、`Badge`、`Divider`、`VisuallyHidden`。
-
-## 组件命名
-
-每个公共组件只导出带 `Periodicity` 前缀的名称：
-
-```tsx
-import { PeriodicityButton, PeriodicityDialog, PeriodicityTable, PeriodicityTextInput } from "periodicity-react";
-```
-
-不再导出不带前缀的兼容别名。统一使用带前缀的名称，以明确组件边界并避免与宿主应用组件重名。
-
-```tsx
-import { PeriodicityTable } from "periodicity-react";
-```
-
-### 动态图标
-
-`PeriodicityIcon` 增加了十个动态图标，用于加载与活动反馈：
-
-```tsx
-<PeriodicityIcon name="Spinner" size={24} />
-<PeriodicityIcon name="LoadingDots" size={24} />
-<PeriodicityIcon name="Pulse" size={24} />
-<PeriodicityIcon name="Orbit" size={24} />
-<PeriodicityIcon name="Bars" size={24} />
-<PeriodicityIcon name="Wave" size={24} />
-<PeriodicityIcon name="Radar" size={24} />
-<PeriodicityIcon name="Breathe" size={24} />
-<PeriodicityIcon name="Sync" size={24} />
-<PeriodicityIcon name="BellRing" size={24} />
-```
-
-`Spinner` 是安卓风格的转圈图标，旋转时缺口大小会动态变化。所有动态图标都尊重 `prefers-reduced-motion`。`Agent` 组是静态 AI 厂商图标；`Motion` 和 `Live` 使用 CSS 动画；专门新增的 `Dynamic` 组把 SMIL 动画写在 SVG 内部：`DynamicRotateRight`、`DynamicRotateLeft`、`DynamicThrob`、`DynamicBounceBall`、`DynamicFlipCard`、`DynamicMorphing`、`DynamicLoad`、`DynamicSatellite`、`DynamicBlink`、`DynamicRipple`、`DynamicPulse`、`DynamicTyping`、`DynamicWave`、`DynamicScan`、`DynamicOrbit`、`DynamicBreathe`、`DynamicShake`。新增 `Programming` 编程分组（Java、Python、JavaScript、TypeScript、C、C++、C#、PHP、Kotlin、Rust、Go、Swift、Ruby、Dart、Scala、Perl、Lua、Bash、HTML、CSS、SQL、npm、Maven、JSON 等）、`Computer` 分组（终端、服务器、数据库、代码、芯片、网络、存储等）和 `Electronics` 分组（电阻、电容、二极管、晶体管、PCB、示波器、万用表、电位器、热敏电阻、MOSFET、桥式整流、高压危险、触电警示等）。`Math` 分类新增 `Equal`、`NotEqual`、`LessThan`、`GreaterThan`、`Sum`、`Pi`、`Infinity`、`SquareRoot`、`Fraction`、`Percent`、`Integral`、`Function`、`Matrix`、`Angle`、`Delta`、`Partial`、`Nabla`、`Product`、`Factorial`、`Union`、`Intersection`、`ElementOf`、`NotElementOf`、`Subset`、`ForAll`、`Exists`、`PlusMinus`、`Approximately`、`Degree`、`Proportional`、`Therefore`、`Because`、`Vector`、`Coordinate`、`Integer`、`Negative`、`Absolute`、`Rational`、`Irrational`、`Real`、`Imaginary`、`Quaternion`、`Natural`、`Complex`、`Even`、`Odd`、`Positive`。新增独立的 `Animal` 和 `Plant` 分组，每组 30 个图标。现在每个分组都至少有 30 个图标；`Motion`、`Live`、`Dynamic` 还包含额外的动效和状态变体。
-
-## 表单与选择器
-
-表单组件支持原生 input 属性，并透传事件、`ref`、`aria-*` 和 `data-*` 属性。
-
-Button 使用 `prefix`、`content`、`suffix` 三个内容自适应 flex 插槽。`prefix`/`suffix` 传入字符串时按图标名渲染；
-只有一个图标时居中，两个图标等宽，内容自然增长，不会把按钮撑满父容器。
-
-文本输入框使用六个插槽：`prefix`、浮动 `hint`、`message`、`limitation`、`error`、`suffix`。`hint` 是不接收
-指针事件的占位文本，未聚焦时垂直居中，聚焦或有内容时动画缩小并移到左上角；`message` 会被 `error` 替换；
-`limitation` 位于 suffix 下方，显示当前/最小/最大字符数。输入框与按钮都支持悬浮和点击 ripple。聚焦时，边框以
-鼠标位置为圆心（键盘聚焦时用文本光标，空输入框用字段中心）做径向波纹展示：最近的边先出现，每条边从鼠标在该边
-上的投影点向两端生长，整体使用 1 秒的先快后慢缓动。
-
-```tsx
-<PeriodicityButton prefix="Plus" content="添加" suffix="ArrowRight" />
-<PeriodicityButton prefix="Plus" aria-label="添加" />
-<PeriodicityButton prefix="Plus" suffix="ArrowRight" aria-label="拆分" />
-```
-
-```tsx
-import {
-    PeriodicityCheckbox,
-    PeriodicityNumberInput,
-    PeriodicityRange,
-    PeriodicitySelect,
-    PeriodicitySwitch,
-    PeriodicityTextArea,
-} from "periodicity-react";
-
-<PeriodicityTextArea label="备注" rows={4} maxLength={500} />
-<PeriodicityCheckbox label="订阅" defaultChecked />
-<PeriodicitySwitch label="启用" defaultChecked onChange={() => {}} />
-<PeriodicityRange label="音量" min={0} max={100} defaultValue={60} onChange={() => {}} />
-<PeriodicityNumberInput label="数量" min={1} max={99} defaultValue={1} />
-<PeriodicitySelect label="团队" options={teams} onChange={(value) => console.log(value)} />
-```
-
-选择器组件包括：
-
-- `PeriodicityColourPicker`
-- `PeriodicityTimePicker`
-- `PeriodicityDateTimePicker`
-- `PeriodicityNumberPicker`
-- `PeriodicityCyclePicker`
-- `PeriodicityVariantPicker`
-
-### 颜色选择器
-
-`PeriodicityColourPicker` 组合原生颜色输入、可见的十六进制值和一排预设色块。原生输入保留系统取色器和键盘行为；
-标签、提示、错误、禁用和只读状态复用统一的 PickerField。
-
-```tsx
-import { PeriodicityColourPicker } from "periodicity-react";
-
-<PeriodicityColourPicker label="品牌色" defaultValue="#1976d2" showValue onChange={(value) => console.log(value)} />;
-```
-
-值使用 CSS 十六进制颜色。传入 `value` 即受控，使用 `defaultValue` 即非受控。预设色块带有 `aria-pressed`，
-在 `readOnly` 或 `disabled` 时不可交互。
-
-### 日历
-
-`PeriodicityCalendar` 是支持 locale 的月历网格，使用单一 roving tab stop。值格式为 ISO `YYYY-MM-DD`；传入 `value` 为受控，使用 `defaultValue` 为非受控。
-
-```tsx
-import { PeriodicityCalendar } from "periodicity-react";
-
-<PeriodicityCalendar
-    label="交付日期"
-    value={date}
-    onChange={setDate}
-    min="2026-01-01"
-    max="2026-12-31"
-    firstDayOfWeek={1}
-    slots={{
-        body: ({ day }) => <span>{day % 2 === 0 ? "偶数" : "奇数"}</span>,
-    }}
-/>;
-```
-
-每个日期 cell 有 `slots.header`、`slots.body`、`slots.footer` 三行；header 默认显示日期数字。键盘：方向键按天/周移动，Home/End 到本周首尾，PageUp/PageDown 切换月份，Shift+PageUp/PageDown 切换年份，Enter 或 Space 选择。`showAdjacentDays`、`weekdayLabels`、`monthLabels`、`slots`、`renderDay`、`disabled` 和 `readOnly` 可用于定制。
-
-大部分表单和选择器支持受控/非受控值、`disabled`、适当的 `readOnly`，以及调用方与内部事件处理器的组合。`PeriodicityMention` 提供异步建议列表和 Token 化 Chip；加载器由调用方提供，并与其它输入框共用 `prefix`、`hint`、`message`、`limitation`、`error`、`suffix` 六个插槽。
-
-## 集合与数据
-
-集合可以使用普通数组或 Adapter，并支持可选的固定行高虚拟化。
-
-```tsx
-import { PeriodicityList, PeriodicityTable, PeriodicityTree } from "periodicity-react";
-
-<PeriodicityList
-    items={people}
-    getKey={(person) => person.id}
-    selectionMode="single"
-    renderItem={(person) => `${person.firstName} ${person.lastName}`}
-/>
-
-<PeriodicityTable
-    columns={[
-        { id: "name", header: "姓名", cell: (person) => person.name },
-        { id: "role", header: "角色", cell: (person) => person.role },
-    ]}
-    rows={people}
-    rowKey={(person) => person.id}
-    caption="团队成员"
-/>
-
-<PeriodicityTree
-    items={nodes}
-    getKey={(node) => node.id}
-    renderItem={(node) => node.label}
-/>
-```
-
-集合组件包括 `List`、`Tree`、`Table`、`Select`、`Combobox`、`Transfer` 和 `WaterfallLayout`。使用 `virtual`、`height` 和 `itemHeight` / `rowHeight` 开启固定行虚拟化。选择、展开、加载、空状态和禁用状态在各集合中保持一致。
-
-## 浮层与反馈
-
-```tsx
-import {
-    PeriodicityAlert,
-    PeriodicityDialog,
-    PeriodicityToastProvider,
-} from "periodicity-react";
-
-<PeriodicityAlert tone="success" title="已保存">
-    你的修改已经更新。
-</PeriodicityAlert>
-
-<PeriodicityDialog open={open} title="删除项目" onClose={() => setOpen(false)}>
-    此操作无法撤销。
-</PeriodicityDialog>
-
-<PeriodicityToastProvider>
-    <App />
-</PeriodicityToastProvider>
-```
-
-浮层组件覆盖 Dialog、Confirm/Message/Input Dialog、Drawer 与 DrawerLayout、ContextMenu、Dropdown、Popover、Tooltip、Snackbar、Toast、Alert、Banner、Backdrop，以及全屏/局部 Loading。支持受控/非受控打开状态、关闭原因、Escape 处理、焦点恢复和原生面板属性。
-
-## 导航与布局
-
-导航组件：
-
-- `PeriodicityNavigationView`
-- `PeriodicityTabs` 与 `PeriodicityTabPanel`
-- `PeriodicityPager`
-- `PeriodicityMenu`、`PeriodicityMenuItem`、`PeriodicityMenuGroup`、`PeriodicityMenuSeparator`
-- `PeriodicityStepper`
-
-布局以 Flex 为基础，不使用 CSS Grid。结构组件包括：
-
-- `PeriodicityGridLayout`
-- `PeriodicityLinearLayout` 与 `PeriodicityLinearLayoutItem`
-- `PeriodicityConstraintLayout` 与 `PeriodicityConstraint`
-- `PeriodicityWaterfallLayout`
-- `PeriodicityDrawerLayout`
-- `PeriodicityCoordinator`
-- `PeriodicityAppBar`
-- `PeriodicityCollapse`
-- `PeriodicityToolbar`
-- `PeriodicityScrollbar`
-- `PeriodicityDrag`
-
-`PeriodicityCoordinator` 有三个插槽：`collapse`、`header` 和 `main`。`collapse` 从 `collapseHeight` 开始，随着 `main` 滚动收缩到 0 高度；`header` 是固定 AppBar；`main` 是滚动主内容。当 `main` 无法滚动时，没有被子元素消费的垂直滚轮输入会收缩或恢复折叠区域，而不是滚动页面；嵌套滚动容器优先消费滚轮。
-
-```tsx
-<PeriodicityCoordinator
-    height={520}
-    collapseHeight={200}
-    collapse={<HeroImage />}
-    header={
-        <PeriodicityAppBar expandedHeight={64} collapsedHeight={64} scrollBehaviour="none" liftOnScroll={false}>
-            <PeriodicityToolbar
-                title="Field notes"
-                subtitle="Autumn expedition"
-                navigationIcon="←"
-                actions={
-                    <PeriodicityButton size="sm" variant="outline">
-                        Share
-                    </PeriodicityButton>
-                }
-            />
-        </PeriodicityAppBar>
-    }
-    main={<Notes />}
-/>
-```
-
-`PeriodicityToolbar` 也支持 `prefix`、`content`、`suffix` 三个插槽：三个插槽按 1:1:1 分享整行；
-只有一个插槽时占满整行，两个时按 1:1 排布。`prefix` 和 `suffix` 传入字符串时会按图标名渲染。
-
-```tsx
-<PeriodicityToolbar prefix="Menu" content="探索" suffix="More" />
-```
-
-`PeriodicityCollapse` 仍可用于旧式 AppBar 内部的 Hero 组合。
-
-`PeriodicityDrag` 对单一插槽容器的直接子元素排序，并在拖动时显示跟随指针的 Ghost。
-
-## 消息与联系人
-
-```tsx
-import {
-    PeriodicityChat,
-    PeriodicityCommentThread,
-    PeriodicityContact,
-    PeriodicityMessageList,
-    PeriodicityVirtualCommentThread,
-} from "periodicity-react";
-```
-
-`PeriodicityContact` 支持搜索、虚拟化、选择和联系人菜单。`PeriodicityMessageList` 支持消息选择、复制、引用、转发、删除、撤回、重试和消息菜单。`PeriodicityChat` 组合联系人列表、会话、输入框和消息操作。`PeriodicityCommentThread` 支持回复、Mention、引用、解决和删除。两个评论组件都支持 `comment` slot 整项渲染；联系人、消息和聊天组件提供 `contact`、`context`、`message`、`messageContext`、`avatar` slot，参数为渲染索引与对应数据项。
-
-## 文件与预览
-
-```tsx
-import { PeriodicityEditor, PeriodicityPreview, PeriodicityProjectManager } from "periodicity-react";
-```
-
-- `PeriodicityPreview` 将 Markdown 和 HTML 渲染为 HTML，将文章文件渲染为文章，并将代码文件显示为函数、类、方法、属性、变量、类型和接口的结构树。
-- `PeriodicityEditor` 封装 CodeMirror 6，提供语法高亮、行号、历史、搜索、括号匹配、折叠、只读、换行和 Tab 宽度控制。
-- `PeriodicityProjectManager` 组合项目树、预览/编辑模式、导入导出，以及文件保存/修改回调。
-
-编辑器不包含代码补全。需要补全时，请接入 LSP 或专用编辑器扩展。
+发布包刻意只暴露带前缀的组件表面。
 
 ## 主题
 
-使用 `PeriodicityTheme` 包裹应用，并通过 `theme` 选择全局预设：
+用 `PeriodicityTheme` 包裹应用，可设置预设、明暗模式、密度、圆角和 token 覆盖。
 
 ```tsx
+import { useState, type ComponentProps } from "react";
 import { PeriodicityTheme } from "periodicity-react";
 
-<PeriodicityTheme theme="milk">
-    <App />
-</PeriodicityTheme>;
+type ThemeId = NonNullable<ComponentProps<typeof PeriodicityTheme>["theme"]>;
+
+export function Shell() {
+    const [theme, setTheme] = useState<ThemeId>("milk");
+
+    return (
+        <PeriodicityTheme
+            theme={theme}
+            mode="system"
+            density="regular"
+            radius="default"
+            onThemeChange={(next) => setTheme(next)}
+        >
+            <App />
+        </PeriodicityTheme>
+    );
+}
 ```
 
-`theme` 为受控值，`defaultTheme` 为非受控初始值，`onThemeChange` 监听切换，`useTheme().setTheme(id)` 可在运行时切换。不传 `theme` 时保持现有 `mode` 行为；显式 `mode` 会覆盖预设的明暗模式，显式 `tokens` 会覆盖预设 Token。
+`theme` 是受控属性；`defaultTheme` 是非受控初值。`mode` 可选 `light`、`dark`、`system`，会覆盖预设自身的明暗模式。`density` 可选 `compact`、`regular`、`comfortable`；`radius` 可选 `sharp`、`default`、`rounded`、`pill`。`tokens` 和 `defaultTokens` 接受 CSS 自定义属性，优先级高于预设 token。
+
+```tsx
+<PeriodicityTheme
+    theme="dark"
+    tokens={{
+        "--color-primary": "#f48fb1",
+        "--color-secondary": "#80cbc4",
+        "--space-4": "18px",
+    }}
+>
+    <App />
+</PeriodicityTheme>
+```
+
+### 预设
 
 | 预设              | 中文         | English                | 模式  |
 | ----------------- | ------------ | ---------------------- | ----- |
@@ -412,46 +202,468 @@ import { PeriodicityTheme } from "periodicity-react";
 | `deep-green`      | 深绿色       | Deep green             | dark  |
 | `light-green`     | 浅绿色       | Light green            | light |
 
-同时导出 `themePresets`、`getThemePreset(id)` 和 `ThemePresetId`。`accessible` 提高文字、边框、焦点和禁用状态对比度；`prefers-contrast` 和 `forced-colors` 媒体查询提供系统级补充。
+无障碍预设会提高文字、边框、焦点和禁用态的对比度；`prefers-contrast` 和 `forced-colors` 提供额外的系统级样式。主题 token 见 [`src/component/foundation/tokens.css`](src/component/foundation/tokens.css)，常用分组包括颜色（`--color-*`）、间距（`--space-*`）、圆角（`--radius-*`）、排版（`--type-*`、`--weight-*`、`--leading-*`）和高度（`--elevation-*`）。
 
 ## 国际化
 
+用 `PeriodicityInternational` 包裹应用并设置 `locale`。所有内置组件文案——标签、空状态、图表图例与表头、选择器文案、校验消息、评论操作——都会读取当前语言包。
+
 ```tsx
+import { useState, type ComponentProps } from "react";
 import { PeriodicityInternational } from "periodicity-react";
 
-<PeriodicityInternational locale="zh-CN">
-    <App />
-</PeriodicityInternational>;
+type LocaleId = NonNullable<ComponentProps<typeof PeriodicityInternational>["locale"]>;
+
+export function LocalisedApp() {
+    const [locale, setLocale] = useState<LocaleId>("zh-CN");
+
+    return (
+        <>
+            <LocaleSwitcher value={locale} onChange={setLocale} />
+            <PeriodicityInternational locale={locale}>
+                <App />
+            </PeriodicityInternational>
+        </>
+    );
+}
 ```
 
-内置 locale：
+`locale` 是受控属性；`defaultLocale` 是非受控初值。`fallbackLocale` 默认是 `en-GB`。自定义文案会深度合并到内置字典之上：
 
-| Locale  | 语言             |
-| ------- | ---------------- |
-| `en-GB` | 英式英语         |
-| `en-US` | 美式英语         |
-| `zh-CN` | 中国大陆简体中文 |
-| `zh-SG` | 新加坡简体中文   |
-| `zh-HK` | 香港繁体中文     |
-| `zh-TW` | 台湾繁体中文     |
-| `ja-JP` | 日本语           |
-| `ko-KR` | 韩国语           |
-| `es-ES` | 西班牙-西班牙语  |
-| `es-MX` | 墨西哥-西班牙语  |
-| `pt-PT` | 葡萄牙-葡萄牙语  |
-| `pt-BR` | 巴西-葡萄牙语    |
+```tsx
+<PeriodicityInternational
+    locale="zh-CN"
+    messages={{
+        save: "保存",
+        cancel: "取消",
+        noData: "暂无数据",
+        legend: "图例",
+        chooseFile: "选择文件",
+    }}
+>
+    <App />
+</PeriodicityInternational>
+```
 
-同时导出 `localeOptions`、`builtInMessages`、`resolveLocaleMessages` 和 `useInternational()`。内置词典覆盖常用操作、状态、导航、选择和相对日期；调用方消息会深度合并并优先，缺失 key 回退到 `en-GB`，也接受自定义 locale 标签。`t("save")` 读取文案，`formatNumber` / `formatDate` 跟随 locale，自定义 RTL 语言会得到 `dir="rtl"`。带可见文案的组件也支持 label 类 props 覆盖产品文案。
+| Locale  | 语言                 |
+| ------- | -------------------- |
+| `en-GB` | British English      |
+| `en-US` | American English     |
+| `zh-CN` | 中国大陆简体中文     |
+| `zh-SG` | 新加坡简体中文       |
+| `zh-HK` | 香港繁体中文         |
+| `zh-TW` | 台湾繁体中文         |
+| `ja-JP` | 日本語               |
+| `ko-KR` | 한국어               |
+| `es-ES` | Español (España)     |
+| `es-MX` | Español (México)     |
+| `pt-PT` | Português (Portugal) |
+| `pt-BR` | Português (Brasil)   |
 
-`PeriodicityAnimation` 与 `PeriodicityAnimated` 提供动效配置、减少动态效果处理和元素多态包装。
+支持 `fr-CA` 这类自定义 locale；缺失的 key 会按回退语言落到 `en-GB`。带可见标签的组件也接受 labels props，方便产品自定义文案。用例页面的语言选择器显示“原生名称 · 英文名称”，并禁用浏览器自动翻译，避免页面语言被外部翻译器改写。
 
-## 动效
+## 统计图
 
-动效通过 `PeriodicityAnimation` 和 `PeriodicityAnimated` 显式启用，并尊重系统的 `prefers-reduced-motion` 设置。交互 Surface 共享 Ripple 层，关闭动效时 Ripple 也会停止。
+四种图表共用一套 canvas/WebGL 框架：
 
-## 标准事件
+- **双渲染层。** WebGL 系列层位于底层，2D canvas 负责绘制坐标轴和标签。`renderer` 接受 `"auto"`（有 WebGL 时使用）、`"webgl"` 或 `"canvas"`；WebGL 不可用或初始化失败时自动回退到 2D canvas。
+- **响应式且清晰。** `ResizeObserver` 跟踪绘图区，设备像素比决定 canvas 的实际尺寸，重绘交给共享的优先级 task 队列。`renderPriority` 可选 `"high"`、`"medium"`、`"low"`；新的渲染会取消仍在排队的旧帧。
+- **默认可访问。** 绘图区暴露 `role="img"` 和 `ariaLabel`，视觉隐藏的数据表完整镜像每个值，供屏幕阅读器读取。
+- **主题感知。** 系列颜色来自 `series.color`、`palette` prop 或当前主题；类似 `--color-primary: var(--accent)` 的 CSS 变量别名会先通过计算样式解析，再交给 canvas/WebGL。
 
-所有公开的 `Periodicity*` 组件同时支持原生 React 事件和标准事件层，两者互不替代：
+所有图表都接受 `ariaLabel`、`height`（默认 `320`）、`renderer`、`renderPriority`、`palette`、`showLegend`、相关图表支持的 `showGrid`、`emptyLabel`、`valueFormatter`、`onError`、`className`、`ref` 以及原生 `div` 属性。
+
+### 柱状图
+
+```tsx
+import { PeriodicityBarChart } from "periodicity-react";
+
+<PeriodicityBarChart
+    ariaLabel="季度营收与成本"
+    categories={["Q1", "Q2", "Q3", "Q4"]}
+    series={[
+        { id: "revenue", label: "营收", values: [42, 58, 64, 81] },
+        { id: "costs", label: "成本", values: [28, 34, 39, 47] },
+    ]}
+    stacked={false}
+    showValues
+    renderer="auto"
+    height={320}
+/>;
+```
+
+`BarChart` 支持分组柱、堆叠柱、围绕零基线的负值、可选的数值标签，以及 x 轴类别标签。
+
+### 饼图
+
+```tsx
+import { PeriodicityPieChart } from "periodicity-react";
+
+<PeriodicityPieChart
+    ariaLabel="各业务线营收占比"
+    data={[
+        { id: "product", label: "产品", value: 44 },
+        { id: "services", label: "服务", value: 28 },
+        { id: "support", label: "支持", value: 18 },
+        { id: "other", label: "其他", value: 10 },
+    ]}
+    innerRadius={0.52}
+    showPercentages
+    height={320}
+/>;
+```
+
+`innerRadius` 是外半径的比例，会被限制在 `0..0.85`；省略时绘制完整饼图。只有有限的正数会计入总和、图例和无障碍表格。
+
+### 折线图
+
+```tsx
+import { PeriodicityLineChart } from "periodicity-react";
+
+<PeriodicityLineChart
+    ariaLabel="各设备月度会话"
+    series={[
+        {
+            id: "desktop",
+            label: "桌面端",
+            points: [
+                { x: 1, y: 22 },
+                { x: 2, y: 28 },
+                { x: 3, y: 25 },
+                { x: 4, y: 36 },
+            ],
+        },
+        {
+            id: "mobile",
+            label: "移动端",
+            points: [
+                { x: 1, y: 12 },
+                { x: 2, y: 16 },
+                { x: 3, y: 21 },
+                { x: 4, y: 24 },
+            ],
+        },
+    ]}
+    area
+    showPoints
+    xFormatter={(value) => `M${value}`}
+    yFormatter={(value) => `${value}k`}
+    height={320}
+/>;
+```
+
+`area` 用半透明填充把系列填到基线；`showPoints` 添加数据点标记。所有值相同时，x/y 数值域会自动扩展。
+
+### 散点图
+
+```tsx
+import { PeriodicityScatterChart } from "periodicity-react";
+
+<PeriodicityScatterChart
+    ariaLabel="各队列转化率"
+    series={[
+        {
+            id: "control",
+            label: "对照组",
+            points: [
+                { x: 12, y: 18 },
+                { x: 18, y: 24 },
+                { x: 24, y: 21 },
+            ],
+        },
+        {
+            id: "variant",
+            label: "实验组",
+            points: [
+                { x: 14, y: 28 },
+                { x: 20, y: 35 },
+                { x: 26, y: 33 },
+            ],
+        },
+    ]}
+    pointRadius={4}
+    height={320}
+/>;
+```
+
+`xFormatter` / `yFormatter` 控制坐标轴标签和无障碍表格；`valueFormatter` 作为数值的通用回退格式。
+
+## 文件与图片选择器
+
+三个选择器都会渲染自己的隐藏原生 `<input type="file">`。`useFilePick` 驱动该输入，并返回稳定的 `pick()`，解析用户选择的文件。
+
+### useFilePick
+
+```tsx
+import { useFilePick } from "periodicity-react";
+
+export function ImportButton() {
+    const pick = useFilePick(["image/png", ".jpg"], { multiple: true });
+
+    const handleClick = async () => {
+        const files = await pick();
+        if (files.length > 0) {
+            await upload(files);
+        }
+    };
+
+    return <button onClick={handleClick}>导入图片</button>;
+}
+```
+
+Hook 接受 `accept` 字符串或数组，以及包含 `multiple`、`capture`、`disabled`、`inputRef` 的选项。没有 `inputRef` 时，它会创建、挂载并清理一个临时原生输入，因此也可以单独使用。取消对话框会解析为 `[]`；新的 pick 会取消上一个未完成的 Promise；组件卸载时 pending Promise 也会以 `[]` 结束。
+
+### FilePicker
+
+```tsx
+import { PeriodicityFilePicker } from "periodicity-react";
+
+<PeriodicityFilePicker
+    label="附件"
+    accept={[".pdf", ".png", ".jpg"]}
+    multiple
+    hint="支持 PDF 或图片"
+    onChange={(files) => console.log(files.map((file) => file.name))}
+/>;
+```
+
+`FilePicker` 在原生选择完成后立即触发 `onChange(files)`。默认 slot 会替换触发区内容；传入函数可获得 `{ open, disabled, files, summary }`。slot 内容渲染在触发按钮内部，应保持纯展示。
+
+### PhotoPicker
+
+```tsx
+import { PeriodicityPhotoPicker } from "periodicity-react";
+
+<PeriodicityPhotoPicker
+    label="封面照片"
+    aspect={16 / 9}
+    outputWidth={1600}
+    onChange={(selection) => {
+        console.log(selection.file, selection.dataUrl, selection.cropped);
+    }}
+/>;
+```
+
+### AvatarPicker
+
+```tsx
+import { PeriodicityAvatarPicker } from "periodicity-react";
+
+<PeriodicityAvatarPicker
+    label="头像"
+    name="Mira Chen"
+    size="lg"
+    onChange={(selection) => saveAvatar(selection.file)}
+/>;
+```
+
+图片和头像选择后会打开裁剪 Dialog。change 语义如下：
+
+| 操作                           | 结果                                                |
+| ------------------------------ | --------------------------------------------------- |
+| 裁剪 Dialog 中点击确认         | 触发一次 change，`{ file, dataUrl, cropped: true }` |
+| 裁剪 Dialog 中点击取消         | 触发一次 change，使用原图，`cropped` 为 `false`     |
+| 点击关闭、按 Escape 或点击遮罩 | 不触发 change                                       |
+
+`PhotoPicker` 的 slots 是 `pick`、`preview`、`crop`；`AvatarPicker` 的 slots 是 `avatar`、`crop`。crop slot 会作为库内 `Dialog` 的 body 渲染，而不是原生 dialog。`labels` 可按字段覆盖文案，`ImageSelection` 以 `PeriodicityImageSelection` 类型导出。
+
+## 表单与输入
+
+### 文本输入
+
+`TextInput`、`TextArea`、`EmailInput`、`TelephoneInput`、`NumberInput`、`CompleteInput`、`Mention` 共用六槽 `InputLayout` 字段壳：`prefix`、`hint`、`message`、`limitation`、`error`、`suffix`。
+
+```tsx
+import { PeriodicityTextInput } from "periodicity-react";
+
+<PeriodicityTextInput
+    label="工作区名称"
+    value={name}
+    onChange={(event) => setName(event.target.value)}
+    prefix="Folder"
+    hint="工作区成员都能看到这个名称。"
+    message="仅支持小写字母、数字和连字符。"
+    limitation={`${name.length}/40`}
+    suffix="Check"
+    required
+/>;
+```
+
+邮箱和电话输入会清洗输入、保持光标位置、使用原生 pattern 属性，并从当前语言包读取本地化校验消息。`PeriodicityForm`、`PeriodicityFormField`、`PeriodicityFormActions` 封装原生 `<form>`，为原生控件生成 `label htmlFor`、`aria-describedby` 和 `aria-invalid` 关联。
+
+### 按钮
+
+`PeriodicityButton` 除图标、variant、size 外，还支持紧凑的 `prefix`、`content`、`suffix` 三槽布局。
+
+```tsx
+<PeriodicityButton variant="outline" prefix="Plus" content="新建项目" suffix="ChevronRight" onClick={createProject} />
+```
+
+### 其他控件
+
+`PeriodicityCheckbox`、`PeriodicityRadio` / `PeriodicityRadioGroup`、`PeriodicitySwitch`、`PeriodicityRange`、`PeriodicityField`、`PeriodicityFieldGroup`、`PeriodicitySelect`、`PeriodicityVirtualSelect`、`PeriodicityTreeSelect`、`PeriodicityCombobox` 覆盖常见表单和筛选布局，均支持受控/非受控值、disabled/readOnly 和原生属性透传。
+
+## 选择器与日历
+
+| 组件                        | 行为                                                |
+| --------------------------- | --------------------------------------------------- |
+| `PeriodicityTimePicker`     | 24 小时制滚轮时间选择，支持键盘输入。               |
+| `PeriodicityDateTimePicker` | 日期 + 时间组合面板，包含年、月、时、分字段。       |
+| `PeriodicityNumberPicker`   | Android 风格数字滚轮，支持输入建议与 min/max/step。 |
+| `PeriodicityColourPicker`   | 原生颜色输入与预设色板，可选显示数值。              |
+| `PeriodicityCyclePicker`    | 循环滚轮选择器，支持自动补全和自定义条目类型。      |
+| `PeriodicityVariantPicker`  | 单选样式变体 chips。                                |
+| `PeriodicityCalendar`       | 支持 locale 的月历网格，ISO 值，完整键盘导航。      |
+
+```tsx
+<PeriodicityCalendar
+    label="交付日期"
+    value={date}
+    onChange={setDate}
+    min="2026-01-01"
+    max="2026-12-31"
+    firstDayOfWeek={1}
+/>
+```
+
+日历值使用 ISO `YYYY-MM-DD` 字符串。方向键按天/周移动，Home/End 移到本周边界，PageUp/PageDown 切换月份，Shift+PageUp/PageDown 切换年份，Enter 或空格选择。日期单元格暴露 `slots.header`、`slots.body`、`slots.footer`。
+
+## 集合与数据
+
+集合可以使用普通数组或 Adapter，并支持可选的固定行高虚拟化。
+
+```tsx
+import { PeriodicityList, PeriodicityTable, PeriodicityTree } from "periodicity-react";
+
+<PeriodicityList
+    items={people}
+    getKey={(person) => person.id}
+    selectionMode="single"
+    renderItem={(person) => `${person.firstName} ${person.lastName}`}
+/>;
+
+<PeriodicityTable
+    columns={[
+        { id: "name", header: "姓名", cell: (person) => person.name },
+        { id: "role", header: "角色", cell: (person) => person.role },
+    ]}
+    rows={people}
+    rowKey={(person) => person.id}
+    caption="团队成员"
+/>;
+
+<PeriodicityTree items={nodes} getKey={(node) => node.id} renderItem={(node) => node.label} />;
+```
+
+集合家族包括 `List`、`Tree`、`Table`、`Select`、`Combobox`、`Transfer`，以及 `Virtual*` 预设和 `NormalList` / `MultipleList` / `SelectList` / `CheckList` / `CheckTree` / `SelectTree` 等便捷包装。固定行高虚拟化使用 `virtual`、`height` 和 `itemHeight` / `rowHeight`。选择、展开、加载、空状态和禁用状态在整个家族中保持一致。
+
+## 浮层与反馈
+
+```tsx
+import {
+    PeriodicityAlert,
+    PeriodicityDialog,
+    PeriodicityDropdown,
+    PeriodicityDropdownItem,
+    PeriodicityTooltip,
+} from "periodicity-react";
+
+<PeriodicityAlert tone="success" title="已保存" description="所有更改都已同步。" />;
+
+<PeriodicityDialog open={open} title="删除项目" onClose={() => setOpen(false)}>
+    此操作无法撤销。
+</PeriodicityDialog>;
+
+<PeriodicityDropdown ariaLabel="项目操作" trigger={(slot) => <button {...slot}>操作</button>}>
+    <PeriodicityDropdownItem onSelect={rename}>重命名</PeriodicityDropdownItem>
+    <PeriodicityDropdownItem onSelect={archive}>归档</PeriodicityDropdownItem>
+</PeriodicityDropdown>;
+
+<PeriodicityTooltip content="复制链接">
+    <PeriodicityButton aria-label="复制链接" prefix="Link" />
+</PeriodicityTooltip>;
+```
+
+浮层家族覆盖 Dialog、Confirm/Message/Input Dialog、Drawer、DrawerLayout、ContextMenu、Dropdown、Popover、Tooltip、Snackbar、Toast、Alert、Banner、Backdrop，以及全屏/局部 Loading。它们支持受控/非受控打开状态、关闭原因、Escape 处理、焦点恢复和原生面板属性。
+
+Dropdown 和 Popover 会 portal 到 `document.body`，并标记 `-webkit-app-region: no-drag`，因此即使覆盖在 Electron 自定义应用栏或 Hero 的拖拽区域上，整个面板仍可交互。
+
+## 导航与布局
+
+导航组件包括 `PeriodicityNavigationView`、`PeriodicityTabs` / `PeriodicityTabPanel`、`PeriodicityPager` / `PeriodicityPage`、`PeriodicityMenu` 家族、`PeriodicityStepper`、`PeriodicityAccordion`。
+
+布局以 Flex 为基础，不使用 CSS Grid。结构组件包括：
+
+- `PeriodicityGridLayout`
+- `PeriodicityLinearLayout` 和 `PeriodicityLinearLayoutItem`
+- `PeriodicityConstraintLayout` 和 `PeriodicityConstraint`
+- `PeriodicityWaterfallLayout`
+- `PeriodicityDrawerLayout`
+- `PeriodicityCoordinator`、`PeriodicityAppBar`、`PeriodicityCollapse`、`PeriodicityToolbar`
+- `PeriodicityScrollbar` 和 `PeriodicityScroll`
+- `PeriodicityDrag`
+
+`PeriodicityCoordinator` 只有 `collapse`、`header`、`main` 三个插槽。`collapse` 随 `main` 滚动从 `collapseHeight` 收缩到 0；`header` 是固定 AppBar；`main` 是滚动视口。当 `main` 无法滚动时，未被内部组件消费的竖直滚轮会用于折叠或恢复 collapse，而不是滚动页面；嵌套滚动容器仍然优先。
+
+```tsx
+<PeriodicityCoordinator
+    height={520}
+    collapseHeight={200}
+    collapse={<HeroImage />}
+    header={
+        <PeriodicityAppBar expandedHeight={64} collapsedHeight={64} scrollBehaviour="none" liftOnScroll={false}>
+            <PeriodicityToolbar
+                title="野外笔记"
+                subtitle="秋季考察"
+                navigationIcon="←"
+                actions={
+                    <PeriodicityButton size="sm" variant="outline">
+                        分享
+                    </PeriodicityButton>
+                }
+            />
+        </PeriodicityAppBar>
+    }
+    main={<Notes />}
+/>
+```
+
+`PeriodicityToolbar` 也接受 `prefix`、`content`、`suffix` 三个插槽；三个插槽等分整行，只有一个时占满，两个时各占一半。`prefix` 和 `suffix` 的字符串值会被视为图标名。
+
+`PeriodicityDrag` 对单个 slot 容器的直接子元素做拖拽排序，并在排序时渲染跟随指针的拖拽幽灵。
+
+## 消息与评论
+
+消息家族包括 `PeriodicityContact` / `PeriodicityVirtualContact`、`PeriodicityMessageList` / `PeriodicityVirtualMessageList`、`PeriodicityChat` / `PeriodicityVirtualChat`，以及联系人/消息右键菜单。
+
+- `PeriodicityContact` 支持搜索、虚拟化、选择，以及联系人右键菜单。
+- `PeriodicityMessageList` 支持消息选择、复制、引用、转发、删除、撤回、重试，以及消息右键菜单。
+- `PeriodicityChat` 组合联系人列表、会话、输入区和消息操作。
+- `PeriodicityCommentThread` 支持回复、提及、引用、标记解决和删除；新增的 `PeriodicityVirtualCommentThread` 按固定行高对扁平化评论线程做虚拟滚动。
+
+两种评论线程都接受 `comment` slot 替换整条评论。联系人、消息和聊天组件暴露 `contact`、`context`、`message`、`messageContext`、`avatar` slots，并接收渲染索引和对应数据项。
+
+## 排版与 Font
+
+`PeriodicityText` 按字号层级和语义色调渲染文本。`PeriodicityFont` 创建作用域排版上下文，`useFont` 读取引用元素的计算后字体族、字号、颜色、字重、行高、字距和大小写转换。
+
+```tsx
+import { PeriodicityFont, useFont } from "periodicity-react";
+
+<PeriodicityFont level="h3" family="display" weight="semibold" letterSpacing="tight">
+    考察笔记
+</PeriodicityFont>;
+
+const font = useFont(triggerRef);
+```
+
+`Font` 的 level 可选 `display`、`h1`、`h2`、`h3`、`h4`、`body`、`body-sm`、`label`、`mono`；family 可选 `sans`、`display`、`mono`，也可以传原始 CSS 字体栈。`useFont` 在 ref 挂载前会回退到最近的 `Font` 上下文，适合让 portal 浮层与触发元素保持一致。
+
+## 动效与标准事件
+
+`PeriodicityAnimation` 和 `PeriodicityAnimated` 提供动效配置、减少动效处理和元素多态动画包装。Ripple 层由可交互表面共享，在关闭动效时停止。
+
+每个公共 `Periodicity*` 组件都同时接受原生 React props 和标准事件层，两者不会互相覆盖：
 
 ```tsx
 <PeriodicityButton
@@ -465,105 +677,106 @@ import { PeriodicityInternational } from "periodicity-react";
 />
 ```
 
-`over`、`enter`、`leave`、`wheel`、`click`、`press`、`input`、`continuous`、`drag` 都有对应的
-`onStandard*` 监听器；也可以用 `onStandardEvent` 接收全部事件，或用 `standardEvents` 配置每个事件及阈值。
-原生 `onClick`、`onWheel`、`onInput`、`onDrag` 保持不变。
+命名监听器包括 `over`、`enter`、`leave`、`wheel`、`click`、`press`、`input`、`continuous`、`drag`。可以用 `onStandardEvent` 统一监听，或用 `standardEvents` 配置每个事件和阈值。原生 `onClick`、`onWheel`、`onInput`、`onDrag` 保持原样。
 
 ## 可访问性
 
-- 默认提供语义化角色和标签，并可通过原生 `aria-*` 属性覆盖。
-- Dialog、Drawer、Menu、Dropdown、Listbox、Tree 和 Table 实现了键盘交互。
+- 默认提供语义角色和标签，可用原生 `aria-*` 覆盖。
+- Dialog、Drawer、Menu、Dropdown、Listbox、Tree、Table 都实现了键盘交互。
 - 浮层支持焦点恢复和 Escape 关闭。
-- 选区颜色经过限制，选中文字保持可读。
-- 动效和 Ripple 尊重“减少动态效果”偏好。
-- `PeriodicityDrag` 支持 Alt+ArrowUp/Alt+ArrowDown 键盘排序，并通过 live region 播报位置。
-- `PeriodicityScrollbar` 支持方向键、Page、Home/End 和 Space 键盘滚动，并提供 scrollbar ARIA。
-- `PeriodicityCalendar` 与 `PeriodicityDateTimePicker` 提供完整日历网格键盘导航和 roving focus。
-- Table/Tree 提供行标题、树层级、选中/勾选状态和虚拟列表位置语义。
-- 内置 skip link、landmark、减少动效、强制颜色和 `prefers-contrast` 样式。
+- 选中文本的颜色被限制在可读范围内。
+- 动画和 Ripple 尊重减少动效偏好。
+- `PeriodicityDrag` 支持 Alt+ArrowUp/Alt+ArrowDown 键盘排序，并通过 live region 播报。
+- `PeriodicityScrollbar` 支持 Arrow、Page、Home/End、Space 键盘滚动，并暴露 scrollbar ARIA。
+- `PeriodicityCalendar` 和 `PeriodicityDateTimePicker` 提供完整的日历网格键盘导航和 roving focus。
+- Table 和 Tree 暴露行头、排序中立表头、树层级、选中/勾选状态和虚拟集合位置。
+- 图表把绘图区暴露为带标签的图片，并用视觉隐藏表格镜像所有数值。
+- 内置跳过链接、landmark 结构、减少动效、强制颜色和 `prefers-contrast` 样式。
 
-当组件封装原生控件时，优先使用原生属性和事件，而不是手工重复 ARIA。
+如果组件封装了原生控件，优先使用其原生 props 和事件，不要手工重复 ARIA。
 
-## 其他组件
+## 样式与 Token
 
-完整 API 和英文说明见 [Additional components](README.md#additional-components)。以下组件均已导出：
+在应用入口引入一次 `periodicity-react/styles.css`。组件暴露稳定的 class name 供宿主覆盖；主题定制应优先通过 CSS 自定义属性完成，而不是 fork 组件样式。设计系统 token 覆盖颜色角色、表面、描边、间距、圆角、排版、状态层、高度和 z-index 层级。
 
-- `PeriodicityTag`
-- `PeriodicityEmailInput`
-- `PeriodicityTelephoneInput`
-- `PeriodicityCompleteInput`
-- `PeriodicityVirtualSelect`
-- `PeriodicityRadio`
-- `PeriodicityRadioGroup`
-- `PeriodicityField`
-- `PeriodicityFieldGroup`
-- `PeriodicityCard`
-- `PeriodicityStateLayer`
-- `PeriodicityBadge`
-- `PeriodicityAvatar`
-- `PeriodicityAvatarGroup`
-- `PeriodicityDivider`
-- `PeriodicityTimeline`
-- `PeriodicityRate`
-- `PeriodicityEmptyState`
-- `PeriodicityProgress`
-- `PeriodicityCircularProgress`
-- `PeriodicityProgressRing`
-- `PeriodicitySpinner`
-- `PeriodicitySkeleton`
-- `PeriodicityElementLoading`
-- `PeriodicityFullscreenLoading`
-- `PeriodicityuseLoad`
-- `PeriodicityConfirmDialog`
-- `PeriodicityMessageDialog`
-- `PeriodicityInputDialog`
-- `PeriodicityDropdownItem`
-- `PeriodicityDropdownGroup`
-- `PeriodicityDropdownSeparator`
-- `PeriodicityContextMenuGroup`
-- `PeriodicityContextMenuItem`
-- `PeriodicityContextMenuSeparator`
-- `PeriodicityAccordion`
-- `PeriodicityBreadcrumbs`
-- `PeriodicityPagination`
-- `PeriodicityNormalList`
-- `PeriodicityMultipleList`
-- `PeriodicitySelectList`
-- `PeriodicityCheckList`
-- `PeriodicityVirtualList`
-- `PeriodicityCheckTree`
-- `PeriodicitySelectTree`
-- `PeriodicityVirtualTree`
-- `PeriodicityVirtualContact`
-- `PeriodicityVirtualMessageList`
-- `PeriodicityVirtualChat`
-- `PeriodicityContactContextMenu`
-- `PeriodicityMessageContextMenu`
-- `PeriodicityPortal`
-- `PeriodicityVisuallyHidden`
+```css
+:root {
+    --color-primary: #1976d2;
+    --color-on-primary: #ffffff;
+    --color-surface: #fbf9f6;
+    --space-4: 16px;
+    --radius-md: 12px;
+}
+```
+
+组件以 Flex 为基础，不使用 CSS Grid。宿主应用可以在组件外部自由使用 Grid；库内结构组件本身保持 flex 容器。
+
+## API 约定
+
+- **受控与非受控。** 组件通常接受 `value` / `defaultValue` 加 change 回调，或 `open` / `defaultOpen` 加 open-change 回调；传入受控 prop 时以受控值为准。
+- **原生属性与事件。** 公共组件继承原生元素 props；显式传入的原生处理器会与内部处理器组合，而不是被替换。
+- **Ref。** 大多数组件接受根元素 `ref`；部分复合字段还接受专用的 `rootRef` 或内部 input ref。
+- **Slots。** Slot props 接受节点或接收类型化上下文的渲染函数。Slot 内容应保持展示性，行为和 ARIA 由组件负责。
+- **Change 语义。** 文件选择立即触发；图片选择器只在裁剪 Dialog 点击确认或取消后触发；图表是只读可视化，不提供值变更事件。
+- **只有前缀导出。** 发布入口暴露 `Periodicity*` 组件、`useFilePick`、`useFont` 和标准事件工具。
+
+## 组件索引
+
+发布包包含 136 个 `Periodicity*` 组件。下表省略前缀以便阅读。
+
+| 家族            | 组件                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Provider 与基础 | Theme, International, Animation, Animated, Portal, Surface, StateLayer, VisuallyHidden, Font, Text, Icon, Divider                                                                                                                                                                                                                                                                                                                                                              |
+| 操作与字段      | Button, TextInput, TextArea, EmailInput, TelephoneInput, NumberInput, CompleteInput, Mention, Select, VirtualSelect, TreeSelect, Combobox, Checkbox, Radio, RadioGroup, Switch, Range, Field, FieldGroup, Form, FormField, FormActions, Link, Anchor                                                                                                                                                                                                                           |
+| 选择器与日历    | FilePicker, PhotoPicker, AvatarPicker, TimePicker, DateTimePicker, NumberPicker, ColourPicker, CyclePicker, VariantPicker, Calendar                                                                                                                                                                                                                                                                                                                                            |
+| 统计图          | BarChart, PieChart, LineChart, ScatterChart                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| 集合与数据      | List, VirtualList, NormalList, MultipleList, SelectList, CheckList, Tree, VirtualTree, CheckTree, SelectTree, Table, VirtualTable, Transfer, Pagination, Scrollbar, Scroll, Drag, Timeline, Card                                                                                                                                                                                                                                                                               |
+| 浮层与反馈      | Dialog, ConfirmDialog, MessageDialog, InputDialog, Drawer, DrawerLayout, Popover, Dropdown, DropdownItem, DropdownGroup, DropdownSeparator, ContextMenu, ContextMenuItem, ContextMenuGroup, ContextMenuSeparator, Menu, MenuItem, MenuGroup, MenuSeparator, Tooltip, ToastProvider, Snackbar, Alert, Banner, Backdrop, FullscreenLoading, ElementLoading, Progress, CircularProgress, ProgressRing, Spinner, Skeleton, Rate, Badge, Tag, Chip, Avatar, AvatarGroup, EmptyState |
+| 导航与布局      | Coordinator, AppBar, Collapse, Toolbar, Tabs, TabPanel, Pager, Page, NavigationView, Stepper, Accordion, Breadcrumbs, LinearLayout, LinearLayoutItem, ConstraintLayout, Constraint, GridLayout, WaterfallLayout                                                                                                                                                                                                                                                                |
+| 消息与评论      | Contact, VirtualContact, ContactContextMenu, MessageList, VirtualMessageList, MessageContextMenu, Chat, VirtualChat, CommentThread, VirtualCommentThread                                                                                                                                                                                                                                                                                                                       |
 
 ## 开发
 
 ```bash
 npm install
-npm run dev          # 组件展示站
-npm run build:lib    # 可发布的 ES Module、CSS 和声明文件
-npm run build:app    # 静态展示站构建
+npm run dev           # Vite 组件用例站
+npm run build:lib     # 可发布的 ES Module、CSS 和 TypeScript 声明
+npm run build:app     # 静态用例站构建
 npm run lint
 npm run format:check
-npm run preview      # 预览静态展示站
+npm run test:a11y     # 无障碍审计
+npx vitest run        # 完整单元/组件测试
+npm run preview       # 预览静态用例站
 ```
 
-`npm run build` 等价于 `npm run build:lib`。库构建输出 `dist/periodicity-react.js`、`dist/periodicity-react.css`，声明文件位于 `dist/types`。
+`npm run build` 是 `npm run build:lib` 的别名。库构建输出 `dist/periodicity-react.js`、`dist/periodicity-react.css` 和 `dist/types` 下的声明文件。`publish.ps1` 执行 `npm publish`，会先触发 `prepublishOnly` 重新构建库。
 
-## 验证
+### 目录结构
+
+- `src/component` — 组件家族、共享原语和公共 barrel。
+- `src/layout` — Coordinator、AppBar、Drawer、Table、List、Tree 等布局与集合。
+- `src/theme` — 主题 Provider、预设和 token 契约。
+- `src/international` — locale 解析、内置语言包和消息处理。
+- `src/animation`、`src/gesture` — 动效、Ripple 和标准事件层。
+- `src/task` — 图表与集合使用的优先级调度器。
+- `src/showcase` — 文档应用和实时示例。
+- `tests` — Vitest、Testing Library 与 axe 无障碍检查。
+
+### 验证
+
+仓库使用以下命令验证：
 
 ```bash
 npx tsc -p tsconfig.app.json --noEmit
-npx eslint src --max-warnings 0
-npm run build
+npm run lint
+npm run format:check
+npx vitest run
+npm run audit:contrast
+npm run audit:locales
+npm run test:a11y
+npm run build:lib
 ```
 
 ## 更新日志
 
-见 [CHANGELOG.zh-CN.md](CHANGELOG.zh-CN.md)。
+英文版本见 [CHANGELOG.md](CHANGELOG.md)，中文版本见 [CHANGELOG.zh-CN.md](CHANGELOG.zh-CN.md)。
