@@ -5,7 +5,7 @@
 `periodicity-react` 提供 **138 个 `Periodicity*` 组件**、四种统计图、文件与图片选择器、作用域排版、设计系统 Provider，以及 **12 个内置语言包**。API 以 TypeScript 为先、以 Flex 布局为基础，并尽量贴近浏览器原生行为：在合理的地方透传原生属性、事件、ARIA 和 `ref`。
 
 - **npm：** [`periodicity-react`](https://www.npmjs.com/package/periodicity-react)
-- **版本：** `0.1.10`
+- **版本：** `0.1.11`
 - **在线示例：** 运行 `npm run dev`；源码见 [`src/showcase`](src/showcase)
 - **源码：** [github.com/eloyhere/periodicity-react](https://github.com/eloyhere/periodicity-react)
 - **要求：** React 19、React DOM 19

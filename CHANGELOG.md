@@ -3,7 +3,7 @@
 All notable changes to Periodicity React are recorded here. The format follows the spirit of Keep a Changelog,
 and this project uses British English in its English documentation.
 
-## [Unreleased]
+## [0.1.11] - 2026-10-23
 
 ### Added
 

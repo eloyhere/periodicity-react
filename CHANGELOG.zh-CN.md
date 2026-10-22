@@ -2,7 +2,7 @@
 
 本文件记录 Periodicity React 的重要变更。格式参考 Keep a Changelog。
 
-## [Unreleased]
+## [0.1.11] - 2026-10-23
 
 ### 新增
 

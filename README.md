@@ -7,7 +7,7 @@ typography, design-system providers, and **12 built-in locales**. The API is Typ
 to the browser: native attributes, events, ARIA, and refs pass through wherever they make sense.
 
 - **npm:** [`periodicity-react`](https://www.npmjs.com/package/periodicity-react)
-- **Version:** `0.1.10`
+- **Version:** `0.1.11`
 - **Showcase:** run `npm run dev`; source in [`src/showcase`](src/showcase)
 - **Source:** [github.com/eloyhere/periodicity-react](https://github.com/eloyhere/periodicity-react)
 - **Requirements:** React 19 and React DOM 19
