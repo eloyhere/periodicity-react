@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    Date-time picker 鈥?custom panel with editable year and month
    ========================================================================== */
 
@@ -57,10 +57,43 @@
 
 .date-time-picker__header {
     display: flex;
+    align-items: flex-start;
     gap: var(--space-3);
 }
 
-.date-time-picker__header label,
+.date-time-picker__number {
+    --input-layout-height: 40px;
+    --input-layout-pad: var(--space-2);
+    --input-hint-float-background: var(--color-surface);
+
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.date-time-picker__header .input-layout__row {
+    gap: var(--space-1);
+}
+
+.date-time-picker__header .number-field__input,
+.date-time-picker__header .input-layout__hint {
+    font-size: var(--type-label);
+}
+
+.date-time-picker__header .number-field__steps {
+    gap: 2px;
+}
+
+.date-time-picker__header .number-field__step-surface,
+.date-time-picker__header .number-field__step {
+    width: 24px;
+    height: 24px;
+}
+
+.date-time-picker__header .number-field__step svg {
+    width: 12px;
+    height: 12px;
+}
+
 .date-time-picker__time label {
     display: flex;
     flex: 1 1 0;
@@ -70,7 +103,6 @@
     gap: 3px;
 }
 
-.date-time-picker__header input,
 .date-time-picker__time input {
     width: 100%;
     height: 34px;

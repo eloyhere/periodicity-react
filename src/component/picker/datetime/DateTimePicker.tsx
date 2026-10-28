@@ -17,6 +17,7 @@ import Icon from "../../icon/Icon";
 import Popover from "../../popover/Popover";
 import Surface from "../../surface/Surface";
 import Button from "../../button/Button";
+import NumberInput from "../../input/number/NumberInput";
 import useControllableState from "../../foundation/useControllableState";
 import useMergedRef from "../../foundation/useMergedRef";
 import type { PickerDataAttributes } from "../shared/native";
@@ -513,23 +514,19 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
     };
 
     /**
-     * Commits a year typed into the calendar header.
-     * @param event - Change event from the year input.
+     * Commits a year chosen through the calendar header's NumberInput.
+     * @param next - Numeric year, or null when the field is cleared.
      * @example
-     * <input onChange={handleYearChange} />
+     * <NumberInput label="Year" onChange={handleYearInput} />
      * @returns Nothing.
      */
-    const handleYearChange: (event: ChangeEvent<HTMLInputElement>) => void = (
-        event: ChangeEvent<HTMLInputElement>,
-    ): void => {
-        const year: number = Number(event.target.value);
-
-        if (!Number.isFinite(year)) {
+    const handleYearInput: (next: number | null) => void = (next: number | null): void => {
+        if (next === null) {
             return;
         }
 
         const date: CalendarDate = clampCalendarDate({
-            year,
+            year: next,
             month: activeDate.month,
             day: activeDate.day,
         });
@@ -539,24 +536,20 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
     };
 
     /**
-     * Commits a month typed into the calendar header.
-     * @param event - Change event from the month input.
+     * Commits a month chosen through the calendar header's NumberInput.
+     * @param next - Numeric month, or null when the field is cleared.
      * @example
-     * <input onChange={handleMonthChange} />
+     * <NumberInput label="Month" onChange={handleMonthInput} />
      * @returns Nothing.
      */
-    const handleMonthChange: (event: ChangeEvent<HTMLInputElement>) => void = (
-        event: ChangeEvent<HTMLInputElement>,
-    ): void => {
-        const month: number = Number(event.target.value);
-
-        if (!Number.isFinite(month)) {
+    const handleMonthInput: (next: number | null) => void = (next: number | null): void => {
+        if (next === null) {
             return;
         }
 
         const date: CalendarDate = clampCalendarDate({
             year: activeDate.year,
-            month,
+            month: next,
             day: activeDate.day,
         });
 
@@ -726,30 +719,28 @@ const DateTimePicker: FC<DateTimePickerProps> = ({
                     onKeyDown={handlePanelKeyDown}
                 >
                     <div className="date-time-picker__header">
-                        <label htmlFor={yearId}>
-                            {t("year")}
-                            <input
-                                id={yearId}
-                                type="number"
-                                min={1900}
-                                max={2100}
-                                value={activeDate.year}
-                                readOnly={readOnly}
-                                onChange={handleYearChange}
-                            />
-                        </label>
-                        <label htmlFor={monthId}>
-                            {t("month")}
-                            <input
-                                id={monthId}
-                                type="number"
-                                min={1}
-                                max={12}
-                                value={activeDate.month}
-                                readOnly={readOnly}
-                                onChange={handleMonthChange}
-                            />
-                        </label>
+                        <NumberInput
+                            id={yearId}
+                            className="date-time-picker__number"
+                            label={t("year")}
+                            value={activeDate.year}
+                            min={1900}
+                            max={2100}
+                            disabled={disabled}
+                            readOnly={readOnly}
+                            onChange={handleYearInput}
+                        />
+                        <NumberInput
+                            id={monthId}
+                            className="date-time-picker__number"
+                            label={t("month")}
+                            value={activeDate.month}
+                            min={1}
+                            max={12}
+                            disabled={disabled}
+                            readOnly={readOnly}
+                            onChange={handleMonthInput}
+                        />
                     </div>
 
                     <div className="date-time-picker__weekdays" aria-hidden="true">
