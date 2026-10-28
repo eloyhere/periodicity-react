@@ -3,6 +3,22 @@
 All notable changes to Periodicity React are recorded here. The format follows the spirit of Keep a Changelog,
 and this project uses British English in its English documentation.
 
+## [0.1.13] - 2026-10-28
+
+### Added
+
+- `PeriodicitySticky` pins a block to the top or bottom edge of its nearest scroll container while preserving its
+  space in normal flow. `edge`, `offset`, `zIndex`, `disabled`, `stuckClassName`, and `onStuckChange` cover the
+  pinning contract, and the element exposes `data-edge` and `data-stuck` for styling and tests.
+- The showcase adds a dedicated `#sticky` route whose first demo is a self-contained mini site: its internal
+  Overview, Guide, and Reference sub-pages share one scroll port with a sticky page header, a sticky contents rail,
+  and a bottom-sticky action bar.
+
+### Fixed
+
+- Component routes now scroll to a demo with a gap below the sticky focus bar, so the demo title and description are
+  no longer tucked underneath it.
+
 ## [0.1.12] - 2026-10-23
 
 ### Added

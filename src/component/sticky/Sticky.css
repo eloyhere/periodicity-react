@@ -1,0 +1,24 @@
+/* ==========================================================================
+   Sticky — a flow-preserving pin to the top or bottom edge of a scroll port
+   ========================================================================== */
+
+.sticky {
+    position: sticky;
+    z-index: var(--z-sticky);
+}
+
+.sticky--top {
+    top: 0;
+}
+
+.sticky--bottom {
+    bottom: 0;
+}
+
+/* A disabled Sticky keeps its box and its content but stops pinning, so a
+   print layout or a short viewport can opt out without changing the markup. */
+.sticky--disabled {
+    position: relative;
+    top: auto;
+    bottom: auto;
+}

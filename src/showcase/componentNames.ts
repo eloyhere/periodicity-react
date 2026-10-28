@@ -4,7 +4,7 @@ import type { LocaleCode } from "../international";
 /**
  * Component-name vocabulary used by the documentation shell.
  * Names are split on PascalCase boundaries and translated word by word, which
- * keeps all 130 entries covered without duplicating a full catalogue per locale.
+ * keeps every current entry covered without duplicating a full catalogue per locale.
  */
 type WordMap = Readonly<Record<string, string>>;
 
@@ -36,6 +36,7 @@ const zh: WordMap = {
     Table: "表格",
     Pagination: "分页",
     Scrollbar: "滚动条",
+    Sticky: "粘性",
     Badge: "徽章",
     Tag: "标签",
     Chip: "标签块",
@@ -137,6 +138,7 @@ const ja: WordMap = {
     Table: "テーブル",
     Pagination: "ページネーション",
     Scrollbar: "スクロールバー",
+    Sticky: "スティッキー",
     Badge: "バッジ",
     Tag: "タグ",
     Chip: "チップ",
@@ -238,6 +240,7 @@ const ko: WordMap = {
     Table: "표",
     Pagination: "페이지네이션",
     Scrollbar: "스크롤바",
+    Sticky: "스티키",
     Badge: "배지",
     Tag: "태그",
     Chip: "칩",
@@ -339,6 +342,7 @@ const es: WordMap = {
     Table: "Tabla",
     Pagination: "Paginación",
     Scrollbar: "Barra de desplazamiento",
+    Sticky: "Fijo",
     Badge: "Insignia",
     Tag: "Etiqueta",
     Chip: "Chip",
@@ -440,6 +444,7 @@ const pt: WordMap = {
     Table: "Tabela",
     Pagination: "Paginação",
     Scrollbar: "Barra de rolagem",
+    Sticky: "Fixo",
     Badge: "Selo",
     Tag: "Etiqueta",
     Chip: "Chip",

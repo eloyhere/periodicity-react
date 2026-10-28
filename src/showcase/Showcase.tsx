@@ -33,6 +33,7 @@ import type {
     ThemePreset,
     ThemePresetId,
 } from "../component";
+import { findScrollContainer } from "../component/foundation/scrollContainer";
 import Text from "../component/text/Text";
 import { ShowcaseFocusContext } from "./focus";
 import {
@@ -118,6 +119,16 @@ const showcaseCategories: readonly ShowcaseCategory[] = [
         ],
     },
 ];
+
+/**
+ * Gap between the sticky focus bar and the demo that a component entry scrolls
+ * to. The focus bar shares the scroll viewport, so a plain `scrollIntoView`
+ * would tuck the demo header underneath it.
+ * Type: number constant.
+ * @example
+ * const top: number = demoTop - DemoAnchorGap;
+ */
+const DemoAnchorGap: number = 84;
 
 /**
  * Reads the raw hash without letting a malformed escape stop the shell.
@@ -288,21 +299,29 @@ const Showcase: FC = () => {
     }, [localizedTitle]);
 
     useEffect((): void => {
+        const scroller: HTMLElement | null =
+            mainRef.current === null ? null : findScrollContainer(mainRef.current);
         const anchor: string | void = entry.anchor;
 
-        if (anchor === (void 0)) {
-            mainRef.current?.parentElement?.scrollTo({ top: 0, behavior: "auto" });
+        if (scroller === null) {
             return;
         }
 
-        const target: HTMLElement | null = document.getElementById(anchor);
+        const target: HTMLElement | null =
+            anchor === (void 0) ? null : document.getElementById(anchor);
 
         if (target === null) {
-            mainRef.current?.parentElement?.scrollTo({ top: 0, behavior: "auto" });
+            scroller.scrollTo({ top: 0, behavior: "auto" });
             return;
         }
 
-        target.scrollIntoView({ block: "start", behavior: "auto" });
+        const top: number =
+            target.getBoundingClientRect().top -
+            scroller.getBoundingClientRect().top +
+            scroller.scrollTop -
+            DemoAnchorGap;
+
+        scroller.scrollTo({ top: Math.max(top, 0), behavior: "auto" });
     }, [entry.anchor, entry.id]);
 
     useEffect((): void => {

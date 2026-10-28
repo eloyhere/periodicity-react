@@ -136,7 +136,7 @@ const createSection: (
 });
 
 /**
- * Every UI component, grouped into the sidebar sections that keep a 120-item
+ * Every UI component, grouped into the sidebar sections that keep a long
  * list navigable. The order is deliberate: everyday controls come first and
  * infrastructure comes last.
  * Type: constant.
@@ -779,6 +779,12 @@ export const uiComponentSections: readonly ComponentSection[] = [
             family: "layout",
             demo: "Coordinator and app bar",
             description: "Material toolbar with navigation, title, subtitle, and actions.",
+        },
+        {
+            name: "Sticky",
+            family: "sticky",
+            demo: "Sticky sub-pages",
+            description: "Pins a block to the top or bottom edge of its scroll container, with offsets, stuck styling, and a state callback.",
         },
     ]),
     createSection("data", "Data display", [

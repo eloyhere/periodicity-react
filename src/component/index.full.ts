@@ -61,6 +61,7 @@ export * from "./progress";
 export * from "./rate";
 export * from "./skeleton";
 export * from "./scrollbar";
+export * from "./sticky";
 export * from "./snackbar";
 export * from "./stepper";
 export * from "./tag";

@@ -24,6 +24,7 @@ import OverviewPage from "./pages/components/OverviewPage";
 import PickersPage from "./pages/components/PickersPage";
 import PrimitivesPage from "./pages/components/PrimitivesPage";
 import ProvidersPage from "./pages/components/ProvidersPage";
+import StickyPage from "./pages/components/StickyPage";
 import TextFieldsPage from "./pages/components/TextFieldsPage";
 import TextPage from "./pages/components/TextPage";
 import TransferPage from "./pages/components/TransferPage";
@@ -239,6 +240,13 @@ const familyRecords: readonly FamilyRecord[] = [
         title: "Layout",
         description: "Linear, constraint, grid, waterfall, table, list, tree, pager, and drawer layouts.",
         page: LayoutPage,
+    },
+    {
+        id: "sticky",
+        label: "Sticky",
+        title: "Sticky",
+        description: "Flow-preserving pins for headers, rails, and action bars at either edge of a scroll container.",
+        page: StickyPage,
     },
     {
         id: "cards",
@@ -520,6 +528,9 @@ const aliasEntries: ReadonlyArray<readonly [string, string]> = [
     ["feedback", "alert"],
     ["dialogs", "dialog"],
     ["layout", "linear-layout"],
+    ["sticky-header", "sticky"],
+    ["sticky-footer", "sticky"],
+    ["affix", "sticky"],
     ["cards", "card"],
     ["color", "colours"],
     ["colors", "colours"],

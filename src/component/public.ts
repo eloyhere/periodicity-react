@@ -266,6 +266,12 @@ import BasePeriodicityScrollbar from "./scrollbar/Scrollbar";
 export const PeriodicityScrollbar = withStandardEvents(BasePeriodicityScrollbar);
 import { Scroll as BasePeriodicityScroll } from "./scrollbar/Scrollbar";
 export const PeriodicityScroll = withStandardEvents(BasePeriodicityScroll);
+import BasePeriodicitySticky from "./sticky/Sticky";
+export const PeriodicitySticky = withStandardEvents(BasePeriodicitySticky);
+export type {
+    StickyEdge as PeriodicityStickyEdge,
+    StickyProps as PeriodicityStickyProps,
+} from "./sticky/Sticky";
 import BasePeriodicityDrag from "./drag/Drag";
 export const PeriodicityDrag = withStandardEvents(BasePeriodicityDrag);
 import BasePeriodicityList from "../layout/list/List";

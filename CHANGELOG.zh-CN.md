@@ -2,6 +2,17 @@
 
 本文件记录 Periodicity React 的重要变更。格式参考 Keep a Changelog。
 
+## [0.1.13] - 2026-10-28
+
+### 新增
+
+- 新增 `PeriodicitySticky`：把内容吸附到最近滚动容器的顶部或底部，并在正常文档流中保留占位。`edge`、`offset`、`zIndex`、`disabled`、`stuckClassName` 与 `onStuckChange` 构成完整的吸附契约，元素同时暴露 `data-edge` 与 `data-stuck`，便于样式和测试。
+- 用例站新增独立的 `#sticky` 路由，首个示例是一座自带内部页面的小型站点：Overview、Guide、Reference 三个子页面共用同一个滚动容器，并带有粘性页头、粘性目录栏和底部粘性操作栏。
+
+### 修复
+
+- 组件路由现在会在粘性焦点栏下方留出间距再滚动到示例，示例标题与说明不再被焦点栏遮住。
+
 ## [0.1.12] - 2026-10-23
 
 ### 新增

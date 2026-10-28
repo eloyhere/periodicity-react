@@ -2,12 +2,12 @@
 
 A Material-inspired React 19 component library for product interfaces, admin tools, and data-heavy applications.
 
-`periodicity-react` ships **140 `Periodicity*` components**, four chart types, file and image pickers, scoped
+`periodicity-react` ships **141 `Periodicity*` components**, four chart types, file and image pickers, scoped
 typography, design-system providers, and **12 built-in locales**. The API is TypeScript-first, flex-first, and close
 to the browser: native attributes, events, ARIA, and refs pass through wherever they make sense.
 
 - **npm:** [`periodicity-react`](https://www.npmjs.com/package/periodicity-react)
-- **Version:** `0.1.12`
+- **Version:** `0.1.13`
 - **Showcase:** run `npm run dev`; source in [`src/showcase`](src/showcase)
 - **Source:** [github.com/eloyhere/periodicity-react](https://github.com/eloyhere/periodicity-react)
 - **Requirements:** React 19 and React DOM 19
@@ -681,6 +681,7 @@ Layout is flex-first and does not use CSS Grid. Structural components include:
 - `PeriodicityWaterfallLayout`
 - `PeriodicityDrawerLayout`
 - `PeriodicityCoordinator`, `PeriodicityAppBar`, `PeriodicityCollapse`, and `PeriodicityToolbar`
+- `PeriodicitySticky`
 - `PeriodicityScrollbar` and `PeriodicityScroll`
 - `PeriodicityDrag`
 
@@ -715,6 +716,17 @@ scrolling the page; nested scrollers keep priority.
 `PeriodicityToolbar` also accepts `prefix`, `content`, and `suffix` slots. The three slots share the row equally;
 with one slot it fills the row, and with two they are split evenly. String values in `prefix` and `suffix` are icon
 names.
+
+`PeriodicitySticky` pins a block to the top or bottom edge of its nearest scroll container while keeping the space
+reserved in normal flow. `edge` chooses the edge, `offset` clears a fixed header, and `disabled` opts out for print
+layouts. `onStuckChange` reports the pinned state, `stuckClassName` styles it, and the element always carries
+`data-edge` and `data-stuck` for CSS and tests.
+
+```tsx
+<PeriodicitySticky offset={64} stuckClassName="toolbar--pinned" onStuckChange={setPinned}>
+    <PeriodicityToolbar title="Field notes" />
+</PeriodicitySticky>
+```
 
 `PeriodicityDrag` reorders the direct children of a single slotted container and renders a pointer-following drag
 ghost while sorting.
@@ -870,7 +882,7 @@ the structural components themselves remain flex containers.
 
 ## Component index
 
-The published package contains 140 `Periodicity*` components. The prefix is omitted below for readability.
+The published package contains 141 `Periodicity*` components. The prefix is omitted below for readability.
 
 | Family                    | Components                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -880,7 +892,7 @@ The published package contains 140 `Periodicity*` components. The prefix is omit
 | Charts                    | BarChart, PieChart, LineChart, ScatterChart                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | Collections and data      | List, VirtualList, NormalList, MultipleList, SelectList, CheckList, Tree, VirtualTree, CheckTree, SelectTree, Table, VirtualTable, Transfer, Pagination, Scrollbar, Scroll, Drag, Timeline, Card                                                                                                                                                                                                                                                                               |
 | Overlays and feedback     | Dialog, ConfirmDialog, MessageDialog, InputDialog, Drawer, DrawerLayout, Popover, Dropdown, DropdownItem, DropdownGroup, DropdownSeparator, ContextMenu, ContextMenuItem, ContextMenuGroup, ContextMenuSeparator, Menu, MenuItem, MenuGroup, MenuSeparator, Tooltip, ToastProvider, Snackbar, Alert, Banner, Backdrop, FullscreenLoading, ElementLoading, Progress, CircularProgress, ProgressRing, Spinner, Skeleton, Rate, Badge, Tag, Chip, Avatar, AvatarGroup, EmptyState |
-| Navigation and layout     | Coordinator, AppBar, Collapse, Toolbar, Tabs, TabPanel, Pager, Page, NavigationView, Stepper, Accordion, Breadcrumbs, LinearLayout, LinearLayoutItem, ConstraintLayout, Constraint, GridLayout, WaterfallLayout                                                                                                                                                                                                                                                                |
+| Navigation and layout     | Coordinator, AppBar, Collapse, Toolbar, Sticky, Tabs, TabPanel, Pager, Page, NavigationView, Stepper, Accordion, Breadcrumbs, LinearLayout, LinearLayoutItem, ConstraintLayout, Constraint, GridLayout, WaterfallLayout                                                                                                                                                                                                                                                        |
 | Messaging and comments    | Contact, VirtualContact, ContactContextMenu, MessageList, VirtualMessageList, MessageContextMenu, Chat, VirtualChat, AgentChat, VirtualAgentChat, CommentThread, VirtualCommentThread                                                                                                                                                                                                                                                                                          |
 | Documents                 | Markdown, Tex                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
