@@ -42,7 +42,8 @@
     border-right-color: transparent;
     border-radius: var(--radius-pill);
     vertical-align: middle;
-    animation: confirm-dialog-spin calc(var(--duration-slow) * 2) linear infinite;
+    animation: confirm-dialog-spin calc(calc(var(--motion-duration-slow) * var(--motion-essential-scale, 1)) * 2) linear
+        var(--motion-repeat, infinite);
 }
 
 @keyframes confirm-dialog-spin {
@@ -52,12 +53,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .button.confirm-dialog__confirm--danger {
+    :root:not([data-motion="always"]) .button.confirm-dialog__confirm--danger {
         transition: none;
-    }
-
-    .confirm-dialog__spinner {
-        animation: none;
-        border-right-color: currentColor;
     }
 }

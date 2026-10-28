@@ -1,0 +1,348 @@
+/* ==========================================================================
+   Audio — a themed player around the native audio element
+
+   The shell, cover tile, title, transport, and volume rail are painted with
+   the page's semantic surface and accent roles, so the player follows the
+   active preset and mode exactly like the rest of the page. The SeekBar inside
+   inherits the same accent roles.
+   ========================================================================== */
+
+.audio {
+    --audio-artwork-size: var(--space-10);
+    --audio-control-size: var(--space-8);
+    --audio-rate-width: var(--space-9);
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 0;
+    margin: 0;
+    color: var(--color-on-surface);
+    font-family: var(--font-family-current, var(--font-sans));
+}
+
+.audio__shell {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    min-width: 0;
+    padding: var(--space-3);
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius-surface);
+    background: var(--color-surface-container);
+    color: var(--color-on-surface);
+}
+
+.audio__artwork {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--audio-artwork-size);
+    height: var(--audio-artwork-size);
+    overflow: hidden;
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-container-high);
+    color: var(--color-primary);
+}
+
+.audio__artwork img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.audio__body {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.audio__head {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.audio__meta {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.audio__title {
+    overflow: hidden;
+    color: var(--color-on-surface);
+    font-size: var(--type-body);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-snug);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.audio__subtitle {
+    overflow: hidden;
+    color: var(--color-on-surface-variant);
+    font-size: var(--type-body-sm);
+    line-height: var(--leading-snug);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.audio__actions {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+/* ==========================================================================
+   Transport — play, seek, time, volume, and speed
+   ========================================================================== */
+
+.audio__transport {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.audio__seekbar {
+    flex: 1 1 var(--space-10);
+    min-width: var(--space-7);
+}
+
+/* A SeekBar is a full-height field on a page; in the transport it collapses to
+   the rail so the row keeps a single line where space allows. */
+.audio__seekbar .seekbar__surface {
+    height: var(--space-6);
+}
+
+.audio__time {
+    flex: none;
+    color: var(--color-on-surface-variant);
+    font-size: var(--type-label-sm);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.audio__button,
+.audio__retry {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.audio__button {
+    width: var(--audio-control-size);
+    height: var(--audio-control-size);
+    padding: 0;
+    border-radius: var(--radius-pill);
+}
+
+/* The play action is the focal point of the transport. */
+.audio__button--play {
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+/* Ripple hosts clip the painted circle; the icon stays above it. */
+.audio__button > svg,
+.audio__button > .spinner,
+.audio__rate-label,
+.audio__retry-label {
+    position: relative;
+    z-index: 1;
+}
+
+.audio__button::before,
+.audio__retry::before {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: currentColor;
+    content: "";
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
+}
+
+.audio__button:hover::before,
+.audio__button:focus-visible::before,
+.audio__retry:hover::before,
+.audio__retry:focus-visible::before {
+    opacity: var(--state-hover-opacity);
+}
+
+.audio__button:active::before,
+.audio__retry:active::before {
+    opacity: var(--state-press-opacity);
+}
+
+.audio__button:focus-visible,
+.audio__retry:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+/* The speed action is a text button, so the multiplier stays readable. */
+.audio__rate {
+    width: auto;
+    min-width: var(--audio-rate-width);
+    padding: 0 var(--space-1);
+    color: var(--color-on-surface-variant);
+    font-size: var(--type-label-sm);
+    font-variant-numeric: tabular-nums;
+}
+
+.audio__rate-label {
+    display: inline-block;
+}
+
+/* ==========================================================================
+   Volume — a mute toggle, the entry that opens the rail, and the rail itself
+   ========================================================================== */
+
+.audio__volume-control {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.audio__volume {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + var(--space-2));
+    z-index: var(--z-raised);
+    display: flex;
+    padding: var(--space-2);
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-container-high);
+    color: var(--color-on-surface);
+}
+
+/* The slot hosts whatever row the caller renders; the wrapper adds no box of
+   its own so the transport keeps its own layout. */
+.audio__slot {
+    display: contents;
+}
+
+/* ==========================================================================
+   Media element and status rows — hidden player, failure, and the empty source
+   ========================================================================== */
+
+.audio__media {
+    display: none;
+    width: 100%;
+    border: 0;
+    background: transparent;
+}
+
+/* Native chrome replaces the custom transport when the caller asks for it. */
+.audio[data-controls="native"][data-empty="false"] .audio__media {
+    display: block;
+}
+
+.audio__status {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+    color: var(--color-on-surface-variant);
+    font-size: var(--type-body-sm);
+    line-height: var(--leading-snug);
+}
+
+.audio__status--error {
+    color: var(--color-error);
+}
+
+.audio__message {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.audio__retry {
+    min-height: var(--control-sm);
+    padding: 0 var(--control-inline-sm);
+    border: 1px solid var(--color-outline);
+    border-radius: var(--radius-pill);
+    color: var(--color-on-surface);
+    font-size: var(--type-label-sm);
+}
+
+.audio__caption {
+    padding: 0 var(--space-1);
+    color: var(--color-on-surface-variant);
+    font-size: var(--type-body-sm);
+    line-height: var(--leading-normal);
+}
+
+/* ==========================================================================
+   Adaptations
+   ========================================================================== */
+
+@media (max-width: 420px) {
+    .audio {
+        --audio-artwork-size: var(--space-9);
+    }
+
+    .audio__shell {
+        gap: var(--space-2);
+        padding: var(--space-2);
+    }
+}
+
+@media (pointer: coarse) {
+    .audio {
+        --audio-control-size: var(--touch-target);
+    }
+
+    .audio__seekbar .seekbar__surface {
+        height: var(--touch-target);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root:not([data-motion="always"]) .audio__button::before,
+    :root:not([data-motion="always"]) .audio__retry::before {
+        transition: none;
+    }
+}
+
+@media (forced-colors: active) {
+    .audio__shell,
+    .audio__artwork,
+    .audio__retry,
+    .audio__volume,
+    .audio__button--play {
+        border-color: CanvasText;
+    }
+
+    .audio__shell,
+    .audio__artwork,
+    .audio__volume,
+    .audio__button--play {
+        background: Canvas;
+        color: CanvasText;
+    }
+}

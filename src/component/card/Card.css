@@ -11,8 +11,8 @@
     color: var(--color-on-surface);
     box-shadow: var(--shadow-sm);
     transition:
-        border-color var(--duration-medium) var(--ease-standard),
-        box-shadow var(--duration-medium) var(--ease-standard);
+        border-color calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        box-shadow calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .card--accent {
@@ -187,7 +187,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .card {
+    :root:not([data-motion="always"]) .card {
         transition: none;
     }
 }

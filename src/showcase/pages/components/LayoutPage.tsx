@@ -3,7 +3,6 @@ import {
     useState,
     type Dispatch,
     type FC,
-    type FormEvent,
     type ChangeEvent,
     type ReactNode,
     type RefObject,
@@ -25,6 +24,10 @@ import {
     Form,
     FormActions,
     FormField,
+    FormMessage,
+    FormSubmit,
+    Frame,
+    FramePage,
     GridLayout,
     LinearLayout,
     LinearLayoutItem,
@@ -42,6 +45,7 @@ import {
     VirtualList,
     VirtualTable,
     VirtualTree,
+    VirtualWaterfallLayout,
     WaterfallLayout,
 } from "../../../component";
 import Text from "../../../component/text/Text";
@@ -49,7 +53,9 @@ import { useToast } from "../../../component/toast/ToastContext";
 import type { ToastApi } from "../../../component/toast/ToastContext";
 import type {
     DrawerLayoutHandle,
+    FormErrors,
     FormFieldControlProps,
+    FormValues,
     ListItemState,
     ListOption,
     NavigationItem,
@@ -103,6 +109,43 @@ const gridCode: string = `<GridLayout columns={4} gap="sm">
     ))}
 </WaterfallLayout>`;
 
+interface WaterfallCard {
+    id: string;
+    title: string;
+    height: number;
+}
+
+const waterfallCards: readonly WaterfallCard[] = [
+    { id: "masonry-1", title: "Masonry 1", height: 88 },
+    { id: "masonry-2", title: "Masonry 2", height: 128 },
+    { id: "masonry-3", title: "Masonry 3", height: 72 },
+    { id: "masonry-4", title: "Masonry 4", height: 156 },
+    { id: "masonry-5", title: "Masonry 5", height: 104 },
+    { id: "masonry-6", title: "Masonry 6", height: 80 },
+    { id: "masonry-7", title: "Masonry 7", height: 136 },
+    { id: "masonry-8", title: "Masonry 8", height: 96 },
+    { id: "masonry-9", title: "Masonry 9", height: 120 },
+];
+
+const virtualWaterfallCode: string = `<VirtualWaterfallLayout
+    items={waterfallCards}
+    getKey={(card) => card.id}
+    getHeight={(card) => card.height}
+    columns={3}
+    gap="sm"
+    height={320}
+    renderItem={(card) => (
+        <Surface
+            className="showcase__waterfall-card"
+            elevation={1}
+            shape="sm"
+            style={{ height: "100%" }}
+        >
+            <Text variant="body-sm">{card.title}</Text>
+        </Surface>
+    )}
+/>`;
+
 const tableCode: string = `<Table
     columns={tableColumns}
     rows={teamRows}
@@ -150,18 +193,25 @@ const dragCode: string = `<Drag onReorder={(from, to) => reorder(from, to)}>
     </div>
 </Drag>`;
 
-const formCode: string = `<Form onSubmit={(event) => {
-    event.preventDefault();
-    save(new FormData(event.currentTarget));
-}}>
+const formCode: string = `<Form
+    validate={(values: FormValues): FormErrors =>
+        typeof values.email === "string" && values.email.includes("@")
+            ? {}
+            : { email: "Enter an address with an @." }
+    }
+    onValidSubmit={async (values: FormValues): Promise<void> => {
+        await subscribe(values);
+        toast.show({ title: "Subscribed" });
+    }}
+>
+    <FormMessage />
     <FormField label="Email" name="email" hint="We never share it." required>
         {(field) => <input {...field} type="email" autoComplete="email" />}
     </FormField>
     <FormActions align="end">
-        <Button type="submit">Subscribe</Button>
+        <FormSubmit content="Subscribe" pendingContent="Subscribing…" />
     </FormActions>
 </Form>`;
-
 const coordinatorCode: string = `<Coordinator
     height={460}
     collapseHeight={180}
@@ -274,6 +324,21 @@ const constraintCode: string = `<ConstraintLayout height={220} ariaLabel="Constr
     API select settings
 </Button>`;
 
+const framePagesCode: string = `const [page, setPage] = useState("overview");
+
+<Frame height={240} ariaLabel="Frame pages">
+    <FramePage active={page === "overview"}>
+        <OverviewPage />
+    </FramePage>
+    <FramePage active={page === "details"}>
+        <DetailsPage />
+    </FramePage>
+    <div style={{ position: "absolute", insetInlineStart: 16, bottom: 16 }}>
+        <Button onClick={() => setPage("overview")}>Overview</Button>
+        <Button onClick={() => setPage("details")}>Details</Button>
+    </div>
+</Frame>`;
+
 const pagerCode: string = `<Pager
     ref={pagerApiRef}
     value={pagerPage}
@@ -376,6 +441,8 @@ const LayoutPage: FC = () => {
     const [navValue, setNavValue]: [string, Dispatch<SetStateAction<string>>] =
         useState<string>("today");
     const [pagerPage, setPagerPage]: [number, Dispatch<SetStateAction<number>>] = useState<number>(0);
+    const [framePage, setFramePage]: [string, Dispatch<SetStateAction<string>>] =
+        useState<string>("overview");
     const [switchOn, setSwitchOn]: [boolean, Dispatch<SetStateAction<boolean>>] =
         useState<boolean>(true);
     const [formEmail, setFormEmail]: [string, Dispatch<SetStateAction<string>>] =
@@ -448,6 +515,31 @@ const LayoutPage: FC = () => {
                         )}
                     </WaterfallLayout>
                 </Stack>
+            </Demo>
+
+            <Demo
+                title="Virtual waterfall"
+                description="A height-aware masonry layout that fills the shortest column and mounts only the visible window."
+                code={virtualWaterfallCode}
+            >
+                <VirtualWaterfallLayout
+                    items={waterfallCards}
+                    getKey={(card: WaterfallCard): string => card.id}
+                    getHeight={(card: WaterfallCard): number => card.height}
+                    columns={3}
+                    gap="sm"
+                    height={320}
+                    renderItem={(card: WaterfallCard): ReactNode => (
+                        <Surface
+                            className="showcase__waterfall-card"
+                            elevation={1}
+                            shape="sm"
+                            style={{ height: "100%" }}
+                        >
+                            <Text variant="body-sm">{card.title}</Text>
+                        </Surface>
+                    )}
+                />
             </Demo>
 
             <Demo
@@ -639,6 +731,72 @@ const LayoutPage: FC = () => {
                         </Button>
                     </Stack>
                 </Columns>
+            </Demo>
+
+            <Demo
+                title="Frame pages"
+                description="FramePage fills the frame and keeps its state while inactive. Switch sub-views without unmounting either page."
+                code={framePagesCode}
+            >
+                <Frame
+                    height={240}
+                    ariaLabel="Frame pages demo"
+                    style={{
+                        border: "1px solid var(--color-outline-variant)",
+                        borderRadius: "var(--radius-sm)",
+                        background: "var(--color-surface-container-lowest)",
+                    }}
+                >
+                    <FramePage active={framePage === "overview"}>
+                        <Stack gap="sm" style={{ padding: 24 }}>
+                            <Text variant="label" tone="accent">
+                                Page 01
+                            </Text>
+                            <Text variant="h4">Overview</Text>
+                            <Text variant="body" tone="soft">
+                                A full-frame sub-view. The page stays mounted when inactive,
+                                so local state survives every switch.
+                            </Text>
+                        </Stack>
+                    </FramePage>
+                    <FramePage active={framePage === "details"}>
+                        <Stack gap="sm" style={{ padding: 24 }}>
+                            <Text variant="label" tone="accent">
+                                Page 02
+                            </Text>
+                            <Text variant="h4">Details</Text>
+                            <Text variant="body" tone="soft">
+                                Inactive pages carry the native hidden attribute, removing them
+                                from focus and the accessibility tree.
+                            </Text>
+                        </Stack>
+                    </FramePage>
+                    <div
+                        style={{
+                            position: "absolute",
+                            insetInlineStart: 16,
+                            bottom: 16,
+                            zIndex: 2,
+                        }}
+                    >
+                        <Inline gap="xs">
+                            <Button
+                                size="sm"
+                                variant={framePage === "overview" ? "solid" : "outline"}
+                                onClick={(): void => setFramePage("overview")}
+                            >
+                                Overview
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant={framePage === "details" ? "solid" : "outline"}
+                                onClick={(): void => setFramePage("details")}
+                            >
+                                Details
+                            </Button>
+                        </Inline>
+                    </div>
+                </Frame>
             </Demo>
 
             <Demo
@@ -1029,18 +1187,27 @@ const LayoutPage: FC = () => {
 
             <Demo
                 title="Form"
-                description="A native form wrapper with automatic label, hint, error, and ARIA binding."
+                description="A native form plus a validation, submission, and pending pipeline. Field errors, the message region, and the submit button share one state, so an invalid submission focuses the summary and a slow save keeps the button busy."
                 code={formCode}
             >
                 <Form
-                    onSubmit={(event: FormEvent<HTMLFormElement>): void => {
-                        event.preventDefault();
-                        toast.show({
-                            title: "Form submitted",
-                            description: `Email: ${formEmail}`,
+                    validate={(values: FormValues): FormErrors =>
+                        typeof values.email === "string" && values.email.includes("@")
+                            ? {}
+                            : { email: "Enter an address with an @." }
+                    }
+                    onValidSubmit={async (values: FormValues): Promise<void> => {
+                        await new Promise<void>((resolve: () => void): void => {
+                            window.setTimeout(resolve, 900);
                         });
+                        toast.show({
+                            title: "Subscribed",
+                            description: `Email: ${values.email ?? ""}`,
+                        });
+                        setFormEmail("");
                     }}
                 >
+                    <FormMessage />
                     <FormField
                         label="Email"
                         name="email"
@@ -1069,7 +1236,7 @@ const LayoutPage: FC = () => {
                         )}
                     </FormField>
                     <FormActions align="end">
-                        <Button type="submit">Subscribe</Button>
+                        <FormSubmit content="Subscribe" pendingContent="Subscribing…" />
                     </FormActions>
                 </Form>
             </Demo>

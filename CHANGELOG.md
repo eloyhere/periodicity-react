@@ -3,6 +3,96 @@
 All notable changes to Periodicity React are recorded here. The format follows the spirit of Keep a Changelog,
 and this project uses British English in its English documentation.
 
+## [Unreleased]
+
+## [0.1.15] - 2026-10-28
+
+### Added
+
+- `PeriodicityVirtualWaterfallLayout` adds adapter-backed virtual masonry. Cards supply heights through `getHeight` /
+  `itemHeight` or a `WaterfallAdapter`; each card enters the shortest column and only the visible vertical window is
+  mounted.
+- Both waterfall layouts accept `slots.item`, which replaces the container around each card. The slot receives the
+  default class names and placement style so virtual cards keep their absolute position.
+- `PeriodicityAudio` renders the native `audio` element inside a themed shell with a cover tile, an optional title
+  and subtitle, and a transport that covers play and pause, seeking with buffered progress, time, a mute toggle, a
+  vertical volume rail, and playback speed. `controls="native"` hands the chrome to the browser, `rates` sets the
+  offered speeds, `slots.controls` replaces the transport with a render function that receives the live state,
+  labels, and actions, `slots.actions` adds chrome beside the title, and a string `title` also names the player for
+  assistive technology when no `label` or `aria-label` is supplied.
+- `PeriodicityHorizontalVideo` and `PeriodicityVerticalVideo` render the same themed player in 16:9 and 9:16
+  frames. The frame, bar, buttons, seek track, and overlays use the page's surface and accent roles; the built-in
+  bar covers play and pause, seeking, time, a mute toggle, an entry that opens a vertical volume rail, and full
+  screen; clicking the video toggles the chrome with a centred play or pause affordance; and `slots.controls`
+  replaces the bottom bar with a render function that receives the live state, labels, and actions.
+  `slots.aboveControls` adds extra chrome directly above the bar and hides with it, leaving the built-in bar intact.
+- `PeriodicityBarrage` floats comments over any wrapped content on a pointer-transparent, lane-based layer. It
+  accepts `items`, `paused`, `direction`, `lanes`, `duration`, `stagger`, `repeat`, `bottomInset`, and
+  `respectReducedMotion`, plus `slots.item` and `slots.overlay` for custom floating UI. Items share one
+  pixels-per-millisecond speed, the scheduler keeps lanes clear so comments cannot overtake one another, and
+  appending items joins the current stream. The moving layer is hidden from assistive technology behind a visually
+  hidden transcript and stills under `prefers-reduced-motion` unless `respectReducedMotion` is disabled.
+- `PeriodicityRing` is the Android-style circular indicator. Without a `value` the ring spins forever: the graphic
+  rotates while the rounded arc grows, shrinks, and shifts, matching the Android loader; with a `value` it draws a
+  determinate arc, and `showValue` paints the percentage in the centre. `size`, `thickness`, `tone`, `label`, and
+  `showValue` cover the surface, and `ElementLoading` and `FullscreenLoading` now spin a `Ring`.
+- `PeriodicityTerminal` renders a themed console with a transcript, a command input, and an icon-only send button.
+  `onInput` reports every edit, `onChange` reports a non-empty command submitted with Enter or the button,
+  `history` / `onHistoryChange` bind ArrowUp/ArrowDown recall, and the caller appends output to `lines`;
+  `editable={false}` keeps a transcript-only console. The paper, chrome, border, prompt, cursor, and line tones are
+  all semantic colour roles, and the transcript is exposed as a labelled `role="log"` region.
+- `PeriodicitySeekBar` is an Android-style seek bar: a native range input under a painted track and thumb, with
+  buffered secondary progress, optional tick marks, snapped steps, horizontal or vertical direction (`length` sizes
+  vertical tracks), sizes and tones, a thumb ripple on hover and press, and `onSeekStart` / `onSeekEnd` callbacks.
+- `PeriodicityFrame`, `PeriodicityFrameItem`, and `PeriodicityFramePage` provide an Android-style frame layout: items
+  are absolutely positioned by `gravity`, `offsetX` / `offsetY`, `width` / `height`, and `zIndex`, while `FramePage`
+  swaps page content inside one bounded frame with clipping.
+- `PeriodicityForm` now adds a validation and submission pipeline to the native form: `validate(values)` returns
+  field errors, `onValidSubmit(values, api)` runs only when validation passes, async submissions keep the form
+  `pending`, and the shared error map lets one server response mark every `FormField`. The new
+  `PeriodicityFormMessage` reports a rejection in a focusable alert, `PeriodicityFormSubmit` disables itself and
+  spins a `Ring` while pending, and an invalid submission focuses the message before the first invalid control.
+- The showcase adds a `#media` family with the audio player, both video players, the custom control-bar slot,
+  `SeekBar`, and the barrage overlay; the barrage demo mounts a `PeriodicityForm` composer in
+  `slots.aboveControls` so it opens and closes with the player chrome, and an icon-only send button appends
+  comments to the live stream. The virtual waterfall on the Layout page, `Ring` on Feedback, `SeekBar` on Choices,
+  and `Terminal` on Documents are also documented.
+
+### Changed
+
+- Every CSS animation and transition now reads the shared motion layer. Durations multiply by `--motion-scale`,
+  loops use `--motion-repeat`, and easing aliases point at the `--motion-ease-*` tokens, so one
+  `PeriodicityAnimation` scope controls ripples, spinners, rings, skeletons, overlays, and icon effects together.
+  The showcase opts into `<html data-motion="always">` so its demos stay animated when the host reports reduced
+  motion; consumers keep the operating-system default.
+- Indeterminate loading indicators use `--motion-essential-scale`. They keep a slower turn under reduced motion
+  instead of freezing, so `Ring`, `Spinner`, the combobox spinner, and the confirm-dialog spinner always signal
+  that work is in progress.
+- `PeriodicityNavigationView` is now `PeriodicityNavigation`. The element, its props, and the `NavigationViewHandle`
+  ref API are unchanged; hashes `#navigation-view` and `#navigationview` still resolve, and `#navigation` now opens
+  the component itself.
+- `WaterfallLayout` now lives under `src/layout/waterfall/normal`; the waterfall barrel and the public
+  `PeriodicityWaterfallLayout` export resolve from the new location, and `PeriodicityVirtualWaterfallLayout` ships
+  beside it.
+
+### Removed
+
+- `PeriodicityProgressRing` and `PeriodicityCircularProgress` were removed in favour of `PeriodicityRing`, which
+  covers both the gauge and the loader; `PeriodicityCyclePicker` is unchanged.
+
+### Fixed
+
+- Anchored dropdowns, selects, popovers, and tooltips now share the anchor tracker used by the loading mask. The
+  target is measured every frame, including visual-viewport scroll and resize, layout transitions, and keyboard
+  changes, so the floating layer cannot remain at an old viewport coordinate.
+- `ElementLoading` uses the same anchor tracker for its mask. The overlay follows its target during scrolling,
+  viewport changes, and layout shifts, and hides while the target is outside the visual viewport instead of
+  covering the wrong element.
+- Dropdown panels cap their height to the space on the resolved side and keep the panel clear of the trigger when
+  the visual viewport becomes short, instead of clamping over the anchor.
+- `PeriodicityDateTimePicker` now renders the year and month fields in its calendar header with `NumberInput`, so
+  both keep their labels and native number semantics while gaining the shared input layout and its stepper controls.
+
 ## [0.1.14] - 2026-10-28
 
 ### Added
@@ -219,7 +309,7 @@ and this project uses British English in its English documentation.
 
 - Focus the active input from anywhere in the field, including prefix and suffix icons.
 - Ripple support on number steppers and whole-field colour picker activation.
-- Contact row layout, CJK avatar initials, and localized presence labels.
+- Contact row layout, CJK avatar initials, and localised presence labels.
 
 ## [0.1.2] - 2026-10-22
 
@@ -231,7 +321,7 @@ and this project uses British English in its English documentation.
 
 ### Fixed
 
-- Publish generated TypeScript declarations (dist/types) and a CSS module shim, so ypes and exports.types resolve for consumers.
+- Publish generated TypeScript declarations (dist/types) and a CSS module shim, so `types` and `exports.types` resolve for consumers.
 
 ## [0.1.0] - 2026-10-20
 
@@ -304,11 +394,11 @@ The first public npm release of `periodicity-react`.
 - The documentation shell localises navigation, theme/language controls, About, skip link, back-to-top, and CodeBlock labels for all 12 locales.
 - README and README.zh-CN are restructured around design philosophy, a function map, and components by function, with theme, accessibility-audit, and locale-audit documentation.
 
-- Theme option labels now use the active locale instead of always showing Chinese · English, and component page titles show the API name plus its localized name (for example `Tag 标签`).
+- Theme option labels now use the active locale instead of always showing Chinese · English, and component page titles show the API name plus its localised name (for example `Tag 标签`).
 - Additional visible and accessible defaults now resolve through `t()`: breadcrumb expander, comment empty/loading states, context-menu and text-action labels, number stepper controls, time/date-time placeholders, hour/minute labels, comment loading, and toolbar back label.
 
-- Documentation group/section labels and page descriptions now resolve per locale; en-US copy applies American spelling, and non-English descriptions use localized fallbacks instead of English catalogue copy.
-- Localized component names are appended to the API name (`Tag 标签`, `Tag タグ`, `Tag Etiqueta`), and the component pickers use the same labels.
+- Documentation group/section labels and page descriptions now resolve per locale; en-US copy applies American spelling, and non-English descriptions use localised fallbacks instead of English catalogue copy.
+- Localised component names are appended to the API name (`Tag 标签`, `Tag タグ`, `Tag Etiqueta`), and the component pickers use the same labels.
 - The toolbar Select surfaces now declare their own background, so Surface ripple contrast is measured against the field rather than the blue AppBar.
 
 ### Changed
@@ -353,5 +443,20 @@ The first public npm release of `periodicity-react`.
 - Collection adapters, virtualisation configuration, and existing controlled APIs remain source-compatible.
 - Markdown and HTML rendering is handled by the Preview component; CodeMirror remains an editor, not a renderer.
 
-[Unreleased]: https://github.com/eloyhere/periodicity-react/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/eloyhere/periodicity-react/compare/v0.1.15...HEAD
+[0.1.15]: https://github.com/eloyhere/periodicity-react/compare/v0.1.14...v0.1.15
+[0.1.14]: https://github.com/eloyhere/periodicity-react/compare/v0.1.13...v0.1.14
+[0.1.13]: https://github.com/eloyhere/periodicity-react/compare/v0.1.12...v0.1.13
+[0.1.12]: https://github.com/eloyhere/periodicity-react/compare/v0.1.11...v0.1.12
+[0.1.11]: https://github.com/eloyhere/periodicity-react/compare/v0.1.10...v0.1.11
+[0.1.10]: https://github.com/eloyhere/periodicity-react/compare/v0.1.9...v0.1.10
+[0.1.9]: https://github.com/eloyhere/periodicity-react/compare/v0.1.8...v0.1.9
+[0.1.8]: https://github.com/eloyhere/periodicity-react/compare/v0.1.7...v0.1.8
+[0.1.7]: https://github.com/eloyhere/periodicity-react/compare/v0.1.6...v0.1.7
+[0.1.6]: https://github.com/eloyhere/periodicity-react/compare/v0.1.5...v0.1.6
+[0.1.5]: https://github.com/eloyhere/periodicity-react/compare/v0.1.4...v0.1.5
+[0.1.4]: https://github.com/eloyhere/periodicity-react/compare/v0.1.3...v0.1.4
+[0.1.3]: https://github.com/eloyhere/periodicity-react/compare/v0.1.2...v0.1.3
+[0.1.2]: https://github.com/eloyhere/periodicity-react/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/eloyhere/periodicity-react/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/eloyhere/periodicity-react/releases/tag/v0.1.0

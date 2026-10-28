@@ -24,7 +24,7 @@
     color: var(--color-on-surface-variant);
     cursor: pointer;
     touch-action: manipulation;
-    transition: background-color var(--duration-fast) var(--ease-standard);
+    transition: background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .photo-picker__trigger:hover:not(:disabled) {
@@ -83,7 +83,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .photo-picker__trigger {
+    :root:not([data-motion="always"]) .photo-picker__trigger {
         transition: none;
     }
 }

@@ -13,8 +13,10 @@
     pointer-events: none;
     transform: translate(-50%, -50%) scale(0);
     animation-name: ripple-spread;
-    animation-duration: max(1000ms, var(--ripple-duration, 1000ms));
-    animation-timing-function: var(--ease-decelerate, cubic-bezier(0.05, 0.7, 0.1, 1));
+    animation-duration: calc(
+        max(var(--motion-duration-ripple, 1000ms), var(--ripple-duration, 0ms)) * var(--motion-scale, 1)
+    );
+    animation-timing-function: var(--motion-ease-decelerate, cubic-bezier(0.05, 0.7, 0.1, 1));
     animation-fill-mode: forwards;
     will-change: transform, opacity;
 }

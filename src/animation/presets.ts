@@ -110,7 +110,8 @@ export interface AnimationStyleOptions {
 /**
  * CSS variables understood by the animation stylesheet.
  * Type: interface.
- * Fields: --animation-duration, --animation-delay, --animation-easing, and optional --animation-repeat.
+ * Fields: --animation-duration, --animation-delay, --animation-easing, optional --animation-repeat,
+ * and the shared --motion-scale, --motion-essential-scale, and --motion-repeat controls.
  * @example
  * const style: AnimationStyle = animationStyle({ duration: 220 });
  */
@@ -119,6 +120,9 @@ export interface AnimationStyle extends CSSProperties {
     "--animation-delay": string;
     "--animation-easing": string;
     "--animation-repeat"?: string;
+    "--motion-scale": string;
+    "--motion-essential-scale": string;
+    "--motion-repeat": string;
 }
 
 /**
@@ -143,6 +147,9 @@ export const animationStyle: (options?: AnimationStyleOptions) => AnimationStyle
         "--animation-duration": `${muted ? 0 : Math.max(0, duration)}ms`,
         "--animation-delay": `${muted ? 0 : Math.max(0, delay)}ms`,
         "--animation-easing": easing,
+        "--motion-scale": muted ? "0" : "1",
+        "--motion-essential-scale": enabled ? (reduced ? "0.5" : "1") : "0",
+        "--motion-repeat": muted ? "1" : "infinite",
     };
 
     if (muted) {

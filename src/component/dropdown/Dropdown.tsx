@@ -372,6 +372,7 @@ export const Dropdown: FC<DropdownProps> = ({
         placement,
         offset,
         matchWidth,
+        constrainHeight: true,
     });
     const registerItem: (id: string, node: HTMLButtonElement | null) => void = useCallback(
         (id: string, node: HTMLButtonElement | null): void => {
@@ -603,6 +604,7 @@ export const Dropdown: FC<DropdownProps> = ({
                             className,
                         )}
                         style={anchored.style}
+                        data-anchor-visible={anchored.visible ? "true" : "false"}
                         tone="neutral"
                         elevation={3}
                         shape="md"

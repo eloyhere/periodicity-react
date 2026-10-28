@@ -68,8 +68,8 @@
     background: transparent;
     color: var(--color-on-primary);
     transition:
-        background-color var(--duration-fast) var(--ease-standard),
-        border-color var(--duration-fast) var(--ease-standard);
+        background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        border-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .checkbox__icon {
@@ -78,8 +78,8 @@
     opacity: 0;
     transform: scale(0.5);
     transition:
-        opacity var(--duration-fast) var(--ease-standard),
-        transform var(--duration-medium) var(--ease-spring);
+        opacity calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        transform calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-spring);
 }
 
 .checkbox--checked .checkbox__box,
@@ -92,7 +92,7 @@
 .checkbox--mixed .checkbox__icon--mixed {
     opacity: 1;
     transform: scale(1);
-    animation: checkbox-confirm var(--duration-medium) var(--ease-spring);
+    animation: checkbox-confirm calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-spring);
 }
 
 .checkbox__touch:hover .checkbox__box {

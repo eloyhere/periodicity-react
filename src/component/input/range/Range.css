@@ -25,7 +25,7 @@
     line-height: var(--font-leading-current, var(--leading-snug));
     text-transform: var(--font-transform-current, uppercase);
     cursor: pointer;
-    transition: color var(--duration-fast) var(--ease-standard);
+    transition: color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .range__spacer {
@@ -93,7 +93,7 @@
     height: 100%;
     border-radius: inherit;
     background: var(--color-primary);
-    transition: background-color var(--duration-fast) var(--ease-standard);
+    transition: background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .range__thumb {
@@ -109,9 +109,9 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.28);
     transform: translate(-50%, -50%);
     transition:
-        background-color var(--duration-fast) var(--ease-standard),
-        box-shadow var(--duration-fast) var(--ease-standard),
-        transform var(--duration-fast) var(--ease-standard);
+        background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        box-shadow calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        transform calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .range__surface:not([data-disabled="true"]):hover .range__thumb {
@@ -179,9 +179,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .range__label,
-    .range__fill,
-    .range__thumb {
+    :root:not([data-motion="always"]) .range__label,
+    :root:not([data-motion="always"]) .range__fill,
+    :root:not([data-motion="always"]) .range__thumb {
         transition: none;
     }
 }

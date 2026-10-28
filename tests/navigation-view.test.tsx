@@ -1,5 +1,6 @@
 import { act, fireEvent, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import * as PublicComponents from "../src/component/public";
 import NavigationView, { type NavigationItem } from "../src/layout/navigation/NavigationView";
 
 type ResizeCallback = (entries: ResizeObserverEntry[]) => void;
@@ -106,5 +107,11 @@ describe("navigation view width modes", (): void => {
 
         fireEvent.pointerDown(item, { pointerType: "mouse", clientX: 8, clientY: 8, button: 0 });
         expect(item.querySelectorAll(".ripple").length).toBeGreaterThan(0);
+    });
+
+    it("publishes the Navigation name instead of NavigationView", (): void => {
+        expect("PeriodicityNavigation" in PublicComponents).toBe(true);
+        expect("PeriodicityNavigationView" in PublicComponents).toBe(false);
+        expect(typeof PublicComponents.PeriodicityNavigation).toBe("function");
     });
 });

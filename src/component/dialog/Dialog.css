@@ -38,11 +38,12 @@
 }
 
 .dialog[open] {
-    animation: dialog-enter var(--duration-medium) var(--ease-spring);
+    animation: dialog-enter calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-spring);
 }
 
 .dialog[open]::backdrop {
-    animation: dialog-backdrop-enter var(--duration-slow) var(--ease-standard);
+    animation: dialog-backdrop-enter calc(var(--motion-duration-slow) * var(--motion-scale, 1))
+        var(--motion-ease-standard);
 }
 
 .dialog__panel {
@@ -119,9 +120,9 @@
     cursor: pointer;
     touch-action: manipulation;
     transition:
-        color var(--duration-fast) var(--ease-standard),
-        border-color var(--duration-fast) var(--ease-standard),
-        background-color var(--duration-fast) var(--ease-standard);
+        color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        border-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .dialog__close:hover {
@@ -214,12 +215,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .dialog[open],
-    .dialog[open]::backdrop {
+    :root:not([data-motion="always"]) .dialog[open],
+    :root:not([data-motion="always"]) .dialog[open]::backdrop {
         animation: none;
     }
 
-    .dialog__close {
+    :root:not([data-motion="always"]) .dialog__close {
         transition: none;
     }
 }

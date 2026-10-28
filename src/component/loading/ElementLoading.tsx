@@ -1,32 +1,10 @@
-import {
-    useEffect,
-    useLayoutEffect,
-    useRef,
-    useState,
-    type FC,
-    type HTMLAttributes,
-    type Ref,
-    type RefObject,
-} from "react";
+import { type FC, type HTMLAttributes, type Ref, type RefObject } from "react";
 import cx from "../foundation/cx";
 import { useInternational, type InternationalContextValue } from "../../international";
 import Portal from "../foundation/Portal";
-import CircularProgress from "../progress/CircularProgress";
+import { useAnchorRect, type AnchorRect } from "../anchor/useAnchorRect";
+import Ring from "../ring/Ring";
 import "./ElementLoading.css";
-
-/**
- * Rectangle measured from the bound element.
- * Type: interface.
- * Fields: top, left, width, height.
- * @example
- * const rect: LoadingRect = { top: 0, left: 0, width: 320, height: 180 };
- */
-interface LoadingRect {
-    top: number;
-    left: number;
-    width: number;
-    height: number;
-}
 
 /**
  * Props for an element-bound loading overlay.
@@ -66,71 +44,9 @@ const ElementLoading: FC<ElementLoadingProps> = ({
 }: ElementLoadingProps) => {
     const { t }: InternationalContextValue = useInternational();
     const resolvedLabel: string = label ?? t("loading");
-    const [rect, setRect]: [LoadingRect | null, (next: LoadingRect | null) => void] =
-        useState<LoadingRect | null>(null);
-    const frameRef: RefObject<number | null> = useRef<number | null>(null);
+    const rect: AnchorRect | null = useAnchorRect(target, loading);
 
-    useLayoutEffect((): (() => void) | void => {
-        if (!loading) {
-            return;
-        }
-
-        const resolveTarget: () => HTMLElement | null = (): HTMLElement | null =>
-            typeof target === "string"
-                ? document.querySelector<HTMLElement>(target)
-                : target.current;
-
-        const measure: () => void = (): void => {
-            const node: HTMLElement | null = resolveTarget();
-
-            if (node === null) {
-                return;
-            }
-
-            const bounds: DOMRect = node.getBoundingClientRect();
-            setRect({
-                top: bounds.top,
-                left: bounds.left,
-                width: bounds.width,
-                height: bounds.height,
-            });
-        };
-
-        measure();
-        frameRef.current = window.requestAnimationFrame(measure);
-
-        const observer: ResizeObserver | null =
-            typeof ResizeObserver === "undefined" ? null : new ResizeObserver(measure);
-        const node: HTMLElement | null = resolveTarget();
-
-        if (node !== null) {
-            observer?.observe(node);
-        }
-
-        window.addEventListener("resize", measure);
-        window.addEventListener("scroll", measure, true);
-
-        return (): void => {
-            if (frameRef.current !== null) {
-                window.cancelAnimationFrame(frameRef.current);
-            }
-
-            observer?.disconnect();
-            window.removeEventListener("resize", measure);
-            window.removeEventListener("scroll", measure, true);
-        };
-    }, [loading, target]);
-
-    useEffect(
-        (): (() => void) => (): void => {
-            if (frameRef.current !== null) {
-                window.cancelAnimationFrame(frameRef.current);
-            }
-        },
-        [],
-    );
-
-    if (!loading || rect === null) {
+    if (!loading || rect === null || !rect.visible) {
         return null;
     }
 
@@ -151,7 +67,7 @@ const ElementLoading: FC<ElementLoadingProps> = ({
                 aria-label={resolvedLabel}
                 aria-live="polite"
             >
-                <CircularProgress size={40} label={resolvedLabel} />
+                <Ring size={40} label={resolvedLabel} />
             </div>
         </Portal>
     );

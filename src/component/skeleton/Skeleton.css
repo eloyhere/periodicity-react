@@ -50,7 +50,8 @@
     inset: 0;
     background: linear-gradient(90deg, transparent, var(--color-outline), transparent);
     content: "";
-    animation: skeleton-shimmer calc(var(--duration-slow) * 3) var(--ease-standard) infinite;
+    animation: skeleton-shimmer calc(calc(var(--motion-duration-slow) * var(--motion-scale, 1)) * 3)
+        var(--motion-ease-standard) var(--motion-repeat, infinite);
 }
 
 @keyframes skeleton-shimmer {
@@ -64,9 +65,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .skeleton__line::after,
-    .skeleton--rect::after,
-    .skeleton--circle::after {
+    :root:not([data-motion="always"]) .skeleton__line::after,
+    :root:not([data-motion="always"]) .skeleton--rect::after,
+    :root:not([data-motion="always"]) .skeleton--circle::after {
         animation: none;
         opacity: 0;
     }

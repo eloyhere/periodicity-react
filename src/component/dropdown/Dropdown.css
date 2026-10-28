@@ -7,8 +7,8 @@
     display: flex;
     flex-direction: column;
     min-width: 180px;
-    max-width: min(380px, calc(100vw - var(--space-6)));
-    max-height: min(420px, 68vh);
+    max-width: min(380px, calc(100vw - var(--space-6)), var(--anchor-max-width, 100vw));
+    max-height: min(420px, 68vh, var(--anchor-max-height, 100vh));
     padding: var(--space-1);
     overflow: hidden;
     border: 1px solid var(--color-outline-variant);
@@ -79,7 +79,7 @@
     flex: none;
     border-radius: var(--radius-control);
     color: var(--color-on-surface);
-    transition: background-color var(--duration-fast) var(--ease-standard);
+    transition: background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .dropdown__item:hover {
@@ -217,7 +217,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .dropdown__item {
+    :root:not([data-motion="always"]) .dropdown__item {
         transition: none;
     }
 }
@@ -225,12 +225,12 @@
 /* Open and close motion for the anchored panel. */
 .dropdown__panel {
     transform-origin: top center;
-    animation: dropdown-panel-in 160ms var(--ease-decelerate);
+    animation: dropdown-panel-in calc(160ms * var(--motion-scale, 1)) var(--motion-ease-decelerate);
 }
 
 .dropdown__panel--closing {
     pointer-events: none;
-    animation: dropdown-panel-out 160ms var(--ease-accelerate) forwards;
+    animation: dropdown-panel-out calc(160ms * var(--motion-scale, 1)) var(--motion-ease-accelerate) forwards;
 }
 
 @keyframes dropdown-panel-in {

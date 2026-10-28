@@ -1,0 +1,397 @@
+/* ==========================================================================
+   Video — a themed player shared by the horizontal and vertical variants
+
+   Every surface, border, label, and action is painted with the page's semantic
+   roles, so the chrome follows the active preset and mode exactly like the rest
+   of the page. The SeekBar inside inherits the same accent roles.
+   ========================================================================== */
+
+.video {
+    --video-controls-height: calc(var(--space-8) + var(--space-1) * 2 + 1px);
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 0;
+    margin: 0;
+    color: var(--color-on-surface);
+    font-family: var(--font-family-current, var(--font-sans));
+}
+
+.video[data-layout="vertical"] {
+    --video-controls-height: calc(var(--space-6) + var(--space-1) + var(--space-2) + 1px);
+}
+
+.video__stage {
+    position: relative;
+    display: flex;
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: var(--video-aspect, 16 / 9);
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius-surface);
+    background: var(--color-surface-container-lowest);
+    isolation: isolate;
+}
+
+.video__media {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: transparent;
+    object-fit: contain;
+}
+
+/* The stage is a focusable group so the chrome can be toggled from the keyboard. */
+.video__stage:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+/* ==========================================================================
+   Centred play affordance
+   ========================================================================== */
+
+.video__play {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-base);
+    display: inline-flex;
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+    width: var(--space-10);
+    height: var(--space-10);
+    margin: auto;
+    padding: 0;
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-container);
+    color: var(--color-on-surface);
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+        background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        transform calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
+}
+
+.video__play:hover {
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+.video__play:active {
+    transform: scale(0.94);
+}
+
+/* ==========================================================================
+   Chrome — the horizontal bar, the vertical action stack, and their buttons
+   ========================================================================== */
+
+/* Extra chrome supplied by the caller; it sits above the bottom bar and is
+   rendered only while the chrome is visible. */
+.video__above-controls {
+    position: absolute;
+    right: 0;
+    bottom: var(--video-controls-height);
+    left: 0;
+    z-index: var(--z-raised);
+}
+
+.video__controls {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: var(--z-raised);
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+    border-block-start: 1px solid var(--color-outline-variant);
+    background: var(--color-surface-container);
+    color: var(--color-on-surface);
+    font-size: var(--type-label-sm);
+    line-height: var(--leading-snug);
+}
+
+/* The vertical variant keeps only the progress rail at the bottom edge. */
+.video__controls--slim {
+    padding: var(--space-1) var(--space-3) var(--space-2);
+}
+
+.video__actions {
+    position: absolute;
+    right: var(--space-3);
+    bottom: calc(var(--space-6) + var(--space-5));
+    z-index: var(--z-raised);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.video__badge {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    z-index: var(--z-raised);
+    padding: var(--space-1) var(--space-2);
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-container);
+    color: var(--color-on-surface-variant);
+    font-size: var(--type-label-sm);
+    font-variant-numeric: tabular-nums;
+    line-height: var(--leading-snug);
+}
+
+.video__button,
+.video__retry {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.video__button {
+    width: var(--space-8);
+    height: var(--space-8);
+    padding: 0;
+    border-radius: var(--radius-pill);
+}
+
+/* Ripple hosts clip the painted circle; the icon stays above it. */
+.video__button > svg,
+.video__play > svg,
+.video__retry-label {
+    position: relative;
+    z-index: 1;
+}
+
+/* Buttons that float directly over footage carry their own themed plate. */
+.video__actions .video__button {
+    width: var(--space-9);
+    height: var(--space-9);
+    border: 1px solid var(--color-outline-variant);
+    background: var(--color-surface-container);
+    color: var(--color-on-surface);
+}
+
+.video__button::before,
+.video__retry::before {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: currentColor;
+    content: "";
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
+}
+
+.video__button:hover::before,
+.video__button:focus-visible::before,
+.video__retry:hover::before,
+.video__retry:focus-visible::before {
+    opacity: var(--state-hover-opacity);
+}
+
+.video__button:active::before,
+.video__retry:active::before {
+    opacity: var(--state-press-opacity);
+}
+
+/* ==========================================================================
+   Seek bar — the shared SeekBar in the same accent roles as the page
+   ========================================================================== */
+
+.video__seekbar {
+    flex: 1 1 auto;
+    min-width: var(--space-7);
+}
+
+/* A SeekBar is a full-height field on a page; in the chrome it collapses to
+   the rail so the bar keeps a single row. */
+.video__seekbar .seekbar__surface {
+    height: var(--space-6);
+}
+
+.video__time {
+    flex: none;
+    color: var(--color-on-surface-variant);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.video__button:focus-visible,
+.video__play:focus-visible,
+.video__retry:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+/* ==========================================================================
+   Volume — a mute toggle, the entry that opens the rail, and the rail itself
+   ========================================================================== */
+
+.video__volume-control {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.video__volume {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + var(--space-2));
+    z-index: var(--z-raised);
+    display: flex;
+    padding: var(--space-2);
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-container-high);
+    color: var(--color-on-surface);
+}
+
+/* The slot hosts whatever bar the caller renders; the wrapper adds no box of its
+   own so absolute children still position against the stage. */
+.video__slot {
+    display: contents;
+}
+
+/* ==========================================================================
+   Status overlays — buffering, failure, and the empty source
+   ========================================================================== */
+
+.video__status {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-base);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    text-align: center;
+}
+
+.video__status--busy {
+    background: var(--colourScrim);
+    pointer-events: none;
+}
+
+.video__status--error,
+.video__status--empty {
+    background: var(--color-surface-container);
+    color: var(--color-on-surface);
+}
+
+.video__spinner {
+    display: inline-flex;
+    color: var(--color-primary);
+}
+
+.video__message {
+    max-width: var(--measure-prose);
+    color: var(--color-on-surface-variant);
+    font-size: var(--type-body-sm);
+    line-height: var(--leading-snug);
+}
+
+.video__retry {
+    min-height: var(--control-sm);
+    padding: 0 var(--control-inline-sm);
+    border: 1px solid var(--color-outline);
+    border-radius: var(--radius-pill);
+    color: var(--color-on-surface);
+    font-size: var(--type-label-sm);
+}
+
+.video__retry-label {
+    display: inline-block;
+}
+
+.video__caption {
+    padding: 0 var(--space-1);
+    color: var(--color-on-surface-variant);
+    font-size: var(--type-body-sm);
+    line-height: var(--leading-normal);
+}
+
+/* ==========================================================================
+   Adaptations
+   ========================================================================== */
+
+@media (pointer: coarse) {
+    .video {
+        --video-controls-height: calc(var(--touch-target) + var(--space-1) * 2 + 1px);
+    }
+
+    .video[data-layout="vertical"] {
+        --video-controls-height: calc(var(--touch-target) + var(--space-1) + var(--space-2) + 1px);
+    }
+
+    .video__button {
+        width: var(--touch-target);
+        height: var(--touch-target);
+    }
+
+    .video__actions .video__button {
+        width: var(--touch-target);
+        height: var(--touch-target);
+    }
+
+    .video__seekbar .seekbar__surface {
+        height: var(--touch-target);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root:not([data-motion="always"]) .video__play {
+        transition: none;
+    }
+
+    :root:not([data-motion="always"]) .video__play:active {
+        transform: none;
+    }
+
+    :root:not([data-motion="always"]) .video__button::before,
+    :root:not([data-motion="always"]) .video__retry::before {
+        transition: none;
+    }
+}
+
+@media (forced-colors: active) {
+    .video__stage,
+    .video__retry,
+    .video__play,
+    .video__badge,
+    .video__volume,
+    .video__actions .video__button {
+        border-color: CanvasText;
+    }
+
+    .video__controls,
+    .video__volume,
+    .video__play,
+    .video__actions .video__button,
+    .video__status--error,
+    .video__status--empty {
+        background: Canvas;
+        color: CanvasText;
+    }
+}

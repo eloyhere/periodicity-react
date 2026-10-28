@@ -9,31 +9,31 @@
 
 .icon[data-icon="Spinner"] {
     transform-origin: 50% 50%;
-    animation: icon-spinner-rotate 1400ms linear infinite;
+    animation: icon-spinner-rotate calc(1400ms * var(--motion-scale, 1)) linear var(--motion-repeat, infinite);
 }
 
 .icon[data-icon="Spinner"] .icon-motion-spinner__arc {
     stroke-dasharray: 1 100;
     stroke-dashoffset: 0;
-    animation: icon-spinner-dash 1400ms ease-in-out infinite;
+    animation: icon-spinner-dash calc(1400ms * var(--motion-scale, 1)) ease-in-out var(--motion-repeat, infinite);
 }
 
 .icon[data-icon="LoadingDots"] .icon-motion-dot {
-    animation: icon-dot-pulse 1200ms ease-in-out infinite;
+    animation: icon-dot-pulse calc(1200ms * var(--motion-scale, 1)) ease-in-out var(--motion-repeat, infinite);
 }
 
 .icon[data-icon="LoadingDots"] .icon-motion-dot--2 {
-    animation-delay: 160ms;
+    animation-delay: calc(160ms * var(--motion-scale, 1));
 }
 
 .icon[data-icon="LoadingDots"] .icon-motion-dot--3 {
-    animation-delay: 320ms;
+    animation-delay: calc(320ms * var(--motion-scale, 1));
 }
 
 .icon[data-icon="Pulse"] .icon-motion-pulse__line {
     stroke-dasharray: 100;
     stroke-dashoffset: 100;
-    animation: icon-pulse-draw 1800ms ease-in-out infinite;
+    animation: icon-pulse-draw calc(1800ms * var(--motion-scale, 1)) ease-in-out var(--motion-repeat, infinite);
 }
 
 .icon[data-icon="Orbit"],
@@ -41,42 +41,42 @@
 .icon[data-icon="Sync"],
 .icon[data-icon="BellRing"] {
     transform-origin: 50% 50%;
-    animation: icon-spin 1800ms linear infinite;
+    animation: icon-spin calc(1800ms * var(--motion-scale, 1)) linear var(--motion-repeat, infinite);
 }
 
 .icon[data-icon="Bars"] .icon-motion-bars__bar {
     transform-box: fill-box;
     transform-origin: 50% 100%;
-    animation: icon-bar-bounce 900ms ease-in-out infinite;
+    animation: icon-bar-bounce calc(900ms * var(--motion-scale, 1)) ease-in-out var(--motion-repeat, infinite);
 }
 
 .icon[data-icon="Bars"] .icon-motion-bars__bar--2 {
-    animation-delay: 120ms;
+    animation-delay: calc(120ms * var(--motion-scale, 1));
 }
 
 .icon[data-icon="Bars"] .icon-motion-bars__bar--3 {
-    animation-delay: 240ms;
+    animation-delay: calc(240ms * var(--motion-scale, 1));
 }
 
 .icon[data-icon="Wave"] .icon-motion-wave__line {
     stroke-dasharray: 24 76;
-    animation: icon-wave-flow 1600ms linear infinite;
+    animation: icon-wave-flow calc(1600ms * var(--motion-scale, 1)) linear var(--motion-repeat, infinite);
 }
 
 .icon[data-icon="Breathe"] .icon-motion-breathe__ring {
     transform-box: fill-box;
     transform-origin: center;
-    animation: icon-breathe 2200ms ease-in-out infinite;
+    animation: icon-breathe calc(2200ms * var(--motion-scale, 1)) ease-in-out var(--motion-repeat, infinite);
 }
 
 .icon[data-icon="Breathe"] .icon-motion-breathe__ring--inner {
-    animation-delay: -1100ms;
+    animation-delay: calc(-1100ms * var(--motion-scale, 1));
     animation-direction: reverse;
 }
 
 .icon[data-icon="BellRing"] {
     transform-origin: 50% 16%;
-    animation: icon-bell-ring 1600ms ease-in-out infinite;
+    animation: icon-bell-ring calc(1600ms * var(--motion-scale, 1)) ease-in-out var(--motion-repeat, infinite);
 }
 
 /* Live */
@@ -85,83 +85,83 @@
 .icon[data-icon="Ping"] .icon-live__ping {
     transform-box: fill-box;
     transform-origin: center;
-    animation: icon-live-ping 1600ms ease-out infinite;
+    animation: icon-live-ping calc(1600ms * var(--motion-scale, 1)) ease-out var(--motion-repeat, infinite);
 }
 
 .icon[data-icon="Live"] .icon-live__ring--2,
 .icon[data-icon="Ping"] .icon-live__ping--2 {
-    animation-delay: 320ms;
+    animation-delay: calc(320ms * var(--motion-scale, 1));
 }
 
 .icon[data-icon="Ping"] .icon-live__ping--3 {
-    animation-delay: 640ms;
+    animation-delay: calc(640ms * var(--motion-scale, 1));
 }
 
 .icon[data-icon="Broadcast"] .icon-live__broadcast {
-    animation: icon-live-fade 1200ms ease-in-out infinite;
+    animation: icon-live-fade calc(1200ms * var(--motion-scale, 1)) ease-in-out var(--motion-repeat, infinite);
 }
 
 .icon[data-icon="Broadcast"] .icon-live__broadcast--2 {
-    animation-delay: 300ms;
+    animation-delay: calc(300ms * var(--motion-scale, 1));
 }
 
 .icon[data-icon="Signal"] .icon-live__signal {
     transform-box: fill-box;
     transform-origin: 50% 100%;
-    animation: icon-live-bar 900ms ease-in-out infinite;
+    animation: icon-live-bar calc(900ms * var(--motion-scale, 1)) ease-in-out var(--motion-repeat, infinite);
 }
 
 .icon[data-icon="Signal"] .icon-live__signal--2 {
-    animation-delay: 100ms;
+    animation-delay: calc(100ms * var(--motion-scale, 1));
 }
 
 .icon[data-icon="Signal"] .icon-live__signal--3 {
-    animation-delay: 200ms;
+    animation-delay: calc(200ms * var(--motion-scale, 1));
 }
 
 .icon[data-icon="Signal"] .icon-live__signal--4 {
-    animation-delay: 300ms;
+    animation-delay: calc(300ms * var(--motion-scale, 1));
 }
 
 .icon[data-icon="Heartbeat"] .icon-live__heartbeat {
     stroke-dasharray: 100;
     stroke-dashoffset: 100;
-    animation: icon-live-draw 1800ms ease-in-out infinite;
+    animation: icon-live-draw calc(1800ms * var(--motion-scale, 1)) ease-in-out var(--motion-repeat, infinite);
 }
 
 .icon[data-icon="Waveform"] .icon-live__wave {
     transform-box: fill-box;
     transform-origin: 50% 50%;
-    animation: icon-live-wave 1100ms ease-in-out infinite;
+    animation: icon-live-wave calc(1100ms * var(--motion-scale, 1)) ease-in-out var(--motion-repeat, infinite);
 }
 
 .icon[data-icon="Waveform"] .icon-live__wave--2 {
-    animation-delay: 120ms;
+    animation-delay: calc(120ms * var(--motion-scale, 1));
 }
 
 .icon[data-icon="Waveform"] .icon-live__wave--3 {
-    animation-delay: 240ms;
+    animation-delay: calc(240ms * var(--motion-scale, 1));
 }
 
 .icon[data-icon="Waveform"] .icon-live__wave--4 {
-    animation-delay: 360ms;
+    animation-delay: calc(360ms * var(--motion-scale, 1));
 }
 
 .icon[data-icon="Waveform"] .icon-live__wave--5 {
-    animation-delay: 480ms;
+    animation-delay: calc(480ms * var(--motion-scale, 1));
 }
 
 .icon[data-icon="Connecting"] .icon-live__connecting {
     stroke-dasharray: 2 3;
-    animation: icon-live-flow 900ms linear infinite;
+    animation: icon-live-flow calc(900ms * var(--motion-scale, 1)) linear var(--motion-repeat, infinite);
 }
 
 .icon[data-icon="Recording"] .icon-live__recording-dot {
-    animation: icon-live-blink 1200ms ease-in-out infinite;
+    animation: icon-live-blink calc(1200ms * var(--motion-scale, 1)) ease-in-out var(--motion-repeat, infinite);
 }
 
 .icon[data-icon="Recording"] .icon-live__recording-ring {
-    animation: icon-live-fade 1200ms ease-in-out infinite;
+    animation: icon-live-fade calc(1200ms * var(--motion-scale, 1)) ease-in-out var(--motion-repeat, infinite);
 }
 
 @keyframes icon-spinner-rotate {
@@ -366,41 +366,41 @@
 }
 
 .icon-fx-spin {
-    animation: icon-fx-spin 1800ms linear infinite;
+    animation: icon-fx-spin calc(1800ms * var(--motion-scale, 1)) linear var(--motion-repeat, infinite);
 }
 
 .icon-fx-pulse {
-    animation: icon-fx-pulse 1400ms ease-in-out infinite;
+    animation: icon-fx-pulse calc(1400ms * var(--motion-scale, 1)) ease-in-out var(--motion-repeat, infinite);
 }
 
 .icon-fx-breathe {
-    animation: icon-fx-breathe 2200ms ease-in-out infinite;
+    animation: icon-fx-breathe calc(2200ms * var(--motion-scale, 1)) ease-in-out var(--motion-repeat, infinite);
 }
 
 .icon-fx-bounce {
-    animation: icon-fx-bounce 1200ms ease-in-out infinite;
+    animation: icon-fx-bounce calc(1200ms * var(--motion-scale, 1)) ease-in-out var(--motion-repeat, infinite);
 }
 
 .icon-fx-swing {
-    animation: icon-fx-swing 1600ms ease-in-out infinite;
+    animation: icon-fx-swing calc(1600ms * var(--motion-scale, 1)) ease-in-out var(--motion-repeat, infinite);
 }
 
 .icon-fx-wave {
-    animation: icon-fx-wave 1200ms ease-in-out infinite;
+    animation: icon-fx-wave calc(1200ms * var(--motion-scale, 1)) ease-in-out var(--motion-repeat, infinite);
 }
 
 .icon-fx-dash {
     stroke-dasharray: 4 4;
-    animation: icon-fx-dash 1000ms linear infinite;
+    animation: icon-fx-dash calc(1000ms * var(--motion-scale, 1)) linear var(--motion-repeat, infinite);
 }
 
 .icon-fx-bars {
     transform-origin: 50% 100%;
-    animation: icon-fx-bars 900ms ease-in-out infinite;
+    animation: icon-fx-bars calc(900ms * var(--motion-scale, 1)) ease-in-out var(--motion-repeat, infinite);
 }
 
 .icon-fx-scan {
-    animation: icon-fx-scan 1800ms ease-in-out infinite;
+    animation: icon-fx-scan calc(1800ms * var(--motion-scale, 1)) ease-in-out var(--motion-repeat, infinite);
 }
 
 @keyframes icon-fx-spin {
@@ -509,47 +509,47 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .icon[data-icon="Spinner"],
-    .icon[data-icon="Orbit"],
-    .icon[data-icon="Radar"],
-    .icon[data-icon="Sync"],
-    .icon[data-icon="BellRing"] {
+    :root:not([data-motion="always"]) .icon[data-icon="Spinner"],
+    :root:not([data-motion="always"]) .icon[data-icon="Orbit"],
+    :root:not([data-motion="always"]) .icon[data-icon="Radar"],
+    :root:not([data-motion="always"]) .icon[data-icon="Sync"],
+    :root:not([data-motion="always"]) .icon[data-icon="BellRing"] {
         animation: none;
     }
 
-    .icon[data-icon="Spinner"] .icon-motion-spinner__arc,
-    .icon[data-icon="Pulse"] .icon-motion-pulse__line,
-    .icon[data-icon="Wave"] .icon-motion-wave__line,
-    .icon[data-icon="Heartbeat"] .icon-live__heartbeat,
-    .icon[data-icon="Connecting"] .icon-live__connecting {
+    :root:not([data-motion="always"]) .icon[data-icon="Spinner"] .icon-motion-spinner__arc,
+    :root:not([data-motion="always"]) .icon[data-icon="Pulse"] .icon-motion-pulse__line,
+    :root:not([data-motion="always"]) .icon[data-icon="Wave"] .icon-motion-wave__line,
+    :root:not([data-motion="always"]) .icon[data-icon="Heartbeat"] .icon-live__heartbeat,
+    :root:not([data-motion="always"]) .icon[data-icon="Connecting"] .icon-live__connecting {
         animation: none;
         stroke-dashoffset: 0;
     }
 
-    .icon[data-icon="LoadingDots"] .icon-motion-dot,
-    .icon[data-icon="Bars"] .icon-motion-bars__bar,
-    .icon[data-icon="Breathe"] .icon-motion-breathe__ring,
-    .icon[data-icon="Live"] .icon-live__ring,
-    .icon[data-icon="Ping"] .icon-live__ping,
-    .icon[data-icon="Broadcast"] .icon-live__broadcast,
-    .icon[data-icon="Signal"] .icon-live__signal,
-    .icon[data-icon="Waveform"] .icon-live__wave,
-    .icon[data-icon="Recording"] .icon-live__recording-dot,
-    .icon[data-icon="Recording"] .icon-live__recording-ring {
+    :root:not([data-motion="always"]) .icon[data-icon="LoadingDots"] .icon-motion-dot,
+    :root:not([data-motion="always"]) .icon[data-icon="Bars"] .icon-motion-bars__bar,
+    :root:not([data-motion="always"]) .icon[data-icon="Breathe"] .icon-motion-breathe__ring,
+    :root:not([data-motion="always"]) .icon[data-icon="Live"] .icon-live__ring,
+    :root:not([data-motion="always"]) .icon[data-icon="Ping"] .icon-live__ping,
+    :root:not([data-motion="always"]) .icon[data-icon="Broadcast"] .icon-live__broadcast,
+    :root:not([data-motion="always"]) .icon[data-icon="Signal"] .icon-live__signal,
+    :root:not([data-motion="always"]) .icon[data-icon="Waveform"] .icon-live__wave,
+    :root:not([data-motion="always"]) .icon[data-icon="Recording"] .icon-live__recording-dot,
+    :root:not([data-motion="always"]) .icon[data-icon="Recording"] .icon-live__recording-ring {
         animation: none;
         opacity: 1;
         transform: none;
     }
 
-    .icon-fx-spin,
-    .icon-fx-pulse,
-    .icon-fx-breathe,
-    .icon-fx-bounce,
-    .icon-fx-swing,
-    .icon-fx-wave,
-    .icon-fx-dash,
-    .icon-fx-bars,
-    .icon-fx-scan {
+    :root:not([data-motion="always"]) .icon-fx-spin,
+    :root:not([data-motion="always"]) .icon-fx-pulse,
+    :root:not([data-motion="always"]) .icon-fx-breathe,
+    :root:not([data-motion="always"]) .icon-fx-bounce,
+    :root:not([data-motion="always"]) .icon-fx-swing,
+    :root:not([data-motion="always"]) .icon-fx-wave,
+    :root:not([data-motion="always"]) .icon-fx-dash,
+    :root:not([data-motion="always"]) .icon-fx-bars,
+    :root:not([data-motion="always"]) .icon-fx-scan {
         animation: none;
         opacity: 1;
         transform: none;

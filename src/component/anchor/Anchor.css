@@ -17,7 +17,7 @@
     height: 14px;
     border-radius: var(--radius-pill);
     background: transparent;
-    transition: background-color 150ms var(--ease-standard);
+    transition: background-color calc(150ms * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .anchor:hover {

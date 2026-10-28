@@ -65,7 +65,7 @@
     margin: 0 8px;
     border-radius: var(--radius-xs);
     color: var(--text);
-    transition: background-color 120ms var(--ease-standard);
+    transition: background-color calc(120ms * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .context-menu__item:hover {

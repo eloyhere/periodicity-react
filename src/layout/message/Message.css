@@ -155,10 +155,10 @@
     color: var(--muted);
     cursor: pointer;
     transition:
-        background-color 120ms ease,
-        border-color 120ms ease,
-        color 120ms ease,
-        transform 120ms ease;
+        background-color calc(120ms * var(--motion-scale, 1)) ease,
+        border-color calc(120ms * var(--motion-scale, 1)) ease,
+        color calc(120ms * var(--motion-scale, 1)) ease,
+        transform calc(120ms * var(--motion-scale, 1)) ease;
 }
 
 .message-reactions__option:hover {
@@ -217,8 +217,8 @@
     color: var(--muted);
     cursor: pointer;
     transition:
-        background-color 120ms ease,
-        color 120ms ease;
+        background-color calc(120ms * var(--motion-scale, 1)) ease,
+        color calc(120ms * var(--motion-scale, 1)) ease;
 }
 
 .message-reactions__more:hover {
@@ -285,8 +285,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .message-reactions__option,
-    .message-reactions__more {
+    :root:not([data-motion="always"]) .message-reactions__option,
+    :root:not([data-motion="always"]) .message-reactions__more {
         transition: none;
     }
 }

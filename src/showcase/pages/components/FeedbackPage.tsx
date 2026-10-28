@@ -16,13 +16,12 @@ import {
     Banner,
     Button,
     Chip,
-    CircularProgress,
     Divider,
     ElementLoading,
     EmptyState,
     Progress,
-    ProgressRing,
     Rate,
+    Ring,
     Skeleton,
     Spinner,
     Tag,
@@ -81,9 +80,9 @@ const progressCode: string = `<Columns count={3} gap="lg">
         <Text variant="label" tone="muted">Progress</Text>
         <Inline gap="md" align="center">
             <Progress value={68} label="Cycle" showValue />
-            <ProgressRing value={68} size={72} label="Cycle" />
-            <CircularProgress minimum={0} maximum={0} step={0} label="Unknown progress" />
-            <CircularProgress value={68} maximum={100} />
+            <Ring value={68} size={72} showValue label="Cycle" />
+            <Ring label="Unknown progress" />
+            <Ring size="lg" tone="mint" label="Syncing" />
         </Inline>
         <Progress label="Loading" />
     </Stack>
@@ -281,9 +280,9 @@ const FeedbackPage: FC = () => {
                         </Text>
                         <Inline gap="md" align="center">
                             <Progress value={68} label="Cycle" showValue />
-                            <ProgressRing value={68} size={72} label="Cycle" />
-                            <CircularProgress minimum={0} maximum={0} step={0} label="Unknown progress" />
-                            <CircularProgress value={68} maximum={100} />
+                            <Ring value={68} size={72} showValue label="Cycle" />
+                            <Ring label="Unknown progress" />
+                            <Ring size="lg" tone="mint" label="Syncing" />
                         </Inline>
                         <Progress label="Loading" />
                     </Stack>

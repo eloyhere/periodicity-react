@@ -119,7 +119,7 @@
     border-radius: 1px;
     background: currentColor;
     vertical-align: -0.12em;
-    animation: agent-caret 1s steps(2, jump-none) infinite;
+    animation: agent-caret calc(1s * var(--motion-scale, 1)) steps(2, jump-none) var(--motion-repeat, infinite);
 }
 
 .agent-chat__markdown {
@@ -251,7 +251,7 @@
 
 .agent-chat__thinking-chevron {
     margin-left: auto;
-    transition: transform 180ms ease;
+    transition: transform calc(180ms * var(--motion-scale, 1)) ease;
 }
 
 .agent-chat__thinking--open .agent-chat__thinking-chevron {
@@ -263,8 +263,8 @@
     grid-template-rows: 0fr;
     opacity: 0;
     transition:
-        grid-template-rows 220ms cubic-bezier(0.2, 0, 0, 1),
-        opacity 160ms ease;
+        grid-template-rows calc(220ms * var(--motion-scale, 1)) cubic-bezier(0.2, 0, 0, 1),
+        opacity calc(160ms * var(--motion-scale, 1)) ease;
 }
 
 .agent-chat__thinking--open .agent-chat__thinking-panel {
@@ -307,15 +307,15 @@
     border-radius: var(--radius-pill);
     background: currentColor;
     opacity: 0.55;
-    animation: agent-typing 1s ease-in-out infinite;
+    animation: agent-typing calc(1s * var(--motion-scale, 1)) ease-in-out var(--motion-repeat, infinite);
 }
 
 .agent-chat__typing > span:nth-child(2) {
-    animation-delay: 140ms;
+    animation-delay: calc(140ms * var(--motion-scale, 1));
 }
 
 .agent-chat__typing > span:nth-child(3) {
-    animation-delay: 280ms;
+    animation-delay: calc(280ms * var(--motion-scale, 1));
 }
 
 .agent-chat__typing--small {
@@ -335,7 +335,7 @@
     border-radius: 1px;
     background: currentColor;
     vertical-align: -0.12em;
-    animation: agent-caret 1s steps(2, jump-none) infinite;
+    animation: agent-caret calc(1s * var(--motion-scale, 1)) steps(2, jump-none) var(--motion-repeat, infinite);
 }
 
 @keyframes agent-typing {
@@ -365,11 +365,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .agent-chat__typing > span,
-    .agent-chat__caret,
-    .agent-chat__bubble[data-streaming="true"] .agent-chat__markdown > :last-child::after,
-    .agent-chat__thinking-chevron,
-    .agent-chat__thinking-panel {
+    :root:not([data-motion="always"]) .agent-chat__typing > span,
+    :root:not([data-motion="always"]) .agent-chat__caret,
+    :root:not([data-motion="always"])
+        .agent-chat__bubble[data-streaming="true"]
+        .agent-chat__markdown
+        > :last-child::after,
+    :root:not([data-motion="always"]) .agent-chat__thinking-chevron,
+    :root:not([data-motion="always"]) .agent-chat__thinking-panel {
         animation: none;
         transition: none;
     }

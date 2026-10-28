@@ -45,8 +45,8 @@
     border-radius: inherit;
     background: var(--text-field-bg);
     transition:
-        border-color 140ms var(--ease-standard),
-        background-color 140ms var(--ease-standard);
+        border-color calc(140ms * var(--motion-scale, 1)) var(--motion-ease-standard),
+        background-color calc(140ms * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .text-field__edge {
@@ -58,9 +58,9 @@
     pointer-events: none;
     transform: scale(0.985);
     transition:
-        opacity 220ms var(--ease-decelerate),
-        transform 220ms var(--ease-decelerate),
-        border-color 140ms var(--ease-standard);
+        opacity calc(220ms * var(--motion-scale, 1)) var(--motion-ease-decelerate),
+        transform calc(220ms * var(--motion-scale, 1)) var(--motion-ease-decelerate),
+        border-color calc(140ms * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .text-field__row {
@@ -80,7 +80,7 @@
     align-items: center;
     justify-content: center;
     color: var(--muted);
-    transition: color 140ms var(--ease-standard);
+    transition: color calc(140ms * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .text-field:focus-within .text-field__leading,
@@ -128,13 +128,13 @@
     transform-origin: left center;
     will-change: top, transform, font-size;
     transition:
-        top 220ms var(--ease-decelerate),
-        left 220ms var(--ease-decelerate),
-        padding 220ms var(--ease-decelerate),
-        background-color 140ms var(--ease-standard),
-        color 140ms var(--ease-standard),
-        font-size 220ms var(--ease-decelerate),
-        transform 220ms var(--ease-decelerate);
+        top calc(220ms * var(--motion-scale, 1)) var(--motion-ease-decelerate),
+        left calc(220ms * var(--motion-scale, 1)) var(--motion-ease-decelerate),
+        padding calc(220ms * var(--motion-scale, 1)) var(--motion-ease-decelerate),
+        background-color calc(140ms * var(--motion-scale, 1)) var(--motion-ease-standard),
+        color calc(140ms * var(--motion-scale, 1)) var(--motion-ease-standard),
+        font-size calc(220ms * var(--motion-scale, 1)) var(--motion-ease-decelerate),
+        transform calc(220ms * var(--motion-scale, 1)) var(--motion-ease-decelerate);
 }
 
 .text-field__required {
@@ -152,10 +152,10 @@
 
 .text-field__hint {
     color: var(--muted);
-    animation: text-field-hint-enter 260ms var(--ease-decelerate) both;
+    animation: text-field-hint-enter calc(260ms * var(--motion-scale, 1)) var(--motion-ease-decelerate) both;
     transition:
-        color 160ms var(--ease-standard),
-        transform 160ms var(--ease-standard);
+        color calc(160ms * var(--motion-scale, 1)) var(--motion-ease-standard),
+        transform calc(160ms * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .text-field:hover .text-field__hint,
@@ -394,7 +394,7 @@
 }
 
 .text-field__input::placeholder {
-    transition: color 140ms var(--ease-standard);
+    transition: color calc(140ms * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 /* Disabled fields keep a visible boundary instead of fading the whole shell. */
@@ -421,13 +421,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .text-field__hint {
+    :root:not([data-motion="always"]) .text-field__hint {
         animation: none;
         transition: none;
     }
 
-    .text-field:hover .text-field__hint,
-    .text-field:focus-within .text-field__hint {
+    :root:not([data-motion="always"]) .text-field:hover .text-field__hint,
+    :root:not([data-motion="always"]) .text-field:focus-within .text-field__hint {
         transform: none;
     }
 }

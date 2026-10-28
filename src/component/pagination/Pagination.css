@@ -29,8 +29,8 @@
     border: 1px solid transparent;
     border-radius: var(--radius-sm);
     transition:
-        background-color var(--duration-fast) var(--ease-standard),
-        border-color var(--duration-fast) var(--ease-standard);
+        background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        border-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .pagination__button {
@@ -118,7 +118,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .pagination__surface {
+    :root:not([data-motion="always"]) .pagination__surface {
         transition: none;
     }
 }

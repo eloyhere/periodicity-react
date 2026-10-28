@@ -27,7 +27,8 @@
 .spinner__svg {
     width: 100%;
     height: 100%;
-    animation: spinner-rotate calc(var(--duration-slow) * 2) linear infinite;
+    animation: spinner-rotate calc(calc(var(--motion-duration-slow) * var(--motion-essential-scale, 1)) * 2) linear
+        var(--motion-repeat, infinite);
 }
 
 .spinner__track {
@@ -46,11 +47,5 @@
 @keyframes spinner-rotate {
     to {
         transform: rotate(360deg);
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .spinner__svg {
-        animation: none;
     }
 }

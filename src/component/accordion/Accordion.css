@@ -42,7 +42,7 @@
     position: relative;
     min-width: 0;
     border-radius: var(--radius-sm);
-    transition: background-color var(--duration-fast) var(--ease-standard);
+    transition: background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .accordion__surface:hover:not([data-disabled="true"]) {
@@ -100,8 +100,8 @@
     flex: 0 0 auto;
     color: var(--color-on-surface-variant);
     transition:
-        color var(--duration-fast) var(--ease-standard),
-        transform var(--duration-medium) var(--ease-standard);
+        color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        transform calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .accordion__trigger[aria-expanded="true"] .accordion__chevron {
@@ -119,7 +119,8 @@
 }
 
 .accordion__panel:not([hidden]) {
-    animation: accordion-reveal var(--duration-medium) var(--ease-decelerate);
+    animation: accordion-reveal calc(var(--motion-duration-medium) * var(--motion-scale, 1))
+        var(--motion-ease-decelerate);
 }
 
 .accordion__content {
@@ -149,12 +150,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .accordion__surface,
-    .accordion__chevron {
+    :root:not([data-motion="always"]) .accordion__surface,
+    :root:not([data-motion="always"]) .accordion__chevron {
         transition: none;
     }
 
-    .accordion__panel:not([hidden]) {
+    :root:not([data-motion="always"]) .accordion__panel:not([hidden]) {
         animation: none;
     }
 }

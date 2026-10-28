@@ -2,10 +2,10 @@
 
 面向产品界面、管理后台和数据密集型应用的 Material 风格 React 19 组件库。
 
-`periodicity-react` 提供 **141 个 `Periodicity*` 组件**、四种统计图、文件与图片选择器、作用域排版、设计系统 Provider，以及 **12 个内置语言包**。API 以 TypeScript 为先、以 Flex 布局为基础，并尽量贴近浏览器原生行为：在合理的地方透传原生属性、事件、ARIA 和 `ref`。
+`periodicity-react` 提供 **152 个 `Periodicity*` 组件**、四种统计图、文件与图片选择器、作用域排版、设计系统 Provider，以及 **12 个内置语言包**。API 以 TypeScript 为先、以 Flex 布局为基础，并尽量贴近浏览器原生行为：在合理的地方透传原生属性、事件、ARIA 和 `ref`。
 
 - **npm：** [`periodicity-react`](https://www.npmjs.com/package/periodicity-react)
-- **版本：** `0.1.14`
+- **版本：** `0.1.15`
 - **在线示例：** 运行 `npm run dev`；源码见 [`src/showcase`](src/showcase)
 - **源码：** [github.com/eloyhere/periodicity-react](https://github.com/eloyhere/periodicity-react)
 - **要求：** React 19、React DOM 19
@@ -13,7 +13,7 @@
 
 ## 目录
 
-- [0.1.9 包含什么](#019-包含什么)
+- [当前版本新增特性](#当前版本新增特性)
 - [设计原则](#设计原则)
 - [要求与安装](#要求与安装)
 - [快速开始](#快速开始)
@@ -29,6 +29,8 @@
 - [导航与布局](#导航与布局)
 - [消息与评论](#消息与评论)
 - [排版与 Font](#排版与-font)
+- [文档](#文档)
+- [媒体](#媒体)
 - [动效与标准事件](#动效与标准事件)
 - [可访问性](#可访问性)
 - [样式与 Token](#样式与-token)
@@ -37,24 +39,29 @@
 - [开发](#开发)
 - [更新日志](#更新日志)
 
-## 0.1.9 包含什么
+## 当前版本新增特性
 
-- **Canvas 与 WebGL 统计图。** `BarChart`、`PieChart`、`LineChart`、`ScatterChart` 共用响应式画布框架：WebGL 系列层、canvas 回退、DPR 尺寸、图例、屏幕阅读器数据表，并通过共享的优先级 task 队列调度重绘。
-- **原生文件与图片选择器。** `useFilePick` 驱动 `FilePicker`、`PhotoPicker`、`AvatarPicker` 内部渲染的隐藏原生 file 输入。图片与头像支持 Base64 预览和 Dialog 内裁剪，并区分确认、取消、关闭三种结果。
-- **完整的国际化收尾。** 图表、选择器、评论、Transfer、日期时间、Mention、评分、进度、单选、滚动条、右键菜单、Combobox、Loading，以及邮箱/电话校验文案，都会读取当前语言包；12 个内置 locale 全部覆盖。
-- **作用域排版。** `Font` 与 `useFont` 通过嵌套字体上下文提供字号层级、字体族、字重、行高、字距、大小写转换和对齐方式。
-- **Electron 安全浮层。** Dropdown 与 Popover 面板设置 `-webkit-app-region: no-drag`；菜单覆盖在 Electron 自定义标题栏、应用栏或 Hero 的拖拽区域上时，整个面板仍可点击。
+`0.1.15` 交付媒体家族（`PeriodicityAudio`、两个视频播放器与 `PeriodicityBarrage`）、Android 风格的
+`PeriodicityRing` 与 `PeriodicitySeekBar`、`PeriodicityTerminal`、表单校验、Frame 布局、虚拟瀑布流，以及统一的 Motion
+与锚点跟踪层。以下内容均已进入 `main`，随本版本发布。
+
+- **媒体家族。** `PeriodicityAudio` 在原生 `audio` 外提供紧凑播放器：封面块、标题与副标题，以及内置播放/暂停、进度、时间、静音、音量与倍速操作栏，并提供 `slots.controls` 渲染函数；`PeriodicityHorizontalVideo` 与 `PeriodicityVerticalVideo` 在原生 `video` 外提供 16:9 与 9:16 舞台，内置播放、进度、时间、静音、音量与全屏操作栏，并提供 `slots.controls` 渲染函数；`PeriodicityBarrage` 在任意被包裹内容上浮动评论，图层不接收指针事件。
+- **`PeriodicityRing` 取代 `PeriodicityProgressRing` 与 `PeriodicityCircularProgress`。** 不传 `value` 时无限旋转，作为不确定加载环；传入 `value` 时绘制确定进度弧，`showValue` 在圆心显示百分比。`PeriodicityElementLoading` 与 `PeriodicityFullscreenLoading` 已改用 `Ring`。
+- **`PeriodicityTerminal` 与 `PeriodicitySeekBar`。** 终端渲染带命令输入框和图标发送按钮的交互式控制台记录；`onInput` / `onChange` 把命令执行留给调用者，`history` / `onHistoryChange` 绑定 ArrowUp/ArrowDown 历史回溯。拖动条是 Android 风格的原生 range 输入，带二级缓冲进度、可选刻度、步进吸附、横向或纵向方向，以及 `onSeekStart` / `onSeekEnd`。
+- **瀑布流拆分。** `PeriodicityWaterfallLayout` 移到 `src/layout/waterfall/normal`；`PeriodicityVirtualWaterfallLayout` 提供受 adapter 驱动的虚拟瀑布流，两者都接受 `slots.item`。
+- **`DateTimePicker` 的年份与月份改用 `NumberInput`**，键入数字、方向键步进与范围收敛都与小时、分钟字段一致。
+- **Frame 布局。** `PeriodicityFrame` 在同一个受限、可裁剪的画框内叠放整页的 `PeriodicityFramePage` 子视图；未激活页面保持挂载并隐藏。
 
 ## 设计原则
 
 Periodicity 遵循六条规则：
 
 - **语义优先于装饰。** 组件消费 `--color-primary`、`--color-on-surface`、`--space-4` 等 token，不硬编码某套品牌色。切换主题或色盲配色时，所有组件会一起变化。
-- **Flex 优先布局。** 组件使用 flexbox 组合，不依赖 CSS Grid，可以安全嵌入宿主布局、虚拟列表和滚动容器。
+- **Flex 优先布局。** 所有结构性布局都用 flexbox 组合，可以安全嵌入宿主布局、虚拟列表和滚动容器。包内仅有的 CSS Grid 位于装饰性表面：消息回应选择器、聊天 emoji 弹层、Agent 思考折叠面板与 LaTeX 公式行。
 - **原生行为优先。** 表单仍可提交，链接仍可导航，输入仍走浏览器校验，对话框仍管理焦点，`ref` 指向真实 DOM；ARIA 和 data 属性是在原生语义上的增强。
 - **可组合的表面。** `Surface`、`StateLayer`、`Ripple`、`Icon`、`Text`、`Font` 和布局原语是共享积木；高层组件保持轻量，并可通过 token 定制。
 - **默认可访问、可国际化。** 焦点环、键盘路径、减少动效、经过对比度审计的配色、强制颜色样式，以及 12 个语言包都属于公共 API。
-- **调度而非抖动。** 集合默认支持虚拟化，图表把绘制交给 task 调度器，输入变化时会取消过期的帧。
+- **调度而非抖动。** 集合支持可选的虚拟化，图表把绘制交给 task 调度器，输入变化时会取消过期的帧。
 
 ## 要求与安装
 
@@ -117,20 +124,21 @@ export function SignIn() {
 
 ## 公共导出面
 
-组件导出只使用 `Periodicity*` 前缀；包根同时导出两个 Hook 和标准事件工具。完整组件清单见[组件索引](#组件索引)。
+组件导出只使用 `Periodicity*` 前缀；包根同时导出两个 Hook、消息回应预设和标准事件工具。完整组件清单见[组件索引](#组件索引)。
 
 | 导出分组 | 名称                                                                   |
 | -------- | ---------------------------------------------------------------------- |
 | 组件     | 所有 `Periodicity*` 组件，以及已导出的对应 Props 类型                  |
 | Hooks    | `useFilePick`、`useFont`                                               |
 | 标准事件 | `createStandardEvent`、`useStandardEvents`、`withStandardEvents`       |
+| 运行值   | `defaultMessageReactions`、`MessageReactionOption`                     |
 | 类型     | 共享 Props、`PeriodicityStandardEventProps`、图表/选择器/字体/语言类型 |
 
 ```tsx
-import { PeriodicityButton, PeriodicityDialog, useFilePick } from "periodicity-react";
+import { PeriodicityButton, PeriodicityDialog, defaultMessageReactions, useFilePick } from "periodicity-react";
 ```
 
-发布包刻意只暴露带前缀的组件表面。
+发布包刻意只暴露带前缀的组件表面与上述运行值，不导出其他内容。
 
 ## 主题
 
@@ -260,7 +268,7 @@ export function LocalisedApp() {
 | `pt-PT` | Português (Portugal) |
 | `pt-BR` | Português (Brasil)   |
 
-支持 `fr-CA` 这类自定义 locale；缺失的 key 会按回退语言落到 `en-GB`。带可见标签的组件也接受 labels props，方便产品自定义文案。用例页面的语言选择器显示“原生名称 · 英文名称”，并禁用浏览器自动翻译，避免页面语言被外部翻译器改写。
+支持 `fr-CA` 这类自定义 locale；缺失的 key 会按回退语言落到 `en-GB`。带可见标签的组件也接受 `label` props，方便产品自定义文案。用例站的语言选择器显示“原生名称 · 英文名称”，并禁用浏览器自动翻译，避免页面语言被外部翻译器改写。
 
 ## 统计图
 
@@ -489,7 +497,38 @@ import { PeriodicityTextInput } from "periodicity-react";
 />;
 ```
 
-邮箱和电话输入会清洗输入、保持光标位置、使用原生 pattern 属性，并从当前语言包读取本地化校验消息。`PeriodicityForm`、`PeriodicityFormField`、`PeriodicityFormActions` 封装原生 `<form>`，为原生控件生成 `label htmlFor`、`aria-describedby` 和 `aria-invalid` 关联。
+邮箱和电话输入会清洗输入、保持光标位置、使用原生 pattern 属性，并从当前语言包读取本地化校验消息。
+
+### 表单
+
+`PeriodicityForm` 仍然是原生 `<form>`：submit、reset、method、action、enctype 与 autocomplete 行为不变，`onSubmit` / `onReset` 依旧收到原生事件；在此基础上叠加校验与提交流水线。`validate(values)` 收集表单值并返回字段错误，只有校验通过才会调用 `onValidSubmit(values, api)`，异步提交期间表单保持 pending。错误表通过 context 共享，一次服务端返回即可标记所有匹配的 `FormField`；`FormMessage` 汇总失败信息，校验不通过时焦点会先落到它上面。
+
+```tsx
+import {
+    PeriodicityForm,
+    PeriodicityFormField,
+    PeriodicityFormMessage,
+    PeriodicityFormSubmit,
+} from "periodicity-react";
+
+<PeriodicityForm
+    validate={(values) =>
+        typeof values.email === "string" && values.email.includes("@") ? {} : { email: "请输入包含 @ 的地址。" }
+    }
+    onValidSubmit={async (values, api) => {
+        const result = await subscribe(values);
+        api.setErrors(result.errors);
+    }}
+>
+    <PeriodicityFormMessage />
+    <PeriodicityFormField label="邮箱" name="email" hint="我们不会公开你的邮箱。" required>
+        {(field) => <input {...field} type="email" autoComplete="email" />}
+    </PeriodicityFormField>
+    <PeriodicityFormSubmit content="订阅" pendingContent="订阅中…" />
+</PeriodicityForm>;
+```
+
+`Form` 接受 `validate`、`onValidSubmit`、`onInvalidSubmit`、`onSubmitError`、`errors` / `defaultErrors`、`pending` / `defaultPending` 与对应的变更回调。`FormField` 为控件或其渲染函数绑定 `label htmlFor`、`name`、`required`、`aria-describedby`、`aria-invalid` 与 `aria-errormessage`，未显式传 `error` 时从表单错误表读取。`FormActions` 负责底部动作对齐；表单 pending 期间 `FormSubmit` 自动禁用并显示 `Ring`。
 
 ### 按钮
 
@@ -501,7 +540,30 @@ import { PeriodicityTextInput } from "periodicity-react";
 
 ### 其他控件
 
-`PeriodicityCheckbox`、`PeriodicityRadio` / `PeriodicityRadioGroup`、`PeriodicitySwitch`、`PeriodicityRange`、`PeriodicityField`、`PeriodicityFieldGroup`、`PeriodicitySelect`、`PeriodicityVirtualSelect`、`PeriodicityTreeSelect`、`PeriodicityCombobox` 覆盖常见表单和筛选布局，均支持受控/非受控值、disabled/readOnly 和原生属性透传。
+`PeriodicityCheckbox`、`PeriodicityRadio` / `PeriodicityRadioGroup`、`PeriodicitySwitch`、`PeriodicityRange`、`PeriodicitySeekBar`、`PeriodicityField`、`PeriodicityFieldGroup`、`PeriodicitySelect`、`PeriodicityVirtualSelect`、`PeriodicityTreeSelect`、`PeriodicityCombobox` 覆盖常见表单和筛选布局，均支持受控/非受控值、disabled/readOnly 和原生属性透传。
+
+### SeekBar
+
+`PeriodicitySeekBar` 是 Android 风格拖动条：原生 `input type="range"` 之上绘制轨道与滑块，支持二级缓冲进度、可选刻度、步进吸附、滑块在悬浮与按压时的 ripple，以及横向或纵向方向（纵向用 `length` 指定长度）。
+
+```tsx
+import { PeriodicitySeekBar } from "periodicity-react";
+
+<PeriodicitySeekBar
+    label="播放进度"
+    min={0}
+    max={240}
+    step={5}
+    defaultValue={95}
+    secondaryValue={140}
+    ticks={5}
+    showValue
+    onChange={(seconds) => setPosition(seconds)}
+    onSeekEnd={(seconds) => savePosition(seconds)}
+/>;
+```
+
+`SeekBar` 接受 `value` / `defaultValue` 与必填的 `onChange(value)`，以及 `min`、`max`、`step`、`secondaryValue`、`ticks`、`label`、`showValue`、`format`、`hint`、`error`、`size`、`tone`、`direction`、`length` 和 `onSeekStart` / `onSeekEnd`。
 
 ## 选择器与日历
 
@@ -586,24 +648,38 @@ import {
 
 浮层家族覆盖 Dialog、Confirm/Message/Input Dialog、Drawer、DrawerLayout、ContextMenu、Dropdown、Popover、Tooltip、Snackbar、Toast、Alert、Banner、Backdrop，以及全屏/局部 Loading。它们支持受控/非受控打开状态、关闭原因、Escape 处理、焦点恢复和原生面板属性。
 
+两个 Loading 浮层都改为旋转 `PeriodicityRing`——取代 `PeriodicityProgressRing` 与 `PeriodicityCircularProgress` 的 Android 风格圆形指示器。不传 `value` 时无限旋转，作为不确定加载环；传入 `value` 时绘制确定进度弧，`showValue` 在圆心显示百分比。
+
+```tsx
+import { PeriodicityRing } from "periodicity-react";
+
+<PeriodicityRing value={68} size="lg" thickness={6} showValue label="上传进度" />;
+<PeriodicityRing size="sm" label="保存中" />;
+```
+
 Dropdown 和 Popover 会 portal 到 `document.body`，并标记 `-webkit-app-region: no-drag`，因此即使覆盖在 Electron 自定义应用栏或 Hero 的拖拽区域上，整个面板仍可交互。
 
 ## 导航与布局
 
-导航组件包括 `PeriodicityNavigationView`、`PeriodicityTabs` / `PeriodicityTabPanel`、`PeriodicityPager` / `PeriodicityPage`、`PeriodicityMenu` 家族、`PeriodicityStepper`、`PeriodicityAccordion`。
+导航组件包括 `PeriodicityNavigation`、`PeriodicityTabs` / `PeriodicityTabPanel`、`PeriodicityPager` / `PeriodicityPage`、`PeriodicityMenu` 家族、`PeriodicityStepper`、`PeriodicityAccordion`。
 
-布局以 Flex 为基础，不使用 CSS Grid。结构组件包括：
+布局以 Flex 为基础：所有结构组件都是 flex 容器。结构组件包括：
 
 - `PeriodicityGridLayout`
 - `PeriodicityLinearLayout` 和 `PeriodicityLinearLayoutItem`
 - `PeriodicityConstraintLayout` 和 `PeriodicityConstraint`
 - `PeriodicityWaterfallLayout`
+- `PeriodicityVirtualWaterfallLayout`
 - `PeriodicityDrawerLayout`
 - `PeriodicityCoordinator`、`PeriodicityAppBar`、`PeriodicityCollapse`、`PeriodicityToolbar`
 - `PeriodicitySticky` 和 `PeriodicityStickyPage`
 - `PeriodicityScrollbar`
 - `PeriodicityScroll`
 - `PeriodicityDrag`
+
+`PeriodicityVirtualWaterfallLayout` 是受 adapter 驱动的虚拟瀑布流：每张卡片通过数值 `height` 字段、`getHeight` /
+`itemHeight` 或 `WaterfallAdapter` 提供高度，卡片进入当前最短的列，只有视口内的纵向片段会挂载。两个瀑布流布局都接受
+`slots.item`，用于替换包裹每张卡片的元素；`state.className` 与 `state.style` 保留布局所需的定位信息。
 
 `PeriodicityCoordinator` 只有 `collapse`、`header`、`main` 三个插槽。`collapse` 随 `main` 滚动从 `collapseHeight` 收缩到 0；`header` 是固定 AppBar；`main` 是滚动视口。当 `main` 无法滚动时，未被内部组件消费的竖直滚轮会用于折叠或恢复 collapse，而不是滚动页面；嵌套滚动容器仍然优先。
 
@@ -704,9 +780,84 @@ import { PeriodicityMarkdown, PeriodicityTex } from "periodicity-react";
 
 `Markdown` 接受 `source` 和可选的 `breaks`；`Tex` 接受 `source` 和 `display`，用于在行内公式与独立公式之间切换；完整文档模式下 `display` 会被忽略。通过 `\input` 或 `\bibliography` 引用的外部文件不会被加载，宏包不会执行，未知环境会退化为渲染其内容，`align` 的每一行不会单独编号。
 
+`PeriodicityTerminal` 渲染带命令输入框和图标发送按钮的交互式终端记录。面板、边框、提示符、光标和每行的色调全部来自语义颜色角色，因此任何主题预设、明暗模式或作用域内的 `tokens` 都会重新为整个终端上色。
+
+```tsx
+import { useState } from "react";
+import { PeriodicityTerminal, type PeriodicityTerminalLine } from "periodicity-react";
+
+const deployLog: readonly PeriodicityTerminalLine[] = [{ text: "✓ 14 packages linked", tone: "success" }];
+const [command, setCommand] = useState("");
+const [history, setHistory] = useState<string[]>([]);
+const [lines, setLines] = useState<readonly PeriodicityTerminalLine[]>(deployLog);
+
+const runCommand = (submitted: string): void => {
+    setCommand("");
+    setLines((current) => [
+        ...current,
+        { text: submitted, prompt: "~" },
+        { text: "✓ all systems nominal", tone: "success" },
+    ]);
+};
+
+<PeriodicityTerminal
+    title="periodicity — deploy"
+    controls
+    maxHeight={260}
+    prompt="~"
+    lines={lines}
+    value={command}
+    onInput={setCommand}
+    onChange={runCommand}
+    history={history}
+    onHistoryChange={setHistory}
+    sendLabel="Run command"
+/>;
+```
+
+终端本身不执行 shell：`onInput` 在每次编辑后回传文本，`onChange` 在按下 Enter 或点击发送按钮提交非空命令时回传命令，由调用者执行命令并把输出追加到 `lines`。`history` 按从旧到新排列，驱动 ArrowUp/ArrowDown 回溯；`onHistoryChange` 在提交后回传下一份历史数组。传入 `editable={false}` 可保留纯记录模式。设定 `maxHeight` 后记录区可键盘聚焦，并暴露 `role="log"`；打开 `live` 会以礼貌方式播报新增行。
+
+## 媒体
+
+`PeriodicityAudio` 在原生 `audio` 元素外渲染紧凑播放器：封面块、可选的标题与副标题，以及包含播放/暂停、带缓冲进度的进度、时间、静音开关、竖直音量条与倍速的操作栏。它保留全部原生媒体属性与事件，外壳、按钮、进度轨道与音量条都使用页面的表面色与强调色，因此播放器会跟随当前主题。
+
+```tsx
+import { PeriodicityAudio } from "periodicity-react";
+
+<PeriodicityAudio src="/episode.mp3" title="第 12 期" subtitle="现场录音" caption="外壳与操作栏会跟随当前主题。" />;
+```
+
+`PeriodicityAudio` 接受 `src`、`sources`、`controls`（`custom`、`native` 或 `none`）、`label`、`title`、`subtitle`、`artwork`、`caption`、`rates`、`labels` 与 `slots`。`slots.controls` 用渲染函数替换操作栏，函数会收到实时状态、解析后的文案，以及播放、跳转、音量、静音与倍速动作；`slots.actions` 在标题旁追加自定义 UI。当 `title` 为字符串时，它也会作为读屏名称，除非传入了 `label` 或 `aria-label`。
+
+`PeriodicityHorizontalVideo` 在原生 `video` 元素外渲染 16:9 播放器；`PeriodicityVerticalVideo` 是同一播放器的 9:16 版本，右侧为操作按钮列，顶部为时间徽标，底部为细进度条。两者都保留全部原生媒体属性与事件，画框、操作栏、按钮、进度轨道与浮层都使用页面的表面色与强调色，因此控制区会跟随当前主题。内置操作栏包含播放/暂停、进度、时间、静音开关、展开竖直音量条的按钮，以及全屏；点击视频区域会切换操作栏，并在中央闪现播放/暂停按钮。
+
+```tsx
+import { PeriodicityHorizontalVideo, PeriodicityVerticalVideo } from "periodicity-react";
+
+<PeriodicityHorizontalVideo src="/launch.mp4" poster="/launch.jpg" label="发布短片" />;
+
+<PeriodicityVerticalVideo src="/short.mp4" label="竖版短片" caption="竖版剪辑。" />;
+```
+
+两个播放器都接受 `src`、`sources`、`tracks`、`controls`（`custom`、`native` 或 `none`）、`label`、`caption`、`aspectRatio`、`labels` 与 `slots`。`slots.controls` 用渲染函数替换底部操作栏，函数会收到实时状态、解析后的文案，以及跳转、音量、静音、全屏与操作栏动作；`slots.aboveControls` 在同一操作栏上方追加自定义 UI，并随操作栏一起打开/关闭，内置操作栏保持原样。可以在该插槽中用 `PeriodicityForm` 与 `PeriodicityTextInput` 放一个跟随操作栏显隐的评论输入框。
+
+`PeriodicityBarrage` 可以在任意被包裹内容上浮动显示评论。每条评论在绝对定位、且不接收指针事件的图层中逐行滚动，因此被包裹的组件保持原有布局与交互。所有评论使用相同的像素/毫秒速度；调度器只在前一条评论完全进入并留出间距后才复用该行，因此长评论不会追上短评论。循环播放和追加评论都会接入当前直播流，不会重置正在移动的评论。
+
+```tsx
+import { PeriodicityBarrage } from "periodicity-react";
+
+<PeriodicityBarrage items={[{ text: "第一！" }, { text: "剪辑不错" }]} repeat duration={12000} stagger={900}>
+    <PeriodicityHorizontalVideo src="/launch.mp4" label="发布短片" />
+</PeriodicityBarrage>;
+```
+
+`Barrage` 接受 `items`、`paused`、`direction`、`lanes`、`duration`、`stagger`、`repeat`、`bottomInset`、`respectReducedMotion` 与 `slots`；`item` 插槽替换默认气泡，`overlay` 插槽可叠加自定义浮层 UI。`bottomInset` 为播放器操作栏等界面预留底部空间；`respectReducedMotion` 默认为 `true`，在 `prefers-reduced-motion` 下停止滚动；只有动效演示才应设为 `false`。滚动图层对读屏隐藏，纯文本评论会镜像到视觉隐藏列表中。
+
 ## 动效与标准事件
 
-`PeriodicityAnimation` 和 `PeriodicityAnimated` 提供动效配置、减少动效处理和元素多态动画包装。Ripple 层由可交互表面共享，在关闭动效时停止。
+`PeriodicityAnimation` 和 `PeriodicityAnimated` 提供动效配置、减少动效处理和元素多态动画包装。组件的动画和过渡统一读取共享的 `--motion-scale`，Ripple、Spinner、Ring、骨架屏、浮层和图标动效都继承同一比例；加载指示器使用 `--motion-essential-scale` 在减少动效时保持低速转动，因此不会像卡死一样停住。
+
+库默认遵循操作系统的减少动效偏好。若应用需要预览或强制播放动效，可在根元素设置 `<html data-motion="always">`，整个文档（包括 Portal 浮层）都会忽略该系统偏好；本用例站即使用该开关，确保宿主系统开启“减少动画”时演示仍然可见。
 
 每个公共 `Periodicity*` 组件都同时接受原生 React props 和标准事件层，两者不会互相覆盖：
 
@@ -730,7 +881,7 @@ import { PeriodicityMarkdown, PeriodicityTex } from "periodicity-react";
 - Dialog、Drawer、Menu、Dropdown、Listbox、Tree、Table 都实现了键盘交互。
 - 浮层支持焦点恢复和 Escape 关闭。
 - 选中文本的颜色被限制在可读范围内。
-- 动画和 Ripple 尊重减少动效偏好。
+- 默认尊重减少动效偏好；`data-motion="always"` 是应用级显式覆盖，加载指示器在该模式下仍会以较慢速度转动，而不是完全冻结。
 - `PeriodicityDrag` 支持 Alt+ArrowUp/Alt+ArrowDown 键盘排序，并通过 live region 播报。
 - `PeriodicityScrollbar` 支持 Arrow、Page、Home/End、Space 键盘滚动，并暴露 scrollbar ARIA。
 - `PeriodicityCalendar` 和 `PeriodicityDateTimePicker` 提供完整的日历网格键盘导航和 roving focus。
@@ -754,7 +905,7 @@ import { PeriodicityMarkdown, PeriodicityTex } from "periodicity-react";
 }
 ```
 
-组件以 Flex 为基础，不使用 CSS Grid。宿主应用可以在组件外部自由使用 Grid；库内结构组件本身保持 flex 容器。
+结构组件都是 flex 容器，库整体以 Flex 为基础；包内仅有的 CSS Grid 位于装饰性表面，例如消息回应选择器、聊天 emoji 弹层、Agent 思考折叠面板与 LaTeX 公式行。宿主应用可以在组件外部自由使用 Grid。
 
 ## API 约定
 
@@ -763,23 +914,24 @@ import { PeriodicityMarkdown, PeriodicityTex } from "periodicity-react";
 - **Ref。** 大多数组件接受根元素 `ref`；部分复合字段还接受专用的 `rootRef` 或内部 input ref。
 - **Slots。** Slot props 接受节点或接收类型化上下文的渲染函数。Slot 内容应保持展示性，行为和 ARIA 由组件负责。
 - **Change 语义。** 文件选择立即触发；图片选择器只在裁剪 Dialog 点击确认或取消后触发；图表是只读可视化，不提供值变更事件。
-- **只有前缀导出。** 发布入口暴露 `Periodicity*` 组件、`useFilePick`、`useFont` 和标准事件工具。
+- **只有前缀导出。** 发布入口暴露 `Periodicity*` 组件、`useFilePick`、`useFont`、`defaultMessageReactions` 和标准事件工具。
 
 ## 组件索引
 
-发布包包含 142 个 `Periodicity*` 组件。下表省略前缀以便阅读。
+发布包包含 152 个 `Periodicity*` 组件。下表省略前缀以便阅读。
 
-| 家族            | 组件                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Provider 与基础 | Theme, International, Animation, Animated, Portal, Surface, StateLayer, VisuallyHidden, Font, Text, Icon, Divider                                                                                                                                                                                                                                                                                                                                                              |
-| 操作与字段      | Button, TextInput, TextArea, EmailInput, TelephoneInput, NumberInput, CompleteInput, Mention, Select, VirtualSelect, TreeSelect, Combobox, Checkbox, Radio, RadioGroup, Switch, Range, Field, FieldGroup, Form, FormField, FormActions, Link, Anchor                                                                                                                                                                                                                           |
-| 选择器与日历    | FilePicker, PhotoPicker, AvatarPicker, TimePicker, DateTimePicker, NumberPicker, ColourPicker, CyclePicker, VariantPicker, Calendar                                                                                                                                                                                                                                                                                                                                            |
-| 统计图          | BarChart, PieChart, LineChart, ScatterChart                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| 集合与数据      | List, VirtualList, NormalList, MultipleList, SelectList, CheckList, Tree, VirtualTree, CheckTree, SelectTree, Table, VirtualTable, Transfer, Pagination, Scrollbar, Drag, Timeline, Card                                                                                                                                                                                                                                                                                       |
-| 浮层与反馈      | Dialog, ConfirmDialog, MessageDialog, InputDialog, Drawer, DrawerLayout, Popover, Dropdown, DropdownItem, DropdownGroup, DropdownSeparator, ContextMenu, ContextMenuItem, ContextMenuGroup, ContextMenuSeparator, Menu, MenuItem, MenuGroup, MenuSeparator, Tooltip, ToastProvider, Snackbar, Alert, Banner, Backdrop, FullscreenLoading, ElementLoading, Progress, CircularProgress, ProgressRing, Spinner, Skeleton, Rate, Badge, Tag, Chip, Avatar, AvatarGroup, EmptyState |
-| 导航与布局      | Coordinator, AppBar, Collapse, Toolbar, Sticky, StickyPage, Tabs, TabPanel, Pager, Page, Scroll, NavigationView, Stepper, Accordion, Breadcrumbs, LinearLayout, LinearLayoutItem, ConstraintLayout, Constraint, GridLayout, WaterfallLayout                                                                                                                                                                                                                                    |
-| 消息与评论      | Contact, VirtualContact, ContactContextMenu, MessageList, VirtualMessageList, MessageContextMenu, Chat, VirtualChat, AgentChat, VirtualAgentChat, CommentThread, VirtualCommentThread                                                                                                                                                                                                                                                                                          |
-| 文档            | Markdown, Tex                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 家族            | 组件                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Provider 与基础 | Theme, International, Animation, Animated, Portal, Surface, StateLayer, VisuallyHidden, Font, Text, Icon, Divider                                                                                                                                                                                                                                                                                                                                    |
+| 操作与字段      | Button, TextInput, TextArea, EmailInput, TelephoneInput, NumberInput, CompleteInput, Mention, Select, VirtualSelect, TreeSelect, Combobox, Checkbox, Radio, RadioGroup, Switch, Range, SeekBar, Field, FieldGroup, Form, FormField, FormActions, FormMessage, FormSubmit, Link, Anchor                                                                                                                                                               |
+| 选择器与日历    | FilePicker, PhotoPicker, AvatarPicker, TimePicker, DateTimePicker, NumberPicker, ColourPicker, CyclePicker, VariantPicker, Calendar                                                                                                                                                                                                                                                                                                                  |
+| 统计图          | BarChart, PieChart, LineChart, ScatterChart                                                                                                                                                                                                                                                                                                                                                                                                          |
+| 集合与数据      | List, VirtualList, NormalList, MultipleList, SelectList, CheckList, Tree, VirtualTree, CheckTree, SelectTree, Table, VirtualTable, Transfer, Pagination, Scrollbar, Drag, Timeline, Card                                                                                                                                                                                                                                                             |
+| 浮层与反馈      | Dialog, ConfirmDialog, MessageDialog, InputDialog, Drawer, DrawerLayout, Popover, Dropdown, DropdownItem, DropdownGroup, DropdownSeparator, ContextMenu, ContextMenuItem, ContextMenuGroup, ContextMenuSeparator, Menu, MenuItem, MenuGroup, MenuSeparator, Tooltip, ToastProvider, Snackbar, Alert, Banner, Backdrop, FullscreenLoading, ElementLoading, Progress, Ring, Spinner, Skeleton, Rate, Badge, Tag, Chip, Avatar, AvatarGroup, EmptyState |
+| 导航与布局      | Coordinator, AppBar, Collapse, Toolbar, Sticky, StickyPage, Frame, FramePage, Tabs, TabPanel, Pager, Page, Scroll, Navigation, Stepper, Accordion, Breadcrumbs, LinearLayout, LinearLayoutItem, ConstraintLayout, Constraint, GridLayout, WaterfallLayout, VirtualWaterfallLayout                                                                                                                                                                    |
+| 消息与评论      | Contact, VirtualContact, ContactContextMenu, MessageList, VirtualMessageList, MessageContextMenu, Chat, VirtualChat, AgentChat, VirtualAgentChat, CommentThread, VirtualCommentThread                                                                                                                                                                                                                                                                |
+| 文档            | Markdown, Tex, Terminal                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| 媒体            | Audio, HorizontalVideo, VerticalVideo, Barrage                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 ## 开发
 

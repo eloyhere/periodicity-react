@@ -6,7 +6,7 @@
     background: var(--state-layer-color, currentColor);
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--duration-fast) var(--ease-standard);
+    transition: opacity calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .state-layer--active {
@@ -44,7 +44,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .state-layer {
+    :root:not([data-motion="always"]) .state-layer {
         transition: none;
     }
 }

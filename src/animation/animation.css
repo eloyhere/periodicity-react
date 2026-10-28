@@ -8,9 +8,9 @@
 }
 
 .animated {
-    animation-duration: var(--animation-duration, var(--duration-medium, 500ms));
+    animation-duration: var(--animation-duration, calc(var(--motion-duration-medium) * var(--motion-scale, 1)));
     animation-delay: var(--animation-delay, 0ms);
-    animation-timing-function: var(--animation-easing, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+    animation-timing-function: var(--animation-easing, var(--motion-ease-standard, cubic-bezier(0.2, 0, 0, 1)));
     animation-fill-mode: both;
     animation-iteration-count: var(--animation-repeat, 1);
     transform-origin: center;
@@ -50,12 +50,12 @@
 
 .animated--pulse {
     animation-name: animation-pulse;
-    animation-iteration-count: var(--animation-repeat, infinite);
+    animation-iteration-count: var(--animation-repeat, var(--motion-repeat, infinite));
 }
 
 .animated--spin {
     animation-name: animation-spin;
-    animation-iteration-count: var(--animation-repeat, infinite);
+    animation-iteration-count: var(--animation-repeat, var(--motion-repeat, infinite));
     animation-timing-function: linear;
 }
 
@@ -188,7 +188,7 @@
 
 /* Fallback for raw class utilities; Animated opts out with data false. */
 @media (prefers-reduced-motion: reduce) {
-    .animated:not([data-animation-reduced="false"]) {
+    :root:not([data-motion="always"]) .animated:not([data-animation-reduced="false"]) {
         animation: none !important;
     }
 }

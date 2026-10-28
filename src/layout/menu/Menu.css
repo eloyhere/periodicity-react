@@ -35,8 +35,8 @@
     border-radius: var(--radius-xs);
     color: var(--color-on-surface);
     transition:
-        background-color var(--duration-fast) var(--ease-standard),
-        color var(--duration-fast) var(--ease-standard);
+        background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .menu__item > .surface__component {
@@ -136,7 +136,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .menu__item {
+    :root:not([data-motion="always"]) .menu__item {
         transition: none;
     }
 }

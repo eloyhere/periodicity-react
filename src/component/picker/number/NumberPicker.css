@@ -85,7 +85,7 @@
     flex: 0 0 auto;
     flex-direction: column;
     width: 100%;
-    transition: transform var(--duration-fast) var(--ease-decelerate);
+    transition: transform calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-decelerate);
 }
 
 .number-picker__wheel--dragging .number-picker__track {
@@ -113,8 +113,8 @@
     user-select: none;
     -webkit-user-select: none;
     transition:
-        opacity 140ms var(--ease-standard),
-        color 140ms var(--ease-standard);
+        opacity calc(140ms * var(--motion-scale, 1)) var(--motion-ease-standard),
+        color calc(140ms * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .number-picker__item--adjacent {
@@ -272,8 +272,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .number-picker__track,
-    .number-picker__item {
+    :root:not([data-motion="always"]) .number-picker__track,
+    :root:not([data-motion="always"]) .number-picker__item {
         transition: none;
     }
 }

@@ -52,7 +52,7 @@
     flex: 0 1 auto;
     min-width: 0;
     border-radius: var(--radius-md);
-    transition: background-color var(--duration-fast) var(--ease-standard);
+    transition: background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .stepper__surface:hover {
@@ -103,10 +103,10 @@
     font-weight: var(--font-weight-current, var(--weight-semibold));
     line-height: var(--font-leading-current, 1);
     transition:
-        background-color var(--duration-medium) var(--ease-standard),
-        border-color var(--duration-medium) var(--ease-standard),
-        box-shadow var(--duration-medium) var(--ease-standard),
-        color var(--duration-medium) var(--ease-standard);
+        background-color calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        border-color calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        box-shadow calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        color calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .stepper__item--completed .stepper__marker {
@@ -237,8 +237,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .stepper__surface,
-    .stepper__marker {
+    :root:not([data-motion="always"]) .stepper__surface,
+    :root:not([data-motion="always"]) .stepper__marker {
         transition: none;
     }
 }

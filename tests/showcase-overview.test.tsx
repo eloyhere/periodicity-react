@@ -29,7 +29,11 @@ describe("showcase overview", (): void => {
         );
         const missing: string[] = publicNames.filter(
             (name: string): boolean =>
-                name !== "FormField" && name !== "FormActions" && !catalogueNames.has(name),
+                name !== "FormField" &&
+                name !== "FormActions" &&
+                name !== "FormMessage" &&
+                name !== "FormSubmit" &&
+                !catalogueNames.has(name),
         );
 
         expect(missing).toEqual([]);

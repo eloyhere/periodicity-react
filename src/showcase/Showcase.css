@@ -22,7 +22,7 @@
     text-decoration: none;
     white-space: nowrap;
     transform: translateY(calc(-100% - var(--space-4)));
-    transition: transform 160ms var(--ease-standard);
+    transition: transform calc(160ms * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .skip-link:focus,
@@ -200,7 +200,7 @@
 }
 
 .showcase-page {
-    animation: showcase-enter 280ms cubic-bezier(0.2, 0, 0, 1) both;
+    animation: showcase-enter calc(280ms * var(--motion-scale, 1)) cubic-bezier(0.2, 0, 0, 1) both;
 }
 
 .showcase-page__header {
@@ -314,8 +314,8 @@
 
 .showcase-page .card {
     transition:
-        box-shadow 200ms cubic-bezier(0.2, 0, 0, 1),
-        transform 200ms cubic-bezier(0.2, 0, 0, 1);
+        box-shadow calc(200ms * var(--motion-scale, 1)) cubic-bezier(0.2, 0, 0, 1),
+        transform calc(200ms * var(--motion-scale, 1)) cubic-bezier(0.2, 0, 0, 1);
 }
 
 .showcase-page .card:hover {
@@ -471,9 +471,9 @@
     text-decoration: none;
     gap: 4px;
     transition:
-        border-color 160ms var(--ease-standard),
-        background-color 160ms var(--ease-standard),
-        transform 160ms var(--ease-standard);
+        border-color calc(160ms * var(--motion-scale, 1)) var(--motion-ease-standard),
+        background-color calc(160ms * var(--motion-scale, 1)) var(--motion-ease-standard),
+        transform calc(160ms * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .showcase__component-card:hover {
@@ -729,7 +729,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .skip-link {
+    :root:not([data-motion="always"]) .skip-link {
         transition: none;
     }
 }

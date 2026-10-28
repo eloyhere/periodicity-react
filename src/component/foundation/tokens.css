@@ -122,6 +122,23 @@
     --ease-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
     --ease-spring: cubic-bezier(0.22, 0.8, 0.32, 1);
 
+    /* Every animation and transition multiplies its duration by this scale.
+       A provider or :root[data-motion="always"] can turn motion up or down as
+       one unit without rewriting component styles. Essential indicators use a
+       separate scale so a loading ring never freezes when motion is reduced. */
+    --motion-scale: 1;
+    --motion-essential-scale: 1;
+    --motion-repeat: infinite;
+    --motion-duration-fast: var(--duration-fast);
+    --motion-duration-medium: var(--duration-medium);
+    --motion-duration-slow: var(--duration-slow);
+    --motion-duration-slower: var(--duration-slower);
+    --motion-duration-ripple: 1000ms;
+    --motion-ease-standard: var(--ease-standard);
+    --motion-ease-decelerate: var(--ease-decelerate);
+    --motion-ease-accelerate: var(--ease-accelerate);
+    --motion-ease-spring: var(--ease-spring);
+
     /* ------------------------------------------------------------------
        Layers
        ------------------------------------------------------------------ */
@@ -409,6 +426,31 @@
         --colourInverseAction: #ffffff;
         --colourTooltipPaper: #000000;
     }
+}
+
+/* ==========================================================================
+   Motion preference
+
+   Decorative motion stops when the operating system asks for less movement.
+   Loading indicators keep a slower turn through --motion-essential-scale, so
+   an indeterminate progress ring never looks frozen. Applications that must
+   preview or force motion (this showcase, for example) opt in with
+   <html data-motion="always">; the higher-specificity rule below overrides the
+   media query for the whole document, including portalled layers.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    :root:not([data-motion="always"]) {
+        --motion-scale: 0;
+        --motion-essential-scale: 0.5;
+        --motion-repeat: 1;
+    }
+}
+
+:root[data-motion="always"] {
+    --motion-scale: 1;
+    --motion-essential-scale: 1;
+    --motion-repeat: infinite;
 }
 
 /* ==========================================================================

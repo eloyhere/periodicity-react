@@ -122,9 +122,9 @@
     border-radius: var(--radius-pill);
     background: var(--color-surface-container-lowest);
     transition:
-        border-color var(--duration-fast) var(--ease-standard),
-        background-color var(--duration-fast) var(--ease-standard),
-        box-shadow var(--duration-fast) var(--ease-standard);
+        border-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        box-shadow calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .switch__thumb {
@@ -138,9 +138,9 @@
     box-shadow: 0 var(--space-1) var(--space-2) rgba(0, 0, 0, 0.28);
     transform: translateY(-50%);
     transition:
-        left var(--duration-medium) var(--ease-spring),
-        background-color var(--duration-fast) var(--ease-standard),
-        transform var(--duration-fast) var(--ease-standard);
+        left calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-spring),
+        background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        transform calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .switch--on .switch__track {
@@ -180,8 +180,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .switch__track,
-    .switch__thumb {
+    :root:not([data-motion="always"]) .switch__track,
+    :root:not([data-motion="always"]) .switch__thumb {
         transition: none;
     }
 }

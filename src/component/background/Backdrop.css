@@ -8,7 +8,7 @@
     background: var(--scrim);
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--duration-medium) var(--ease-standard);
+    transition: opacity calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .backdrop--blur {
@@ -26,7 +26,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .backdrop {
+    :root:not([data-motion="always"]) .backdrop {
         transition: none;
     }
 }

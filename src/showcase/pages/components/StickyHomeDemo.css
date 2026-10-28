@@ -86,8 +86,8 @@
     border-bottom: 1px solid transparent;
     gap: var(--space-4);
     transition:
-        border-color 180ms var(--ease-standard),
-        box-shadow 180ms var(--ease-standard);
+        border-color calc(180ms * var(--motion-scale, 1)) var(--motion-ease-standard),
+        box-shadow calc(180ms * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .sticky-home__nav.is-stuck {

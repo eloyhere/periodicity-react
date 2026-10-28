@@ -23,7 +23,7 @@
     text-decoration: none;
     white-space: nowrap;
     transform: translateY(calc(-100% - var(--space-4)));
-    transition: transform 160ms var(--ease-standard);
+    transition: transform calc(160ms * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .skip-link:focus,
@@ -218,9 +218,9 @@
     text-align: var(--font-align-current, left);
     cursor: pointer;
     transition:
-        color 160ms ease,
-        background-color 160ms ease,
-        border-color 160ms ease;
+        color calc(160ms * var(--motion-scale, 1)) ease,
+        background-color calc(160ms * var(--motion-scale, 1)) ease,
+        border-color calc(160ms * var(--motion-scale, 1)) ease;
 }
 
 .nav__item:hover {
@@ -258,7 +258,7 @@
 
 .nav__item .icon {
     color: currentColor;
-    transition: color 160ms ease;
+    transition: color calc(160ms * var(--motion-scale, 1)) ease;
 }
 
 .nav__label {
@@ -628,7 +628,7 @@
     border-radius: 50%;
     background: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-soft);
-    animation: hero-pulse 3.4s ease-in-out infinite;
+    animation: hero-pulse calc(3.4s * var(--motion-scale, 1)) ease-in-out var(--motion-repeat, infinite);
 }
 
 @keyframes hero-pulse {
@@ -815,8 +815,8 @@
     border: 1px solid transparent;
     border-radius: var(--radius-sm);
     transition:
-        background-color 200ms ease,
-        border-color 200ms ease;
+        background-color calc(200ms * var(--motion-scale, 1)) ease,
+        border-color calc(200ms * var(--motion-scale, 1)) ease;
 }
 
 .ritual:hover {
@@ -941,10 +941,10 @@
     border-radius: 50%;
     color: transparent;
     transition:
-        background-color 180ms ease,
-        border-color 180ms ease,
-        color 180ms ease,
-        transform 180ms ease;
+        background-color calc(180ms * var(--motion-scale, 1)) ease,
+        border-color calc(180ms * var(--motion-scale, 1)) ease,
+        color calc(180ms * var(--motion-scale, 1)) ease,
+        transform calc(180ms * var(--motion-scale, 1)) ease;
 }
 
 .ritual:hover .ritual__check {
@@ -1081,9 +1081,9 @@
     border-radius: 7px 7px 2px 2px;
     background: linear-gradient(180deg, var(--line-strong), var(--panel-strong));
     transition:
-        background 220ms ease,
-        border-color 220ms ease,
-        box-shadow 220ms ease;
+        background calc(220ms * var(--motion-scale, 1)) ease,
+        border-color calc(220ms * var(--motion-scale, 1)) ease,
+        box-shadow calc(220ms * var(--motion-scale, 1)) ease;
 }
 
 .chart__col:hover .chart__bar {
@@ -1250,7 +1250,7 @@
     height: 6px;
     border-radius: 50%;
     background: var(--mint);
-    animation: status-pulse 3s ease-out infinite;
+    animation: status-pulse calc(3s * var(--motion-scale, 1)) ease-out var(--motion-repeat, infinite);
 }
 
 @keyframes status-pulse {
@@ -1618,16 +1618,16 @@
 /* ------------------------------------------------------------------ */
 
 @media (prefers-reduced-motion: reduce) {
-    .hero__pulse,
-    .footer-strip__pulse {
+    :root:not([data-motion="always"]) .hero__pulse,
+    :root:not([data-motion="always"]) .footer-strip__pulse {
         animation: none;
     }
 
-    .skip-link,
-    .nav__item,
-    .ritual,
-    .ritual__check,
-    .chart__bar {
+    :root:not([data-motion="always"]) .skip-link,
+    :root:not([data-motion="always"]) .nav__item,
+    :root:not([data-motion="always"]) .ritual,
+    :root:not([data-motion="always"]) .ritual__check,
+    :root:not([data-motion="always"]) .chart__bar {
         transition: none;
     }
 }

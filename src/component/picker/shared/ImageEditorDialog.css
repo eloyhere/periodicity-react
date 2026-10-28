@@ -63,9 +63,9 @@
     cursor: pointer;
     touch-action: manipulation;
     transition:
-        background-color var(--duration-fast) var(--ease-standard),
-        border-color var(--duration-fast) var(--ease-standard),
-        color var(--duration-fast) var(--ease-standard);
+        background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        border-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .image-editor__action:hover:not(:disabled) {
@@ -90,7 +90,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .image-editor__action {
+    :root:not([data-motion="always"]) .image-editor__action {
         transition: none;
     }
 }

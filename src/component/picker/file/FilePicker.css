@@ -27,8 +27,8 @@
     gap: var(--space-2);
     touch-action: manipulation;
     transition:
-        background-color var(--duration-fast) var(--ease-standard),
-        color var(--duration-fast) var(--ease-standard);
+        background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .file-picker__trigger:hover:not(:disabled) {
@@ -88,7 +88,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .file-picker__trigger {
+    :root:not([data-motion="always"]) .file-picker__trigger {
         transition: none;
     }
 }

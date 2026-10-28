@@ -407,7 +407,7 @@ const NumberInput: FC<NumberInputProps> = ({
                         onMouseDown={preventFocusLoss}
                         onClick={handleDecrease}
                     >
-                        <Icon name="Subtract" size={14} />
+                        <Icon name="Subtract" size={18} />
                     </button>
                 </Surface>
                 <Surface
@@ -424,7 +424,7 @@ const NumberInput: FC<NumberInputProps> = ({
                         onMouseDown={preventFocusLoss}
                         onClick={handleIncrease}
                     >
-                        <Icon name="Plus" size={14} />
+                        <Icon name="Plus" size={18} />
                     </button>
                 </Surface>
             </span>

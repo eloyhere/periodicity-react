@@ -19,7 +19,7 @@
     height: 100%;
     overflow: hidden;
     background: var(--colourSurface);
-    transition: width 240ms var(--ease-decelerate);
+    transition: width calc(240ms * var(--motion-scale, 1)) var(--motion-ease-decelerate);
     will-change: width;
 }
 
@@ -38,7 +38,7 @@
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
-    transition: transform 240ms var(--ease-decelerate);
+    transition: transform calc(240ms * var(--motion-scale, 1)) var(--motion-ease-decelerate);
     will-change: transform;
 }
 
@@ -123,6 +123,6 @@
 
 .drawer-layout__pane {
     transition:
-        width 240ms var(--ease-decelerate),
-        height 240ms var(--ease-decelerate);
+        width calc(240ms * var(--motion-scale, 1)) var(--motion-ease-decelerate),
+        height calc(240ms * var(--motion-scale, 1)) var(--motion-ease-decelerate);
 }

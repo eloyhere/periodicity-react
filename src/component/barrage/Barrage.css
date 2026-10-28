@@ -1,0 +1,127 @@
+/* ==========================================================================
+   Barrage — a collision-aware stream of floating comments
+
+   The layer is absolutely positioned and pointer-transparent, so the content
+   underneath keeps its layout and its interactions. The scheduler assigns each
+   occurrence a lane and drives its transform with the Web Animations API; the
+   stylesheet owns lane geometry, pill chrome, and the hidden measuring layer.
+   ========================================================================== */
+
+.barrage {
+    --barrage-lane-height: var(--space-7);
+    --barrage-inset: var(--space-2);
+
+    position: relative;
+    display: block;
+    min-width: 0;
+}
+
+.barrage__content {
+    position: relative;
+    display: block;
+    min-width: 0;
+}
+
+.barrage__layer {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    contain: layout paint;
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   Travelling items
+
+   The component writes the lane index and the current translate3d transform.
+   No CSS animation is used: the scheduler controls start, speed, pause, and
+   completion so items cannot overtake one another.
+   ========================================================================== */
+
+.barrage__item,
+.barrage__measure-item {
+    display: flex;
+    max-width: none;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.barrage__item {
+    position: absolute;
+    top: calc(var(--barrage-inset) + var(--barrage-lane, 0) * var(--barrage-lane-height));
+    left: 0;
+    will-change: transform;
+}
+
+/* Hidden measuring copy: one per item, so widths match the live slot content. */
+.barrage__measure {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.barrage__measure-item {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* ==========================================================================
+   Default pill — the page palette, so the comments follow the theme
+   ========================================================================== */
+
+.barrage__pill {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-container-high);
+    color: var(--color-on-surface);
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-label-sm);
+    line-height: var(--leading-snug);
+    white-space: nowrap;
+}
+
+/* ==========================================================================
+   Custom floating UI — the slot children own their placement and may be
+   interactive even though the layer itself is transparent to pointers.
+   ========================================================================== */
+
+.barrage__overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.barrage__overlay > * {
+    pointer-events: auto;
+}
+
+.barrage__transcript {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* ==========================================================================
+   Adaptations
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    /* The overlay slot stays visible: only the travelling comments stop. */
+    :root:not([data-motion="always"]) .barrage[data-reduced-motion="true"] .barrage__item {
+        display: none;
+    }
+}
+
+@media (forced-colors: active) {
+    .barrage__pill {
+        border: 1px solid CanvasText;
+        background: Canvas;
+        color: CanvasText;
+    }
+}

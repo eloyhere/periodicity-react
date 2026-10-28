@@ -13,6 +13,7 @@ import {
     Radio,
     RadioGroup,
     Range,
+    SeekBar,
     Switch,
 } from "../../../component";
 import Demo, { DemoGroup } from "../../Demo";
@@ -108,6 +109,47 @@ const rangeStatesCode: string = `<Range label="Disabled range" value={rangeValue
     error="Value is outside the allowed band."
 />`;
 
+const seekBarCode: string = `<SeekBar
+    label="Buffered playback"
+    value={seekPosition}
+    secondaryValue={72}
+    onChange={setSeekPosition}
+    format={(value) => \`\${value}%\`}
+    showValue
+    hint="The lighter segment is buffered ahead of the playhead."
+/>
+<SeekBar
+    label="Rating"
+    value={seekRating}
+    min={0}
+    max={5}
+    step={1}
+    ticks
+    onChange={setSeekRating}
+    format={(value) => \`\${value} of 5\`}
+    showValue
+/>
+<SeekBar
+    style={{ alignSelf: "flex-start", width: 280 }}
+    label="Horizontal"
+    value={seekPosition}
+    secondaryValue={72}
+    onChange={setSeekPosition}
+    showValue
+/>
+<SeekBar
+    style={{ alignSelf: "flex-start" }}
+    direction="vertical"
+    length={200}
+    label="Vertical"
+    value={seekPosition}
+    secondaryValue={72}
+    onChange={setSeekPosition}
+    showValue
+/>
+<SeekBar label="Disabled" value={48} onChange={() => {}} disabled />
+<SeekBar label="Invalid" value={48} onChange={() => {}} error="Choose a position inside the track." />`;
+
 const switchStatesCode: string = `<Switch size="sm" checked={switchOn} onChange={setSwitchOn} label="Small" />
 <Switch size="md" checked={switchOn} onChange={setSwitchOn} label="Medium" />
 <Switch size="lg" checked={switchOn} onChange={setSwitchOn} label="Large" />
@@ -125,6 +167,10 @@ const ChoicesPage: FC = () => {
         useState<string>("daily");
     const [rangeValue, setRangeValue]: [number, Dispatch<SetStateAction<number>>] =
         useState<number>(64);
+    const [seekPosition, setSeekPosition]: [number, Dispatch<SetStateAction<number>>] =
+        useState<number>(48);
+    const [seekRating, setSeekRating]: [number, Dispatch<SetStateAction<number>>] =
+        useState<number>(3);
     const [numberValue, setNumberValue]: [number | null, Dispatch<SetStateAction<number | null>>] =
         useState<number | null>(12);
     const [switchOn, setSwitchOn]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(true);
@@ -256,6 +302,62 @@ const ChoicesPage: FC = () => {
                         error="Value is outside the allowed band."
                     />
                 </DemoGroup>
+            </Demo>
+
+            <Demo
+                title="Android seek bar"
+                description="Buffered progress, tick marks, and drag callbacks."
+                code={seekBarCode}
+            >
+                <Stack gap="md">
+                    <SeekBar
+                        label="Buffered playback"
+                        value={seekPosition}
+                        secondaryValue={72}
+                        onChange={setSeekPosition}
+                        format={(value: number): string => `${value}%`}
+                        showValue
+                        hint="The lighter segment is buffered ahead of the playhead."
+                    />
+                    <SeekBar
+                        label="Rating"
+                        value={seekRating}
+                        min={0}
+                        max={5}
+                        step={1}
+                        ticks
+                        onChange={setSeekRating}
+                        format={(value: number): string => `${value} of 5`}
+                        showValue
+                    />
+                    <DemoGroup label="Directions">
+                        <SeekBar
+                            style={{ alignSelf: "flex-start", width: 280 }}
+                            label="Horizontal"
+                            value={seekPosition}
+                            secondaryValue={72}
+                            onChange={setSeekPosition}
+                            showValue
+                        />
+                        <SeekBar
+                            style={{ alignSelf: "flex-start" }}
+                            direction="vertical"
+                            length={200}
+                            label="Vertical"
+                            value={seekPosition}
+                            secondaryValue={72}
+                            onChange={setSeekPosition}
+                            showValue
+                        />
+                    </DemoGroup>
+                    <SeekBar label="Disabled" value={48} onChange={(): void => {}} disabled />
+                    <SeekBar
+                        label="Invalid"
+                        value={48}
+                        onChange={(): void => {}}
+                        error="Choose a position inside the track."
+                    />
+                </Stack>
             </Demo>
 
             <Demo title="Switch sizes and states" code={switchStatesCode}>

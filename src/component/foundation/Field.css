@@ -35,7 +35,7 @@
     letter-spacing: var(--font-tracking-current, 0.065em);
     line-height: var(--font-leading-current, 1.35);
     text-transform: var(--font-transform-current, uppercase);
-    transition: color var(--duration-fast) var(--ease-standard);
+    transition: color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .field__required {
@@ -118,9 +118,9 @@
     border-radius: var(--radius-field);
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 55%), var(--panel-muted);
     transition:
-        border-color var(--duration-fast) var(--ease-standard),
-        background-color var(--duration-fast) var(--ease-standard),
-        box-shadow var(--duration-fast) var(--ease-standard);
+        border-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        box-shadow calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .field__edge {
@@ -133,7 +133,7 @@
         inset 0 0 28px var(--accent-soft);
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--duration-fast) var(--ease-standard);
+    transition: opacity calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .field__input {
@@ -227,9 +227,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .field__label,
-    .field__background,
-    .field__edge {
+    :root:not([data-motion="always"]) .field__label,
+    :root:not([data-motion="always"]) .field__background,
+    :root:not([data-motion="always"]) .field__edge {
         transition: none;
     }
 }

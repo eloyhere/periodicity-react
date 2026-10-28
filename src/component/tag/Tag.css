@@ -23,9 +23,9 @@
     user-select: none;
     -webkit-user-select: none;
     transition:
-        border-color var(--duration-fast) var(--ease-standard),
-        background-color var(--duration-fast) var(--ease-standard),
-        color var(--duration-fast) var(--ease-standard);
+        border-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 button.tag {
@@ -124,7 +124,7 @@ button.tag__main {
     content: "";
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--duration-fast) var(--ease-standard);
+    transition: opacity calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .tag__remove::after {
@@ -222,8 +222,8 @@ button.tag__main {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .tag,
-    .tag__remove::before {
+    :root:not([data-motion="always"]) .tag,
+    :root:not([data-motion="always"]) .tag__remove::before {
         transition: none;
     }
 }

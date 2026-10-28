@@ -1,6 +1,12 @@
-import type { FC } from "react";
+import {
+    useState,
+    type Dispatch,
+    type FC,
+    type SetStateAction,
+} from "react";
 import { Inline, Stack } from "../../../arrange/layout";
 import Markdown from "../../../component/markdown/Markdown";
+import Terminal, { type TerminalLine } from "../../../component/terminal/Terminal";
 import Tex from "../../../component/tex/Tex";
 import Text from "../../../component/text/Text";
 import Demo from "../../Demo";
@@ -12,6 +18,55 @@ const texCode: string = `<Tex source={waveEquation} />
 <Tex source={determinant} />`;
 
 const latexDocumentCode: string = `<Tex source={paper} />`;
+
+const terminalCode: string = `const [command, setCommand] = useState("");
+const [history, setHistory] = useState<string[]>(["help", "status"]);
+const [lines, setLines] = useState<readonly TerminalLine[]>(deployLog);
+
+const runCommand = (submitted: string): void => {
+    setCommand("");
+    setLines((current) => [
+        ...current,
+        { text: submitted, prompt: "~" },
+        { text: "✓ all systems nominal", tone: "success" },
+    ]);
+};
+
+<Terminal
+    title="periodicity — deploy"
+    controls
+    maxHeight={220}
+    prompt="~"
+    lines={lines}
+    value={command}
+    onInput={setCommand}
+    onChange={runCommand}
+    history={history}
+    onHistoryChange={setHistory}
+    sendLabel="Run command"
+/>
+
+<Terminal lines={wrappedLog} wrap maxHeight={150} editable={false} aria-label="Wrapped output" />`;
+
+const deployLog: readonly TerminalLine[] = [
+    { text: "periodicity deploy --production", prompt: "~" },
+    { text: "resolving workspace packages", tone: "muted" },
+    { text: "✓ 14 packages linked", tone: "success" },
+    { text: "→ uploading dist (4.2 MB)", tone: "primary", meta: "42%" },
+    { text: "→ uploading assets (18 files)", tone: "primary", meta: "88%" },
+    { text: "warn  cache age above 7 days; expect a cold start", tone: "warning" },
+    { text: "✓ deployed to https://periodicity.example.com", tone: "success", meta: "6.1s" },
+    { text: "3 snapshots kept for rollback", tone: "tertiary" },
+];
+
+const wrappedLog: readonly TerminalLine[] = [
+    { text: "cat release-notes.md | head -n 2", prompt: "$" },
+    {
+        text: "The transcript keeps its own width by default, so a long line scrolls sideways; wrap hands the width back to the viewport and breaks the line instead.",
+        tone: "secondary",
+    },
+    { text: "every tone above comes from a semantic role in the theme", tone: "muted", meta: "wrap" },
+];
 
 const releaseNotes: string = [
     "# Field notes",
@@ -92,7 +147,59 @@ A footnote.\footnote{Notes are collected at the end of the document.}
 \end{document}`;
 
 /**
- * Documents the read-only Markdown and TeX preview components.
+ * Interactive console demo: the caller owns execution and appends the output.
+ * @example
+ * <TerminalDemo />
+ * @returns The terminal demo stack.
+ */
+const TerminalDemo: FC = () => {
+    const [command, setCommand]: [string, (next: string) => void] = useState<string>("");
+    const [history, setHistory]: [
+        readonly string[],
+        (next: readonly string[]) => void,
+    ] = useState<readonly string[]>(["help", "status"]);
+    const [lines, setLines]: [
+        readonly TerminalLine[],
+        Dispatch<SetStateAction<readonly TerminalLine[]>>,
+    ] = useState<readonly TerminalLine[]>(deployLog);
+
+    const runCommand: (submitted: string) => void = (submitted: string): void => {
+        setCommand("");
+        setLines((current: readonly TerminalLine[]): readonly TerminalLine[] => [
+            ...current,
+            { text: submitted, prompt: "~" },
+            { text: "✓ all systems nominal", tone: "success" },
+        ]);
+    };
+
+    return (
+        <Stack gap="lg">
+            <Terminal
+                title="periodicity — deploy"
+                controls
+                maxHeight={220}
+                prompt="~"
+                lines={lines}
+                value={command}
+                onInput={setCommand}
+                onChange={runCommand}
+                history={history}
+                onHistoryChange={setHistory}
+                sendLabel="Run command"
+            />
+            <Terminal
+                lines={wrappedLog}
+                wrap
+                maxHeight={150}
+                editable={false}
+                aria-label="Wrapped output"
+            />
+        </Stack>
+    );
+};
+
+/**
+ * Documents the Markdown, TeX, and interactive Terminal components.
  * @example
  * <DocumentsPage />
  * @returns The Documents entry.
@@ -138,6 +245,14 @@ const DocumentsPage: FC = () => (
             code={latexDocumentCode}
         >
             <Tex source={paper} />
+        </Demo>
+
+        <Demo
+            title="Terminal output"
+            description="An interactive console: the caller owns command execution, appends output lines, and persists the ArrowUp/ArrowDown history. The send control is an icon button."
+            code={terminalCode}
+        >
+            <TerminalDemo />
         </Demo>
     </>
 );

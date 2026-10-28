@@ -16,7 +16,7 @@ import { useInternational, type InternationalContextValue } from "../../internat
 import cx from "../foundation/cx";
 import useControllableState from "../foundation/useControllableState";
 import useMergedRef from "../foundation/useMergedRef";
-import CircularProgress from "../progress/CircularProgress";
+import Ring from "../ring/Ring";
 import Portal from "../foundation/Portal";
 import Text from "../text/Text";
 import "./FullscreenLoading.css";
@@ -164,7 +164,7 @@ const FullscreenLoading: FC<FullscreenLoadingProps> = ({
                 onCancel={handleCancel}
             >
                 <div className="fullscreen-loading__content">
-                    <CircularProgress size={56} label={resolvedLabel} />
+                    <Ring size={56} label={resolvedLabel} />
                     <Text as="p" variant="h4">
                         {resolvedLabel}
                     </Text>

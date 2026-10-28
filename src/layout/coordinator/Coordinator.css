@@ -12,7 +12,7 @@
 .coordinator__collapse {
     flex: none;
     overflow: hidden;
-    transition: height 80ms linear;
+    transition: height calc(80ms * var(--motion-scale, 1)) linear;
 }
 
 .coordinator__header {
@@ -49,8 +49,8 @@
     background: var(--color-primary);
     color: var(--color-on-primary);
     transition:
-        height 80ms linear,
-        box-shadow 160ms ease;
+        height calc(80ms * var(--motion-scale, 1)) linear,
+        box-shadow calc(160ms * var(--motion-scale, 1)) ease;
 }
 
 .app-bar--lifted {
@@ -81,8 +81,8 @@
     justify-content: center;
     transform-origin: center top;
     transition:
-        opacity 80ms linear,
-        transform 80ms linear;
+        opacity calc(80ms * var(--motion-scale, 1)) linear,
+        transform calc(80ms * var(--motion-scale, 1)) linear;
 }
 
 .collapse__hero > img,
@@ -128,8 +128,8 @@
     letter-spacing: var(--font-tracking-current, -0.02em);
     pointer-events: none;
     transition:
-        opacity 80ms linear,
-        transform 80ms linear;
+        opacity calc(80ms * var(--motion-scale, 1)) linear,
+        transform calc(80ms * var(--motion-scale, 1)) linear;
 }
 
 .collapse__subtitle {
@@ -236,9 +236,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .app-bar,
-    .collapse__hero,
-    .collapse__expanded-title {
+    :root:not([data-motion="always"]) .app-bar,
+    :root:not([data-motion="always"]) .collapse__hero,
+    :root:not([data-motion="always"]) .collapse__expanded-title {
         transition: none;
     }
 }

@@ -1,8 +1,12 @@
 export { default as Form } from "./Form";
-export type { FormProps } from "./Form";
+export type { FormProps, FormSubmitApi } from "./Form";
 export { FormContext, useFormContext } from "./FormContext";
-export type { FormContextValue } from "./FormContext";
+export type { FormContextValue, FormErrors, FormValue, FormValues } from "./FormContext";
 export { default as FormField } from "./FormField";
 export type { FormFieldControlProps, FormFieldProps } from "./FormField";
 export { default as FormActions } from "./FormActions";
 export type { FormActionsAlign, FormActionsProps } from "./FormActions";
+export { default as FormMessage } from "./FormMessage";
+export type { FormMessageProps } from "./FormMessage";
+export { default as FormSubmit } from "./FormSubmit";
+export type { FormSubmitProps } from "./FormSubmit";

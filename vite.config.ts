@@ -9,5 +9,10 @@ const base: string = process.env.GITHUB_ACTIONS === "true" ? `/${repositoryName}
 // https://vite.dev/config/
 export default defineConfig({
     base,
+    server: {
+        host: "127.0.0.1",
+        port: 5200,
+        hmr: true
+    },
     plugins: [react(), babel({ presets: [reactCompilerPreset()] })],
 });

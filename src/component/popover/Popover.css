@@ -1,8 +1,8 @@
 .popover {
     display: flex;
-    max-width: calc(100vw - var(--space-6));
+    max-width: min(calc(100vw - var(--space-6)), var(--anchor-max-width, 100vw));
     transform-origin: center top;
-    animation: popover-enter var(--duration-fast) var(--ease-decelerate);
+    animation: popover-enter calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-decelerate);
     /* Electron drag regions on app chrome swallow pointer events for overlays
        that visually cross them; the panel must opt out of window dragging. */
     -webkit-app-region: no-drag;
@@ -64,7 +64,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .popover {
+    :root:not([data-motion="always"]) .popover {
         animation: none;
     }
 }

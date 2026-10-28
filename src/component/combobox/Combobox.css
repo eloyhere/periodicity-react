@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    Filterable combobox 鈥?Material-style outlined field with a floating label.
    ========================================================================== */
 
@@ -31,8 +31,8 @@
     border-radius: var(--radius-sm);
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 55%), var(--combobox-bg);
     transition:
-        border-color var(--duration-fast) var(--ease-standard),
-        background-color var(--duration-fast) var(--ease-standard);
+        border-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .combobox__edge {
@@ -45,7 +45,7 @@
         inset 0 0 var(--space-6) var(--color-primary-container);
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--duration-fast) var(--ease-standard);
+    transition: opacity calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .combobox__row {
@@ -79,7 +79,7 @@
 .combobox__input::placeholder {
     color: var(--color-on-surface-variant);
     opacity: 0;
-    transition: opacity var(--duration-fast) var(--ease-standard);
+    transition: opacity calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .combobox:focus-within .combobox__input::placeholder {
@@ -97,8 +97,8 @@
     justify-content: center;
     color: var(--color-on-surface-variant);
     transition:
-        color var(--duration-fast) var(--ease-standard),
-        transform var(--duration-fast) var(--ease-standard);
+        color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        transform calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .combobox--open .combobox__indicator {
@@ -108,7 +108,7 @@
 
 .combobox__spinner {
     transform-origin: center;
-    animation: combobox-spin 900ms linear infinite;
+    animation: combobox-spin calc(900ms * var(--motion-essential-scale, 1)) linear var(--motion-repeat, infinite);
 }
 
 @keyframes combobox-spin {
@@ -133,11 +133,11 @@
     pointer-events: none;
     transform: translateY(-50%);
     transition:
-        top var(--duration-fast) var(--ease-standard),
-        left var(--duration-fast) var(--ease-standard),
-        color var(--duration-fast) var(--ease-standard),
-        font-size var(--duration-fast) var(--ease-standard),
-        transform var(--duration-fast) var(--ease-standard);
+        top calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        left calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        font-size calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        transform calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .combobox__hint,
@@ -228,11 +228,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .combobox__background,
-    .combobox__edge,
-    .combobox__indicator,
-    .combobox__label,
-    .combobox__input::placeholder {
+    :root:not([data-motion="always"]) .combobox__background,
+    :root:not([data-motion="always"]) .combobox__edge,
+    :root:not([data-motion="always"]) .combobox__indicator,
+    :root:not([data-motion="always"]) .combobox__label,
+    :root:not([data-motion="always"]) .combobox__input::placeholder {
         transition: none;
     }
 }

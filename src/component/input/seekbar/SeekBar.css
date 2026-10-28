@@ -1,0 +1,523 @@
+/* ==========================================================================
+   SeekBar - Android-style slider with buffered progress and tick marks.
+   ========================================================================== */
+
+.seekbar {
+    --seekbar-active: var(--color-primary);
+    --seekbar-on-active: var(--color-on-primary);
+    --seekbar-halo: var(--color-primary-container);
+    --seekbar-thumb-size: var(--space-5);
+    --seekbar-track-height: var(--space-1);
+
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.seekbar--sm {
+    --seekbar-thumb-size: var(--space-4);
+    --seekbar-track-height: calc(var(--space-1) / 2);
+}
+
+.seekbar--lg {
+    --seekbar-thumb-size: var(--space-6);
+    --seekbar-track-height: calc(var(--space-1) + var(--space-1) / 2);
+}
+
+.seekbar--neutral {
+    --seekbar-active: var(--color-on-surface-variant);
+    --seekbar-on-active: var(--color-surface);
+    --seekbar-halo: var(--color-surface-container-highest);
+}
+
+.seekbar--mint {
+    --seekbar-active: var(--color-secondary);
+    --seekbar-on-active: var(--color-on-secondary);
+    --seekbar-halo: var(--color-secondary-container);
+}
+
+.seekbar--violet {
+    --seekbar-active: var(--color-tertiary);
+    --seekbar-on-active: var(--color-on-tertiary);
+    --seekbar-halo: var(--color-tertiary-container);
+}
+
+.seekbar--amber {
+    --seekbar-active: var(--color-warning);
+    --seekbar-on-active: var(--color-on-warning);
+    --seekbar-halo: var(--color-warning-container);
+}
+
+.seekbar--danger,
+.seekbar[data-invalid="true"] {
+    --seekbar-active: var(--color-error);
+    --seekbar-on-active: var(--color-on-error);
+    --seekbar-halo: var(--color-error-container);
+}
+
+/* ---- label row --------------------------------------------------------- */
+
+.seekbar__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-2);
+}
+
+.seekbar__label {
+    color: var(--color-on-surface-variant);
+    font-family: var(--font-family-current, var(--font-sans));
+    font-size: var(--type-label-sm);
+    font-weight: var(--font-weight-current, var(--weight-medium));
+    letter-spacing: var(--font-tracking-current, var(--tracking-normal));
+    line-height: var(--font-leading-current, var(--leading-snug));
+    cursor: pointer;
+    transition: color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
+}
+
+.seekbar__spacer {
+    flex: 1 1 auto;
+}
+
+.seekbar__value {
+    flex: none;
+    color: var(--color-on-surface);
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--font-tracking-current, var(--tracking-wide));
+}
+
+/* ---- control ----------------------------------------------------------- */
+
+.seekbar__surface {
+    position: relative;
+    width: 100%;
+    height: var(--touch-target);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    overflow: visible;
+}
+
+.seekbar__surface > .surface__component {
+    height: 100%;
+}
+
+.seekbar__rail {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    inset-inline: calc(var(--seekbar-thumb-size) / 2);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.seekbar__track {
+    position: absolute;
+    top: 50%;
+    inset-inline: 0;
+    height: var(--seekbar-track-height);
+    border-radius: var(--radius-pill);
+    background: var(--seekbar-active);
+    opacity: 0.24;
+    transform: translateY(-50%);
+    transition:
+        opacity calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
+}
+
+.seekbar__secondary,
+.seekbar__fill {
+    position: absolute;
+    top: 50%;
+    inset-inline-start: 0;
+    height: var(--seekbar-track-height);
+    border-radius: var(--radius-pill);
+    background: var(--seekbar-active);
+    transform: translateY(-50%);
+}
+
+.seekbar__secondary {
+    opacity: 0.38;
+}
+
+.seekbar__fill {
+    transition: background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
+}
+
+.seekbar__tick {
+    position: absolute;
+    top: 50%;
+    width: calc(var(--space-1) / 2);
+    height: var(--space-2);
+    margin-inline-start: calc(var(--space-1) / 4 * -1);
+    border-radius: var(--radius-pill);
+    background: var(--color-on-surface-variant);
+    transform: translateY(-50%);
+    transition: background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
+}
+
+.seekbar__tick--active {
+    background: var(--seekbar-on-active);
+}
+
+.seekbar__thumb {
+    position: absolute;
+    top: 50%;
+    width: var(--seekbar-thumb-size);
+    height: var(--seekbar-thumb-size);
+    margin-inline-start: calc(var(--seekbar-thumb-size) / -2);
+    border: 1px solid var(--seekbar-active);
+    border-radius: var(--radius-pill);
+    background: var(--seekbar-active);
+    box-shadow:
+        0 var(--space-1) var(--space-1) var(--color-shadow),
+        0 0 0 0 var(--seekbar-halo);
+    transform: translateY(-50%);
+    transition:
+        background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        box-shadow calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        transform calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
+}
+
+.seekbar__native {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    opacity: 0;
+    cursor: pointer;
+    touch-action: manipulation;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.seekbar__native::-webkit-slider-thumb {
+    width: var(--seekbar-thumb-size);
+    height: var(--seekbar-thumb-size);
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.seekbar__native::-moz-range-thumb {
+    width: var(--seekbar-thumb-size);
+    height: var(--seekbar-thumb-size);
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+}
+
+.seekbar__native::-moz-range-track {
+    height: var(--seekbar-track-height);
+    background: transparent;
+}
+
+.seekbar__native:disabled {
+    cursor: not-allowed;
+}
+
+/* ---- thumb ripple ------------------------------------------------------ */
+
+.seekbar__ripple-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    border-radius: var(--radius-pill);
+    pointer-events: none;
+}
+
+.seekbar__ripple-rail {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    inset-inline: calc(var(--seekbar-thumb-size) / 2);
+}
+
+.seekbar__ripple {
+    position: absolute;
+    top: 50%;
+    width: var(--seekbar-thumb-size);
+    height: var(--seekbar-thumb-size);
+    margin-inline-start: calc(var(--seekbar-thumb-size) / -2);
+    border-radius: var(--radius-pill);
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.seekbar__ripple::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-pill);
+    background: var(--seekbar-active);
+    opacity: 0;
+    animation: seekbar-ripple-spread calc(var(--motion-duration-medium) * var(--motion-scale, 1))
+        var(--motion-ease-decelerate) forwards;
+}
+
+@keyframes seekbar-ripple-spread {
+    0% {
+        opacity: 0.24;
+        transform: scale(0.85);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(2.8);
+    }
+}
+
+/* ---- vertical direction ------------------------------------------------ */
+
+.seekbar--vertical {
+    --seekbar-length: calc(var(--space-10) * 3);
+
+    align-items: center;
+}
+
+.seekbar--vertical .seekbar__header,
+.seekbar--vertical .seekbar__hint,
+.seekbar--vertical .seekbar__error {
+    width: 100%;
+}
+
+.seekbar--vertical .seekbar__surface {
+    width: var(--touch-target);
+    height: var(--seekbar-length);
+}
+
+.seekbar--vertical .seekbar__rail {
+    top: calc(var(--seekbar-thumb-size) / 2);
+    bottom: calc(var(--seekbar-thumb-size) / 2);
+    inset-inline: 0;
+}
+
+.seekbar--vertical .seekbar__track {
+    top: 0;
+    bottom: 0;
+    inset-inline: auto;
+    left: 50%;
+    width: var(--seekbar-track-height);
+    height: auto;
+    transform: translateX(-50%);
+}
+
+.seekbar--vertical .seekbar__secondary,
+.seekbar--vertical .seekbar__fill {
+    top: auto;
+    bottom: 0;
+    inset-inline-start: auto;
+    left: 50%;
+    width: var(--seekbar-track-height);
+    height: 0;
+    transform: translateX(-50%);
+}
+
+.seekbar--vertical .seekbar__tick {
+    top: auto;
+    bottom: 0;
+    left: 50%;
+    width: var(--space-2);
+    height: calc(var(--space-1) / 2);
+    margin-inline-start: 0;
+    margin-bottom: calc(var(--space-1) / 4 * -1);
+    transform: translateX(-50%);
+}
+
+.seekbar--vertical .seekbar__thumb {
+    top: auto;
+    bottom: 0;
+    left: 50%;
+    margin-inline-start: 0;
+    margin-bottom: calc(var(--seekbar-thumb-size) / -2);
+    transform: translateX(-50%);
+}
+
+.seekbar--vertical .seekbar__ripple-rail {
+    top: calc(var(--seekbar-thumb-size) / 2);
+    bottom: calc(var(--seekbar-thumb-size) / 2);
+    inset-inline: 0;
+}
+
+.seekbar--vertical .seekbar__ripple {
+    top: auto;
+    bottom: 0;
+    left: 50%;
+    margin-inline-start: 0;
+    margin-bottom: calc(var(--seekbar-thumb-size) / -2);
+    transform: translateX(-50%);
+}
+
+.seekbar--vertical .seekbar__surface:has(.seekbar__native:active) .seekbar__thumb {
+    transform: translateX(-50%) scale(1.06);
+}
+
+/*
+ * The native input stays horizontal in its own coordinate space and is rotated
+ * into place, so dragging and keyboard stepping keep the browser's range
+ * implementation on every engine. `direction: ltr` pins zero to the bottom.
+ */
+.seekbar--vertical .seekbar__native {
+    inset: auto;
+    top: 50%;
+    left: 50%;
+    width: var(--seekbar-length);
+    height: var(--touch-target);
+    direction: ltr;
+    transform: translate(-50%, -50%) rotate(-90deg);
+}
+
+/* ---- interaction ------------------------------------------------------- */
+
+.seekbar__surface:not([data-disabled="true"]):hover .seekbar__track {
+    opacity: 0.32;
+}
+
+.seekbar__surface:not([data-disabled="true"]):hover .seekbar__thumb,
+.seekbar__surface:has(.seekbar__native:focus-visible) .seekbar__thumb {
+    box-shadow:
+        0 var(--space-1) var(--space-1) var(--color-shadow),
+        0 0 0 var(--space-2) var(--seekbar-halo);
+}
+
+.seekbar__surface:has(.seekbar__native:active) .seekbar__thumb {
+    box-shadow:
+        0 var(--space-1) var(--space-1) var(--color-shadow),
+        0 0 0 var(--space-3) var(--seekbar-halo);
+    transform: translateY(-50%) scale(1.06);
+}
+
+.seekbar__surface:has(.seekbar__native:focus-visible) {
+    outline: var(--focus-ring-width) solid var(--seekbar-active);
+    outline-offset: var(--focus-ring-offset);
+}
+
+.seekbar__surface:has(.seekbar__native:focus-visible) .seekbar__track {
+    opacity: 0.32;
+}
+
+.seekbar[data-dragging="true"] .seekbar__native {
+    cursor: grabbing;
+}
+
+/* ---- field copy -------------------------------------------------------- */
+
+.seekbar__hint,
+.seekbar__error {
+    margin: var(--space-2) 0 0;
+    padding-left: calc(var(--space-1) / 2);
+    font-size: var(--type-label-sm);
+    line-height: var(--font-leading-current, var(--leading-normal));
+}
+
+.seekbar__hint {
+    color: var(--color-on-surface-variant);
+}
+
+.seekbar__error {
+    color: var(--color-error);
+}
+
+.seekbar:focus-within .seekbar__label {
+    color: var(--seekbar-active);
+}
+
+.seekbar[data-invalid="true"] .seekbar__label {
+    color: var(--color-error);
+}
+
+.seekbar[data-disabled="true"] {
+    opacity: var(--state-disabled-opacity);
+}
+
+.seekbar[data-disabled="true"] .seekbar__label {
+    cursor: not-allowed;
+}
+
+.seekbar[data-disabled="true"] .seekbar__thumb {
+    box-shadow: none;
+}
+
+/* ---- responsive and user preferences ---------------------------------- */
+
+@media (pointer: coarse) {
+    .seekbar {
+        --seekbar-thumb-size: var(--space-6);
+    }
+
+    .seekbar--sm {
+        --seekbar-thumb-size: var(--space-5);
+    }
+}
+
+@media (prefers-contrast: more) {
+    .seekbar__track {
+        opacity: 0.38;
+    }
+
+    .seekbar__tick:not(.seekbar__tick--active) {
+        background: var(--color-on-surface);
+    }
+}
+
+@media (forced-colors: active) {
+    .seekbar__track {
+        border: 1px solid CanvasText;
+        background: Canvas;
+        opacity: 1;
+    }
+
+    .seekbar__secondary,
+    .seekbar__fill {
+        background: Highlight;
+        opacity: 1;
+    }
+
+    .seekbar__secondary {
+        border: 1px solid CanvasText;
+        background: Canvas;
+    }
+
+    .seekbar__thumb {
+        border: var(--focus-ring-width) solid CanvasText;
+        background: Canvas;
+        box-shadow: none;
+    }
+
+    .seekbar__tick {
+        background: CanvasText;
+    }
+
+    .seekbar__tick--active {
+        background: HighlightText;
+    }
+
+    .seekbar__ripple::after {
+        background: Highlight;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root:not([data-motion="always"]) .seekbar__label,
+    :root:not([data-motion="always"]) .seekbar__track,
+    :root:not([data-motion="always"]) .seekbar__fill,
+    :root:not([data-motion="always"]) .seekbar__tick,
+    :root:not([data-motion="always"]) .seekbar__thumb {
+        transition: none;
+    }
+
+    :root:not([data-motion="always"]) .seekbar__ripple::after {
+        animation: none;
+        opacity: 0;
+    }
+}

@@ -20,7 +20,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .toolbar__slot {
+    :root:not([data-motion="always"]) .toolbar__slot {
         transition: none;
     }
 }

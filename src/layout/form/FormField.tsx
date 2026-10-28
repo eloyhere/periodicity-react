@@ -159,8 +159,6 @@ const FormField: FC<FormFieldProps> = ({
     const generatedId: string = useId();
     const form: FormContextValue = useFormContext();
     const hasHint: boolean = isPresent(hint);
-    const hasError: boolean = isPresent(error);
-    const invalid: boolean = hasError;
     const child: ReactElement<Record<string, unknown>> | null = isValidElement<Record<string, unknown>>(children)
         ? children
         : null;
@@ -174,6 +172,11 @@ const FormField: FC<FormFieldProps> = ({
     const isRequired: boolean = required || childRequired;
     const isDisabled: boolean = disabled || form.disabled || hasBooleanAttribute(childProps.disabled);
     const controlName: string | undefined = readString(name) ?? readString(childProps.name);
+    // A form-wide error map (server response or validation) reaches every named field; an explicit prop wins.
+    const contextError: ReactNode = controlName === (void 0) ? (void 0) : form.errors[controlName];
+    const resolvedError: ReactNode = error ?? contextError;
+    const hasError: boolean = isPresent(resolvedError);
+    const invalid: boolean = hasError;
     const describedBy: string = mergeIds([
         hasHint ? hintId : (void 0),
         hasError ? errorId : (void 0),
@@ -216,7 +219,7 @@ const FormField: FC<FormFieldProps> = ({
                 htmlFor={controlId}
                 hint={hint}
                 hintId={hintId}
-                error={error}
+                error={resolvedError}
                 errorId={errorId}
                 required={isRequired}
                 optional={optional}

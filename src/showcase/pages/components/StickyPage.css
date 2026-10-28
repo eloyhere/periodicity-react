@@ -18,7 +18,7 @@
     border-top: 1px solid var(--color-outline-variant);
     border-bottom: 1px solid var(--color-outline-variant);
     background: var(--color-surface);
-    transition: box-shadow 200ms var(--ease-standard);
+    transition: box-shadow calc(200ms * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .sticky-slot__toolbar.is-stuck {
@@ -52,7 +52,7 @@
     padding: var(--space-2) var(--space-4);
     border-top: 1px solid var(--color-outline-variant);
     background: var(--color-surface);
-    transition: box-shadow 200ms var(--ease-standard);
+    transition: box-shadow calc(200ms * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .sticky-slot__actionbar.is-stuck {
@@ -86,7 +86,7 @@
     padding: var(--space-2) var(--space-3);
     border-bottom: 1px solid var(--color-outline-variant);
     background: var(--color-surface);
-    transition: box-shadow 200ms var(--ease-standard);
+    transition: box-shadow calc(200ms * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .sticky-offset__bar.is-stuck {
@@ -169,7 +169,7 @@
     border-top: 1px solid var(--color-outline-variant);
     background: var(--color-surface);
     gap: var(--space-2) var(--space-3);
-    transition: box-shadow 200ms var(--ease-standard);
+    transition: box-shadow calc(200ms * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .sticky-edge__bar.is-stuck {

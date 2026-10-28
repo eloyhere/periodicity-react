@@ -11,8 +11,8 @@
     text-decoration-thickness: 1px;
     text-underline-offset: 0.18em;
     transition:
-        color 150ms var(--ease-standard),
-        text-decoration-color 150ms var(--ease-standard);
+        color calc(150ms * var(--motion-scale, 1)) var(--motion-ease-standard),
+        text-decoration-color calc(150ms * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .link--default {

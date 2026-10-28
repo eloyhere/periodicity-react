@@ -213,8 +213,8 @@
     border-radius: 50%;
     background: var(--color-primary);
     animation-name: foundation-motion;
-    animation-timing-function: var(--ease-standard);
-    animation-iteration-count: infinite;
+    animation-timing-function: var(--motion-ease-standard);
+    animation-iteration-count: var(--motion-repeat, infinite);
     animation-direction: alternate;
 }
 
@@ -314,8 +314,8 @@
     cursor: pointer;
     gap: 2px;
     transition:
-        border-color 140ms var(--ease-standard),
-        background-color 140ms var(--ease-standard);
+        border-color calc(140ms * var(--motion-scale, 1)) var(--motion-ease-standard),
+        background-color calc(140ms * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .foundation-icon:hover {

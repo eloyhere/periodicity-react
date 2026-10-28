@@ -2,12 +2,12 @@
 
 A Material-inspired React 19 component library for product interfaces, admin tools, and data-heavy applications.
 
-`periodicity-react` ships **141 `Periodicity*` components**, four chart types, file and image pickers, scoped
+`periodicity-react` ships **152 `Periodicity*` components**, four chart types, file and image pickers, scoped
 typography, design-system providers, and **12 built-in locales**. The API is TypeScript-first, flex-first, and close
 to the browser: native attributes, events, ARIA, and refs pass through wherever they make sense.
 
 - **npm:** [`periodicity-react`](https://www.npmjs.com/package/periodicity-react)
-- **Version:** `0.1.14`
+- **Version:** `0.1.15`
 - **Showcase:** run `npm run dev`; source in [`src/showcase`](src/showcase)
 - **Source:** [github.com/eloyhere/periodicity-react](https://github.com/eloyhere/periodicity-react)
 - **Requirements:** React 19 and React DOM 19
@@ -15,7 +15,7 @@ to the browser: native attributes, events, ARIA, and refs pass through wherever 
 
 ## Contents
 
-- [What is in 0.1.9](#what-is-in-019)
+- [What's new in this version](#whats-new-in-this-version)
 - [Design principles](#design-principles)
 - [Requirements and installation](#requirements-and-installation)
 - [Quick start](#quick-start)
@@ -31,6 +31,8 @@ to the browser: native attributes, events, ARIA, and refs pass through wherever 
 - [Navigation and layout](#navigation-and-layout)
 - [Messaging and comments](#messaging-and-comments)
 - [Typography and Font](#typography-and-font)
+- [Documents](#documents)
+- [Media](#media)
 - [Motion and standard events](#motion-and-standard-events)
 - [Accessibility](#accessibility)
 - [Styling and tokens](#styling-and-tokens)
@@ -39,21 +41,31 @@ to the browser: native attributes, events, ARIA, and refs pass through wherever 
 - [Development](#development)
 - [Changelog](#changelog)
 
-## What is in 0.1.9
+## What's new in this version
 
-- **Canvas and WebGL charts.** `BarChart`, `PieChart`, `LineChart`, and `ScatterChart` share a responsive frame
-  with a WebGL series layer, a canvas renderer fallback, device-pixel-ratio sizing, legends, screen-reader data
-  tables, and redraws scheduled through the library's priority task queue.
-- **Native file and image pickers.** `useFilePick` drives the hidden native file input rendered by `FilePicker`,
-  `PhotoPicker`, and `AvatarPicker`. Photo and avatar selections get a Base64 preview and an in-dialog cropper with
-  confirm, cancel, and close semantics.
-- **A complete internationalisation pass.** Charts, pickers, comments, transfer, date-time, mention, rating,
-  progress, radio, scrollbar, context menu, combobox, loading, and email/telephone validation copy now read from
-  the active dictionary in all 12 built-in locales.
-- **Scoped typography.** `Font` and `useFont` expose type-scale levels, families, weights, line heights, letter
-  spacing, transforms, and alignment through a nested font context.
-- **Electron-safe overlays.** Dropdown and popover panels opt out of window dragging with
-  `-webkit-app-region: no-drag`, so menus that cross a drag region in an Electron app bar remain fully clickable.
+`0.1.15` ships the media family (`PeriodicityAudio`, both video players, `PeriodicityBarrage`), the Android-style
+`PeriodicityRing` and `PeriodicitySeekBar`, `PeriodicityTerminal`, form validation, Frame layouts, virtual masonry,
+and a unified motion and anchor-tracking layer. Everything below is on `main` and ships in this release.
+
+- **The media family.** `PeriodicityAudio` wraps the native `audio` element in a compact themed shell with a cover
+  tile, title and subtitle, and a built-in play, seek, time, mute, volume, and speed transport plus a
+  `slots.controls` render prop. `PeriodicityHorizontalVideo` and `PeriodicityVerticalVideo` wrap the native `video`
+  element in a themed 16:9 or 9:16 stage with a built-in play, seek, time, mute, volume, and full-screen bar plus a
+  `slots.controls` render prop. `PeriodicityBarrage` floats comments over any wrapped content on a
+  pointer-transparent, lane-based layer.
+- **`PeriodicityRing` replaces `PeriodicityProgressRing` and `PeriodicityCircularProgress`.** Without a `value` the
+  ring spins as an indeterminate loader; with one it draws a determinate arc and `showValue` prints the percentage in
+  the centre. `PeriodicityElementLoading` and `PeriodicityFullscreenLoading` now spin a `Ring`.
+- **`PeriodicityTerminal` and `PeriodicitySeekBar`.** The terminal renders a themed console with a transcript, a
+  command input, and an icon-only send button; `onInput` / `onChange` leave execution to the caller, while `history` /
+  `onHistoryChange` bind ArrowUp/ArrowDown recall. The seek bar is an Android-style native range input with buffered
+  secondary progress, optional ticks, snapped steps, horizontal or vertical direction, and `onSeekStart` / `onSeekEnd`.
+- **The waterfall layout is split.** `PeriodicityWaterfallLayout` moved to `src/layout/waterfall/normal`, and
+  `PeriodicityVirtualWaterfallLayout` adds adapter-backed virtual masonry; both accept `slots.item`.
+- **`DateTimePicker` year and month fields use `NumberInput`**, so typed digits, arrow keys, and clamping match the
+  hour and minute fields.
+- **The frame layout.** `PeriodicityFrame` layers full-frame `PeriodicityFramePage` sub-views inside one bounded,
+  clipping frame; inactive pages stay mounted and hidden.
 
 ## Design principles
 
@@ -62,8 +74,9 @@ Periodicity is built around six rules:
 - **Semantic before decorative.** Components consume tokens such as `--color-primary`, `--color-on-surface`, and
   `--space-4`; they do not hard-code a house palette. Themes and colour-vision palettes therefore change every
   component at once.
-- **Flex-first layout.** The library composes with flexbox and does not rely on CSS Grid, so it embeds safely in
-  host layouts, virtualisers, and scrolling panes.
+- **Flex-first layout.** Every structural layout composes with flexbox, so components embed safely in host layouts,
+  virtualisers, and scrolling panes. The only CSS Grid in the package sits inside decorative surfaces: the message
+  reaction picker, the chat emoji popover, the agent reasoning collapse, and LaTeX equation rows.
 - **Native behaviour first.** Forms submit, anchors navigate, inputs validate, dialogs trap focus, and refs point
   at real DOM nodes. ARIA and data attributes are additions, not replacements for browser semantics.
 - **Composable surfaces.** `Surface`, `StateLayer`, `Ripple`, `Icon`, `Text`, `Font`, and the layout primitives are
@@ -137,23 +150,26 @@ export function SignIn() {
 
 ## Public surface
 
-Component exports use the `Periodicity*` prefix only. The package root also exposes two hooks and the standard event
-utilities. The full component inventory is in the [component index](#component-index).
+Component exports use the `Periodicity*` prefix only. The package root also exposes two hooks, the message reaction
+preset, and the standard event utilities. The full component inventory is in the
+[component index](#component-index).
 
 | Export group    | Names                                                                                     |
 | --------------- | ----------------------------------------------------------------------------------------- |
 | Components      | Every `Periodicity*` component, plus exported prop types where provided                   |
 | Hooks           | `useFilePick`, `useFont`                                                                  |
 | Standard events | `createStandardEvent`, `useStandardEvents`, `withStandardEvents`                          |
+| Runtime values  | `defaultMessageReactions`, `MessageReactionOption`                                        |
 | Types           | Shared prop types, `PeriodicityStandardEventProps`, chart, picker, font, and locale types |
 
 Import from the single package entry:
 
 ```tsx
-import { PeriodicityButton, PeriodicityDialog, useFilePick } from "periodicity-react";
+import { PeriodicityButton, PeriodicityDialog, defaultMessageReactions, useFilePick } from "periodicity-react";
 ```
 
-The published package intentionally exposes the prefixed component surface only.
+The published package intentionally exposes the prefixed component surface plus those runtime helpers, and nothing
+else.
 
 ## Theming
 
@@ -211,7 +227,7 @@ values.
 | `tritanopia`      | 蓝色盲友好   | Tritanopia friendly    | light |
 | `achromatopsia`   | 全色盲友好   | Achromatopsia friendly | light |
 | `default`         | 默认         | Default                | light |
-| `dark`            | 夜间         | Dark                   | dark  |
+| `dark`            | 深色         | Dark                   | dark  |
 | `milk`            | 牛奶白       | Milk white             | light |
 | `space-gray`      | 深空灰       | Space grey             | dark  |
 | `gray`            | 灰色         | Grey                   | dark  |
@@ -547,9 +563,47 @@ import { PeriodicityTextInput } from "periodicity-react";
 ```
 
 Email and telephone fields sanitise input, preserve the caret, use native pattern attributes, and surface
-localised validation messages from the active dictionary. `PeriodicityForm`, `PeriodicityFormField`, and
-`PeriodicityFormActions` wrap a native `<form>` and generate `label htmlFor`, `aria-describedby`, and
-`aria-invalid` wiring for native controls.
+localised validation messages from the active dictionary.
+
+### Forms
+
+`PeriodicityForm` stays a native `<form>` — submit, reset, method, action, enctype, and autocomplete keep working,
+and `onSubmit` / `onReset` still receive their native events — and adds a validation and submission pipeline on
+top. `validate(values)` collects the form values and returns field errors, `onValidSubmit(values, api)` runs only
+when validation passes, and an async submission keeps the form pending until it settles. The error map is shared
+through context, so one server response marks every matching `FormField`, and `FormMessage` reports the failure
+while an invalid submission moves focus to it.
+
+```tsx
+import {
+    PeriodicityForm,
+    PeriodicityFormField,
+    PeriodicityFormMessage,
+    PeriodicityFormSubmit,
+} from "periodicity-react";
+
+<PeriodicityForm
+    validate={(values) =>
+        typeof values.email === "string" && values.email.includes("@") ? {} : { email: "Enter an address with an @." }
+    }
+    onValidSubmit={async (values, api) => {
+        const result = await subscribe(values);
+        api.setErrors(result.errors);
+    }}
+>
+    <PeriodicityFormMessage />
+    <PeriodicityFormField label="Email" name="email" hint="We never share it." required>
+        {(field) => <input {...field} type="email" autoComplete="email" />}
+    </PeriodicityFormField>
+    <PeriodicityFormSubmit content="Subscribe" pendingContent="Subscribing…" />
+</PeriodicityForm>;
+```
+
+`Form` accepts `validate`, `onValidSubmit`, `onInvalidSubmit`, `onSubmitError`, `errors` / `defaultErrors`,
+`pending` / `defaultPending`, and the matching change callbacks. `FormField` binds `label htmlFor`,
+`name`, `required`, `aria-describedby`, `aria-invalid`, and `aria-errormessage` to a control or a render
+function, and reads its error from the form map when no explicit `error` prop is set. `FormActions` aligns the
+footer actions; `FormSubmit` disables itself and shows a `Ring` while the form is pending.
 
 ### Buttons
 
@@ -569,9 +623,36 @@ sizes.
 ### Other controls
 
 `PeriodicityCheckbox`, `PeriodicityRadio` / `PeriodicityRadioGroup`, `PeriodicitySwitch`, `PeriodicityRange`,
-`PeriodicityField`, `PeriodicityFieldGroup`, `PeriodicitySelect`, `PeriodicityVirtualSelect`,
+`PeriodicitySeekBar`, `PeriodicityField`, `PeriodicityFieldGroup`, `PeriodicitySelect`, `PeriodicityVirtualSelect`,
 `PeriodicityTreeSelect`, and `PeriodicityCombobox` cover standard form and filter layouts. Controlled and
 uncontrolled values, disabled/read-only states, and native props are supported throughout.
+
+### SeekBar
+
+`PeriodicitySeekBar` is an Android-style seek bar: a native `input type="range"` under a painted track and thumb,
+with buffered secondary progress, optional tick marks, snapped steps, a thumb ripple on hover and press, and
+horizontal or vertical direction; `length` sizes a vertical track.
+
+```tsx
+import { PeriodicitySeekBar } from "periodicity-react";
+
+<PeriodicitySeekBar
+    label="Playback position"
+    min={0}
+    max={240}
+    step={5}
+    defaultValue={95}
+    secondaryValue={140}
+    ticks={5}
+    showValue
+    onChange={(seconds) => setPosition(seconds)}
+    onSeekEnd={(seconds) => savePosition(seconds)}
+/>;
+```
+
+`SeekBar` accepts `value` / `defaultValue` and a required `onChange(value)`, plus `min`, `max`, `step`,
+`secondaryValue`, `ticks`, `label`, `showValue`, `format`, `hint`, `error`, `size`, `tone`, `direction`, `length`,
+and `onSeekStart` / `onSeekEnd`.
 
 ## Pickers and calendar
 
@@ -664,27 +745,44 @@ popover, tooltip, snackbar, toast, alert, banner, backdrop, and fullscreen/eleme
 uncontrolled open state, close reasons, Escape handling, focus restoration, and native panel attributes are
 supported.
 
+Both loading overlays spin `PeriodicityRing`, the Android-style circular indicator that replaces
+`PeriodicityProgressRing` and `PeriodicityCircularProgress`. Without a `value` it spins as an indeterminate loader;
+with one it draws a determinate arc and `showValue` prints the percentage in the centre.
+
+```tsx
+import { PeriodicityRing } from "periodicity-react";
+
+<PeriodicityRing value={68} size="lg" thickness={6} showValue label="Upload progress" />;
+<PeriodicityRing size="sm" label="Saving" />;
+```
+
 Dropdown and popover panels are portalled to `document.body` and marked `-webkit-app-region: no-drag`, so their
 entire surface stays interactive when it overlaps an Electron drag region such as a custom app bar or hero.
 
 ## Navigation and layout
 
-Navigation components include `PeriodicityNavigationView`, `PeriodicityTabs` / `PeriodicityTabPanel`,
+Navigation components include `PeriodicityNavigation`, `PeriodicityTabs` / `PeriodicityTabPanel`,
 `PeriodicityPager` / `PeriodicityPage`, the `PeriodicityMenu` family, `PeriodicityStepper`, and
 `PeriodicityAccordion`.
 
-Layout is flex-first and does not use CSS Grid. Structural components include:
+Layout is flex-first: every structural component is a flex container. Structural components include:
 
 - `PeriodicityGridLayout`
 - `PeriodicityLinearLayout` and `PeriodicityLinearLayoutItem`
 - `PeriodicityConstraintLayout` and `PeriodicityConstraint`
 - `PeriodicityWaterfallLayout`
+- `PeriodicityVirtualWaterfallLayout`
 - `PeriodicityDrawerLayout`
 - `PeriodicityCoordinator`, `PeriodicityAppBar`, `PeriodicityCollapse`, and `PeriodicityToolbar`
 - `PeriodicitySticky` and `PeriodicityStickyPage`
 - `PeriodicityScrollbar`
 - `PeriodicityScroll`
 - `PeriodicityDrag`
+
+`PeriodicityVirtualWaterfallLayout` windows an adapter-backed masonry: cards carry a height through a numeric
+`height` field, `getHeight` / `itemHeight`, or a `WaterfallAdapter`, each card enters the shortest column, and only the
+vertical slice inside the viewport is mounted. Both waterfall layouts accept `slots.item`, which replaces the element
+around each card while exposing the placement through `state.className` and `state.style`.
 
 `PeriodicityCoordinator` has exactly three slots: `collapse`, `header`, and `main`. The collapse slot shrinks from
 `collapseHeight` to zero as `main` scrolls; `header` is the fixed app bar; `main` is the scroll viewport. When
@@ -822,11 +920,126 @@ between block and inline maths; `display` is ignored for complete documents. Ext
 `\input` or `\bibliography` are not loaded, packages are not executed, custom environments fall back to their
 rendered content, and rows inside `align` are not individually numbered.
 
+`PeriodicityTerminal` renders an interactive console transcript with a command input and an icon-only send button.
+Every surface, border, prompt, cursor, and line tone is a semantic colour role, so the console is repainted by
+whichever theme preset, mode, or scoped `tokens` wrap it.
+
+```tsx
+import { useState } from "react";
+import { PeriodicityTerminal, type PeriodicityTerminalLine } from "periodicity-react";
+
+const deployLog: readonly PeriodicityTerminalLine[] = [{ text: "✓ 14 packages linked", tone: "success" }];
+const [command, setCommand] = useState("");
+const [history, setHistory] = useState<string[]>([]);
+const [lines, setLines] = useState<readonly PeriodicityTerminalLine[]>(deployLog);
+
+const runCommand = (submitted: string): void => {
+    setCommand("");
+    setLines((current) => [
+        ...current,
+        { text: submitted, prompt: "~" },
+        { text: "✓ all systems nominal", tone: "success" },
+    ]);
+};
+
+<PeriodicityTerminal
+    title="periodicity — deploy"
+    controls
+    maxHeight={260}
+    prompt="~"
+    lines={lines}
+    value={command}
+    onInput={setCommand}
+    onChange={runCommand}
+    history={history}
+    onHistoryChange={setHistory}
+    sendLabel="Run command"
+/>;
+```
+
+The component never executes a shell. `onInput` receives every edit, `onChange` receives the non-empty command
+submitted with Enter or the send button, and the caller appends the resulting output to `lines`. `history` is ordered
+oldest first and drives ArrowUp/ArrowDown recall; `onHistoryChange` receives the next array after a submission. A
+capped transcript is focusable and exposed as `role="log"`; set `live` to announce new lines politely.
+
+## Media
+
+`PeriodicityAudio` renders a compact player around the native `audio` element: a cover tile, an optional title and
+subtitle, and a transport with play and pause, seeking with buffered progress, time, a mute toggle, a vertical
+volume rail, and playback speed. It keeps every native media attribute and event, and the shell, buttons, seek
+track, and rail use the page's surface and accent roles, so the player follows the active theme.
+
+```tsx
+import { PeriodicityAudio } from "periodicity-react";
+
+<PeriodicityAudio
+    src="/episode.mp3"
+    title="Episode 12"
+    subtitle="Field recording"
+    caption="The shell and transport follow the active theme."
+/>;
+```
+
+`PeriodicityAudio` accepts `src`, `sources`, `controls` (`custom`, `native`, or `none`), `label`, `title`,
+`subtitle`, `artwork`, `caption`, `rates`, `labels`, and `slots`. `slots.controls` replaces the transport with a
+render function that receives the live state, the resolved labels, and the play, seek, volume, mute, and speed
+actions; `slots.actions` adds chrome beside the title. When `title` is a string it also names the player for
+assistive technology unless `label` or `aria-label` says otherwise.
+
+`PeriodicityHorizontalVideo` renders a 16:9 player around the native `video` element, and
+`PeriodicityVerticalVideo` renders the same player in a 9:16 stage with a right-hand action stack, a time badge,
+and a slim progress rail. Both keep every native media attribute and event, and the frame, control bar, buttons,
+seek track, and overlays use the page's surface and accent roles, so the chrome follows the active theme. The
+built-in bar supplies play and pause, seeking, time, a mute toggle, an entry that opens a vertical volume rail,
+and full screen; clicking the video area toggles the chrome and flashes a centred play or pause affordance.
+
+```tsx
+import { PeriodicityHorizontalVideo, PeriodicityVerticalVideo } from "periodicity-react";
+
+<PeriodicityHorizontalVideo src="/launch.mp4" poster="/launch.jpg" label="Launch film" />;
+
+<PeriodicityVerticalVideo src="/short.mp4" label="Portrait cut" caption="Portrait edit." />;
+```
+
+Both players accept `src`, `sources`, `tracks`, `controls` (`custom`, `native`, or `none`), `label`, `caption`,
+`aspectRatio`, `labels`, and `slots`. `slots.controls` replaces the bottom bar with a render function that
+receives the live state, the resolved labels, and the seek, volume, mute, full-screen, and chrome actions.
+`slots.aboveControls` adds extra chrome directly above the bar with the same context, and it opens and closes
+with the bar without changing the built-in controls. Use `PeriodicityForm` and `PeriodicityTextInput` inside
+that slot for a comment composer that follows the chrome.
+
+`PeriodicityBarrage` floats comments over any wrapped content. Items travel lanes on an absolutely positioned,
+pointer-transparent layer, so the wrapped component keeps its layout and its interactions. Every item moves at
+the same pixels-per-millisecond speed, and the scheduler reuses a lane only after the previous item has cleared
+the entry edge, so a longer comment cannot overtake a shorter one. Repeating and appending items joins the live
+stream without resetting the comments already in flight.
+
+```tsx
+import { PeriodicityBarrage } from "periodicity-react";
+
+<PeriodicityBarrage items={[{ text: "First!" }, { text: "Nice cut" }]} repeat duration={12000} stagger={900}>
+    <PeriodicityHorizontalVideo src="/launch.mp4" label="Launch film" />
+</PeriodicityBarrage>;
+```
+
+`Barrage` accepts `items`, `paused`, `direction`, `lanes`, `duration`, `stagger`, `repeat`, `bottomInset`,
+`respectReducedMotion`, and `slots`; the `item` slot replaces the default pill, and the `overlay` slot adds
+floating UI of your own. `bottomInset` reserves room for player chrome, and `respectReducedMotion` defaults to
+`true` so the stream stills under `prefers-reduced-motion`; set it to `false` only for a motion showcase. The
+travelling layer is hidden from assistive technology while plain-text comments are mirrored in a visually hidden
+list.
+
 ## Motion and standard events
 
 `PeriodicityAnimation` and `PeriodicityAnimated` provide motion configuration, reduced-motion handling, and
-element-polymorphic animation wrappers. Ripple layers are shared by interactive surfaces and stop when motion is
-disabled.
+element-polymorphic animation wrappers. Every component animation and transition reads the shared
+`--motion-scale`; ripples, spinners, rings, skeletons, overlays, and icon effects all inherit the same scale.
+Essential indicators keep a slower turn through `--motion-essential-scale` when motion is reduced, so a loading
+ring never looks frozen.
+
+The library follows the operating-system preference by default. An application that wants to preview or force
+motion can opt in for the whole document, including portalled layers, with `<html data-motion="always">`; the
+showcase uses this so its demos stay live when the host reports reduced motion.
 
 Every public `Periodicity*` component accepts native React props and the standard event layer without replacing
 each other:
@@ -853,7 +1066,8 @@ thresholds. Native `onClick`, `onWheel`, `onInput`, and `onDrag` remain untouche
 - Dialog, drawer, menu, dropdown, listbox, tree, and table keyboard interactions are implemented.
 - Focus restoration and Escape handling are supported by overlays.
 - Selection colours are scoped so selected text remains readable.
-- Reduced-motion preferences are respected by the animation and ripple layers.
+- Reduced-motion preferences are respected by default; `data-motion="always"` is an explicit application-level
+  override, and essential loading indicators keep a slower turn rather than freezing.
 - `PeriodicityDrag` supports Alt+ArrowUp/Alt+ArrowDown keyboard sorting with live-region announcements.
 - `PeriodicityScrollbar` supports Arrow, Page, Home/End, and Space keyboard scrolling with scrollbar ARIA.
 - `PeriodicityCalendar` and `PeriodicityDateTimePicker` expose full calendar-grid keyboard navigation and roving
@@ -882,8 +1096,9 @@ cover colour roles, surfaces, outlines, spacing, radii, typography, state layers
 }
 ```
 
-The library is flex-first and does not use CSS Grid. Host applications may use Grid freely around the components;
-the structural components themselves remain flex containers.
+The structural components are flex containers and the library is flex-first; the only CSS Grid in the package is
+inside decorative surfaces such as the message reaction picker, the chat emoji popover, the agent reasoning collapse,
+and LaTeX equation rows. Host applications may use Grid freely around the components.
 
 ## API conventions
 
@@ -897,24 +1112,25 @@ the structural components themselves remain flex containers.
   presentational; the component keeps ownership of behaviour and ARIA.
 - **Change events.** File selections emit immediately. Image pickers emit only after the crop dialog closes with
   Confirm or Cancel. Charts are read-only visualisations and expose no value change event.
-- **Prefix only.** The published entry point exposes `Periodicity*` components, `useFilePick`, `useFont`, and the
-  standard event utilities.
+- **Prefix only.** The published entry point exposes `Periodicity*` components, `useFilePick`, `useFont`,
+  `defaultMessageReactions`, and the standard event utilities.
 
 ## Component index
 
-The published package contains 142 `Periodicity*` components. The prefix is omitted below for readability.
+The published package contains 152 `Periodicity*` components. The prefix is omitted below for readability.
 
-| Family                    | Components                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Providers and foundations | Theme, International, Animation, Animated, Portal, Surface, StateLayer, VisuallyHidden, Font, Text, Icon, Divider                                                                                                                                                                                                                                                                                                                                                              |
-| Actions and fields        | Button, TextInput, TextArea, EmailInput, TelephoneInput, NumberInput, CompleteInput, Mention, Select, VirtualSelect, TreeSelect, Combobox, Checkbox, Radio, RadioGroup, Switch, Range, Field, FieldGroup, Form, FormField, FormActions, Link, Anchor                                                                                                                                                                                                                           |
-| Pickers and calendar      | FilePicker, PhotoPicker, AvatarPicker, TimePicker, DateTimePicker, NumberPicker, ColourPicker, CyclePicker, VariantPicker, Calendar                                                                                                                                                                                                                                                                                                                                            |
-| Charts                    | BarChart, PieChart, LineChart, ScatterChart                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| Collections and data      | List, VirtualList, NormalList, MultipleList, SelectList, CheckList, Tree, VirtualTree, CheckTree, SelectTree, Table, VirtualTable, Transfer, Pagination, Scrollbar, Drag, Timeline, Card                                                                                                                                                                                                                                                                                       |
-| Overlays and feedback     | Dialog, ConfirmDialog, MessageDialog, InputDialog, Drawer, DrawerLayout, Popover, Dropdown, DropdownItem, DropdownGroup, DropdownSeparator, ContextMenu, ContextMenuItem, ContextMenuGroup, ContextMenuSeparator, Menu, MenuItem, MenuGroup, MenuSeparator, Tooltip, ToastProvider, Snackbar, Alert, Banner, Backdrop, FullscreenLoading, ElementLoading, Progress, CircularProgress, ProgressRing, Spinner, Skeleton, Rate, Badge, Tag, Chip, Avatar, AvatarGroup, EmptyState |
-| Navigation and layout     | Coordinator, AppBar, Collapse, Toolbar, Sticky, StickyPage, Tabs, TabPanel, Pager, Page, Scroll, NavigationView, Stepper, Accordion, Breadcrumbs, LinearLayout, LinearLayoutItem, ConstraintLayout, Constraint, GridLayout, WaterfallLayout                                                                                                                                                                                                                                    |
-| Messaging and comments    | Contact, VirtualContact, ContactContextMenu, MessageList, VirtualMessageList, MessageContextMenu, Chat, VirtualChat, AgentChat, VirtualAgentChat, CommentThread, VirtualCommentThread                                                                                                                                                                                                                                                                                          |
-| Documents                 | Markdown, Tex                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| Family                    | Components                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Providers and foundations | Theme, International, Animation, Animated, Portal, Surface, StateLayer, VisuallyHidden, Font, Text, Icon, Divider                                                                                                                                                                                                                                                                                                                                    |
+| Actions and fields        | Button, TextInput, TextArea, EmailInput, TelephoneInput, NumberInput, CompleteInput, Mention, Select, VirtualSelect, TreeSelect, Combobox, Checkbox, Radio, RadioGroup, Switch, Range, SeekBar, Field, FieldGroup, Form, FormField, FormActions, FormMessage, FormSubmit, Link, Anchor                                                                                                                                                               |
+| Pickers and calendar      | FilePicker, PhotoPicker, AvatarPicker, TimePicker, DateTimePicker, NumberPicker, ColourPicker, CyclePicker, VariantPicker, Calendar                                                                                                                                                                                                                                                                                                                  |
+| Charts                    | BarChart, PieChart, LineChart, ScatterChart                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Collections and data      | List, VirtualList, NormalList, MultipleList, SelectList, CheckList, Tree, VirtualTree, CheckTree, SelectTree, Table, VirtualTable, Transfer, Pagination, Scrollbar, Drag, Timeline, Card                                                                                                                                                                                                                                                             |
+| Overlays and feedback     | Dialog, ConfirmDialog, MessageDialog, InputDialog, Drawer, DrawerLayout, Popover, Dropdown, DropdownItem, DropdownGroup, DropdownSeparator, ContextMenu, ContextMenuItem, ContextMenuGroup, ContextMenuSeparator, Menu, MenuItem, MenuGroup, MenuSeparator, Tooltip, ToastProvider, Snackbar, Alert, Banner, Backdrop, FullscreenLoading, ElementLoading, Progress, Ring, Spinner, Skeleton, Rate, Badge, Tag, Chip, Avatar, AvatarGroup, EmptyState |
+| Navigation and layout     | Coordinator, AppBar, Collapse, Toolbar, Sticky, StickyPage, Frame, FramePage, Tabs, TabPanel, Pager, Page, Scroll, Navigation, Stepper, Accordion, Breadcrumbs, LinearLayout, LinearLayoutItem, ConstraintLayout, Constraint, GridLayout, WaterfallLayout, VirtualWaterfallLayout                                                                                                                                                                    |
+| Messaging and comments    | Contact, VirtualContact, ContactContextMenu, MessageList, VirtualMessageList, MessageContextMenu, Chat, VirtualChat, AgentChat, VirtualAgentChat, CommentThread, VirtualCommentThread                                                                                                                                                                                                                                                                |
+| Documents                 | Markdown, Tex, Terminal                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Media                     | Audio, HorizontalVideo, VerticalVideo, Barrage                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 ## Development
 

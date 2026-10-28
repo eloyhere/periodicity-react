@@ -1,0 +1,301 @@
+/* ==========================================================================
+   Terminal — a console transcript painted with semantic theme roles
+
+   Every colour below resolves to a role in the active theme, so a light, dark,
+   or named preset repaints the paper, chrome, border, prompt, cursor, and line
+   tones together. No colour is declared locally.
+   ========================================================================== */
+
+.terminal {
+    /* Console palette, mapped onto the theme's semantic roles. */
+    --terminal-paper: var(--color-surface-container-lowest);
+    --terminal-chrome: var(--color-surface-container);
+    --terminal-border: var(--color-outline-variant);
+    --terminal-text: var(--color-on-surface);
+    --terminal-muted: var(--color-on-surface-variant);
+    --terminal-primary: var(--color-primary);
+    --terminal-secondary: var(--color-secondary);
+    --terminal-tertiary: var(--color-tertiary);
+    --terminal-success: var(--mint);
+    --terminal-warning: var(--color-warning);
+    --terminal-danger: var(--color-error);
+
+    /* Rhythm, so the chrome and the transcript share one inset. */
+    --terminal-inline: var(--space-4);
+    --terminal-block: var(--space-3);
+    --terminal-gap: var(--space-2);
+    --terminal-row-gap: var(--space-1);
+    --terminal-font-size: var(--type-mono);
+    --terminal-line-height: var(--leading-normal);
+    --terminal-cursor-width: 1ch;
+    --terminal-cursor-height: 1.1em;
+
+    display: flex;
+    overflow: hidden;
+    flex-direction: column;
+    min-width: 0;
+    border: 1px solid var(--terminal-border);
+    border-radius: var(--radius-surface);
+    background: var(--terminal-paper);
+    box-shadow: var(--elevation-1);
+    color: var(--terminal-text);
+    font-family: var(--font-mono);
+    font-size: var(--terminal-font-size);
+    line-height: var(--terminal-line-height);
+}
+
+/* ==========================================================================
+   Chrome — decorative controls and the console label
+   ========================================================================== */
+
+.terminal__chrome {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--terminal-gap);
+    min-height: var(--space-7);
+    padding: 0 var(--terminal-inline);
+    border-bottom: 1px solid var(--terminal-border);
+    background: var(--terminal-chrome);
+    color: var(--terminal-muted);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.terminal__controls {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.terminal__dot {
+    display: block;
+    width: var(--space-2);
+    height: var(--space-2);
+    border-radius: var(--radius-pill);
+}
+
+.terminal__dot--danger {
+    background: var(--terminal-danger);
+}
+
+.terminal__dot--warning {
+    background: var(--terminal-warning);
+}
+
+.terminal__dot--success {
+    background: var(--terminal-success);
+}
+
+.terminal__title {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--terminal-muted);
+    font-size: var(--type-label-sm);
+    line-height: var(--leading-snug);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ==========================================================================
+   Viewport — the scrollable transcript
+   ========================================================================== */
+
+.terminal__viewport {
+    display: flex;
+    overflow: auto;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    max-height: var(--terminal-max-height, none);
+    padding: var(--terminal-block) var(--terminal-inline);
+    overscroll-behavior: contain;
+    tab-size: 4;
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+.terminal__viewport:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+/* The transcript keeps its own width so long lines scroll instead of shrinking;
+   wrap mode hands the width back to the viewport. */
+.terminal__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--terminal-row-gap);
+    width: max-content;
+    min-width: 100%;
+}
+
+.terminal--wrap .terminal__body {
+    width: auto;
+    min-width: 0;
+}
+
+/* ==========================================================================
+   Lines
+   ========================================================================== */
+
+.terminal__line {
+    display: flex;
+    align-items: baseline;
+    gap: var(--terminal-gap);
+    min-width: 0;
+}
+
+.terminal__prompt {
+    flex: none;
+    color: var(--terminal-primary);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.terminal__text {
+    min-width: 0;
+    white-space: pre;
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+.terminal--wrap .terminal__text {
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.terminal__meta {
+    flex: none;
+    margin-inline-start: auto;
+    color: var(--terminal-muted);
+    font-size: var(--type-label-sm);
+    font-variant-numeric: tabular-nums;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Line tones — the text carries the role, so a prompt keeps its own colour. */
+.terminal__line[data-tone="muted"] .terminal__text {
+    color: var(--terminal-muted);
+}
+
+.terminal__line[data-tone="primary"] .terminal__text {
+    color: var(--terminal-primary);
+}
+
+.terminal__line[data-tone="secondary"] .terminal__text {
+    color: var(--terminal-secondary);
+}
+
+.terminal__line[data-tone="tertiary"] .terminal__text {
+    color: var(--terminal-tertiary);
+}
+
+.terminal__line[data-tone="success"] .terminal__text {
+    color: var(--terminal-success);
+}
+
+.terminal__line[data-tone="warning"] .terminal__text {
+    color: var(--terminal-warning);
+}
+
+.terminal__line[data-tone="danger"] .terminal__text {
+    color: var(--terminal-danger);
+}
+
+/* ==========================================================================
+   Live row — prompt plus a block cursor
+   ========================================================================== */
+
+.terminal__line--live {
+    align-items: center;
+}
+
+/* ==========================================================================
+   Command row — editable prompt outside the scroll viewport
+   ========================================================================== */
+
+.terminal__command-bar {
+    display: flex;
+    flex: none;
+    padding: 0 var(--terminal-inline) var(--terminal-block);
+}
+
+.terminal__line--command {
+    width: 100%;
+}
+
+.terminal__input {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    caret-color: var(--terminal-primary);
+    font: inherit;
+    letter-spacing: inherit;
+    line-height: inherit;
+    outline: none;
+}
+
+.terminal__input::placeholder {
+    color: var(--terminal-muted);
+}
+
+.terminal__input:focus-visible {
+    outline: none;
+}
+
+/* Icon-only send control; the Button keeps its ripple and focus ring. */
+.terminal__send {
+    flex: none;
+    margin-inline-start: var(--space-1);
+}
+
+.terminal__send .button__control {
+    width: var(--control-sm);
+    padding: 0;
+}
+
+.terminal__send:not(:has(.button__control:disabled)) {
+    color: var(--terminal-primary);
+}
+
+.terminal__cursor {
+    display: inline-block;
+    flex: none;
+    width: var(--terminal-cursor-width);
+    height: var(--terminal-cursor-height);
+    background: var(--terminal-primary);
+    animation: terminal-cursor-blink calc(var(--motion-duration-slower) * var(--motion-scale, 1)) step-end
+        var(--motion-repeat, infinite);
+}
+
+@keyframes terminal-cursor-blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root:not([data-motion="always"]) .terminal__cursor {
+        animation: none;
+    }
+}
+
+/* The system palette replaces backgrounds, so the block cursor would vanish. */
+@media (forced-colors: active) {
+    .terminal {
+        border-color: CanvasText;
+    }
+
+    .terminal__cursor {
+        background: CanvasText;
+    }
+}

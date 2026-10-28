@@ -41,3 +41,55 @@
 .form-actions--between {
     justify-content: space-between;
 }
+
+/* Submission failure and the field errors collected by validation. The region is
+   focusable so an invalid submission can move focus here before the first field. */
+.form-message {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-error);
+    border-radius: var(--radius-surface);
+    background: var(--color-error-container);
+    color: var(--color-on-surface);
+    font-size: var(--type-body-sm);
+    line-height: var(--leading-normal);
+}
+
+.form-message:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
+.form-message__title {
+    margin: 0;
+    color: var(--color-error);
+    font-weight: var(--font-weight-current, var(--weight-semibold));
+}
+
+.form-message__body {
+    margin: 0;
+}
+
+.form-message__list {
+    margin: 0;
+    padding-inline-start: 1.2em;
+    list-style: disc;
+}
+
+.form-message__item {
+    color: var(--color-on-surface-variant);
+}
+
+@media (forced-colors: active) {
+    .form-message {
+        border-color: CanvasText;
+        background: Canvas;
+        color: CanvasText;
+    }
+
+    .form-message__title {
+        color: CanvasText;
+    }
+}

@@ -4,7 +4,7 @@ import {
     Anchor,
     Badge,
     Button,
-    ProgressRing,
+    Ring,
     Sticky,
     StickyPage as StickyPageSurface,
     Text,
@@ -306,7 +306,7 @@ const HomeHero: FC<{ route: StickyHomeRoute }> = ({ route }: { route: StickyHome
             <span className="sticky-home__orb-core" />
             <div className="sticky-home__float">
                 <Text variant="label">Cycle 04</Text>
-                <ProgressRing value={68} size={86} stroke={7} label="cycle" />
+                <Ring value={68} size={86} thickness={7} showValue label="cycle" />
                 <Text variant="body-sm">Day 17 of 28</Text>
             </div>
         </div>
@@ -363,7 +363,7 @@ const HomeProductMock: FC = () => (
         </div>
         <div className="sticky-home__mock-body">
             <div className="sticky-home__mock-ring">
-                <ProgressRing value={68} size={84} stroke={7} label="cycle" />
+                <Ring value={68} size={84} thickness={7} showValue label="cycle" />
             </div>
             <div className="sticky-home__mock-list">
                 {["Morning pages", "Deep work", "Evening review"].map(

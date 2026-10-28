@@ -24,7 +24,7 @@
     letter-spacing: var(--font-tracking-current, var(--tracking-wide));
     line-height: var(--font-leading-current, var(--leading-snug));
     text-transform: var(--font-transform-current, uppercase);
-    transition: color var(--duration-fast) var(--ease-standard);
+    transition: color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .radio-group__options {
@@ -76,7 +76,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .radio-group__legend {
+    :root:not([data-motion="always"]) .radio-group__legend {
         transition: none;
     }
 }

@@ -1,17 +1,18 @@
-﻿.tooltip__trigger {
+.tooltip__trigger {
     display: inline-flex;
     max-width: 100%;
 }
 
 .tooltip {
     width: max-content;
-    max-width: calc(var(--space-11) * 3.5);
+    max-width: min(calc(var(--space-11) * 3.5), var(--anchor-max-width, 100vw));
     pointer-events: none;
-    animation: tooltip-enter var(--duration-fast) var(--ease-decelerate);
+    animation: tooltip-enter calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-decelerate);
 }
 
 .tooltip[data-state="closing"] {
-    animation: tooltip-exit var(--duration-fast) var(--ease-accelerate) forwards;
+    animation: tooltip-exit calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-accelerate)
+        forwards;
 }
 
 .tooltip__bubble {
@@ -102,11 +103,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .tooltip {
+    :root:not([data-motion="always"]) .tooltip {
         animation-name: tooltip-fade-in;
     }
 
-    .tooltip[data-state="closing"] {
+    :root:not([data-motion="always"]) .tooltip[data-state="closing"] {
         animation-name: tooltip-fade-out;
     }
 }

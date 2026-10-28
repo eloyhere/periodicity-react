@@ -88,7 +88,7 @@
     color: var(--faint);
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--duration-fast) var(--ease-standard);
+    transition: opacity calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 /* The resting label doubles as the placeholder, as in TextInput. */
@@ -99,7 +99,7 @@
 /* Show the placeholder only after the hint has floated out of the way. */
 .mention--has-label .mention__editor[data-floating="true"]:empty::before {
     opacity: 1;
-    transition-delay: var(--duration-medium);
+    transition-delay: calc(var(--motion-duration-medium) * var(--motion-scale, 1));
 }
 
 .mention__required {
@@ -168,8 +168,8 @@
     line-height: var(--font-leading-current, 1);
     cursor: pointer;
     transition:
-        background-color var(--duration-fast) var(--ease-standard),
-        color var(--duration-fast) var(--ease-standard);
+        background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .mention__token-remove::before {
@@ -290,8 +290,8 @@
 /* ---- reduced motion ----------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
-    .mention__editor:empty::before,
-    .mention__token-remove {
+    :root:not([data-motion="always"]) .mention__editor:empty::before,
+    :root:not([data-motion="always"]) .mention__token-remove {
         transition: none;
     }
 }

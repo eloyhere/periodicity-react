@@ -30,7 +30,7 @@
     display: inline-flex;
     flex: 0 0 auto;
     border-radius: var(--radius-sm);
-    transition: background-color var(--duration-fast) var(--ease-standard);
+    transition: background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .breadcrumbs__surface:hover {
@@ -133,7 +133,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .breadcrumbs__surface {
+    :root:not([data-motion="always"]) .breadcrumbs__surface {
         transition: none;
     }
 }

@@ -1,0 +1,132 @@
+/* ==========================================================================
+   Ring — the Android-style circular indicator
+
+   The circle lives in a fixed 100×100 coordinate space, so the dash geometry
+   never depends on the rendered diameter. For the indeterminate state two
+   animations combine: the whole graphic rotates, while the arc grows and then
+   shrinks and shifts, which is the same motion the Android loader uses. The
+   determinate state holds the same geometry at one value.
+   ========================================================================== */
+
+.ring {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+    vertical-align: middle;
+}
+
+.ring__svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform-origin: center;
+    animation: ring-rotate calc(1600ms * var(--motion-essential-scale, 1)) linear var(--motion-repeat, infinite);
+}
+
+.ring__arc {
+    stroke: currentColor;
+    stroke-linecap: round;
+}
+
+/* The indeterminate geometry lives in CSS so the keyframes can animate it; the
+   determinate geometry is written inline by the component instead. */
+.ring:not(.ring--determinate) .ring__arc {
+    stroke-dasharray: 2.2 440;
+    stroke-dashoffset: 0;
+    animation: ring-dash calc(1600ms * var(--motion-essential-scale, 1)) ease-in-out var(--motion-repeat, infinite);
+}
+
+.ring__track {
+    stroke: var(--color-surface-container-high);
+}
+
+.ring__value {
+    fill: currentColor;
+    font-family: var(--font-family-current, var(--font-sans));
+    font-weight: var(--font-weight-current, var(--weight-semibold));
+}
+
+/* ==========================================================================
+   Determinate — the same geometry, held at one value
+   ========================================================================== */
+
+.ring--determinate .ring__svg {
+    animation: none;
+    transform: rotate(-90deg);
+}
+
+.ring--determinate .ring__arc {
+    animation: none;
+    transition: stroke-dasharray calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
+}
+
+/* ==========================================================================
+   Tones
+   ========================================================================== */
+
+.ring--neutral {
+    color: var(--color-on-surface-variant);
+}
+
+.ring--accent {
+    color: var(--color-primary);
+}
+
+.ring--mint {
+    color: var(--color-secondary);
+}
+
+.ring--violet {
+    color: var(--color-tertiary);
+}
+
+.ring--amber {
+    color: var(--color-warning);
+}
+
+.ring--danger {
+    color: var(--color-error);
+}
+
+/* ==========================================================================
+   Motion
+   ========================================================================== */
+
+@keyframes ring-rotate {
+    from {
+        transform: rotate(-90deg);
+    }
+
+    to {
+        transform: rotate(270deg);
+    }
+}
+
+@keyframes ring-dash {
+    0% {
+        stroke-dasharray: 2.2 440;
+        stroke-dashoffset: 0;
+    }
+
+    50% {
+        stroke-dasharray: 198 440;
+        stroke-dashoffset: -77;
+    }
+
+    100% {
+        stroke-dasharray: 198 440;
+        stroke-dashoffset: -272.8;
+    }
+}
+
+@media (forced-colors: active) {
+    .ring {
+        color: CanvasText;
+    }
+
+    .ring__track {
+        stroke: CanvasText;
+    }
+}

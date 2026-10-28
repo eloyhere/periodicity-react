@@ -51,8 +51,8 @@
     border-radius: inherit;
     background: var(--color-surface);
     transition:
-        border-color var(--duration-fast) var(--ease-standard),
-        background-color var(--duration-fast) var(--ease-standard);
+        border-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .input-layout__edge {
@@ -61,7 +61,7 @@
     background: var(--color-primary);
     pointer-events: none;
     will-change: transform;
-    transition: transform var(--duration-fast) var(--ease-standard);
+    transition: transform calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .input-layout__edge--top,
@@ -168,13 +168,13 @@
     transform: translateY(-50%);
     transform-origin: left center;
     transition:
-        top 220ms var(--ease-decelerate),
-        left 220ms var(--ease-decelerate),
-        padding 220ms var(--ease-decelerate),
-        color 140ms var(--ease-standard),
-        background-color 140ms var(--ease-standard),
-        font-size 220ms var(--ease-decelerate),
-        transform 220ms var(--ease-decelerate);
+        top calc(220ms * var(--motion-scale, 1)) var(--motion-ease-decelerate),
+        left calc(220ms * var(--motion-scale, 1)) var(--motion-ease-decelerate),
+        padding calc(220ms * var(--motion-scale, 1)) var(--motion-ease-decelerate),
+        color calc(140ms * var(--motion-scale, 1)) var(--motion-ease-standard),
+        background-color calc(140ms * var(--motion-scale, 1)) var(--motion-ease-standard),
+        font-size calc(220ms * var(--motion-scale, 1)) var(--motion-ease-decelerate),
+        transform calc(220ms * var(--motion-scale, 1)) var(--motion-ease-decelerate);
     will-change: top, transform, font-size;
 }
 
@@ -185,7 +185,7 @@
 .input-layout:has(.input-layout__row > :is(input, textarea):placeholder-shown)
     .input-layout__control:focus-within
     .input-layout__hint {
-    animation: input-layout-hint-float 220ms var(--ease-decelerate) both;
+    animation: input-layout-hint-float calc(220ms * var(--motion-scale, 1)) var(--motion-ease-decelerate) both;
 }
 
 @keyframes input-layout-hint-float {
@@ -272,27 +272,39 @@
 /* Spread the four outline edges like a wave: the nearest edge starts first,
    and every edge still finishes within the overall one-second window. */
 .input-layout__control:focus-within .input-layout__edge--top {
-    transition-delay: calc(var(--input-distance-top, 0) * 400ms);
-    transition-duration: calc(var(--duration-slower) - var(--input-distance-top, 0) * 400ms);
-    transition-timing-function: var(--ease-decelerate);
+    transition-delay: calc(var(--input-distance-top, 0) * calc(400ms * var(--motion-scale, 1)));
+    transition-duration: calc(
+        calc(var(--motion-duration-slower) * var(--motion-scale, 1)) - var(--input-distance-top, 0) *
+            calc(400ms * var(--motion-scale, 1))
+    );
+    transition-timing-function: var(--motion-ease-decelerate);
 }
 
 .input-layout__control:focus-within .input-layout__edge--right {
-    transition-delay: calc(var(--input-distance-right, 0) * 400ms);
-    transition-duration: calc(var(--duration-slower) - var(--input-distance-right, 0) * 400ms);
-    transition-timing-function: var(--ease-decelerate);
+    transition-delay: calc(var(--input-distance-right, 0) * calc(400ms * var(--motion-scale, 1)));
+    transition-duration: calc(
+        calc(var(--motion-duration-slower) * var(--motion-scale, 1)) - var(--input-distance-right, 0) *
+            calc(400ms * var(--motion-scale, 1))
+    );
+    transition-timing-function: var(--motion-ease-decelerate);
 }
 
 .input-layout__control:focus-within .input-layout__edge--bottom {
-    transition-delay: calc(var(--input-distance-bottom, 0) * 400ms);
-    transition-duration: calc(var(--duration-slower) - var(--input-distance-bottom, 0) * 400ms);
-    transition-timing-function: var(--ease-decelerate);
+    transition-delay: calc(var(--input-distance-bottom, 0) * calc(400ms * var(--motion-scale, 1)));
+    transition-duration: calc(
+        calc(var(--motion-duration-slower) * var(--motion-scale, 1)) - var(--input-distance-bottom, 0) *
+            calc(400ms * var(--motion-scale, 1))
+    );
+    transition-timing-function: var(--motion-ease-decelerate);
 }
 
 .input-layout__control:focus-within .input-layout__edge--left {
-    transition-delay: calc(var(--input-distance-left, 0) * 400ms);
-    transition-duration: calc(var(--duration-slower) - var(--input-distance-left, 0) * 400ms);
-    transition-timing-function: var(--ease-decelerate);
+    transition-delay: calc(var(--input-distance-left, 0) * calc(400ms * var(--motion-scale, 1)));
+    transition-duration: calc(
+        calc(var(--motion-duration-slower) * var(--motion-scale, 1)) - var(--input-distance-left, 0) *
+            calc(400ms * var(--motion-scale, 1))
+    );
+    transition-timing-function: var(--motion-ease-decelerate);
 }
 
 /* A bottom-only field has no wave to wait for: grow it immediately from the
@@ -300,14 +312,19 @@
 .input-layout--fill .input-layout__control:focus-within .input-layout__edge--bottom,
 .input-layout--standard .input-layout__control:focus-within .input-layout__edge--bottom {
     transition-delay: 0ms;
-    transition-duration: var(--duration-slower);
+    transition-duration: calc(var(--motion-duration-slower) * var(--motion-scale, 1));
 }
 
 /* The strips leave the rounded outline corners to the 1px base border; hand
    those corners over to the primary colour as the strips finish. */
 .input-layout--outline:not(.input-layout--invalid) .input-layout__control:focus-within .input-layout__background {
     border-color: var(--color-primary);
-    transition-delay: calc(var(--duration-slower) - var(--duration-fast)), 0s;
+    transition-delay:
+        calc(
+            calc(var(--motion-duration-slower) * var(--motion-scale, 1)) -
+                calc(var(--motion-duration-fast) * var(--motion-scale, 1))
+        ),
+        0s;
 }
 
 .input-layout--invalid .input-layout__background {
@@ -383,8 +400,8 @@
 /* The focus-border wave is a local, thin-line reveal rather than large-area
    motion, so it stays available when the OS asks for reduced motion. */
 @media (prefers-reduced-motion: reduce) {
-    .input-layout__hint,
-    .input-layout__background {
+    :root:not([data-motion="always"]) .input-layout__hint,
+    :root:not([data-motion="always"]) .input-layout__background {
         transition: none;
         animation: none;
     }

@@ -49,6 +49,50 @@
     break-inside: avoid;
 }
 
+/* Virtual layout: one scroll viewport over a flex row of positioned columns. */
+
+.waterfall-layout--virtual {
+    position: relative;
+    display: block;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    overflow-anchor: none;
+}
+
+.waterfall-layout__canvas {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    min-width: 0;
+    gap: var(--waterfall-gap);
+}
+
+.waterfall-layout__column--virtual {
+    position: relative;
+    height: 100%;
+}
+
+.waterfall-layout__item--virtual {
+    position: absolute;
+    right: 0;
+    left: 0;
+}
+
+.waterfall-layout__state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    min-height: 120px;
+    padding: var(--space-4);
+    color: var(--muted);
+    font-size: var(--type-label);
+    text-align: var(--font-align-current, center);
+}
+
 @media (max-width: 720px) {
     .waterfall-layout--responsive {
         flex-direction: column;

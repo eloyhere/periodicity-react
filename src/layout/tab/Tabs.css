@@ -50,8 +50,8 @@
     border-radius: var(--radius-pill);
     color: var(--color-on-surface-variant);
     transition:
-        background-color var(--duration-fast) var(--ease-standard),
-        color var(--duration-fast) var(--ease-standard);
+        background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .tabs--line .tabs__surface {
@@ -142,8 +142,8 @@
     pointer-events: none;
     transform: scaleX(0);
     transition:
-        background-color var(--duration-medium) var(--ease-standard),
-        transform var(--duration-medium) var(--ease-standard);
+        background-color calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        transform calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .tabs--line .tabs__surface--selected .tabs__tab::after {
@@ -215,8 +215,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .tabs__surface,
-    .tabs__tab::after {
+    :root:not([data-motion="always"]) .tabs__surface,
+    :root:not([data-motion="always"]) .tabs__tab::after {
         transition: none;
     }
 }

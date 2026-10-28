@@ -41,7 +41,7 @@
     z-index: 4;
     border-radius: var(--radius-pill);
     opacity: 1;
-    transition: opacity 140ms var(--ease-standard);
+    transition: opacity calc(140ms * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .scrollbar--auto-hide .scrollbar__track {
@@ -81,7 +81,7 @@
     opacity: 0.56;
     cursor: grab;
     touch-action: none;
-    transition: opacity 140ms var(--ease-standard);
+    transition: opacity calc(140ms * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .scrollbar__track--vertical .scrollbar__thumb {
@@ -119,8 +119,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .scrollbar__track,
-    .scrollbar__thumb {
+    :root:not([data-motion="always"]) .scrollbar__track,
+    :root:not([data-motion="always"]) .scrollbar__thumb {
         transition: none;
     }
 }

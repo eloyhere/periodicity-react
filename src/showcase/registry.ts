@@ -16,6 +16,7 @@ import DocumentsPage from "./pages/components/DocumentsPage";
 import FeedbackPage from "./pages/components/FeedbackPage";
 import LayoutPage from "./pages/components/LayoutPage";
 import ListVariantsPage from "./pages/components/ListVariantsPage";
+import MediaPage from "./pages/components/MediaPage";
 import MessagingPage from "./pages/components/MessagingPage";
 import MessageMenusPage from "./pages/components/MessageMenusPage";
 import NavigationPage from "./pages/components/NavigationPage";
@@ -154,8 +155,15 @@ const familyRecords: readonly FamilyRecord[] = [
         id: "documents",
         label: "Documents",
         title: "Documents",
-        description: "Read-only Markdown and TeX previews, including complete LaTeX documents, rendered as HTML and MathML.",
+        description: "Markdown and TeX previews plus an interactive terminal console, rendered as HTML, MathML, and themed output.",
         page: DocumentsPage,
+    },
+    {
+        id: "media",
+        label: "Media",
+        title: "Media",
+        description: "A themed video player and a compact audio player around the native media elements, with custom or native controls, text tracks, and poster support.",
+        page: MediaPage,
     },
     {
         id: "text-fields",
@@ -238,7 +246,8 @@ const familyRecords: readonly FamilyRecord[] = [
         id: "layout",
         label: "Layout",
         title: "Layout",
-        description: "Linear, constraint, grid, waterfall, table, list, tree, pager, and drawer layouts.",
+        description:
+            "Linear, constraint, grid, waterfall, virtual waterfall, table, list, tree, pager, and drawer layouts.",
         page: LayoutPage,
     },
     {
@@ -524,7 +533,7 @@ const aliasEntries: ReadonlyArray<readonly [string, string]> = [
     ["discussion", "comment-thread"],
     ["messaging", "contact"],
     ["overlays", "dropdown"],
-    ["navigation", "tabs"],
+    ["navigation-view", "navigation"],
     ["feedback", "alert"],
     ["dialogs", "dialog"],
     ["layout", "linear-layout"],
@@ -561,6 +570,7 @@ const aliasEntries: ReadonlyArray<readonly [string, string]> = [
     ["radiogroup", "radio-group"],
     ["toggle", "switch"],
     ["slider", "range"],
+    ["seekbar", "seek-bar"],
     ["fieldgroup", "field-group"],
     ["fullscreenloading", "fullscreen-loading"],
     ["full-screen-loading", "fullscreen-loading"],
@@ -603,13 +613,16 @@ const aliasEntries: ReadonlyArray<readonly [string, string]> = [
     ["previeweditor", "preview"],
     ["preview-editor", "preview"],
     ["filetools", "preview"],
-    ["navigationview", "navigation-view"],
+    ["navigationview", "navigation"],
     ["drawerlayout", "drawer-layout"],
     ["linearlayout", "linear-layout"],
     ["linearlayoutitem", "linear-layout-item"],
     ["gridlayout", "grid-layout"],
     ["waterfall", "waterfall-layout"],
     ["waterfalllayout", "waterfall-layout"],
+    ["virtualwaterfall", "virtual-waterfall-layout"],
+    ["virtualwaterfalllayout", "virtual-waterfall-layout"],
+    ["virtual-waterfall", "virtual-waterfall-layout"],
     ["constraintlayout", "constraint-layout"],
     ["pagerpage", "page"],
     ["pager-page", "page"],
@@ -621,7 +634,7 @@ const aliasEntries: ReadonlyArray<readonly [string, string]> = [
     ["visuallyhidden", "visually-hidden"],
     ["screen-reader-only", "visually-hidden"],
     ["statelayer", "state-layer"],
-    ["bottomnavigation", "navigation-view"],
+    ["bottomnavigation", "navigation"],
     ["breadcrumb", "breadcrumbs"],
     ["confirmdialog", "confirm-dialog"],
     ["messagedialog", "message-dialog"],

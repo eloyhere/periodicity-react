@@ -41,9 +41,9 @@
     cursor: pointer;
     line-height: 0;
     transition:
-        color 120ms var(--ease-standard),
-        transform 120ms var(--ease-standard),
-        background-color 120ms var(--ease-standard);
+        color calc(120ms * var(--motion-scale, 1)) var(--motion-ease-standard),
+        transform calc(120ms * var(--motion-scale, 1)) var(--motion-ease-standard),
+        background-color calc(120ms * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .rate-field__star:hover {

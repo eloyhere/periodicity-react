@@ -30,8 +30,8 @@
     border-radius: var(--radius-sm);
     background: var(--text-area-bg);
     transition:
-        border-color var(--duration-fast) var(--ease-standard),
-        background-color var(--duration-fast) var(--ease-standard);
+        border-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .text-area__edge {
@@ -44,7 +44,7 @@
         inset 0 0 var(--space-6) var(--color-primary-container);
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--duration-fast) var(--ease-standard);
+    transition: opacity calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .text-area__row {
@@ -81,7 +81,7 @@
 .text-area__field::placeholder {
     color: var(--faint);
     opacity: 0;
-    transition: opacity var(--duration-fast) var(--ease-standard);
+    transition: opacity calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .text-area:focus-within .text-area__field::placeholder {
@@ -110,13 +110,13 @@
     will-change: top, transform, font-size;
     /* Same 220ms / 140ms timings as TextInput.css. */
     transition:
-        top var(--duration-medium) var(--ease-decelerate),
-        left var(--duration-medium) var(--ease-decelerate),
-        padding var(--duration-medium) var(--ease-decelerate),
-        background-color var(--duration-fast) var(--ease-standard),
-        color var(--duration-fast) var(--ease-standard),
-        font-size var(--duration-medium) var(--ease-decelerate),
-        transform var(--duration-medium) var(--ease-decelerate);
+        top calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-decelerate),
+        left calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-decelerate),
+        padding calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-decelerate),
+        background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        font-size calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-decelerate),
+        transform calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-decelerate);
 }
 
 .text-area__support {
@@ -314,10 +314,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .text-area__background,
-    .text-area__edge,
-    .text-area__label,
-    .text-area__field::placeholder {
+    :root:not([data-motion="always"]) .text-area__background,
+    :root:not([data-motion="always"]) .text-area__edge,
+    :root:not([data-motion="always"]) .text-area__label,
+    :root:not([data-motion="always"]) .text-area__field::placeholder {
         transition: none;
     }
 }

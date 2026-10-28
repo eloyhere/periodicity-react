@@ -7,7 +7,8 @@
 
 .drawer .drawer__backdrop {
     z-index: 0;
-    animation: drawer-backdrop-in var(--duration-medium) var(--ease-standard);
+    animation: drawer-backdrop-in calc(var(--motion-duration-medium) * var(--motion-scale, 1))
+        var(--motion-ease-standard);
 }
 
 .drawer__panel {
@@ -18,8 +19,8 @@
     max-width: 100vw;
     max-height: 100dvh;
     pointer-events: auto;
-    animation-duration: var(--duration-slow);
-    animation-timing-function: var(--ease-decelerate);
+    animation-duration: calc(var(--motion-duration-slow) * var(--motion-scale, 1));
+    animation-timing-function: var(--motion-ease-decelerate);
     animation-fill-mode: both;
 }
 
@@ -174,9 +175,9 @@
     cursor: pointer;
     touch-action: manipulation;
     transition:
-        color var(--duration-fast) var(--ease-standard),
-        border-color var(--duration-fast) var(--ease-standard),
-        background-color var(--duration-fast) var(--ease-standard);
+        color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        border-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard),
+        background-color calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .drawer__close:hover {
@@ -299,12 +300,13 @@
 
 /* Closing keeps the drawer mounted for one exit animation beat. */
 .drawer[data-state="closing"] .drawer__backdrop {
-    animation: drawer-backdrop-out var(--duration-medium) var(--ease-accelerate) forwards;
+    animation: drawer-backdrop-out calc(var(--motion-duration-medium) * var(--motion-scale, 1))
+        var(--motion-ease-accelerate) forwards;
 }
 
 .drawer[data-state="closing"] .drawer__panel {
-    animation-duration: var(--duration-medium);
-    animation-timing-function: var(--ease-accelerate);
+    animation-duration: calc(var(--motion-duration-medium) * var(--motion-scale, 1));
+    animation-timing-function: var(--motion-ease-accelerate);
     animation-fill-mode: forwards;
 }
 

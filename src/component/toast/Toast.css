@@ -12,11 +12,12 @@
 
 .toast {
     pointer-events: auto;
-    animation: toast-enter var(--duration-medium) var(--ease-decelerate);
+    animation: toast-enter calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-decelerate);
 }
 
 .toast[data-state="leaving"] {
-    animation: toast-exit var(--duration-fast) var(--ease-accelerate) forwards;
+    animation: toast-exit calc(var(--motion-duration-fast) * var(--motion-scale, 1)) var(--motion-ease-accelerate)
+        forwards;
 }
 
 .toast[data-tone="neutral"] {
@@ -152,12 +153,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .toast,
-    .toast[data-state="leaving"] {
+    :root:not([data-motion="always"]) .toast,
+    :root:not([data-motion="always"]) .toast[data-state="leaving"] {
         animation: none;
     }
 
-    .toast[data-state="leaving"] {
+    :root:not([data-motion="always"]) .toast[data-state="leaving"] {
         opacity: 0;
     }
 }

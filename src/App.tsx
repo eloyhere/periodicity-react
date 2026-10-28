@@ -21,7 +21,7 @@ import Icon, { type IconName } from "./component/icon/Icon";
 import Switch from "./component/input/switch/Switch";
 import TextInput from "./component/input/text/TextInput";
 import { Select, type SelectOption } from "./component/input/select";
-import ProgressRing from "./component/ring/ProgressRing";
+import Ring from "./component/ring/Ring";
 import Surface from "./component/surface/Surface";
 import { initialRituals, momentum, type MomentumPoint, type Ritual, type RitualTone } from "./data/rituals";
 import "./App.css";
@@ -457,7 +457,7 @@ const App: FC = () => {
                                 </Stack>
                                 <Stack className="hero__aside" gap="sm" align="center">
                                     <div className="hero__ring">
-                                        <ProgressRing value={CycleProgress} size={176} stroke={10} label="cycle" />
+                                        <Ring value={CycleProgress} size={176} thickness={10} showValue label="cycle" />
                                         <Badge tone="lime" className="hero__float">
                                             <Icon name="Sparkle" size={11} />
                                             On track
@@ -545,7 +545,7 @@ const App: FC = () => {
                                 action={<Badge tone="mint">25 min</Badge>}
                             >
                                 <Stack className="focus__body" gap="sm" align="center">
-                                    <ProgressRing value={focusPercent} size={128} stroke={8} label="focus" />
+                                    <Ring value={focusPercent} size={128} thickness={8} showValue label="focus" />
                                     <p className="focus__timer" role="timer">
                                         {pad(focusMinutes)}:{pad(focusSeconds)}
                                     </p>

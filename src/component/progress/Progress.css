@@ -73,7 +73,7 @@
     height: 100%;
     border-radius: inherit;
     background: var(--progress-color);
-    transition: width var(--duration-medium) var(--ease-standard);
+    transition: width calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-standard);
 }
 
 .progress__fill--indeterminate {
@@ -84,7 +84,8 @@
         transparent var(--space-2) var(--space-4)
     );
     background-size: var(--space-8) 100%;
-    animation: progress-stripes calc(var(--duration-slow) * 3) linear infinite;
+    animation: progress-stripes calc(calc(var(--motion-duration-slow) * var(--motion-scale, 1)) * 3) linear
+        var(--motion-repeat, infinite);
 }
 
 @keyframes progress-stripes {
@@ -98,11 +99,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .progress__fill {
+    :root:not([data-motion="always"]) .progress__fill {
         transition: none;
     }
 
-    .progress__fill--indeterminate {
+    :root:not([data-motion="always"]) .progress__fill--indeterminate {
         animation: none;
     }
 }

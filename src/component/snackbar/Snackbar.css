@@ -8,7 +8,7 @@
     display: flex;
     width: min(calc(100vw - var(--space-6)), 560px);
     pointer-events: none;
-    animation: snackbar-in var(--duration-medium) var(--ease-decelerate);
+    animation: snackbar-in calc(var(--motion-duration-medium) * var(--motion-scale, 1)) var(--motion-ease-decelerate);
 }
 
 .snackbar--bottom-left {

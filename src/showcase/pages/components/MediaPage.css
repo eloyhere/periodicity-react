@@ -1,0 +1,102 @@
+.media__portrait {
+    max-width: 280px;
+}
+
+.media__cover {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+.media__live {
+    position: absolute;
+    top: var(--space-3);
+    left: var(--space-3);
+}
+
+.media__bubble {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    max-width: 100%;
+    overflow: hidden;
+    padding: var(--space-1) var(--space-2);
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-container-high);
+    color: var(--color-on-surface);
+    font-size: var(--type-label-sm);
+    line-height: var(--leading-snug);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.media__composer {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    box-sizing: border-box;
+    padding: var(--space-1) var(--space-2);
+    border-block-start: 1px solid var(--color-outline-variant);
+    background: var(--color-surface-container);
+    color: var(--color-on-surface);
+}
+
+/* PeriodicityForm adds the generic stacked form layout; the composer is one row. */
+.media__composer.form {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.media__composer-input {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.media__send {
+    --button-radius: var(--radius-pill);
+
+    flex: none;
+}
+
+.media__send .button__control {
+    width: var(--control-sm);
+    min-width: var(--control-sm);
+    padding: 0;
+}
+
+.media__bar {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border-block-start: 1px solid var(--color-outline-variant);
+    background: var(--color-surface-container);
+    color: var(--color-on-surface);
+    font-size: var(--type-label-sm);
+}
+
+.media__bar-button {
+    min-height: var(--control-sm);
+    padding: 0 var(--control-inline-sm);
+    border: 1px solid var(--color-outline);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.media__bar-clock {
+    color: var(--color-on-surface-variant);
+    font-variant-numeric: tabular-nums;
+}

@@ -253,6 +253,12 @@ export const uiComponentSections: readonly ComponentSection[] = [
             description: "Stepped slider with bounds, custom formatting, and disabled or error states.",
         },
         {
+            name: "SeekBar",
+            family: "choices",
+            demo: "Android seek bar",
+            description: "Android-style seek bar with buffered progress, tick marks, and drag callbacks.",
+        },
+        {
             name: "Field",
             family: "choices",
             demo: "Field wrappers",
@@ -412,6 +418,30 @@ export const uiComponentSections: readonly ComponentSection[] = [
             demo: "Empty state with an icon",
             description: "Centred empty message with icon, description, and action slots.",
         },
+        {
+            name: "Audio",
+            family: "media",
+            demo: "Audio player",
+            description: "Compact themed player around the native audio element, with artwork, custom or native controls, buffered progress, volume, and playback speed.",
+        },
+        {
+            name: "HorizontalVideo",
+            family: "media",
+            demo: "Horizontal player",
+            description: "16:9 themed player around the native video element, with custom or native controls, text tracks, and a poster.",
+        },
+        {
+            name: "VerticalVideo",
+            family: "media",
+            demo: "Vertical player",
+            description: "9:16 themed player with a right-hand action stack, a time badge, and a slim progress rail.",
+        },
+        {
+            name: "Barrage",
+            family: "media",
+            demo: "Barrage overlay",
+            description: "Floating comments that travel over any wrapped component, with item and overlay slots for custom floating UI.",
+        },
     ]),
     createSection("documents", "Documents", [
         {
@@ -425,6 +455,12 @@ export const uiComponentSections: readonly ComponentSection[] = [
             family: "documents",
             demo: "TeX mathematics",
             description: "Read-only TeX mathematics and complete LaTeX documents rendered as MathML and HTML.",
+        },
+        {
+            name: "Terminal",
+            family: "documents",
+            demo: "Terminal output",
+            description: "Themeable console with a transcript, command input, icon send button, and caller-owned command history.",
         },
     ]),
     createSection("feedback", "Feedback", [
@@ -447,16 +483,10 @@ export const uiComponentSections: readonly ComponentSection[] = [
             description: "Linear determinate or indeterminate progress with tone and size.",
         },
         {
-            name: "CircularProgress",
+            name: "Ring",
             family: "feedback",
             demo: "Progress, spinners, and empty states",
-            description: "Circular determinate or indeterminate progress with a label.",
-        },
-        {
-            name: "ProgressRing",
-            family: "feedback",
-            demo: "Progress, spinners, and empty states",
-            description: "Compact circular gauge for a single bounded value.",
+            description: "Android-style circular indicator: a spinning ring by default, or a determinate arc when a value is supplied.",
         },
         {
             name: "Spinner",
@@ -657,7 +687,7 @@ export const uiComponentSections: readonly ComponentSection[] = [
             description: "Horizontal or vertical step indicator with clickable steps.",
         },
         {
-            name: "NavigationView",
+            name: "Navigation",
             family: "navigation",
             demo: "Navigation rail and bottom bar",
             description: "Rail or bottom navigation driven by items and a ref API.",
@@ -689,6 +719,12 @@ export const uiComponentSections: readonly ComponentSection[] = [
             description: "Masonry columns built from flex, without CSS Grid.",
         },
         {
+            name: "VirtualWaterfallLayout",
+            family: "layout",
+            demo: "Virtual waterfall",
+            description: "Adapter-backed masonry that windows variable-height cards into balanced columns.",
+        },
+        {
             name: "ConstraintLayout",
             family: "layout",
             demo: "Constraint layout and navigation",
@@ -699,6 +735,18 @@ export const uiComponentSections: readonly ComponentSection[] = [
             family: "layout",
             demo: "Constraint layout and navigation",
             description: "One child anchored inside a ConstraintLayout.",
+        },
+        {
+            name: "Frame",
+            family: "layout",
+            demo: "Frame pages",
+            description: "Layered frame that stacks full-frame sub-view pages.",
+        },
+        {
+            name: "FramePage",
+            family: "layout",
+            demo: "Frame pages",
+            description: "Full-frame sub-view that stays mounted when inactive.",
         },
         {
             name: "DrawerLayout",
@@ -740,7 +788,7 @@ export const uiComponentSections: readonly ComponentSection[] = [
             name: "Form",
             family: "layout",
             demo: "Form",
-            description: "Native form wrapper with browser validation, submission, and field context.",
+            description: "Native form with a validation, submission, and pending pipeline shared by its fields.",
         },
         {
             name: "FormField",
@@ -754,6 +802,20 @@ export const uiComponentSections: readonly ComponentSection[] = [
             family: "layout",
             demo: "Form",
             description: "Flex action row for submit and cancel controls.",
+            parent: "Form",
+        },
+        {
+            name: "FormMessage",
+            family: "layout",
+            demo: "Form",
+            description: "Focusable alert that reports a rejected submission and the current field errors.",
+            parent: "Form",
+        },
+        {
+            name: "FormSubmit",
+            family: "layout",
+            demo: "Form",
+            description: "Submit button that follows the form's pending and disabled state with a busy ring.",
             parent: "Form",
         },
         {
