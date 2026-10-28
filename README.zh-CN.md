@@ -5,7 +5,7 @@
 `periodicity-react` 提供 **141 个 `Periodicity*` 组件**、四种统计图、文件与图片选择器、作用域排版、设计系统 Provider，以及 **12 个内置语言包**。API 以 TypeScript 为先、以 Flex 布局为基础，并尽量贴近浏览器原生行为：在合理的地方透传原生属性、事件、ARIA 和 `ref`。
 
 - **npm：** [`periodicity-react`](https://www.npmjs.com/package/periodicity-react)
-- **版本：** `0.1.13`
+- **版本：** `0.1.14`
 - **在线示例：** 运行 `npm run dev`；源码见 [`src/showcase`](src/showcase)
 - **源码：** [github.com/eloyhere/periodicity-react](https://github.com/eloyhere/periodicity-react)
 - **要求：** React 19、React DOM 19
@@ -600,8 +600,9 @@ Dropdown 和 Popover 会 portal 到 `document.body`，并标记 `-webkit-app-reg
 - `PeriodicityWaterfallLayout`
 - `PeriodicityDrawerLayout`
 - `PeriodicityCoordinator`、`PeriodicityAppBar`、`PeriodicityCollapse`、`PeriodicityToolbar`
-- `PeriodicitySticky`
-- `PeriodicityScrollbar` 和 `PeriodicityScroll`
+- `PeriodicitySticky` 和 `PeriodicityStickyPage`
+- `PeriodicityScrollbar`
+- `PeriodicityScroll`
 - `PeriodicityDrag`
 
 `PeriodicityCoordinator` 只有 `collapse`、`header`、`main` 三个插槽。`collapse` 随 `main` 滚动从 `collapseHeight` 收缩到 0；`header` 是固定 AppBar；`main` 是滚动视口。当 `main` 无法滚动时，未被内部组件消费的竖直滚轮会用于折叠或恢复 collapse，而不是滚动页面；嵌套滚动容器仍然优先。
@@ -631,7 +632,23 @@ Dropdown 和 Popover 会 portal 到 `document.body`，并标记 `-webkit-app-reg
 
 `PeriodicityToolbar` 也接受 `prefix`、`content`、`suffix` 三个插槽；三个插槽等分整行，只有一个时占满，两个时各占一半。`prefix` 和 `suffix` 的字符串值会被视为图标名。
 
-`PeriodicitySticky` 把内容吸附到最近滚动容器的顶部或底部，同时保留正常文档流中的占位。`edge` 选择边缘，`offset` 用于避开固定头部，`disabled` 可在打印布局中关闭吸附；`onStuckChange` 上报吸附状态，`stuckClassName` 用于状态样式，元素始终带有 `data-edge` 与 `data-stuck`。
+`PeriodicityScroll` 是 Android `ScrollView` 语义的布局：一个纵向滚动视口、一个内容块，以及可放任意数量子元素的 slot。`fillViewport` 对应 Android 的同名标志，滚动视口本身是可聚焦的 region。`PeriodicityScrollbar` 仍是带 Material overlay 滚动条和可替换滚动条 slot 的滚动容器。
+
+`PeriodicityStickyPage` 是建立在 `Scroll` 之上的页面容器，slot 可放任意数量子元素；内部的 `PeriodicitySticky` 会吸附在这个页面的视口上。`Sticky` 支持顶部/底部边缘、偏移、`zIndex`、原生 CSS `filter` 语义、`disabled`、吸附状态样式和 `onStuckChange`，并始终暴露 `data-edge` 与 `data-stuck`。
+
+```tsx
+<PeriodicityStickyPage height={520} ariaLabel="Launch">
+    <PeriodicitySticky offset={0} zIndex={20}>
+        <SiteNav />
+    </PeriodicitySticky>
+    <PeriodicitySticky offset={56} filter="saturate(1.08)">
+        <Hero />
+    </PeriodicitySticky>
+    <Article />
+</PeriodicityStickyPage>
+```
+
+`PeriodicitySticky` 也可以单独用在任意滚动容器里，例如卡片或左右分栏：
 
 ```tsx
 <PeriodicitySticky offset={64} stuckClassName="toolbar--pinned" onStuckChange={setPinned}>
@@ -750,7 +767,7 @@ import { PeriodicityMarkdown, PeriodicityTex } from "periodicity-react";
 
 ## 组件索引
 
-发布包包含 141 个 `Periodicity*` 组件。下表省略前缀以便阅读。
+发布包包含 142 个 `Periodicity*` 组件。下表省略前缀以便阅读。
 
 | 家族            | 组件                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -758,9 +775,9 @@ import { PeriodicityMarkdown, PeriodicityTex } from "periodicity-react";
 | 操作与字段      | Button, TextInput, TextArea, EmailInput, TelephoneInput, NumberInput, CompleteInput, Mention, Select, VirtualSelect, TreeSelect, Combobox, Checkbox, Radio, RadioGroup, Switch, Range, Field, FieldGroup, Form, FormField, FormActions, Link, Anchor                                                                                                                                                                                                                           |
 | 选择器与日历    | FilePicker, PhotoPicker, AvatarPicker, TimePicker, DateTimePicker, NumberPicker, ColourPicker, CyclePicker, VariantPicker, Calendar                                                                                                                                                                                                                                                                                                                                            |
 | 统计图          | BarChart, PieChart, LineChart, ScatterChart                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| 集合与数据      | List, VirtualList, NormalList, MultipleList, SelectList, CheckList, Tree, VirtualTree, CheckTree, SelectTree, Table, VirtualTable, Transfer, Pagination, Scrollbar, Scroll, Drag, Timeline, Card                                                                                                                                                                                                                                                                               |
+| 集合与数据      | List, VirtualList, NormalList, MultipleList, SelectList, CheckList, Tree, VirtualTree, CheckTree, SelectTree, Table, VirtualTable, Transfer, Pagination, Scrollbar, Drag, Timeline, Card                                                                                                                                                                                                                                                                                       |
 | 浮层与反馈      | Dialog, ConfirmDialog, MessageDialog, InputDialog, Drawer, DrawerLayout, Popover, Dropdown, DropdownItem, DropdownGroup, DropdownSeparator, ContextMenu, ContextMenuItem, ContextMenuGroup, ContextMenuSeparator, Menu, MenuItem, MenuGroup, MenuSeparator, Tooltip, ToastProvider, Snackbar, Alert, Banner, Backdrop, FullscreenLoading, ElementLoading, Progress, CircularProgress, ProgressRing, Spinner, Skeleton, Rate, Badge, Tag, Chip, Avatar, AvatarGroup, EmptyState |
-| 导航与布局      | Coordinator, AppBar, Collapse, Toolbar, Sticky, Tabs, TabPanel, Pager, Page, NavigationView, Stepper, Accordion, Breadcrumbs, LinearLayout, LinearLayoutItem, ConstraintLayout, Constraint, GridLayout, WaterfallLayout                                                                                                                                                                                                                                                        |
+| 导航与布局      | Coordinator, AppBar, Collapse, Toolbar, Sticky, StickyPage, Tabs, TabPanel, Pager, Page, Scroll, NavigationView, Stepper, Accordion, Breadcrumbs, LinearLayout, LinearLayoutItem, ConstraintLayout, Constraint, GridLayout, WaterfallLayout                                                                                                                                                                                                                                    |
 | 消息与评论      | Contact, VirtualContact, ContactContextMenu, MessageList, VirtualMessageList, MessageContextMenu, Chat, VirtualChat, AgentChat, VirtualAgentChat, CommentThread, VirtualCommentThread                                                                                                                                                                                                                                                                                          |
 | 文档            | Markdown, Tex                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 

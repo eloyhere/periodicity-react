@@ -727,8 +727,8 @@ export const uiComponentSections: readonly ComponentSection[] = [
         {
             name: "Scroll",
             family: "layout",
-            demo: "Scroll slot",
-            description: "Scrollbar with a replaceable scrollbar UI slot and configurable direction and size.",
+            demo: "Scroll viewport",
+            description: "Android-ScrollView-style vertical viewport with one content slot and optional fillViewport.",
         },
         {
             name: "Drag",
@@ -783,8 +783,14 @@ export const uiComponentSections: readonly ComponentSection[] = [
         {
             name: "Sticky",
             family: "sticky",
-            demo: "Sticky sub-pages",
-            description: "Pins a block to the top or bottom edge of its scroll container, with offsets, stuck styling, and a state callback.",
+            demo: "Sticky homepage",
+            description: "A landing page where sticky navigation, stacking hero panels, and product media hold their position while later sections scroll over them.",
+        },
+        {
+            name: "StickyPage",
+            family: "sticky",
+            demo: "Sticky page slot",
+            description: "Sticky page surface built on Scroll, with one content slot for any number of Sticky child layers.",
         },
     ]),
     createSection("data", "Data display", [

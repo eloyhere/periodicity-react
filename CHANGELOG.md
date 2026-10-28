@@ -3,6 +3,24 @@
 All notable changes to Periodicity React are recorded here. The format follows the spirit of Keep a Changelog,
 and this project uses British English in its English documentation.
 
+## [0.1.14] - 2026-10-28
+
+### Added
+
+- `PeriodicityStickyPage` is the page wrapper for sticky layouts. Built on `PeriodicityScroll`, its slot accepts any
+  number of children, and the `PeriodicitySticky` layers inside pin against the page viewport.
+- `PeriodicityScroll` is an Android-`ScrollView`-style layout: one vertical scroll viewport, one content block, any
+  number of slot children, and `fillViewport`. It is the scroll layer used by `StickyPage`.
+- `PeriodicitySticky` accepts `filter` with native CSS `filter` semantics, applied to the sticky subtree (the child
+  page content) without affecting the scrollbar or focus ring.
+- The showcase Sticky entry is now a routed homepage: a sticky site navigation, a stacking hero/statement sequence,
+  and a sticky product media column with scrolling feature copy. Features and pricing are separate nested routes.
+
+### Changed
+
+- `PeriodicityScroll` now names the Android-ScrollView-style layout. The previous `Scroll` alias of `Scrollbar` was
+  removed; use `PeriodicityScrollbar` (which still accepts the scrollbar `slots` prop) for overlay scrolling.
+
 ## [0.1.13] - 2026-10-28
 
 ### Added

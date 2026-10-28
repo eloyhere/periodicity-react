@@ -245,7 +245,7 @@ const familyRecords: readonly FamilyRecord[] = [
         id: "sticky",
         label: "Sticky",
         title: "Sticky",
-        description: "Flow-preserving pins for headers, rails, and action bars at either edge of a scroll container.",
+        description: "A routed homepage with sticky navigation, stacking hero panels, and a sticky product column.",
         page: StickyPage,
     },
     {
@@ -666,14 +666,21 @@ export const resolveEntryId: (hash: string) => string = (hash: string): string =
         return defaultEntryId;
     }
 
-    const alias: string = entryAliases[raw] ?? "";
+    const segments: readonly string[] = raw.split("/");
+    const entryId: string = (segments[0] ?? "").trim();
+
+    if (entryId.length === 0) {
+        return defaultEntryId;
+    }
+
+    const alias: string = entryAliases[entryId] ?? "";
 
     if (alias.length > 0) {
         return alias;
     }
 
     const match: ShowcaseEntry | null =
-        showcaseEntries.find((entry: ShowcaseEntry): boolean => entry.id === raw) ?? null;
+        showcaseEntries.find((entry: ShowcaseEntry): boolean => entry.id === entryId) ?? null;
 
     return match === null ? defaultEntryId : match.id;
 };

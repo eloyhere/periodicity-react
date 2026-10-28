@@ -125,14 +125,22 @@ const scrollbarCode: string = `<div style={{ height: 220 }}>
     </Scrollbar>
 </div>`;
 
-const scrollSlotCode: string = `<Scroll
+const scrollViewportCode: string = `<Scroll height={220} ariaLabel="Scroll viewport">
+    <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: 12 }}>
+        {rows.map((row) => (
+            <div key={row}>{row}</div>
+        ))}
+    </div>
+</Scroll>`;
+
+const scrollbarSlotCode: string = `<Scrollbar
     height={220}
     direction="vertical"
     size={8}
     slots={{ scrollbar: (state) => <MyScrollbar state={state} /> }}
 >
     <div style={{ padding: 12 }}>Long content…</div>
-</Scroll>`;
+</Scrollbar>`;
 
 const dragCode: string = `<Drag onReorder={(from, to) => reorder(from, to)}>
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -902,12 +910,37 @@ const LayoutPage: FC = () => {
             </Demo>
 
             <Demo
-                title="Scroll slot"
+                title="Scroll viewport"
+                description="An Android-ScrollView-style layout: one vertically scrollable viewport, one content slot, and any number of children."
+                code={scrollViewportCode}
+            >
+                <Scroll height={220} ariaLabel="Scroll viewport demo" fillViewport={false}>
+                    <div
+                        style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 8,
+                            padding: 12,
+                        }}
+                    >
+                        {[...Array.from({ length: 18 }).keys()].map(
+                            (index: number): ReactNode => (
+                                <Surface key={index} elevation={1} shape="xs">
+                                    <Text variant="body-sm">{`Scroll viewport row ${index + 1}`}</Text>
+                                </Surface>
+                            ),
+                        )}
+                    </div>
+                </Scroll>
+            </Demo>
+
+            <Demo
+                title="Scrollbar slot"
                 description="Replace the built-in scrollbar UI through the slot, with configurable direction and size."
-                code={scrollSlotCode}
+                code={scrollbarSlotCode}
             >
                 <div style={{ height: 220 }}>
-                    <Scroll
+                    <Scrollbar
                         height={220}
                         direction="vertical"
                         size={8}
@@ -943,12 +976,12 @@ const LayoutPage: FC = () => {
                             {[...Array.from({ length: 18 }).keys()].map(
                                 (index: number): ReactNode => (
                                     <Text key={index} variant="body-sm">
-                                        Scroll slot row {index + 1}
+                                        Scrollbar slot row {index + 1}
                                     </Text>
                                 ),
                             )}
                         </div>
-                    </Scroll>
+                    </Scrollbar>
                 </div>
             </Demo>
 

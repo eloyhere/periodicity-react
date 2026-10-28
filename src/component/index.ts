@@ -28,6 +28,7 @@ export * from "../layout/constraint";
 export * from "../layout/linear";
 export * from "../layout/navigation";
 export * from "../layout/pager";
+export * from "../layout/scroll";
 export * from "../layout/chat";
 export * from "../layout/AgentChat";
 export * from "../layout/contact";
@@ -199,7 +200,7 @@ export { default as PeriodicityDrawerLayout } from "../layout/drawer/DrawerLayou
 export { default as PeriodicityPager } from "../layout/pager/Pager";
 export { Page as PeriodicityPage } from "../layout/pager/Pager";
 export { default as PeriodicityScrollbar } from "./scrollbar/Scrollbar";
-export { Scroll as PeriodicityScroll } from "./scrollbar/Scrollbar";
+export { default as PeriodicityScroll } from "../layout/scroll/Scroll";
 export { default as PeriodicityDrag } from "./drag/Drag";
 export { default as PeriodicityList } from "../layout/list/List";
 export { NormalList as PeriodicityNormalList } from "../layout/list/normal/NormalList";
@@ -271,4 +272,5 @@ export type {
 } from "../layout/appbar";
 export type { CollapseProps as PeriodicityCollapseProps } from "../layout/collapse";
 export type { ToolbarProps as PeriodicityToolbarProps } from "../layout/toolbar";
+
 

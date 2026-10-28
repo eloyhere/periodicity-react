@@ -176,8 +176,13 @@ const useHashRoute: () => readonly [string, (id: string) => void] = () => {
 
     useEffect((): void => {
         const target: string = `#${activeId}`;
+        const nestedRoute: boolean = window.location.hash.startsWith(`${target}/`);
 
-        if (window.location.hash !== target && window.location.hash !== "#dashboard") {
+        if (
+            window.location.hash !== target &&
+            !nestedRoute &&
+            window.location.hash !== "#dashboard"
+        ) {
             window.history.replaceState(null, "", target);
         }
     }, [activeId]);

@@ -1,4 +1,4 @@
-export { default as Scrollbar, Scroll } from "./Scrollbar";
+export { default as Scrollbar } from "./Scrollbar";
 export type {
     ScrollbarKeyboardTarget,
     ScrollbarOrientation,
@@ -6,5 +6,4 @@ export type {
     ScrollbarSlots,
     ScrollbarState,
     ScrollbarViewportProps,
-    ScrollProps,
 } from "./Scrollbar";

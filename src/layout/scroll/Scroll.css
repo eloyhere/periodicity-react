@@ -1,0 +1,32 @@
+/* ==========================================================================
+   Scroll — Android-ScrollView-style layout with one content block
+   ========================================================================== */
+
+.scroll {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-padding-top: var(--space-4);
+    outline: none;
+}
+
+.scroll:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
+}
+
+.scroll__content {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+}
+
+.scroll[data-fill-viewport="true"] .scroll__content {
+    min-height: 100%;
+}

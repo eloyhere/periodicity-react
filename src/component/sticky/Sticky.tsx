@@ -33,7 +33,7 @@ export type StickyEdge = "top" | "bottom";
  * `tabIndex`, and pointer, mouse, keyboard, and focus handlers are forwarded to
  * the sticky element. Sticky only changes layout; it never adds a landmark or a
  * widget role, so the caller owns the semantics of the pinned content.
- * Fields: children, edge, offset, zIndex, disabled, stuckClassName,
+ * Fields: children, edge, offset, zIndex, filter, disabled, stuckClassName,
  * onStuckChange, className.
  * @example
  * <Sticky offset={64} onStuckChange={setPinned}>
@@ -69,6 +69,14 @@ export interface StickyProps extends Omit<HTMLAttributes<HTMLDivElement>, "child
      * zIndex={120}
      */
     zIndex?: number | string;
+    /**
+     * Native CSS filter applied to the sticky element, and therefore to the
+     * sub-page content it wraps. The value uses the same functions and
+     * semantics as the CSS `filter` property.
+     * @example
+     * filter="grayscale(1) contrast(1.1)"
+     */
+    filter?: CSSProperties["filter"];
     /**
      * Keeps the content in normal flow. The element still renders and still
      * reports `false` to `onStuckChange`, but it no longer sticks.
@@ -133,6 +141,7 @@ const Sticky: FC<StickyProps> = ({
     edge = "top",
     offset = 0,
     zIndex,
+    filter,
     disabled = false,
     stuckClassName = "",
     onStuckChange,
@@ -263,6 +272,7 @@ const Sticky: FC<StickyProps> = ({
         ...style,
         ...(edge === "top" ? { top: offset } : { bottom: offset }),
         ...(zIndex === (void 0) ? {} : { zIndex }),
+        ...(filter === (void 0) ? {} : { filter }),
     };
     const isStuck: boolean = stuck && !disabled;
 

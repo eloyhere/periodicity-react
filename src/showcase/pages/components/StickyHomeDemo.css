@@ -1,0 +1,804 @@
+/* ==========================================================================
+   Sticky homepage demo — landing-page effects inside a StickyPage/Scroll
+   ========================================================================== */
+
+.sticky-home-demo {
+    overflow: hidden;
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-container-lowest);
+}
+
+.sticky-home-demo__chrome {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 38px;
+    padding: 0 var(--space-4);
+    border-bottom: 1px solid var(--color-outline-variant);
+    background: var(--color-surface-container);
+    color: var(--color-on-surface-variant);
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
+}
+
+.sticky-home-demo__dots {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 5px;
+}
+
+.sticky-home-demo__dots span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-outline-variant);
+}
+
+.sticky-home-demo__dots span:first-child {
+    background: var(--color-error);
+}
+
+.sticky-home-demo__dots span:nth-child(2) {
+    background: var(--color-warning);
+}
+
+.sticky-home-demo__dots span:last-child {
+    background: var(--color-secondary);
+}
+
+.sticky-home-demo__address {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sticky-home-demo__count {
+    flex: none;
+    font-variant-numeric: tabular-nums;
+}
+
+/* The page frame is supplied by the demo chrome. */
+.sticky-home {
+    border: 0;
+    border-radius: 0;
+}
+
+.sticky-home .scroll {
+    background: var(--color-surface-container-lowest);
+}
+
+/* --------------------------------------------------------------------------
+   Sticky site navigation
+   -------------------------------------------------------------------------- */
+
+.sticky-home__nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 56px;
+    padding: 0 var(--space-5);
+    background: color-mix(in srgb, var(--color-surface) 94%, transparent);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid transparent;
+    gap: var(--space-4);
+    transition:
+        border-color 180ms var(--ease-standard),
+        box-shadow 180ms var(--ease-standard);
+}
+
+.sticky-home__nav.is-stuck {
+    border-color: var(--color-outline-variant);
+    box-shadow: var(--shadow-sm);
+}
+
+.sticky-home__brand {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.sticky-home__mark {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 32% 30%, var(--color-surface) 0 8%, transparent 9%),
+        conic-gradient(
+            from 210deg,
+            var(--color-primary),
+            var(--color-tertiary),
+            var(--color-secondary),
+            var(--color-primary)
+        );
+}
+
+.sticky-home__wordmark {
+    margin: 0;
+    letter-spacing: var(--font-tracking-current, -0.02em);
+}
+
+.sticky-home__links {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.sticky-home__links .anchor {
+    min-height: 32px;
+    padding: 0 10px;
+    border-radius: var(--radius-pill);
+    color: var(--color-on-surface-variant);
+    font-size: var(--type-body-sm);
+}
+
+.sticky-home__links .anchor__marker {
+    display: none;
+}
+
+.sticky-home__links .anchor--active {
+    background: var(--color-primary-container);
+    color: var(--color-on-primary-container);
+}
+
+.sticky-home__nav-cta {
+    flex: none;
+}
+
+/* --------------------------------------------------------------------------
+   Hero
+   -------------------------------------------------------------------------- */
+
+.sticky-home__hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 12px var(--space-4) 0;
+    padding: clamp(24px, 4vw, 44px);
+    border-radius: 26px;
+    background:
+        radial-gradient(circle at 86% 8%, color-mix(in srgb, var(--color-secondary) 34%, transparent), transparent 36%),
+        linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 84%, #050807), var(--color-tertiary));
+    color: var(--color-on-primary);
+    gap: var(--space-6);
+    overflow: hidden;
+}
+
+.sticky-home__hero--tall {
+    min-height: 430px;
+}
+
+.sticky-home__hero--compact {
+    min-height: 300px;
+}
+
+.sticky-home__hero .text {
+    color: inherit;
+}
+
+.sticky-home__hero-copy {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    max-width: 560px;
+    min-width: 0;
+    gap: var(--space-4);
+}
+
+.sticky-home__eyebrow {
+    letter-spacing: var(--font-tracking-current, 0.16em);
+    text-transform: var(--font-transform-current, uppercase);
+    opacity: 0.82;
+}
+
+.sticky-home__hero-title {
+    max-width: 12ch;
+    margin: 0;
+    font-size: clamp(2.2rem, 4.8vw, 3.9rem);
+    font-weight: var(--font-weight-current, 600);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+}
+
+.sticky-home__hero-lead {
+    max-width: 46ch;
+    opacity: 0.9;
+}
+
+.sticky-home__hero .button--solid {
+    border-color: transparent;
+    background: var(--color-on-primary);
+    color: var(--color-primary);
+}
+
+.sticky-home__hero .button--solid:hover {
+    background: color-mix(in srgb, var(--color-on-primary) 88%, var(--color-primary));
+}
+
+.sticky-home__hero .button--outline {
+    border-color: color-mix(in srgb, var(--color-on-primary) 46%, transparent);
+    background: color-mix(in srgb, var(--color-on-primary) 8%, transparent);
+    color: var(--color-on-primary);
+}
+
+.sticky-home__hero .button--outline:hover {
+    border-color: var(--color-on-primary);
+    background: color-mix(in srgb, var(--color-on-primary) 16%, transparent);
+}
+
+.sticky-home__proof {
+    align-items: center;
+    opacity: 0.9;
+}
+
+.sticky-home__proof .badge {
+    border: 1px solid color-mix(in srgb, var(--color-on-primary) 26%, transparent);
+    background: color-mix(in srgb, var(--color-on-primary) 14%, transparent);
+    color: var(--color-on-primary);
+}
+
+.sticky-home__proof .text {
+    opacity: 0.86;
+}
+
+.sticky-home__orb {
+    position: relative;
+    flex: 0 0 300px;
+    width: 300px;
+    height: 300px;
+}
+
+.sticky-home__orb-ring {
+    position: absolute;
+    inset: 8%;
+    border: 1px solid color-mix(in srgb, var(--color-on-primary) 34%, transparent);
+    border-radius: 50%;
+}
+
+.sticky-home__orb-ring::after {
+    content: "";
+    position: absolute;
+    inset: 18%;
+    border: 1px dashed color-mix(in srgb, var(--color-on-primary) 22%, transparent);
+    border-radius: 50%;
+}
+
+.sticky-home__orb-core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    background:
+        radial-gradient(
+            circle at 34% 28%,
+            color-mix(in srgb, var(--color-on-primary) 42%, transparent),
+            transparent 42%
+        ),
+        color-mix(in srgb, var(--color-on-primary) 12%, transparent);
+    box-shadow: inset 0 0 60px color-mix(in srgb, var(--color-on-primary) 14%, transparent);
+    transform: translate(-50%, -50%);
+}
+
+.sticky-home__float {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 176px;
+    padding: var(--space-3);
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-on-surface);
+    box-shadow: var(--elevation-2);
+    gap: 2px;
+    transform: translate(-50%, -50%) rotate(-3deg);
+}
+
+.sticky-home__float .text {
+    color: var(--color-on-surface-variant);
+}
+
+/* --------------------------------------------------------------------------
+   Stacked statement panels
+   -------------------------------------------------------------------------- */
+
+.sticky-home__panel {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    min-height: 504px;
+    margin: 12px var(--space-4) 0;
+    padding: clamp(24px, 4vw, 44px);
+    border-radius: 26px;
+    gap: var(--space-6);
+    overflow: hidden;
+}
+
+.sticky-home__panel .text {
+    color: inherit;
+}
+
+/* The stacked panels must be fully opaque: they scroll over the panel
+   beneath them and any alpha would let its text bleed through. */
+.sticky-home__panel--ink {
+    background: #0d1310;
+    color: #f4f7ef;
+}
+
+.sticky-home__panel--accent {
+    background: #d7f36b;
+    color: #101610;
+}
+
+.sticky-home__panel--paper {
+    border: 1px solid var(--color-outline-variant);
+    background: #f7f5ee;
+    color: #141a16;
+}
+
+.sticky-home__panel-copy {
+    display: flex;
+    flex-direction: column;
+    max-width: 620px;
+    min-width: 0;
+    gap: var(--space-3);
+}
+
+.sticky-home__panel-title {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+}
+
+.sticky-home__panel-body {
+    max-width: 52ch;
+    opacity: 0.82;
+}
+
+.sticky-home__panel-metric {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    align-items: flex-end;
+    opacity: 0.9;
+}
+
+.sticky-home__metric {
+    font-family: var(--font-family-current, var(--font-display));
+    font-size: clamp(3rem, 7vw, 5.6rem);
+    font-weight: var(--font-weight-current, 600);
+    line-height: 0.9;
+    letter-spacing: -0.05em;
+}
+
+.sticky-home__metric-label {
+    font-size: var(--type-body-sm);
+    letter-spacing: var(--font-tracking-current, 0.08em);
+    text-transform: var(--font-transform-current, uppercase);
+    opacity: 0.7;
+}
+
+/* --------------------------------------------------------------------------
+   Sticky media + scrolling features
+   -------------------------------------------------------------------------- */
+
+.sticky-home__split,
+.sticky-home__pricing {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    align-items: flex-start;
+    padding: var(--space-4) var(--space-5) var(--space-8);
+    border-radius: 26px 26px 0 0;
+    background: var(--color-surface-container-lowest);
+    box-shadow: 0 -18px 44px -28px var(--color-shadow);
+    gap: clamp(24px, 4vw, 48px);
+}
+
+.sticky-home__pricing {
+    display: block;
+    padding-top: var(--space-6);
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.sticky-home__pricing-intro {
+    display: flex;
+    flex-direction: column;
+    max-width: 760px;
+    padding: var(--space-3) var(--space-3) var(--space-6);
+    gap: var(--space-3);
+}
+
+.sticky-home__pricing-title {
+    max-width: 14ch;
+    margin: 0;
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    font-weight: var(--font-weight-current, 600);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+}
+
+.sticky-home__pricing-lead {
+    max-width: 52ch;
+}
+
+.sticky-home__pricing-body {
+    display: flex;
+    align-items: flex-start;
+    gap: clamp(24px, 4vw, 48px);
+}
+
+.sticky-home__media {
+    flex: 0 0 42%;
+    padding: var(--space-5);
+    border-radius: 26px;
+    background:
+        radial-gradient(circle at 18% 12%, var(--color-primary-container), transparent 58%),
+        var(--color-surface-container);
+}
+
+.sticky-home__features {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    padding-bottom: var(--space-8);
+    gap: var(--space-6);
+}
+
+.sticky-home__feature {
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-outline-variant);
+    gap: var(--space-2);
+}
+
+.sticky-home__feature .text {
+    max-width: 48ch;
+}
+
+.sticky-home__feature-index {
+    color: var(--color-primary);
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
+    font-weight: var(--font-weight-current, 600);
+    letter-spacing: var(--font-tracking-current, 0.12em);
+}
+
+/* --------------------------------------------------------------------------
+   Product mock
+   -------------------------------------------------------------------------- */
+
+.sticky-home__mock {
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-on-surface);
+    box-shadow: var(--elevation-2);
+    overflow: hidden;
+}
+
+.sticky-home__mock-bar {
+    display: flex;
+    align-items: center;
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--color-outline-variant);
+    background: var(--color-surface-container);
+    gap: 5px;
+}
+
+.sticky-home__mock-bar span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-outline-variant);
+}
+
+.sticky-home__mock-bar span:first-child {
+    background: var(--color-error);
+}
+
+.sticky-home__mock-bar span:nth-child(2) {
+    background: var(--color-warning);
+}
+
+.sticky-home__mock-bar span:last-of-type {
+    background: var(--color-secondary);
+}
+
+.sticky-home__mock-bar em {
+    margin-left: auto;
+    color: var(--color-on-surface-variant);
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
+    font-style: normal;
+}
+
+.sticky-home__mock-body {
+    display: flex;
+    align-items: center;
+    padding: var(--space-5);
+    gap: var(--space-4);
+}
+
+.sticky-home__mock-ring {
+    flex: none;
+}
+
+.sticky-home__mock-list {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    gap: var(--space-2);
+}
+
+.sticky-home__mock-row {
+    display: flex;
+    align-items: center;
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--color-outline-variant);
+    gap: var(--space-2);
+}
+
+.sticky-home__mock-row:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.sticky-home__mock-dot {
+    flex: none;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-outline);
+}
+
+.sticky-home__mock-dot[data-tone="mint"] {
+    background: var(--color-secondary);
+}
+
+.sticky-home__mock-dot[data-tone="accent"] {
+    background: var(--color-primary);
+}
+
+.sticky-home__mock-dot[data-tone="amber"] {
+    background: var(--color-warning);
+}
+
+.sticky-home__mock-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    font-size: var(--type-body-sm);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sticky-home__mock-time {
+    flex: none;
+    color: var(--color-on-surface-variant);
+    font-family: var(--font-family-current, var(--font-mono));
+    font-size: var(--type-label);
+}
+
+.sticky-home__mock-foot {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--space-2) var(--space-3);
+    border-top: 1px solid var(--color-outline-variant);
+    color: var(--color-on-surface-variant);
+    font-size: var(--type-label);
+}
+
+/* --------------------------------------------------------------------------
+   Pricing
+   -------------------------------------------------------------------------- */
+
+.sticky-home__plan {
+    flex: 0 0 38%;
+    padding: var(--space-5);
+    border-radius: 26px;
+    background:
+        radial-gradient(circle at 84% 10%, color-mix(in srgb, var(--color-primary) 38%, transparent), transparent 46%),
+        var(--color-inverse-surface);
+    color: var(--color-inverse-on-surface);
+    box-shadow: var(--elevation-2);
+}
+
+.sticky-home__plan .text {
+    color: inherit;
+}
+
+.sticky-home__plan-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.sticky-home__price {
+    display: flex;
+    align-items: baseline;
+    margin: var(--space-3) 0;
+    gap: var(--space-2);
+}
+
+.sticky-home__price-value {
+    font-family: var(--font-family-current, var(--font-display));
+    font-size: clamp(3rem, 5vw, 4.4rem);
+    font-weight: var(--font-weight-current, 600);
+    line-height: 1;
+    letter-spacing: -0.05em;
+}
+
+.sticky-home__price-unit {
+    opacity: 0.72;
+}
+
+.sticky-home__plan-lead {
+    max-width: 28ch;
+    opacity: 0.84;
+}
+
+.sticky-home__plan-cta {
+    width: 100%;
+    margin-top: var(--space-4);
+}
+
+.sticky-home__plan-note {
+    display: block;
+    margin-top: var(--space-2);
+    opacity: 0.64;
+}
+
+/* --------------------------------------------------------------------------
+   Footer
+   -------------------------------------------------------------------------- */
+
+.sticky-home__footer {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: clamp(32px, 6vw, 64px) var(--space-6);
+    background:
+        radial-gradient(
+            circle at 92% 20%,
+            color-mix(in srgb, var(--color-secondary) 22%, transparent),
+            transparent 40%
+        ),
+        var(--color-inverse-surface);
+    color: var(--color-inverse-on-surface);
+    gap: var(--space-3);
+}
+
+.sticky-home__footer .text {
+    color: inherit;
+}
+
+.sticky-home__footer-lead {
+    max-width: 44ch;
+    opacity: 0.78;
+}
+
+.sticky-home__footer-cta {
+    margin-top: var(--space-2);
+}
+
+@media (max-width: 900px) {
+    .sticky-home__hero {
+        padding: var(--space-5);
+    }
+
+    .sticky-home__orb {
+        flex-basis: 220px;
+        width: 220px;
+        height: 220px;
+    }
+
+    .sticky-home__float {
+        width: 150px;
+    }
+
+    .sticky-home__media {
+        flex-basis: 46%;
+        padding: var(--space-3);
+    }
+
+    .sticky-home__plan {
+        flex-basis: 42%;
+    }
+}
+
+@media (max-width: 760px) {
+    .sticky-home__nav {
+        padding: 0 var(--space-3);
+    }
+
+    .sticky-home__links {
+        gap: 0;
+    }
+
+    .sticky-home__links .anchor {
+        padding: 0 7px;
+        font-size: var(--type-label);
+    }
+
+    .sticky-home__nav-cta {
+        display: none;
+    }
+
+    .sticky-home__hero {
+        flex-direction: column;
+        align-items: flex-start;
+        margin: 8px var(--space-3) 0;
+        padding: var(--space-5);
+        border-radius: 20px;
+    }
+
+    .sticky-home__hero--tall,
+    .sticky-home__hero--compact {
+        min-height: 340px;
+    }
+
+    .sticky-home__orb {
+        display: none;
+    }
+
+    .sticky-home__panel {
+        min-height: 430px;
+        margin: 8px var(--space-3) 0;
+        padding: var(--space-5);
+        border-radius: 20px;
+    }
+
+    .sticky-home__panel-metric {
+        display: none;
+    }
+
+    .sticky-home__split,
+    .sticky-home__pricing {
+        flex-direction: column;
+        padding: var(--space-4) var(--space-3) var(--space-6);
+    }
+
+    .sticky-home__pricing-intro {
+        padding: var(--space-2) 0 var(--space-4);
+    }
+
+    .sticky-home__pricing-body {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .sticky-home__media {
+        display: none;
+    }
+
+    .sticky-home__plan {
+        position: static;
+        flex-basis: auto;
+        width: 100%;
+    }
+
+    .sticky-home__features {
+        padding-bottom: var(--space-4);
+    }
+}

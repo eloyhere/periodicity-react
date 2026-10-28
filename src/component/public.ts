@@ -264,14 +264,18 @@ import { Page as BasePeriodicityPage } from "../layout/pager/Pager";
 export const PeriodicityPage = withStandardEvents(BasePeriodicityPage);
 import BasePeriodicityScrollbar from "./scrollbar/Scrollbar";
 export const PeriodicityScrollbar = withStandardEvents(BasePeriodicityScrollbar);
-import { Scroll as BasePeriodicityScroll } from "./scrollbar/Scrollbar";
+import BasePeriodicityScroll from "../layout/scroll/Scroll";
 export const PeriodicityScroll = withStandardEvents(BasePeriodicityScroll);
+export type { ScrollProps as PeriodicityScrollProps } from "../layout/scroll/Scroll";
 import BasePeriodicitySticky from "./sticky/Sticky";
 export const PeriodicitySticky = withStandardEvents(BasePeriodicitySticky);
+import BasePeriodicityStickyPage from "./sticky/StickyPage";
+export const PeriodicityStickyPage = withStandardEvents(BasePeriodicityStickyPage);
 export type {
     StickyEdge as PeriodicityStickyEdge,
     StickyProps as PeriodicityStickyProps,
 } from "./sticky/Sticky";
+export type { StickyPageProps as PeriodicityStickyPageProps } from "./sticky/StickyPage";
 import BasePeriodicityDrag from "./drag/Drag";
 export const PeriodicityDrag = withStandardEvents(BasePeriodicityDrag);
 import BasePeriodicityList from "../layout/list/List";

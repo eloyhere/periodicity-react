@@ -1,243 +1,62 @@
 /* ==========================================================================
-   Sticky documentation page — a small site with internal sub-pages
+   StickyPage slot, offset, and bottom-edge demos
    ========================================================================== */
 
-.sticky-page {
-    overflow: hidden;
-    border: 1px solid var(--color-outline-variant);
-    border-radius: var(--radius-md);
-    background: var(--color-surface-container-lowest);
+.sticky-slot {
+    border-radius: var(--radius-sm);
 }
 
-.sticky-page__chrome {
+.sticky-slot__intro {
     display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    min-height: 38px;
-    padding: 0 var(--space-4);
+    flex-direction: column;
+    padding: var(--space-4) var(--space-5) var(--space-3);
+    gap: var(--space-1);
+}
+
+.sticky-slot__toolbar {
+    padding: var(--space-2) var(--space-4);
+    border-top: 1px solid var(--color-outline-variant);
     border-bottom: 1px solid var(--color-outline-variant);
-    background: var(--color-surface-container);
+    background: var(--color-surface);
+    transition: box-shadow 200ms var(--ease-standard);
+}
+
+.sticky-slot__toolbar.is-stuck {
+    box-shadow: var(--shadow-sm);
+}
+
+.sticky-slot__rows {
+    display: flex;
+    flex-direction: column;
+    padding: 0 var(--space-5) var(--space-5);
+    gap: var(--space-3);
+}
+
+.sticky-slot__row {
+    display: flex;
+    align-items: baseline;
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--color-outline-variant);
+    gap: var(--space-3);
+}
+
+.sticky-slot__index {
+    flex: none;
     color: var(--color-on-surface-variant);
     font-family: var(--font-family-current, var(--font-mono));
     font-size: var(--type-label);
-}
-
-.sticky-page__dots {
-    display: flex;
-    flex: none;
-    align-items: center;
-    gap: 5px;
-}
-
-.sticky-page__dots span {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--color-outline-variant);
-}
-
-.sticky-page__dots span:first-child {
-    background: var(--color-error);
-}
-
-.sticky-page__dots span:nth-child(2) {
-    background: var(--color-warning);
-}
-
-.sticky-page__dots span:last-child {
-    background: var(--color-secondary);
-}
-
-.sticky-page__address {
-    flex: 1 1 auto;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.sticky-page__count {
-    flex: none;
     font-variant-numeric: tabular-nums;
 }
 
-.sticky-page__scroller {
-    position: relative;
-    height: clamp(360px, 58vh, 520px);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scroll-padding-top: 112px;
-    scrollbar-gutter: stable;
-}
-
-.sticky-page__scroller:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: -2px;
-}
-
-/* --------------------------------------------------------------------------
-   Sticky layers
-   -------------------------------------------------------------------------- */
-
-.sticky-page__header {
-    display: flex;
-    flex-direction: column;
-    padding: var(--space-3) var(--space-4);
-    border-bottom: 1px solid var(--color-outline-variant);
-    background: var(--color-surface);
-    gap: var(--space-2);
-    transition:
-        box-shadow 200ms var(--ease-standard),
-        border-color 200ms var(--ease-standard);
-}
-
-.sticky-page__header.is-stuck {
-    border-color: transparent;
-    box-shadow: var(--shadow-sm);
-}
-
-.sticky-page__mark {
-    display: inline-flex;
-    flex: none;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    border-radius: var(--radius-sm);
-    background: var(--color-primary-container);
-    color: var(--color-on-primary-container);
-    font-family: var(--font-family-current, var(--font-mono));
-    font-size: var(--type-label);
-    font-weight: var(--font-weight-current, var(--weight-semibold));
-    letter-spacing: var(--font-tracking-current, var(--tracking-wide));
-}
-
-.sticky-page__body {
-    display: flex;
-    align-items: flex-start;
-    padding: var(--space-5);
-    gap: var(--space-5);
-}
-
-.sticky-page__aside {
-    display: flex;
-    flex: 0 0 196px;
-    flex-direction: column;
-    width: 196px;
-    padding: var(--space-3);
-    border: 1px solid var(--color-outline-variant);
-    border-radius: var(--radius-sm);
-    background: var(--color-surface);
-    gap: var(--space-3);
-    transition: box-shadow 200ms var(--ease-standard);
-}
-
-.sticky-page__aside.is-stuck {
-    box-shadow: var(--shadow-sm);
-}
-
-.sticky-page__toc {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.sticky-page__toc-link {
-    display: flex;
-    align-items: flex-start;
-    width: 100%;
-    padding: 6px 8px;
-    border: 0;
-    border-radius: var(--radius-xs);
-    background: transparent;
-    color: var(--color-on-surface-variant);
-    font-size: var(--type-body-sm);
-    line-height: var(--font-leading-current, var(--leading-snug));
-    text-align: left;
-    gap: var(--space-2);
-    cursor: pointer;
-}
-
-.sticky-page__toc-link:hover {
-    background: var(--color-primary-container);
-    color: var(--color-on-surface);
-}
-
-.sticky-page__toc-link:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-}
-
-.sticky-page__toc-mark {
-    flex: none;
-    width: 5px;
-    height: 5px;
-    margin-top: 7px;
-    border-radius: 50%;
-    background: var(--color-primary);
-}
-
-.sticky-page__aside-note {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding-top: var(--space-3);
-    border-top: 1px solid var(--color-outline-variant);
-    gap: var(--space-2);
-}
-
-.sticky-page__article {
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: column;
-    min-width: 0;
-    padding-bottom: var(--space-6);
-    gap: var(--space-5);
-}
-
-.sticky-page__section {
-    display: flex;
-    flex-direction: column;
-    scroll-margin-top: 112px;
-    gap: var(--space-2);
-}
-
-.sticky-page__section + .sticky-page__section {
-    padding-top: var(--space-4);
-    border-top: 1px dashed var(--color-outline-variant);
-}
-
-.sticky-page__actionbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
+.sticky-slot__actionbar {
     padding: var(--space-2) var(--space-4);
     border-top: 1px solid var(--color-outline-variant);
     background: var(--color-surface);
-    gap: var(--space-2) var(--space-3);
     transition: box-shadow 200ms var(--ease-standard);
 }
 
-.sticky-page__actionbar.is-stuck {
+.sticky-slot__actionbar.is-stuck {
     box-shadow: 0 -6px 18px -12px var(--color-shadow);
-}
-
-.sticky-page__actionbar-copy {
-    flex: 1 1 220px;
-    min-width: 0;
-}
-
-.sticky-page__signal {
-    flex: none;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--color-outline);
-}
-
-.sticky-page__signal.is-on {
-    background: var(--color-secondary);
 }
 
 /* --------------------------------------------------------------------------
@@ -362,38 +181,14 @@
     min-width: 0;
 }
 
-@media (max-width: 760px) {
-    .sticky-page__header {
-        padding: var(--space-3);
-    }
-
-    .sticky-page__body {
-        flex-direction: column;
-        padding: var(--space-4);
-        gap: var(--space-4);
-    }
-
-    .sticky-page__aside {
-        display: none;
-    }
-
-    .sticky-page__article {
-        padding-bottom: var(--space-4);
-    }
-
-    .sticky-page__chrome {
-        padding: 0 var(--space-3);
-    }
-
-    .sticky-page__scroller {
-        height: clamp(340px, 62vh, 480px);
-    }
+.sticky-page-demo__signal {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-outline);
 }
 
-@media (max-width: 480px) {
-    /* The header already repeats the pinned state; dropping the duplicate badge
-       keeps the bottom action bar on one line on narrow screens. */
-    .sticky-page__actionbar .badge {
-        display: none;
-    }
+.sticky-page-demo__signal.is-on {
+    background: var(--color-secondary);
 }

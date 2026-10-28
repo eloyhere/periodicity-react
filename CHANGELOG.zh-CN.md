@@ -2,6 +2,19 @@
 
 本文件记录 Periodicity React 的重要变更。格式参考 Keep a Changelog。
 
+## [0.1.14] - 2026-10-28
+
+### 新增
+
+- 新增 `PeriodicityStickyPage`：吸附布局的页面容器。它构建在 `PeriodicityScroll` 之上，slot 可放任意数量子元素，内部的 `PeriodicitySticky` 会吸附在页面视口上。
+- 新增 `PeriodicityScroll`：Android `ScrollView` 语义的布局，包含一个纵向滚动视口、一个内容块、可放任意数量子元素的 slot，以及 `fillViewport`。`StickyPage` 就用它作为滚动层。
+- `PeriodicitySticky` 新增 `filter`，遵循原生 CSS `filter` 语义，作用于吸附子树（子页面内容），不影响滚动条与焦点环。
+- 用例站的 Sticky 条目改为路由化首页：粘性站点导航、覆盖式 Hero / 宣言面板、左侧产品画面吸附且右侧特性文案滚动；Features 与 Pricing 是独立子路由。
+
+### 变更
+
+- `PeriodicityScroll` 现在指 Android `ScrollView` 语义的布局。此前作为 `Scrollbar` 别名的 `Scroll` 已移除；需要 overlay 滚动条和可替换 slot 时请使用 `PeriodicityScrollbar`（仍支持 `slots`）。
+
 ## [0.1.13] - 2026-10-28
 
 ### 新增

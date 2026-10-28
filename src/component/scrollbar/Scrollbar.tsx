@@ -198,8 +198,7 @@ const KeyboardPageRatio: number = 0.9;
  * @example
  * <Scrollbar><div>Scrollable content</div></Scrollbar>
  * @returns A scroll viewport with custom thumbs, ARIA values, and forwarded refs.
- */
-const Scrollbar: FC<ScrollbarProps> = ({
+ */const Scrollbar: FC<ScrollbarProps> = ({
     children,
     orientation = "vertical",
     direction,
@@ -798,14 +797,5 @@ const Scrollbar: FC<ScrollbarProps> = ({
         </div>
     );
 };
-
-/**
- * Public Scroll alias with the custom scrollbar slot.
- * @example
- * <Scroll slots={{ scrollbar: (state) => <MyScrollbar state={state} /> }} />
- */
-export const Scroll: FC<ScrollbarProps> = Scrollbar;
-
-export type ScrollProps = ScrollbarProps;
 
 export default Scrollbar;
